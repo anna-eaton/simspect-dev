@@ -1,0 +1,167 @@
+// inttwin 2026-11-16 (agent inttwin): copy of runconfigs/sptrace_20261116/race_sptfence_d1_SPT_6_oneLP_v2_flat_ld_s2Aspt.jsonc (results_name sptrace_fence_d1_SPT_6_oneLP_v2_flat_ld_s2Aspt), the FPR version of row race_sptfence_d1_SPT_6_oneLP_v2_flat_ld_s2Aspt
+// on corpus SPT_6_oneLP_v2_flat_ld_s2Aspt (FPR corpus, symlink wrapper).
+// Changed ONLY: paths.testset_dir -> /tests/inttwin_20261116/testsets, paths.results_name -> race_sptfence_d1_SPT_6_oneLP_v2_flat_ld_s2Aspt_fpr. (paths.results_dir is unused by testrun.py,
+// which writes <code root>/results.) Brief scripts/inttwin_20261116/BRIEF.md; results -> wiki/state/EVAL_MANIFEST.md 'Integer twins'.
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/inttwin_20261116/testsets",
+    "results_dir": "/tests/sptrace_20261116/results",
+    "results_name": "race_sptfence_d1_SPT_6_oneLP_v2_flat_ld_s2Aspt_fpr"
+  },
+  "alloy": {
+    "max_instances": 100000,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt",
+    "config_script": "/work/gem5-spt/configs/example/se_exp.py",
+    "branch_ann_enable": true,
+    "cpu_type": "DerivO3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 28,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "extra_args": [
+      "--applyDDIFT=1",
+      "--fwdUntaint=1",
+      "--bwdUntaint=1",
+      "--configImpFlow=Lazy",
+      "--freeParam=3",
+      "--scheme=SpectreSafeFence"
+    ],
+    "cache_setup": "random_all",
+    "cache_setup_fill_bytes": "64kB",
+    "sample_fraction": 1.0
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "vocab_rj": {
+      "rmw": true,
+      "jmp": true
+    },
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    }
+  },
+  "fpr": {
+    "enabled": true,
+    "loads": "consumed",
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "race_knobs": {
+    "commitToIEWDelay": 1,
+    "applied_via": "env SIMSPECT_COMMIT_IEW_DELAY read by gem5-hooks/gem5-spt/se_exp.py",
+    "cross_model": "NO: SPT-specific corpus from the unchanged SPT_6_oneLP_v2.als (flat enumeration, ld transmitters)"
+  }
+}

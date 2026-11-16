@@ -325,9 +325,20 @@ CLASSIFY += [
     ("text", '''        if "_sh" in n.split("_fv3")[-1]:
             continue
 ''', "", 1),
-    ("text", '''        stt = n.split("_")[0] in ("E3", "E4")''', '''        stt = bool(c.get("stt", False))''', 1),
-    ("text", '''    stt = a.row.split("_")[0] in ("E3", "E4")''', '''    stt = a.stt''', 1),
-    ("text", '''    b.add_argument("--json")\n    b.add_argument("--per-stem"''', '''    b.add_argument("--stt", action="store_true", help="the row is an STT build (E3, E4): bucket by the gate label only")\n    b.add_argument("--json")\n    b.add_argument("--per-stem"''', 1),
+    # inttwin 2026-11-16: classify.py's prefix test became _is_stt_row (explicit "stt" key or an E3/E4 token); the artifact keeps its explicit flag
+    ("text", '''def _is_stt_row(name, camp=None):
+    """STT rows (E3 stt-master, E4 AMuLeT STT) get the STT gate class (S1_xmm4 = UV1) instead of ReCon's R-SA-13 classes.
+    An explicit campaigns-json "stt": true/false wins; otherwise the name has an `E3` / `E4` token anywhere (inttwin 2026-11-16:
+    the old test `name.split("_")[0] in ("E3", "E4")` missed prefixed names such as `bc_E3_...`, which then got ReCon classes)."""
+    if camp is not None and "stt" in camp:
+        return bool(camp["stt"])
+    return re.search(r"(?:^|_)E[34](?:_|$)", name) is not None
+
+
+''', "", 1),
+    ("text", '''        stt = _is_stt_row(n, c)''', '''        stt = bool(c.get("stt", False))''', 1),
+    ("text", '''    stt = _is_stt_row(a.row) if a.stt == "auto" else a.stt == "yes"''', '''    stt = a.stt''', 1),
+    ("text", '''    b.add_argument("--stt", choices=["auto", "yes", "no"], default="auto", help="STT row (auto = E3/E4 token in --row)")\n''', '''    b.add_argument("--stt", action="store_true", help="the row is an STT build (E3, E4): bucket by the gate label only")\n''', 1),
 ]
 
 STAGE_SEED = [("del_stmt", None, "lines.append(f'// AUTO-GENERATED", 1)]

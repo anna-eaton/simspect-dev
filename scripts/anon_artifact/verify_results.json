@@ -49,7 +49,7 @@
   "STAGE3_gem5/bugs/disq_check_ld_rmw_limm.py": 0,
   "STAGE3_gem5/bugs/disq_data_obtained.py": 0,
   "STAGE3_gem5/bugs/disq_hpad_rmw_padding.py": 0,
-  "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py": 0,
+  "STAGE3_gem5/bugs/recon_sse_load_producer.py": 0,
   "STAGE3_gem5/bugs/uv1_stt_xmm4.py": 0,
   "STAGE3_gem5/bugs/uv2_recon_stlf.py": 0,
   "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py": 0,
@@ -152,7 +152,7 @@
   "STAGE3_gem5/bugs/disq_check_ld_rmw_limm.py": [],
   "STAGE3_gem5/bugs/disq_data_obtained.py": [],
   "STAGE3_gem5/bugs/disq_hpad_rmw_padding.py": [],
-  "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py": [],
+  "STAGE3_gem5/bugs/recon_sse_load_producer.py": [],
   "STAGE3_gem5/bugs/uv1_stt_xmm4.py": [],
   "STAGE3_gem5/bugs/uv2_recon_stlf.py": [],
   "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py": [],
@@ -416,7 +416,7 @@
    13,
    5
   ],
-  "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py": [
+  "STAGE3_gem5/bugs/recon_sse_load_producer.py": [
    22,
    14
   ],
@@ -442,12 +442,6 @@
   ]
  },
  "code_edits": {
-  "testrun.py": [
-   [
-    ".get(\"fast_path\") is True",
-    ".get(\"fast_path\", True) is True"
-   ]
-  ],
   "amulet/classify_t5.py": [
    [
     "T5 = '/tests/simspect_alloy_20261108/timing/amulet_t5'",

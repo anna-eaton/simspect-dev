@@ -1,0 +1,725 @@
+[
+ {
+  "run": "int_not_taken_inst-001710",
+  "window_sn": 583,
+  "xmit_sn": 594,
+  "xmit_inserted_tick": 2727000,
+  "release_ticks": [
+   2927000,
+   2927000
+  ],
+  "O": 566,
+  "O_dis": "OR_M_I : ldst   t1, DS:[rax + rsi]",
+  "O_pc": "0x401c63",
+  "O_spec_end": 2926500,
+  "predicted_release": 2927000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    566,
+    585
+   ],
+   "NOMOV": [
+    566,
+    585
+   ],
+   "NOCC": [
+    585
+   ],
+   "REAL": [
+    585
+   ]
+  },
+  "verdict": "flags",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 587,
+   "pc": "0x401c94",
+   "dis": "XOR_R_I : xor   rax, rax, t1",
+   "o_enters_via": [
+    "CC arch 0"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-001710",
+  "window_sn": 583,
+  "xmit_sn": 594,
+  "xmit_inserted_tick": 2727000,
+  "release_ticks": [
+   2927000,
+   2927000
+  ],
+  "O": 566,
+  "O_dis": "OR_M_I : ldst   t1, DS:[rax + rsi]",
+  "O_pc": "0x401c63",
+  "O_spec_end": 2926500,
+  "predicted_release": 2927000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    566,
+    585
+   ],
+   "NOMOV": [
+    566,
+    585
+   ],
+   "NOCC": [
+    585
+   ],
+   "REAL": [
+    585
+   ]
+  },
+  "verdict": "flags",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 587,
+   "pc": "0x401c94",
+   "dis": "XOR_R_I : xor   rax, rax, t1",
+   "o_enters_via": [
+    "CC arch 0"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-003901",
+  "window_sn": 42,
+  "xmit_sn": 54,
+  "xmit_inserted_tick": 137000,
+  "release_ticks": [
+   155000,
+   155000
+  ],
+  "O": 31,
+  "O_dis": "MOV_R_M : ld   r12, DS:[rdi + t0]",
+  "O_pc": "0x401045",
+  "O_spec_end": 154500,
+  "predicted_release": 155000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    31,
+    44
+   ],
+   "NOMOV": [
+    44
+   ],
+   "NOCC": [
+    31,
+    44
+   ],
+   "REAL": [
+    44
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 49,
+   "pc": "0x401077",
+   "dis": "MOV_R_R : mov   rax, rax, r12",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-003901",
+  "window_sn": 42,
+  "xmit_sn": 54,
+  "xmit_inserted_tick": 137000,
+  "release_ticks": [
+   155000,
+   155000
+  ],
+  "O": 31,
+  "O_dis": "MOV_R_M : ld   r12, DS:[rdi + t0]",
+  "O_pc": "0x401045",
+  "O_spec_end": 154500,
+  "predicted_release": 155000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    31,
+    44
+   ],
+   "NOMOV": [
+    44
+   ],
+   "NOCC": [
+    31,
+    44
+   ],
+   "REAL": [
+    44
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 49,
+   "pc": "0x401077",
+   "dis": "MOV_R_R : mov   rax, rax, r12",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-003908",
+  "window_sn": 621,
+  "xmit_sn": 684,
+  "xmit_inserted_tick": 2832500,
+  "release_ticks": [
+   2978500,
+   2978500
+  ],
+  "O": 611,
+  "O_dis": "MOV_R_M : ld   rdx, DS:[rsi + r13]",
+  "O_pc": "0x401c8f",
+  "O_spec_end": 2978000,
+  "predicted_release": 2978500,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    611,
+    677
+   ],
+   "NOMOV": [
+    677
+   ],
+   "NOCC": [
+    611,
+    677
+   ],
+   "REAL": [
+    677
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 679,
+   "pc": "0x401cf9",
+   "dis": "MOV_R_R : mov   rax, rax, rsi",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-003908",
+  "window_sn": 621,
+  "xmit_sn": 684,
+  "xmit_inserted_tick": 2832500,
+  "release_ticks": [
+   2978500,
+   2978500
+  ],
+  "O": 611,
+  "O_dis": "MOV_R_M : ld   rdx, DS:[rsi + r13]",
+  "O_pc": "0x401c8f",
+  "O_spec_end": 2978000,
+  "predicted_release": 2978500,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    611,
+    677
+   ],
+   "NOMOV": [
+    677
+   ],
+   "NOCC": [
+    611,
+    677
+   ],
+   "REAL": [
+    677
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 679,
+   "pc": "0x401cf9",
+   "dis": "MOV_R_R : mov   rax, rax, rsi",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-004774",
+  "window_sn": 579,
+  "xmit_sn": 589,
+  "xmit_inserted_tick": 2726000,
+  "release_ticks": [
+   2928000,
+   2928000
+  ],
+  "O": 567,
+  "O_dis": "OR_M_I : ldst   t1, DS:[r9]",
+  "O_pc": "0x401c71",
+  "O_spec_end": 2927500,
+  "predicted_release": 2928000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    567,
+    581
+   ],
+   "NOMOV": [
+    581
+   ],
+   "NOCC": [
+    581
+   ],
+   "REAL": [
+    581
+   ]
+  },
+  "verdict": "mov or flags (each path needs one; both cut)",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 585,
+   "pc": "0x401c97",
+   "dis": "MOV_R_R : mov   rax, rax, r15",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-004774",
+  "window_sn": 579,
+  "xmit_sn": 589,
+  "xmit_inserted_tick": 2726000,
+  "release_ticks": [
+   2928000,
+   2928000
+  ],
+  "O": 567,
+  "O_dis": "OR_M_I : ldst   t1, DS:[r9]",
+  "O_pc": "0x401c71",
+  "O_spec_end": 2927500,
+  "predicted_release": 2928000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    567,
+    581
+   ],
+   "NOMOV": [
+    581
+   ],
+   "NOCC": [
+    581
+   ],
+   "REAL": [
+    581
+   ]
+  },
+  "verdict": "mov or flags (each path needs one; both cut)",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 585,
+   "pc": "0x401ca1",
+   "dis": "MOV_R_R : mov   rax, rax, r15",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-005443",
+  "window_sn": 565,
+  "xmit_sn": 574,
+  "xmit_inserted_tick": 2675000,
+  "release_ticks": [
+   2677500,
+   2677500
+  ],
+  "O": 555,
+  "O_dis": "MOV_R_M : ld   rsi, DS:[rsi + rcx]",
+  "O_pc": "0x401c52",
+  "O_spec_end": 2677000,
+  "predicted_release": 2677500,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    555,
+    568
+   ],
+   "NOMOV": [
+    555,
+    568
+   ],
+   "NOCC": [
+    555,
+    568
+   ],
+   "REAL": [
+    568
+   ]
+  },
+  "verdict": "mov+flags (alternative paths)",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 570,
+   "pc": "0x401c75",
+   "dis": "MOV_R_R : mov   rax, rax, rsi",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-007681",
+  "window_sn": 44,
+  "xmit_sn": 52,
+  "xmit_inserted_tick": 137000,
+  "release_ticks": [
+   155000,
+   155000
+  ],
+  "O": 35,
+  "O_dis": "MOV_R_M : ld   rax, DS:[rdx]",
+  "O_pc": "0x401055",
+  "O_spec_end": 154500,
+  "predicted_release": 155000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    35,
+    46
+   ],
+   "NOMOV": [
+    46
+   ],
+   "NOCC": [
+    35,
+    46
+   ],
+   "REAL": [
+    46
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 47,
+   "pc": "0x401070",
+   "dis": "MOV_R_R : mov   rcx, rcx, rax",
+   "o_enters_via": [
+    "Int arch 1 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-007681",
+  "window_sn": 44,
+  "xmit_sn": 52,
+  "xmit_inserted_tick": 137000,
+  "release_ticks": [
+   155000,
+   155000
+  ],
+  "O": 35,
+  "O_dis": "MOV_R_M : ld   rax, DS:[rdx]",
+  "O_pc": "0x401055",
+  "O_spec_end": 154500,
+  "predicted_release": 155000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    35,
+    46
+   ],
+   "NOMOV": [
+    46
+   ],
+   "NOCC": [
+    35,
+    46
+   ],
+   "REAL": [
+    46
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 47,
+   "pc": "0x401070",
+   "dis": "MOV_R_R : mov   rcx, rcx, rax",
+   "o_enters_via": [
+    "Int arch 1 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-011455",
+  "window_sn": 585,
+  "xmit_sn": 595,
+  "xmit_inserted_tick": 2727000,
+  "release_ticks": [
+   3927500,
+   3927500
+  ],
+  "O": 568,
+  "O_dis": "MOV_R_M : ld   rax, DS:[r15]",
+  "O_pc": "0x401c65",
+  "O_spec_end": 3927000,
+  "predicted_release": 3927500,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    568,
+    587
+   ],
+   "NOMOV": [
+    587
+   ],
+   "NOCC": [
+    568,
+    587
+   ],
+   "REAL": [
+    587
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 590,
+   "pc": "0x401c9a",
+   "dis": "MOV_R_R : mov   rcx, rcx, rax",
+   "o_enters_via": [
+    "Int arch 1 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-011455",
+  "window_sn": 585,
+  "xmit_sn": 595,
+  "xmit_inserted_tick": 2727500,
+  "release_ticks": [
+   3927500,
+   3927500
+  ],
+  "O": 568,
+  "O_dis": "MOV_R_M : ld   rax, DS:[r15]",
+  "O_pc": "0x401c65",
+  "O_spec_end": 3927000,
+  "predicted_release": 3927500,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    568,
+    587
+   ],
+   "NOMOV": [
+    587
+   ],
+   "NOCC": [
+    568,
+    587
+   ],
+   "REAL": [
+    587
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 590,
+   "pc": "0x401ca6",
+   "dis": "MOV_R_R : mov   rcx, rcx, rax",
+   "o_enters_via": [
+    "Int arch 1 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-014667",
+  "window_sn": 56,
+  "xmit_sn": 75,
+  "xmit_inserted_tick": 189000,
+  "release_ticks": [
+   1409000,
+   1409000,
+   1409000,
+   1409000
+  ],
+  "O": 47,
+  "O_dis": "MOV_R_M : ld   rdi, DS:[r10 + t0]",
+  "O_pc": "0x401071",
+  "O_spec_end": 1408500,
+  "predicted_release": 1409000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    47,
+    69
+   ],
+   "NOMOV": [
+    69
+   ],
+   "NOCC": [
+    47,
+    69
+   ],
+   "REAL": [
+    69
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 70,
+   "pc": "0x4010a6",
+   "dis": "MOV_R_R : mov   rax, rax, rdi",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-014667",
+  "window_sn": 56,
+  "xmit_sn": 75,
+  "xmit_inserted_tick": 189000,
+  "release_ticks": [
+   1409000,
+   1409000,
+   1409000,
+   1409000
+  ],
+  "O": 47,
+  "O_dis": "MOV_R_M : ld   rdi, DS:[r10 + t0]",
+  "O_pc": "0x401071",
+  "O_spec_end": 1408500,
+  "predicted_release": 1409000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    47,
+    69
+   ],
+   "NOMOV": [
+    69
+   ],
+   "NOCC": [
+    47,
+    69
+   ],
+   "REAL": [
+    69
+   ]
+  },
+  "verdict": "mov",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 70,
+   "pc": "0x4010a6",
+   "dis": "MOV_R_R : mov   rax, rax, rdi",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_not_taken_inst-015158",
+  "window_sn": 577,
+  "xmit_sn": 588,
+  "xmit_inserted_tick": 2725500,
+  "release_ticks": [
+   3926000,
+   3926000
+  ],
+  "O": 565,
+  "O_dis": "OR_M_I : ldst   t1, DS:[t0 + r12]",
+  "O_pc": "0x401c67",
+  "O_spec_end": 3925500,
+  "predicted_release": 3926000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    551,
+    565,
+    579
+   ],
+   "NOMOV": [
+    551,
+    565,
+    579
+   ],
+   "NOCC": [
+    551,
+    579
+   ],
+   "REAL": [
+    579
+   ]
+  },
+  "verdict": "flags",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 584,
+   "pc": "0x401c8c",
+   "dis": "MOV_R_R : mov   rax, rax, r9",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ },
+ {
+  "run": "int_taken_inst-015158",
+  "window_sn": 577,
+  "xmit_sn": 588,
+  "xmit_inserted_tick": 2725500,
+  "release_ticks": [
+   3926000,
+   3926000
+  ],
+  "O": 565,
+  "O_dis": "OR_M_I : ldst   t1, DS:[t0 + r12]",
+  "O_pc": "0x401c67",
+  "O_spec_end": 3925500,
+  "predicted_release": 3926000,
+  "release_matches": true,
+  "reach": {
+   "GEM5": [
+    551,
+    565,
+    579
+   ],
+   "NOMOV": [
+    551,
+    565,
+    579
+   ],
+   "NOCC": [
+    551,
+    579
+   ],
+   "REAL": [
+    579
+   ]
+  },
+  "verdict": "flags",
+  "older_roots_under_REAL": [],
+  "merge": {
+   "sn": 584,
+   "pc": "0x401c98",
+   "dis": "MOV_R_R : mov   rax, rax, r9",
+   "o_enters_via": [
+    "Int arch 0 (mov dest read)"
+   ]
+  }
+ }
+]

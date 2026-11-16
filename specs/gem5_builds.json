@@ -41,7 +41,7 @@
       "defense": "Recon / STT (same as gem5-recon-modded) + SimSpect-STL hooks",
       "scheme": "0=Unsafe 1=NDA (code enum Delay) 2=STT 3=DoM",
       "variants": "--branch-ann-file BTB override; --stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred",
-      "intention": "STL (store-to-load) speculation testing: STT_6_stl testsets. Threat model of the STT scheme here = control + store shadows (Recon paper Sec. 3/6; decode.cc:686-695, shadow_tracker.cc freeStores), so STL is in scope.",
+      "intention": "STL (store-to-load) speculation testing: STT_6_stl testsets. Threat model of the STT scheme here = control + store shadows (Recon paper Sec. 3/6; decode.cc:686-695, shadow_tracker.cc freeStores), so STL is in scope. STALE (no resolve hooks); superseded 2026-11-16 by gem5-recon-modded-stl.",
       "timing_hooks": {
         "branch_force": true,
         "fnc_commit_stall": true,
@@ -55,6 +55,31 @@
         "stl"
       ],
       "threat_model": "Recon-STT (scheme 2): control + store shadows, i.e. speculative while an older cond branch is unresolved OR an older store has no address (decode.cc:686-695, shadow_tracker.cc). No threat-model switch. Not the same as /work/stt. wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "gem5-recon-modded-stl",
+      "path": "/work/gem5-recon-modded-stl",
+      "hosts": "built on cafe3 (full tree); binary + configs/ copied to cafe1 (same path, same md5)",
+      "repo": "no git (cp -a of cafe3 /work/gem5-recon-modded 2026-11-16 13:03 UTC, gem5.opt md5 762efbc608e1c803368d19d1101abcbd = the E2w binary, i.e. WITH the 2026-10-30 resolve hooks)",
+      "cpu": "X86 / X86O3CPU",
+      "config_script": "configs/example/se.py",
+      "defense": "Recon / STT (same as gem5-recon-modded) + SimSpect-STL hooks",
+      "scheme": "0=Unsafe 1=NDA (code enum Delay) 2=STT (the ReCon E2w rows) 3=DoM",
+      "variants": "--branch-ann-file BTB override + resolve hooks (BR lines) as gem5-recon-modded; --stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred",
+      "intention": "Store-shadow (STL) testing on the build of the reported ReCon rows (E2w). Replaces the stale gem5-recon-stl for new runs.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "gem5-hooks/stl/apply_stl_hooks.py applied unchanged 2026-11-16 (agent reconstlhook; every anchor matched once; *.pre-stl backups next to each file). Build: cd /work/gem5-recon-modded-stl && nice -n 10 /usr/bin/scons build/X86/gem5.opt -j 24 (log cafe3 /tests/reconstlhook_20261116/logs/build2.log); 6 generated ruby include stubs in build/X86/mem/ruby/protocol (DataBlock/Set/TimerTable/WriteMask/TBETable/BoolVec.hh) pointed at /work/gem5-recon/build and were repointed to this tree first. Diff vs gem5-recon-modded: gem5-hooks/stl/stl_hooks_vs_gem5-recon-modded_20261116.diff. gem5.opt md5 06240ccea173d11b3b2be61adcdbe387. Without STL flags its records equal gem5-recon-modded's (24/24 E2w tests byte-identical). Controls: wiki/design/STL_SPECULATION.md 'gem5-recon-modded-stl (2026-11-16)'."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/stl/",
+      "flags": [
+        "stl"
+      ],
+      "threat_model": "Recon-STT (scheme 2): control + store shadows (decode.cc:686-695, shadow_tracker.cc frees a store shadow at effAddrValid). As gem5-recon-modded."
     },
     {
       "id": "gem5-recon-ruby3",

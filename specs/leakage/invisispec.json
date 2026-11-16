@@ -115,7 +115,9 @@
       "spec": {
         "text": "squashed(i) ∧ lc_seq < i.seq  (pinned 2026-10-28: what the tests realize; i = the event's seq joined to the O3PipeView fetch seqNum; squashed = never retired and younger than a ROB:squash seq while allocated before that squash)",
         "impl": "squashed_after_lc",
-        "window": "footprint"
+        "window": "footprint",
+        "op_class": "load",
+        "op_class_source": "InvisiSpec §III-B / §V-A1: only unsafe speculative loads (USLs) are protected; W-3 decided by Anna 2026-11-16 (follow each paper)"
       },
       "futuristic": {
         "text": "footprint e by instruction i (e.seq) with e.tick < vp(i), vp(i) = min(first L1D expose|validate tick with seq=i, rob_head(i)); rob_head(i) = latest retire tick among retired instructions older than i (i retired), else ∞. Any instruction counts (Futuristic USL = every squashable load), committed or squashed.",
@@ -125,7 +127,9 @@
           "validate"
         ],
         "window": "visibility",
-        "limit": "condition (ii) 'speculative non-squashable' is visible only through the expose/validate it triggers; a load that became non-squashable before it issued (so issued as a normal load, no expose) would be flagged. Triage via vp_basis in the record."
+        "limit": "condition (ii) 'speculative non-squashable' is visible only through the expose/validate it triggers; a load that became non-squashable before it issued (so issued as a normal load, no expose) would be flagged. Triage via vp_basis in the record.",
+        "op_class": "load",
+        "op_class_source": "InvisiSpec §III-B / §V-A1: only unsafe speculative loads (USLs) are protected; W-3 decided by Anna 2026-11-16 (follow each paper)"
       }
     }
   },

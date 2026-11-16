@@ -1,0 +1,120 @@
+{
+ "branch_mode": "mispredict_not_taken",
+ "annotations": [
+  {
+   "branch_pc": 2,
+   "btb_forced_target_pc": 3,
+   "mode": "simspect_force",
+   "branch_addr": 4198504,
+   "branch_addr_hex": "0x401068",
+   "btb_forced_target_addr": 1,
+   "btb_forced_target_addr_hex": "0x1",
+   "resolve_stall_cycles": 10000,
+   "branch_pc_addr": 4198504,
+   "branch_pc_addr_hex": "0x401068",
+   "orig_mode": "mispredict_not_taken"
+  },
+  {
+   "branch_pc": 5,
+   "btb_forced_target_pc": 6,
+   "mode": "simspect_force",
+   "branch_addr": 4198528,
+   "branch_addr_hex": "0x401080",
+   "btb_forced_target_addr": 1,
+   "btb_forced_target_addr_hex": "0x1",
+   "resolve_stall_cycles": 0,
+   "branch_pc_addr": 4198528,
+   "branch_pc_addr_hex": "0x401080",
+   "orig_mode": "mispredict_not_taken"
+  }
+ ],
+ "xmit": {
+  "pc": 5,
+  "kind": "br_x",
+  "atom": "Instruction$7",
+  "addr": 4198528,
+  "addr_hex": "0x401080"
+ },
+ "commit_boundary": {
+  "last_committed": {
+   "pc": 1,
+   "atom": "Instruction$3",
+   "addr": 4198486,
+   "addr_hex": "0x401056"
+  },
+  "first_noncommitted": {
+   "pc": 2,
+   "atom": "Instruction$6",
+   "addr": 4198504,
+   "addr_hex": "0x401068"
+  }
+ },
+ "fanout_v2": {
+  "splices": [],
+  "fillers": [
+   {
+    "before_pc": 7,
+    "op": "movsbq",
+    "dst": "r14",
+    "srcs": [
+     "rsi",
+     "r10"
+    ]
+   }
+  ],
+  "notes": [],
+  "interleave_only": {
+   "table": "STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc",
+   "exclude_tags": [],
+   "n_ops": 69
+  },
+  "window_pc": 2,
+  "pre_window_reads": true,
+  "dead_registers": [
+   "r14"
+  ]
+ },
+ "branch_forms": {
+  "br_cmp": false,
+  "jmp_direct_pcs": [],
+  "uniform": [
+   "test",
+   "cmp",
+   "jmp"
+  ],
+  "br_cmp_pcs": [
+   2
+  ]
+ },
+ "vocab_rj": {
+  "rmw": true,
+  "jmp": true,
+  "rmw_pcs": [],
+  "jmp_filler_before_pcs": []
+ },
+ "vocab_forms": {
+  "0": "store_swapidx",
+  "4": "store_swapidx",
+  "7": "store_swapidx"
+ },
+ "branch_cond": {
+  "from_alloy": true,
+  "pcs": [
+   2
+  ]
+ },
+ "reg_naming": {
+  "mode": "random",
+  "seed": 2050355364,
+  "locked_registers": {
+   "Reg_s$0": "r13"
+  },
+  "infra_registers": [
+   "r15",
+   "r8",
+   "rcx"
+  ]
+ },
+ "func_base_addr": 4198432,
+ "func_base_addr_hex": "0x401020"
+}

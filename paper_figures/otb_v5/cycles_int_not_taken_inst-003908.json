@@ -1,0 +1,328 @@
+{
+ "base_tick": 2724500,
+ "note": "cycle 0 = fetch of lc (i3, 0x401c8f); window = (lc retire, squash lands)",
+ "events": [
+  {
+   "row": "i2",
+   "event": "fetch",
+   "tick": 2724000,
+   "cycle": -1,
+   "source": "O3PipeView fetch sn 606 0x00401c85 JNB_I : rdip   t1, t1"
+  },
+  {
+   "row": "i3",
+   "event": "fetch",
+   "tick": 2724500,
+   "cycle": 0,
+   "source": "O3PipeView fetch sn 611 0x00401c8f MOV_R_M : ld   rdx, DS:[rsi + r13]"
+  },
+  {
+   "row": "i4",
+   "event": "fetch",
+   "tick": 2725000,
+   "cycle": 1,
+   "source": "O3PipeView fetch sn 619 0x00401ca6 JNZ_I : rdip   t1, t1"
+  },
+  {
+   "row": "i6",
+   "event": "fetch",
+   "tick": 2779500,
+   "cycle": 110,
+   "source": "O3PipeView fetch sn 677 0x00401cf1 MOV_R_M : ld   rsi, DS:[rsi + r13]"
+  },
+  {
+   "row": "i7 (merge mov)",
+   "event": "fetch",
+   "tick": 2780000,
+   "cycle": 111,
+   "source": "O3PipeView fetch sn 679 0x00401cf9 MOV_R_R : mov   rax, rax, rsi"
+  },
+  {
+   "row": "i7",
+   "event": "fetch",
+   "tick": 2831000,
+   "cycle": 213,
+   "source": "O3PipeView fetch sn 682 0x00401d00 JB_I : rdip   t1, t1"
+  },
+  {
+   "row": "i2",
+   "event": "decode",
+   "tick": 2724500,
+   "cycle": 0,
+   "source": "O3PipeView decode sn 608"
+  },
+  {
+   "row": "i2",
+   "event": "rename",
+   "tick": 2725000,
+   "cycle": 1,
+   "source": "O3PipeView rename sn 608"
+  },
+  {
+   "row": "i2",
+   "event": "issue",
+   "tick": 2727000,
+   "cycle": 5,
+   "source": "O3PipeView issue sn 608"
+  },
+  {
+   "row": "i2",
+   "event": "complete",
+   "tick": 2727500,
+   "cycle": 6,
+   "source": "O3PipeView complete sn 608"
+  },
+  {
+   "row": "i2",
+   "event": "retire",
+   "tick": 2978500,
+   "cycle": 508,
+   "source": "O3PipeView retire sn 608"
+  },
+  {
+   "row": "i3",
+   "event": "decode",
+   "tick": 2725000,
+   "cycle": 1,
+   "source": "O3PipeView decode sn 611"
+  },
+  {
+   "row": "i3",
+   "event": "rename",
+   "tick": 2725500,
+   "cycle": 2,
+   "source": "O3PipeView rename sn 611"
+  },
+  {
+   "row": "i3",
+   "event": "issue",
+   "tick": 2727000,
+   "cycle": 5,
+   "source": "O3PipeView issue sn 611"
+  },
+  {
+   "row": "i3",
+   "event": "complete",
+   "tick": 2728500,
+   "cycle": 8,
+   "source": "O3PipeView complete sn 611"
+  },
+  {
+   "row": "i3",
+   "event": "retire",
+   "tick": 2978500,
+   "cycle": 508,
+   "source": "O3PipeView retire sn 611"
+  },
+  {
+   "row": "i4",
+   "event": "decode",
+   "tick": 2727000,
+   "cycle": 5,
+   "source": "O3PipeView decode sn 621"
+  },
+  {
+   "row": "i4",
+   "event": "rename",
+   "tick": 2727500,
+   "cycle": 6,
+   "source": "O3PipeView rename sn 621"
+  },
+  {
+   "row": "i4",
+   "event": "issue",
+   "tick": 2728500,
+   "cycle": 8,
+   "source": "O3PipeView issue sn 621"
+  },
+  {
+   "row": "i4",
+   "event": "complete",
+   "tick": 2729000,
+   "cycle": 9,
+   "source": "O3PipeView complete sn 621"
+  },
+  {
+   "row": "i4",
+   "event": "retire",
+   "tick": 3980000,
+   "cycle": 2511,
+   "source": "O3PipeView retire sn 621"
+  },
+  {
+   "row": "i6",
+   "event": "decode",
+   "tick": 2784000,
+   "cycle": 119,
+   "source": "O3PipeView decode sn 677"
+  },
+  {
+   "row": "i6",
+   "event": "rename",
+   "tick": 2784500,
+   "cycle": 120,
+   "source": "O3PipeView rename sn 677"
+  },
+  {
+   "row": "i6",
+   "event": "issue",
+   "tick": 2787000,
+   "cycle": 125,
+   "source": "O3PipeView issue sn 677"
+  },
+  {
+   "row": "i6",
+   "event": "complete",
+   "tick": 2788500,
+   "cycle": 128,
+   "source": "O3PipeView complete sn 677"
+  },
+  {
+   "row": "i7 (merge mov)",
+   "event": "decode",
+   "tick": 2784500,
+   "cycle": 120,
+   "source": "O3PipeView decode sn 679"
+  },
+  {
+   "row": "i7 (merge mov)",
+   "event": "rename",
+   "tick": 2785000,
+   "cycle": 121,
+   "source": "O3PipeView rename sn 679"
+  },
+  {
+   "row": "i7 (merge mov)",
+   "event": "issue",
+   "tick": 2789500,
+   "cycle": 130,
+   "source": "O3PipeView issue sn 679"
+  },
+  {
+   "row": "i7 (merge mov)",
+   "event": "complete",
+   "tick": 2790000,
+   "cycle": 131,
+   "source": "O3PipeView complete sn 679"
+  },
+  {
+   "row": "i7",
+   "event": "decode",
+   "tick": 2831500,
+   "cycle": 214,
+   "source": "O3PipeView decode sn 684"
+  },
+  {
+   "row": "i7",
+   "event": "rename",
+   "tick": 2832000,
+   "cycle": 215,
+   "source": "O3PipeView rename sn 684"
+  },
+  {
+   "row": "i7",
+   "event": "issue",
+   "tick": 2979000,
+   "cycle": 509,
+   "source": "O3PipeView issue sn 684"
+  },
+  {
+   "row": "i7",
+   "event": "complete",
+   "tick": 2979500,
+   "cycle": 510,
+   "source": "O3PipeView complete sn 684"
+  },
+  {
+   "row": "i2",
+   "event": "resolve hold (500 cycles)",
+   "tick": 2727500,
+   "cycle": 6,
+   "source": "O3PipeView:simspect:2727500:BR:resolve_hold:line=-:seq=608:pc=0x401c85:victim=-:cause=-:sq=-:id=-:stall=500:fire=2977500:mispred=0"
+  },
+  {
+   "row": "i2",
+   "event": "resolves (visible, correct)",
+   "tick": 2978000,
+   "cycle": 507,
+   "source": "O3PipeView:simspect:2978000:BR:resolve_visible:line=-:seq=608:pc=0x401c85:victim=-:cause=-:sq=-:id=-:upc=2:mispred=0:stall=500"
+  },
+  {
+   "row": "i3",
+   "event": "load executes, request sent",
+   "tick": 2727500,
+   "cycle": 6,
+   "source": "2727500: system.cpu.iew.lsq.thread0: Memory request (pkt: ReadResp [35c0:35c7]) from inst [sn:611] was sent (cache is blocked: 0, cache_got_blocked: 0)"
+  },
+  {
+   "row": "i4",
+   "event": "resolve hold (2,500 cycles)",
+   "tick": 2729000,
+   "cycle": 9,
+   "source": "O3PipeView:simspect:2729000:BR:resolve_hold:line=-:seq=621:pc=0x401ca6:victim=-:cause=-:sq=-:id=-:stall=2500:fire=3979000:mispred=1"
+  },
+  {
+   "row": "i4",
+   "event": "resolves mispredicted: Commit squash",
+   "tick": 3979500,
+   "cycle": 2510,
+   "source": "3979500: system.cpu.commit: [tid:0] Squashing due to branch mispred PC:0x401ca6 [sn:621]"
+  },
+  {
+   "row": "i4",
+   "event": "squash lands (rename squashes after sn 621)",
+   "tick": 3980000,
+   "cycle": 2511,
+   "source": "3980000: system.cpu.rename: [tid:0] [squash sn:621] Squashing instructions."
+  },
+  {
+   "row": "i6",
+   "event": "load executes, request sent",
+   "tick": 2787500,
+   "cycle": 126,
+   "source": "2787500: system.cpu.iew.lsq.thread0: Memory request (pkt: ReadResp [35c0:35c7]) from inst [sn:677] was sent (cache is blocked: 0, cache_got_blocked: 0)"
+  },
+  {
+   "row": "i6",
+   "event": "squashed (LSQ)",
+   "tick": 3980000,
+   "cycle": 2511,
+   "source": "3980000: system.cpu.iew.lsq.thread0: Load Instruction PC (0x401cf1=>0x401cf6).(0=>1) squashed, [sn:677]"
+  },
+  {
+   "row": "i7 (merge mov)",
+   "event": "executes",
+   "tick": 2790000,
+   "cycle": 131,
+   "source": "2790000: system.cpu.iew: Execute: Processing PC (0x401cf9=>0x401cfc).(0=>1), [tid:0] [sn:679]."
+  },
+  {
+   "row": "i7",
+   "event": "enters delay unit (tainted)",
+   "tick": 2832500,
+   "cycle": 216,
+   "source": "2832500: system.cpu.delay_unit: Inserting branch [sn:684] into delay_unit as it has tainted operands"
+  },
+  {
+   "row": "i7",
+   "event": "released from delay unit",
+   "tick": 2978500,
+   "cycle": 508,
+   "source": "2978500: system.cpu.delay_unit: Released tainted branch [sn:1] from delay_unit as it is no longer tainted"
+  },
+  {
+   "row": "i7",
+   "event": "executes, mispredict detected, redirects fetch",
+   "tick": 2979500,
+   "cycle": 510,
+   "source": "2979500: system.cpu.iew: [tid:0] [sn:684] Execute: Redirecting fetch to PC: (0x401d00=>0x401d03).(2=>3)"
+  },
+  {
+   "row": "i7",
+   "event": "Commit squash (resolve_visible mispred=1)",
+   "tick": 2980000,
+   "cycle": 511,
+   "source": "2980000: system.cpu.commit: [tid:0] Squashing due to branch mispred PC:0x401d00 [sn:684]"
+  }
+ ]
+}

@@ -103,7 +103,9 @@
       "spec": {
         "text": "squashed(i) ∧ lc_seq < i.seq  (pinned 2026-10-28: what the tests realize; i = the event's seq joined to the O3PipeView fetch seqNum; squashed = never retired and younger than a ROB:squash seq while allocated before that squash)",
         "impl": "squashed_after_lc",
-        "window": "footprint"
+        "window": "footprint",
+        "op_class": "load",
+        "op_class_source": "SpecLFB §4: protects speculative loads only; W-3 decided by Anna 2026-11-16 (follow each paper)"
       }
     }
   },

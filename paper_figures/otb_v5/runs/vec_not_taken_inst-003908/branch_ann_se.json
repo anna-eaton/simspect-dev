@@ -1,0 +1,213 @@
+{
+ "branch_mode": "mispredict_not_taken",
+ "annotations": [
+  {
+   "branch_pc": 2,
+   "btb_forced_target_pc": 3,
+   "mode": "simspect_force",
+   "branch_addr": 4201605,
+   "branch_addr_hex": "0x401c85",
+   "btb_forced_target_addr": 1,
+   "btb_forced_target_addr_hex": "0x1",
+   "resolve_stall_cycles": 500,
+   "branch_pc_addr": 4201605,
+   "branch_pc_addr_hex": "0x401c85",
+   "orig_mode": "correctly_not_taken"
+  },
+  {
+   "branch_pc": 4,
+   "btb_forced_target_pc": 5,
+   "mode": "simspect_force",
+   "branch_addr": 4201642,
+   "branch_addr_hex": "0x401caa",
+   "btb_forced_target_addr": 1,
+   "btb_forced_target_addr_hex": "0x1",
+   "resolve_stall_cycles": 2500,
+   "branch_pc_addr": 4201642,
+   "branch_pc_addr_hex": "0x401caa",
+   "orig_mode": "mispredict_not_taken"
+  },
+  {
+   "branch_pc": 7,
+   "btb_forced_target_pc": 8,
+   "mode": "simspect_force",
+   "branch_addr": 4201758,
+   "branch_addr_hex": "0x401d1e",
+   "btb_forced_target_addr": 1,
+   "btb_forced_target_addr_hex": "0x1",
+   "resolve_stall_cycles": 0,
+   "branch_pc_addr": 4201758,
+   "branch_pc_addr_hex": "0x401d1e",
+   "orig_mode": "mispredict_not_taken"
+  }
+ ],
+ "xmit": {
+  "pc": 7,
+  "kind": "br_x",
+  "atom": "Instruction$7",
+  "addr": 4201758,
+  "addr_hex": "0x401d1e"
+ },
+ "commit_boundary": {
+  "last_committed": {
+   "pc": 3,
+   "atom": "Instruction$1",
+   "addr": 4201619,
+   "addr_hex": "0x401c93"
+  },
+  "first_noncommitted": {
+   "pc": 4,
+   "atom": "Instruction$6",
+   "addr": 4201642,
+   "addr_hex": "0x401caa"
+  }
+ },
+ "fpr": {
+  "loads": "consumed",
+  "xmm_regs": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8,
+   9,
+   10,
+   11,
+   12,
+   13,
+   14,
+   15
+  ],
+  "routes": [
+   {
+    "pc": 6,
+    "atom": "Instruction$5",
+    "xmm": 12,
+    "outreg": "rsi",
+    "ssa": "rsi_2",
+    "form": "route_alu",
+    "alu_xmm": 2
+   }
+  ]
+ },
+ "fanout_v2": {
+  "splices": [
+   {
+    "consumer_pc": 5,
+    "slot": "inreg0",
+    "reg": "rsi",
+    "producer_pc": 1,
+    "op": "rol_ror",
+    "xmit_edge": false,
+    "later_readers": [
+     "pc6.inaddr"
+    ]
+   },
+   {
+    "consumer_pc": 6,
+    "slot": "inaddr",
+    "reg": "rsi",
+    "producer_pc": 1,
+    "op": "xor2",
+    "xmit_edge": false
+   },
+   {
+    "consumer_pc": 7,
+    "slot": "inreg0",
+    "reg": "rsi",
+    "producer_pc": 6,
+    "op": "lea0",
+    "xmit_edge": true
+   }
+  ],
+  "fillers": [
+   {
+    "before_pc": 2,
+    "op": "sse_paddq",
+    "dst": "r11",
+    "srcs": [
+     "rsi",
+     "r9"
+    ]
+   },
+   {
+    "before_pc": 4,
+    "op": "lea",
+    "dst": "r10",
+    "srcs": [
+     "rsi",
+     "rdi"
+    ]
+   },
+   {
+    "before_pc": 5,
+    "op": "sse_ucomisd_setb",
+    "dst": "r11",
+    "srcs": [
+     "rdi",
+     "r15"
+    ]
+   }
+  ],
+  "notes": [],
+  "interleave_only": {
+   "table": "STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc",
+   "exclude_tags": [],
+   "n_ops": 69
+  },
+  "window_pc": 4,
+  "pre_window_reads": true,
+  "dead_registers": [
+   "r10",
+   "r11",
+   "r14"
+  ]
+ },
+ "branch_forms": {
+  "br_cmp": false,
+  "jmp_direct_pcs": [],
+  "uniform": [
+   "test",
+   "cmp",
+   "jmp"
+  ],
+  "br_cmp_pcs": [
+   2,
+   7
+  ]
+ },
+ "vocab_rj": {
+  "rmw": true,
+  "jmp": true,
+  "rmw_pcs": [],
+  "jmp_filler_before_pcs": []
+ },
+ "vocab_forms": {
+  "0": "store_imm"
+ },
+ "branch_cond": {
+  "from_alloy": true,
+  "pcs": [
+   2,
+   4
+  ]
+ },
+ "reg_naming": {
+  "mode": "random",
+  "seed": 1327628040,
+  "locked_registers": {
+   "Reg_s$0": "rsi"
+  },
+  "infra_registers": [
+   "rcx",
+   "r8",
+   "r13"
+  ]
+ },
+ "func_base_addr": 4198432,
+ "func_base_addr_hex": "0x401020"
+}

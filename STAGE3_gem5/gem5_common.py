@@ -602,7 +602,8 @@ def parse_pipeview_by_seq(trace_path: Path) -> Dict[int, dict]:
                 continue
             cur = dict(seq=seq, pc=int(parts[3], 16), upc=int(parts[4]),
                        fetch=int(parts[2]), decode=0, rename=0, dispatch=0,
-                       issue=0, complete=0, retire=0)
+                       issue=0, complete=0, retire=0,
+                       disasm=":".join(parts[6:]).strip())
         elif stage in ("decode", "rename", "dispatch", "issue", "complete"):
             if cur:
                 cur[stage] = int(parts[2])
@@ -612,6 +613,22 @@ def parse_pipeview_by_seq(trace_path: Path) -> Dict[int, dict]:
                 by_seq[cur["seq"]] = cur
                 cur = None
     return by_seq
+
+
+def micro_op_mnemonic(disasm: str) -> Optional[str]:
+    """Micro-op mnemonic of an O3PipeView disassembly ("MOV_R_M : ld r11, DS:[...]" -> "ld").
+    None when the text has no "MACRO : uop" form (e.g. synthetic test traces): unknown."""
+    if not disasm or " : " not in disasm:
+        return None
+    rest = disasm.split(" : ", 1)[1].strip()
+    return rest.split()[0].lower() if rest else None
+
+
+def is_load_micro_op(disasm: str) -> Optional[bool]:
+    """True for x86 load micro-ops (ld, ldst, ldstl, ldfp, ldis, ldsplit, ...), False for any
+    other micro-op, None when unknown. Used by check_footprint's op_class filter (W-3)."""
+    m = micro_op_mnemonic(disasm)
+    return None if m is None else m.startswith("ld")
 
 
 def parse_lsq(trace_path: Path) -> Dict[int, List[dict]]:
@@ -678,6 +695,11 @@ def parse_lsq(trace_path: Path) -> Dict[int, List[dict]]:
     speclfb_usl_re = re.compile(
         r"^\s*(\d+):.*Initiating Translation inst \[sn:(\d+)\] sPC [0-9a-f]+ - "
         r"Prior Brs Not Resolved\. isCUSL: ([01])\..*?isUnsafe: ([01])")
+    # [Recon builds] the real send of a load's read request (lsq_unit.cc:1546:
+    # "Memory request (pkt: ..) from inst [sn:N] was sent"; "was not sent" does not
+    # match). Separate field (sent_tick), informational only: packet_tick and
+    # check_ld's gate are unchanged (wiki/findings/bug/recon_cache_reach_gate/).
+    recon_sent_re = re.compile(r"^\s*(\d+):\s+system\.cpu\.iew\.lsq\..*Memory request \(pkt: .*\) from inst \[sn:(\d+)\] was sent ")
     insert_sn_re  = re.compile(r"\[sn:(\d+)\]")
     for line in _trace_lines(trace_path):
         m = insert_re.match(line)
@@ -688,7 +710,7 @@ def parse_lsq(trace_path: Path) -> Dict[int, List[dict]]:
             rec = dict(pc=pc, sn=sn, insert_tick=tick, execute_tick=0,
                        squash_tick=0, packet_tick=0, spec_read_tick=0,
                        expose_tick=0, memaccess_tick=0, cache_fill_tick=0,
-                       cache_access_outcome="",
+                       cache_access_outcome="", sent_tick=0,
                        spec_cusl=False, spec_unprotected=False)
             by_sn[sn] = rec
             by_pc[pc].append(rec)
@@ -707,6 +729,12 @@ def parse_lsq(trace_path: Path) -> Dict[int, List[dict]]:
             rec = by_sn.get(int(m.group(2)))
             if rec is not None and rec["packet_tick"] == 0:
                 rec["packet_tick"] = int(m.group(1))
+            continue
+        m = recon_sent_re.match(line)
+        if m:
+            rec = by_sn.get(int(m.group(2)))
+            if rec is not None and rec["sent_tick"] == 0:
+                rec["sent_tick"] = int(m.group(1))
             continue
         m = spec_re.match(line)
         if m:
@@ -956,8 +984,10 @@ def collect_unresolved_branches(ann_full: dict, binary: Path,
             continue
         # Only the model's unresolved branches define the window. A resolved
         # (correctly_not_taken) branch can carry a sweep grid stall but must not be
-        # required to still be unresolved at the signal. Its timing is reported
-        # separately (criteria.resolved_before_signal).
+        # required to still be unresolved at the signal. Its timing is checked
+        # separately: older uncommitted ones are gated by
+        # criteria.resolved_older_before_signal (resolved_gate.py, 2026-11-16);
+        # resolved_before_signal (all resolved branches) stays reported only.
         if e.get("mode") == "correctly_not_taken":
             continue
         # New schema: absolute branch_addr.
@@ -1033,6 +1063,25 @@ def check_branch_resolutions(by_pc: Dict[int, list],
     details: List[dict] = []
     all_ok = True
     for u in unresolved:
+        if "stl" in u:
+            # Store shadow (stl_bypass tests only; entries added by stl_window):
+            # the annotated store is unresolved until its address resolves, i.e.
+            # the STL hook releases it into executeStore (stl_release), the same
+            # call that sets effAddrValid (ReCon frees the store shadow there) and
+            # finds the memory-order violation.
+            st = u["stl"]
+            tick = st.get("release_tick", 0)
+            d = dict(pc=hex(u["pc"]), stall=u["stall_cycles"], source="stl",
+                     seq=st.get("seq"), hold_tick=st.get("hold_tick", 0),
+                     release_tick=tick, squash_tick=st.get("squash_tick", 0),
+                     resolve_tick=tick)
+            if tick == 0:
+                d.update(ok=True, reason="never released (squashed or sim ended)")
+            else:
+                d["ok"] = xmit_complete < tick
+            details.append(d)
+            all_ok &= d["ok"]
+            continue
         rec = best_record(by_pc.get(u["pc"], []))
         complete = rec.get("complete", 0) if rec else 0
         br = u.get("br")
@@ -1142,6 +1191,134 @@ def execution_validity(ann_entries: List[dict], br_events: Dict[int, Dict[int, d
     return out
 
 
+# ── Store-shadow window (stl_bypass tests) ─────────────────────────────────
+#
+# A stl_bypass test (parsexml pass2_6_specify_stl) speculates on a store-address
+# shadow, not a branch: its .ann.json has `stl_annotations` (store / bypass and
+# alias loads, absolute store_addr / load_addr) and no unresolved branches. The
+# checkers keep their transmission criteria (check_ld's data-obtained gate,
+# check_br's redirect); only the window changes, keyed off the annotation:
+#   * every annotated store S is an extra "unresolved" entry (check_branch_
+#     resolutions, source "stl"): the signal must come before S's stl_release;
+#   * the checker sees only the transient execution: pipeview records fetched,
+#     LSQ records inserted and commit squashes broadcast before the memory-order
+#     squash S causes (after it, L and X replay with the right value, which is
+#     architectural; matching by PC alone would pick the replay);
+#   * validity gates (status "invalid", never a hit, when one fails):
+#     stl_hold (the hook held S), stl_pred (a forced no-alias prediction for an
+#     annotated load, only checked with --stl-alias-pred=no_alias),
+#     stl_bypass (an annotated load executed before stl_release),
+#     stl_squash (a mem_order_squash caused by S of a load at or before the
+#     first annotated load instance: gem5 checks violations at 16-byte
+#     granularity, so it can name an older neighbour).
+# Design + rationale: wiki/design/STL_SPECULATION.md "Window check".
+STL_GATES = ("stl_hold", "stl_pred", "stl_bypass", "stl_squash")
+
+
+def stl_pairs_of(ann_path: Path) -> List[dict]:
+    """The test's resolved STL pairs [{store_addr, load_addr, role}], [] for any
+    test without stl_annotations (every branch-shadow test)."""
+    try:
+        ann = json.loads(Path(ann_path).read_text())
+    except Exception:
+        return []
+    out = []
+    for p in ann.get("stl_annotations") or []:
+        if p.get("store_addr") is None or p.get("load_addr") is None:
+            continue
+        out.append(dict(store_addr=int(p["store_addr"]), load_addr=int(p["load_addr"]),
+                        role=p.get("role")))
+    return out
+
+
+def stl_window(events: List[dict], pairs: List[dict],
+               lsq_by_pc: Dict[int, list]) -> dict:
+    """Store-shadow window facts for one stl_bypass run (see the block comment).
+    Returns the gates, the per-store unresolved entries and t_squash (the
+    earliest store-caused memory-order squash; 0 = none)."""
+    stl = [e for e in events if e["struct"] == "STL"]
+    stores = sorted({p["store_addr"] for p in pairs})
+    out = dict(stores=[hex(s) for s in stores], per_store=[], unresolved=[],
+               notes=[], t_squash=0)
+    gates = dict(stl_hold=True, stl_pred=True if STL_ALIAS_PRED == "no_alias" else None,
+                 stl_bypass=True, stl_squash=True)
+    squash_ticks = []
+    for s_pc in stores:
+        l_pcs = sorted({p["load_addr"] for p in pairs if p["store_addr"] == s_pc})
+        holds = sorted((e for e in stl if e["kind"] == "stl_hold" and e["pc"] == s_pc),
+                       key=lambda e: (e["seq"], e["tick"]))
+        hold = holds[0] if holds else None
+        s_seq = hold["seq"] if hold else None
+        rel = next((e for e in stl if e["kind"] == "stl_release" and e["seq"] == s_seq),
+                   None) if hold else None
+        preds = [e for e in stl if e["kind"] in ("pred_no_alias", "pred_alias")
+                 and e["pc"] in l_pcs]
+        l_recs = [r for pc in l_pcs for r in (lsq_by_pc or {}).get(pc, [])
+                  if s_seq is None or r["sn"] > s_seq]
+        l_first = min(l_recs, key=lambda r: r["sn"]) if l_recs else None
+        t_rel = rel["tick"] if rel else 0
+        bypass = bool(t_rel and l_first and 0 < l_first.get("execute_tick", 0) < t_rel)
+        sq = [e for e in stl if e["kind"] == "mem_order_squash" and s_seq is not None
+              and e["cause"] == s_seq and l_first is not None
+              and s_seq < e["seq"] <= l_first["sn"]]
+        t_sq = min((e["tick"] for e in sq), default=0)
+        d = dict(pc=hex(s_pc), seq=s_seq, hold_tick=hold["tick"] if hold else 0,
+                 release_tick=t_rel, loads=[hex(x) for x in l_pcs],
+                 pred=preds[0]["kind"] if preds else None,
+                 load_sn=l_first["sn"] if l_first else None,
+                 load_execute=l_first.get("execute_tick", 0) if l_first else 0,
+                 squash_tick=t_sq, squash_seq=sq[0]["seq"] if sq else None)
+        out["per_store"].append(d)
+        out["unresolved"].append(dict(pc=s_pc, stall_cycles=STL_STORE_STALL_CYCLES,
+                                      stl=d))
+        if hold is None:
+            gates["stl_hold"] = False
+            out["notes"].append(f"no stl_hold for store {hex(s_pc)} (hook absent or STL flags off)")
+        if gates["stl_pred"] is not None and not any(p["kind"] == "pred_no_alias" for p in preds):
+            gates["stl_pred"] = False
+            out["notes"].append(f"no pred_no_alias for loads of {hex(s_pc)}")
+        if not bypass:
+            gates["stl_bypass"] = False
+            out["notes"].append(f"no annotated load of {hex(s_pc)} executed before stl_release")
+        if not t_sq:
+            gates["stl_squash"] = False
+            out["notes"].append(f"no mem_order_squash caused by store {hex(s_pc)}")
+        else:
+            squash_ticks.append(t_sq)
+    out.update(gates)
+    out["t_squash"] = min(squash_ticks) if squash_ticks else 0
+    return out
+
+
+def stl_transient_view(by_pc, lsq_by_pc, squash_by_pc, t_squash: int):
+    """Only what happened before the memory-order squash (the transient run)."""
+    bp = {}
+    for pc, recs in by_pc.items():
+        kept = [r for r in recs if 0 < r.get("fetch", 0) < t_squash]
+        if kept:
+            bp[pc] = kept
+    lq = {}
+    for pc, recs in (lsq_by_pc or {}).items():
+        kept = [r for r in recs if 0 < r.get("insert_tick", 0) < t_squash]
+        if kept:
+            lq[pc] = kept
+    sq = CommitSquashes()
+    for pc, ticks in (squash_by_pc or {}).items():
+        kept = [t for t in ticks if t < t_squash]
+        if kept:
+            sq[pc] = kept
+    return bp, lq, sq
+
+
+class CommitSquashes(dict):
+    """parse_commit_squashes output that is known to come from a Commit-traced run
+    (run_gem5 always adds the Commit flag). check_br infers "Commit was traced"
+    from a non-empty dict, which holds for branch-shadow tests (the window branch
+    always squashes) but not for a store-shadow test with no branch mispredict at
+    all; this marker keeps check_br on its redirect criterion there."""
+    commit_traced = True
+
+
 # ── Generic process_one ─────────────────────────────────────────────────────
 
 # Type alias for a check function:
@@ -1230,6 +1407,22 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
             if br_events:
                 for u in unresolved:
                     u["br"] = br_events.get(u["pc"], {})
+            # Store-shadow window (stl_bypass tests only; branch-shadow tests have
+            # no stl_annotations and skip this block entirely).
+            stl_pairs = stl_pairs_of(ann_path)
+            stl = None
+            if stl_pairs:
+                stl = stl_window(parse_simspect_events(trace), stl_pairs, lsq_by_pc)
+                unresolved = unresolved + stl.pop("unresolved")
+                if stl["t_squash"]:
+                    by_pc, lsq_by_pc, squash_by_pc = stl_transient_view(
+                        by_pc, lsq_by_pc, squash_by_pc, stl["t_squash"])
+                # informational: the transient xmit's Recon real-send tick
+                # (lsq_unit.cc:1546), not part of any verdict
+                xr = sorted((lsq_by_pc or {}).get(xmit_pc, []), key=lambda r: r["sn"])
+                stl["xmit_sn"] = xr[0]["sn"] if xr else None
+                stl["xmit_sent_tick"] = xr[0].get("sent_tick", 0) if xr else 0
+                result["stl"] = stl
             plan_f = workdir / "force_plan.json"
             plan = json.loads(plan_f.read_text()) if plan_f.exists() else None
             result["force_plan"] = plan
@@ -1268,10 +1461,25 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
                 vt = (r or {}).get("resolve_visible", 0)
                 rb.append(dict(pc=hex(int(e["branch_addr"])), visible_tick=vt,
                                stall=int(e.get("resolve_stall_cycles", 0) or 0),
-                               before_signal=(bool(vt) and sig > 0 and vt < sig)))
+                               before_signal=(bool(vt) and sig > 0 and vt < sig),
+                               spo=e.get("branch_pc")))
             result["resolved_branches"] = rb
             result["resolved_before_signal"] = (all(b["before_signal"] for b in rb)
                                               if (rb and br_events and sig) else None)
+            # Resolved-branch gate (Anna 2026-11-16, option b; resolved_gate.py): every
+            # resolved branch older than the xmit and not committed must be visibly
+            # resolved before the signal. Gated (criteria key, ANDed into
+            # issued_in_window); the run stays valid. None = does not apply.
+            import resolved_gate as _rg
+            rg = _rg.evaluate(rb, sig, dict(xmit=parts["xmit"], annotations=parts["annotations"],
+                                            commit_boundary=dict(last_committed=parts["lc"],
+                                                                 first_noncommitted=parts["fnc"])),
+                              br_observed=bool(br_events))
+            result["resolved_gate"] = rg
+            crit["resolved_older_before_signal"] = rg["value"]
+            if rg["value"] is False and result.get("issued_in_window"):
+                result["issued_in_window_before_resolved_gate"] = True
+                result["issued_in_window"] = False
             for k in ("resolved_correct", "window_opened", "stall_applied", "force_applied"):
                 crit[k] = validity[k]
             if any(validity[k] is False for k in
@@ -1280,6 +1488,17 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
                 result["issued_in_window"] = False
                 result["status"] = "invalid"
                 result["error"] = "; ".join(validity["notes"])
+            if stl is not None:
+                for k in STL_GATES:
+                    crit[k] = stl[k]
+                if any(stl[k] is False for k in STL_GATES):
+                    if result["status"] != "invalid":
+                        result["issued_in_window_unvalidated"] = result.get("issued_in_window")
+                        result["issued_in_window"] = False
+                        result["status"] = "invalid"
+                        result["error"] = "; ".join(stl["notes"])
+                    else:
+                        result["error"] += "; " + "; ".join(stl["notes"])
 
     except subprocess.CalledProcessError as e:
         result["status"] = "error"

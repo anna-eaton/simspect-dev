@@ -1,0 +1,39 @@
+START 2026-11-16T17:39:50Z host=543cef85d966
+89475abc2e19677f3fee9b2feedd5971  /work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt
+c5182aebe59248b0e8e2c76b660886914143603b52292396412ba7a7feb20e81  /tmp/race_inst-000125_zj4o8qm_/inst-000125
+1acc241ab424b85dd148f285908cbec188b393ffd11d5be85ddbbc667ad62d62  /tmp/race_inst-000125_zj4o8qm_/branch_ann_se.json
+8684417923631e3dc73a4256b7a90eb20fd2a925dce79e865aeef717b74b4b54  /tests/race_v5_20261116/track.txt
+cmd: /work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt --outdir=/tmp/race_inst-000125_zj4o8qm_/m5out --debug-flags=O3PipeView,LSQUnit,Commit --debug-file=pipeview.txt /work/gem5-spt/configs/example/se_exp.py --cmd=/tmp/race_inst-000125_zj4o8qm_/inst-000125 --cpu-type=DerivO3CPU --caches --scheme=2 --abs-max-tick=100000000000 --branch-ann-file=/tmp/race_inst-000125_zj4o8qm_/branch_ann_se.json --branch-ann-base=0x401020 --applyDDIFT=1 --fwdUntaint=1 --bwdUntaint=1 --configImpFlow=Lazy --freeParam=3 --scheme=SpectreSafeFence --trackInstsFile=/tests/race_v5_20261116/track.txt
+/tests/race_v5_20261116/rerun_track.sh: line 28: 1317055 Aborted                 SIMSPECT_COMMIT_IEW_DELAY=4 timeout 900 nice -n 19 "${CMD[@]}" > $O/gem5_stdout.txt 2> $O/gem5_stderr.txt
+gem5 rc=134
+DIFFERS from race_v4:
+17027,32510d17026
+< 3006500: system.cpu.commit: Inserting PC (0x401c8e=>0x401c91).(0=>1) [sn:613] [tid:0] into ROB.
+< 3006500: system.cpu.commit: Inserting PC (0x401c91=>0x401c98).(0=>1) [sn:614] [tid:0] into ROB.
+< 3006500: system.cpu.commit: Trying to commit instructions in the ROB.
+< 3006500: system.cpu.commit: [tid:0]: Can't commit, Instruction [sn:607] PC (0x401c80=>0x401c83).(0=>1) is head of ROB and not ready
+< 3006500: system.cpu.commit: [tid:0]: ROB has 8 insts & 184 free entries.
+< 3007000: system.cpu.iew.lsq.thread0: Inserting load PC (0x401c8a=>0x401c8e).(0=>1), idx:1 [sn:612]
+< 3007000: system.cpu.commit: DefaultCommimt<Impl>::tick() begins
+< 3007000: system.cpu.commit: Getting instructions from Rename stage.
+< 3007000: system.cpu.commit: Inserting PC (0x401c91=>0x401c98).(1=>2) [sn:615] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401c98=>0x401c9b).(0=>1) [sn:616] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401c9b=>0x401c9e).(0=>1) [sn:617] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401c9e=>0x401ca0).(0=>1) [sn:618] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401c9e=>0x401ca0).(1=>2) [sn:619] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401c9e=>0x401ca0).(2=>3) [sn:620] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401ca0=>0x401ca3).(0=>1) [sn:621] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Inserting PC (0x401ca3=>0x401ca6).(0=>1) [sn:622] [tid:0] into ROB.
+< 3007000: system.cpu.commit: Trying to commit instructions in the ROB.
+< 3007000: system.cpu.commit: [tid:0]: Can't commit, Instruction [sn:607] PC (0x401c80=>0x401c83).(0=>1) is head of ROB and not ready
+< 3007000: system.cpu.commit: [tid:0]: ROB has 16 insts & 176 free entries.
+80:commitToIEWDelay=4
+169:trackInstsFilePath=/tests/race_v5_20261116/track.txt
+--- SPT tracking prints:
+29:	0x401c8a
+32:[00177e] 401c8a.264 inserted into ROB
+24edbc8e9c1732843f8c479abcf16fd87a7804ab5d0769754657dc0614fd450a  /tests/race_v5_20261116/gem5_stdout.txt
+509022e383473a768181ab2c83604932a09ccc0ae473ba95389bd05e0c2f7c3d  /tests/race_v5_20261116/gem5_stderr.txt
+2827683415363356747e5bf937c1ef386ce50c6f79046228b34f1eabf79f2b14  /tests/race_v5_20261116/pipeview_v5_track.txt.gz
+c36017e1c9b3384652629e6ffea315188df4391f4fc2c22ccc5ab9db467c7b88  /tests/race_v5_20261116/config.ini
+END 2026-11-16T17:39:53Z

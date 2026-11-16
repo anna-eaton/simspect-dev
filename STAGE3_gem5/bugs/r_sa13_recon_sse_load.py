@@ -33,5 +33,14 @@ def is_static(cl) -> bool:
     return cl.startswith("R-SA-13")
 
 
+def sse_annotated_load(replay_evidence) -> bool:
+    """oldest_taint_replay.py record (main run): every annotated bypass load is an SSE/FP load, so gem5 never marks it
+    speculative (decode.cc:686-695 takes the isFloating branch first; STL_CHECK isSpeculative=0) and the counterfactual
+    keep-all-sources replay holds no taint from it either. Label "R-SA-13 (annotated load is an SSE load; replay[, RMW])"
+    (rstltriage 2026-11-16: the static slicer misses these through an idiv on the slice)."""
+    return (bool(replay_evidence) and bool(replay_evidence.get("load_fp"))
+            and not (replay_evidence.get("checks_B") or replay_evidence.get("checks_A") or {}).get("union_has_L", True))
+
+
 def untainted(e) -> bool:
     return e is not None and "isTainted=0" in (e.get("stl") or "")

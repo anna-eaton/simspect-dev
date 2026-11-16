@@ -1,0 +1,155 @@
+{
+  "branch_mode": "mispredict_taken",
+  "annotations": [
+    {
+      "branch_pc": 2,
+      "btb_forced_target_pc": 3,
+      "mode": "correctly_not_taken",
+      "branch_addr": 4201564,
+      "branch_addr_hex": "0x401c5c",
+      "btb_forced_target_addr": 4201571,
+      "btb_forced_target_addr_hex": "0x401c63"
+    },
+    {
+      "branch_pc": 4,
+      "btb_forced_target_pc": 5,
+      "mode": "mispredict_taken",
+      "branch_addr": 4201605,
+      "branch_addr_hex": "0x401c85",
+      "btb_forced_target_addr": 4201612,
+      "btb_forced_target_addr_hex": "0x401c8c"
+    },
+    {
+      "branch_pc": 6,
+      "btb_forced_target_pc": 7,
+      "mode": "mispredict_not_taken",
+      "branch_addr": 4201634,
+      "branch_addr_hex": "0x401ca2",
+      "btb_forced_target_addr": 4201641,
+      "btb_forced_target_addr_hex": "0x401ca9"
+    }
+  ],
+  "xmit": {
+    "pc": 6,
+    "kind": "br_x",
+    "atom": "Instruction$7",
+    "addr": 4201634,
+    "addr_hex": "0x401ca2"
+  },
+  "commit_boundary": {
+    "last_committed": {
+      "pc": 3,
+      "atom": "Instruction$1",
+      "addr": 4201571,
+      "addr_hex": "0x401c63"
+    },
+    "first_noncommitted": {
+      "pc": 4,
+      "atom": "Instruction$6",
+      "addr": 4201605,
+      "addr_hex": "0x401c85"
+    }
+  },
+  "fanout_v2": {
+    "splices": [
+      {
+        "consumer_pc": 4,
+        "slot": "inreg0",
+        "reg": "rax",
+        "producer_pc": 0,
+        "op": "and_m1",
+        "xmit_edge": false
+      },
+      {
+        "consumer_pc": 6,
+        "slot": "inreg0",
+        "reg": "rax",
+        "producer_pc": 5,
+        "op": "xor2",
+        "xmit_edge": true,
+        "later_readers": [
+          "pc7.inaddr"
+        ]
+      }
+    ],
+    "fillers": [
+      {
+        "before_pc": 2,
+        "op": "lea_scaled",
+        "dst": "r15",
+        "srcs": [
+          "rdi",
+          "rax"
+        ]
+      },
+      {
+        "before_pc": 4,
+        "op": "bt_setc",
+        "dst": "r8",
+        "srcs": [
+          "rax",
+          "rcx"
+        ]
+      }
+    ],
+    "notes": [],
+    "interleave_only": {
+      "table": "STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc",
+      "exclude_tags": [],
+      "n_ops": 69
+    },
+    "window_pc": 4,
+    "pre_window_reads": true,
+    "dead_registers": [
+      "r8",
+      "r12",
+      "r14",
+      "r15"
+    ]
+  },
+  "branch_forms": {
+    "br_cmp": false,
+    "jmp_direct_pcs": [],
+    "uniform": [
+      "test",
+      "cmp",
+      "jmp"
+    ],
+    "br_cmp_pcs": [
+      2
+    ]
+  },
+  "vocab_rj": {
+    "rmw": true,
+    "jmp": true,
+    "rmw_pcs": [
+      3
+    ],
+    "jmp_filler_before_pcs": []
+  },
+  "vocab_forms": {
+    "5": "load_swapidx",
+    "7": "store_imm"
+  },
+  "branch_cond": {
+    "from_alloy": true,
+    "pcs": [
+      2,
+      4
+    ]
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 4168524794,
+    "locked_registers": {
+      "Reg_s$0": "rax"
+    },
+    "infra_registers": [
+      "r11",
+      "r9",
+      "rsi"
+    ]
+  },
+  "func_base_addr": 4198432,
+  "func_base_addr_hex": "0x401020"
+}

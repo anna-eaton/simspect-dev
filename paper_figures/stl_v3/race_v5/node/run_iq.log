@@ -1,0 +1,59 @@
+START 2026-11-16T17:40:52Z host=543cef85d966
+89475abc2e19677f3fee9b2feedd5971  /work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt
+c5182aebe59248b0e8e2c76b660886914143603b52292396412ba7a7feb20e81  /tmp/race_inst-000125_zj4o8qm_/inst-000125
+1acc241ab424b85dd148f285908cbec188b393ffd11d5be85ddbbc667ad62d62  /tmp/race_inst-000125_zj4o8qm_/branch_ann_se.json
+cmd: /work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt --outdir=/tmp/race_inst-000125_zj4o8qm_/m5out --debug-flags=O3PipeView,LSQUnit,Commit,IEW,IQ --debug-file=pipeview.txt /work/gem5-spt/configs/example/se_exp.py --cmd=/tmp/race_inst-000125_zj4o8qm_/inst-000125 --cpu-type=DerivO3CPU --caches --scheme=2 --abs-max-tick=100000000000 --branch-ann-file=/tmp/race_inst-000125_zj4o8qm_/branch_ann_se.json --branch-ann-base=0x401020 --applyDDIFT=1 --fwdUntaint=1 --bwdUntaint=1 --configImpFlow=Lazy --freeParam=3 --scheme=SpectreSafeFence
+gem5 rc=0
+DIFFERS from race_v4:
+2a3
+>       0: global: RegFile: Setting int register 4 to 0x7fffffffee30
+9a11,12
+>       0: system.cpu.iew.lsq.thread0: SQ size: 33, #stores occupied: 0
+>       0: system.cpu.iew.lsq.thread0: LQ size: 33, #loads occupied: 0
+12a16,17
+>     500: system.cpu.iew.lsq.thread0: SQ size: 33, #stores occupied: 0
+>     500: system.cpu.iew.lsq.thread0: LQ size: 33, #loads occupied: 0
+16a22,23
+>    1000: system.cpu.iew.lsq.thread0: SQ size: 33, #stores occupied: 0
+>    1000: system.cpu.iew.lsq.thread0: LQ size: 33, #loads occupied: 0
+20a28,29
+>    1500: system.cpu.iew.lsq.thread0: SQ size: 33, #stores occupied: 0
+>    1500: system.cpu.iew.lsq.thread0: LQ size: 33, #loads occupied: 0
+27a37,38
+>    2000: system.cpu.iew.lsq.thread0: SQ size: 33, #stores occupied: 0
+>    2000: system.cpu.iew.lsq.thread0: LQ size: 33, #loads occupied: 0
+31a43,44
+>    2500: system.cpu.iew.lsq.thread0: SQ size: 33, #stores occupied: 0
+>    2500: system.cpu.iew.lsq.thread0: LQ size: 33, #loads occupied: 0
+80:commitToIEWDelay=4
+169:trackInstsFilePath=
+--- transmitter sn:612 IEW/IQ lines:
+43402:3006000: global: [sn:612] has 1 ready out of 3 sources. RTI 0)
+43403:3006000: global: [sn:612] has 2 ready out of 3 sources. RTI 0)
+43443:3006500: system.cpu.commit: Inserting PC (0x401c8a=>0x401c8e).(0=>1) [sn:612] [tid:0] into ROB.
+43483:3007000: system.cpu.iew: [tid:0]: Issue: Adding PC (0x401c8a=>0x401c8e).(0=>1) [sn:612] [tid:0] to IQ.
+43485:3007000: system.cpu.iew.lsq.thread0: Inserting load PC (0x401c8a=>0x401c8e).(0=>1), idx:1 [sn:612]
+43486:3007000: system.cpu.iq: Adding instruction [sn:612] PC (0x401c8a=>0x401c8e).(0=>1) to the IQ.
+43632:3007500: system.cpu.iq: Waking up a dependent instruction, [sn:612] PC (0x401c8a=>0x401c8e).(0=>1).
+43633:3007500: global: [sn:612] has 3 ready out of 3 sources. RTI 0)
+43634:3007500: system.cpu.iq: (regular) Checking if memory instruction [sn:612] can issue.
+43635:3007500: system.cpu.iq: (addReadyMemInst) Instruction is ready to issue, putting it onto the ready list, PC (0x401c8a=>0x401c8e).(0=>1) opclass:32 [sn:612].
+43652:3007500: system.cpu.iq: Thread 0: Issuing instruction PC (0x401c8a=>0x401c8e).(0=>1) [sn:612]
+43729:3008000: system.cpu.iew: Execute: Processing PC (0x401c8a=>0x401c8e).(0=>1), [tid:0] [sn:612].
+80042:4259000: system.cpu.iq: (addReadyMemInst) Instruction is ready to issue, putting it onto the ready list, PC (0x401c8a=>0x401c8e).(0=>1) opclass:32 [sn:612].
+80043:4259000: system.cpu.iq: Thread 0: Issuing instruction PC (0x401c8a=>0x401c8e).(0=>1) [sn:612]
+80505:4259500: system.cpu.iew: Execute: Processing PC (0x401c8a=>0x401c8e).(0=>1), [tid:0] [sn:612].
+80508:4259500: system.cpu.iew.lsq.thread0: Executing load PC (0x401c8a=>0x401c8e).(0=>1), [sn:612]
+80512:4259500: system.cpu.iew.lsq.thread0: Doing memory access (normal load) for inst [sn:612] PC (0x401c8a=>0x401c8e).(0=>1)
+80513:4259500: system.cpu.iew.lsq.thread0: successfully sent out packet(s) for inst [sn:612]
+80540:4260500: system.cpu.iew.lsq.thread0: Writeback event [sn:612].
+80541:4260500: system.cpu.iew.lsq.thread0: Completing instruction [sn:612] access at addr 35c0
+80612:4260500: system.cpu.iq: [tid:0]: Instruction [sn:612] PC (0x401c8a=>0x401c8e).(0=>1) squashed.
+80639:4260500: system.cpu.iew.lsq.thread0: Load Instruction PC (0x401c8a=>0x401c8e).(0=>1) squashed, [sn:612]
+80663:4260500: system.cpu.iew: Sending instructions to commit, [sn:612] PC (0x401c8a=>0x401c8e).(0=>1).
+80842:4265500: system.cpu.commit: Trying to commit head instruction, [sn:612] [tid:0]
+40557823eff3c4633e34d53a60efae11102d7a0f9f1868be8cc679332aaa2b7e  /tests/race_v5_20261116/gem5_stdout_iq.txt
+ef17333951b04ff931f9f2268d2ec70cd0c42233e68f0547dd575b81e766bd77  /tests/race_v5_20261116/gem5_stderr_iq.txt
+f19849bf2fa97b3f0384a726111e1e73a5ee2dddd7a94a5ff399d0098b9dc855  /tests/race_v5_20261116/pipeview_v5_iq.txt.gz
+819550f310e7351351f7b5e20de645bf0b35064b4bc7139c44cc9e5360cecb4e  /tests/race_v5_20261116/config.ini
+END 2026-11-16T17:40:55Z

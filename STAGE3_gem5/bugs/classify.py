@@ -50,6 +50,15 @@ RMW_SEPARATE = ["CS1", "EM_rmw", "EM_other", "UV3_other_actor", "unattributed"]
 RMW_EXCLUDED = ["UV3_padding", "EM_padding"]
 
 
+def _is_stt_row(name, camp=None):
+    """STT rows (E3 stt-master, E4 AMuLeT STT) get the STT gate class (S1_xmm4 = UV1) instead of ReCon's R-SA-13 classes.
+    An explicit campaigns-json "stt": true/false wins; otherwise the name has an `E3` / `E4` token anywhere (inttwin 2026-11-16:
+    the old test `name.split("_")[0] in ("E3", "E4")` missed prefixed names such as `bc_E3_...`, which then got ReCon classes)."""
+    if camp is not None and "stt" in camp:
+        return bool(camp["stt"])
+    return re.search(r"(?:^|_)E[34](?:_|$)", name) is not None
+
+
 def _stage3(path):
     os.environ["SIMSPECT_STAGE3"] = str(path)
     for p in (str(Path(path) / "triage" / "diag"), str(path)):
@@ -427,14 +436,19 @@ def cmd_gate(a):
         if not dirs:
             continue
         ts = os.path.join(a.testsets_root, c["model"])
-        stt = n.split("_")[0] in ("E3", "E4")
+        stt = _is_stt_row(n, c)
         rmw = collections.defaultdict(set)
         for l in open(os.path.join(ts, "rmw_stems.tsv")).read().splitlines()[1:]:
             p = l.split("\t")
             if len(p) > 1:
                 rmw[p[0]].add(p[1])
         res = {}
-        for mode in ("mispredict_not_taken", "mispredict_taken"):
+        # stl_bypass (store-shadow corpora) only when the corpus has that mode, and a store-shadow-only corpus has no
+        # branch modes; branch corpora are unchanged
+        _modes = ("mispredict_not_taken", "mispredict_taken")
+        if os.path.isdir(os.path.join(ts, "stl_bypass", "ann")):
+            _modes = tuple(m for m in _modes if os.path.isdir(os.path.join(ts, m, "ann"))) + ("stl_bypass",)
+        for mode in _modes:
             recs, owner, dups = {}, {}, set()
             for d in dirs:
                 for f in sorted(glob.glob(os.path.join(d, mode, "_sweep_raw", "*.json"))):
@@ -495,7 +509,7 @@ def cmd_gate(a):
 
 # ════════════════════════════ bucket (ReCon / STT eval rows) ══════════════════
 
-def recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev):
+def recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev, ot=None):
     """One gated hit -> bucket label. Same chain as the old bucket_eval.py; each signature test is its cause module."""
     if cl.startswith("disq"):
         return cl
@@ -508,6 +522,11 @@ def recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev):
             return f"A2 STLF bypass (main-run evidence, no twin{sfx})"
         if RSA13.is_static(cl):
             return f"R-SA-13 (static only{sfx})"
+        om = (ot or {}).get(f"{mode}/{s}/main")          # oldest_taint_replay evidence (store-shadow rows only)
+        if RSA13.sse_annotated_load(om):
+            return f"R-SA-13 (annotated load is an SSE load; replay{sfx})"
+        if RSA8.confirmed_stl(om):
+            return f"{RSA8.LABEL_STL} (main run, no twin{sfx})"
         if RSA13.untainted(e):
             return f"untainted transmitter, no twin (R-SA-13 candidate{sfx})"
         if LIMM.matches(rp, e):
@@ -520,8 +539,9 @@ def recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev):
         return "twin missing/error"
     if not t[0]:
         return "R-SA-13" if RSA13.is_static(cl) else "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)"
+    otw = (ot or {}).get(f"{mode}/{s}/twin")
     if RSA8.matches(kind, t[0]):
-        return RSA8.LABEL
+        return RSA8.LABEL_STL if RSA8.confirmed_stl(otw) else RSA8.LABEL
     e = stlf.get(f"{mode}/{s}")
     if e is None:
         return "twin-hit ld, no evidence"
@@ -536,6 +556,8 @@ def recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev):
         if RSA9.matches(r):
             return RSA9.LABEL
         return "isTainted=0 (reveal not checked)"
+    if RSA8.confirmed_stl(otw):
+        return f"{RSA8.LABEL_STL} (ld)"
     return "twin-hit ld, other STL signature"
 
 
@@ -543,7 +565,8 @@ def cmd_bucket(a):
     G = json.load(open(a.gate))["campaigns"][a.row]
     twin, tstems = {}, set()
     for d in a.twin:
-        for f in glob.glob(os.path.join(os.path.realpath(d), "mispredict_*", "*", "window-results.json")):
+        for f in (glob.glob(os.path.join(os.path.realpath(d), "mispredict_*", "*", "window-results.json"))
+                  + glob.glob(os.path.join(os.path.realpath(d), "stl_bypass", "*", "window-results.json"))):
             m = f.split("/")[-3]
             x = json.load(open(f))
             recs = x if isinstance(x, list) else (x.get("results") or list(x.values()))
@@ -557,7 +580,10 @@ def cmd_bucket(a):
         stlf.update(json.load(open(f)))
     for f in a.reveal:
         rev.update(json.load(open(f)))
-    stt = a.row.split("_")[0] in ("E3", "E4")
+    ot = {}
+    for f in a.oldest_taint:
+        ot.update(json.load(open(f)))
+    stt = _is_stt_row(a.row) if a.stt == "auto" else a.stt == "yes"
     out, per_stem = {}, {}
     for key, v in G.items():
         if key.endswith("/_merge") or "classes" not in v:
@@ -567,7 +593,7 @@ def cmd_bucket(a):
         EX = collections.defaultdict(list)
         for cl, stems in v["examples"].items():
             for s in stems:
-                b = recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev)
+                b = recon_bucket(cl, s, mode, kind, rp, stt, twin, tstems, stlf, rev, ot)
                 per_stem[f"{key}/{s}"] = b
                 B[b] += 1
                 if len(EX[b]) < a.examples:
@@ -628,6 +654,9 @@ def main():
     b.add_argument("--twin-stems", nargs="*", default=[])
     b.add_argument("--stlf", nargs="*", default=[])
     b.add_argument("--reveal", nargs="*", default=[])
+    b.add_argument("--oldest-taint", nargs="*", default=[],
+                   help="triage/oldest_taint_replay.py evidence keyed '<mode>/<stem>/{main,twin}' (store-shadow ReCon rows)")
+    b.add_argument("--stt", choices=["auto", "yes", "no"], default="auto", help="STT row (auto = E3/E4 token in --row)")
     b.add_argument("--json")
     b.add_argument("--per-stem", help="also write '<mode>/<kind>/<rp>/<stem>' -> bucket (JSON)")
     b.add_argument("--examples", type=int, default=3)

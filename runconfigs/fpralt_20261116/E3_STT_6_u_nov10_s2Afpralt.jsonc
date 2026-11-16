@@ -1,0 +1,157 @@
+// fpralt 2026-11-16 (xmm-fix-agent): E3 scoring row for the UV1 regeneration with vector-register routing as an alternative
+// concretization (Anna 2026-11-16). Copy of runconfigs/bigcorpus_20261115/E3_STT_6_u_core_lpP_s2A.jsonc with ONLY: paths.testset_dir / results_dir (/tests/fpralt_20261116), paths.results_name
+// (E3_STT_6_u_nov10_s2Afpralt; must start with 'E3_' so STAGE3_gem5/bugs/classify.py gate applies the STT classes), gem5.jobs 8 -> 4 (per shard; throughput only), and fpr.p 0.5 recorded so
+// the Stage-2 keys name the corpus recipe (runconfigs/bigcorpus_20261115/stage2_final_A_fpralt.jsonc; inert for gem5). gem5 block, sweep/timing
+// grid, cache setup and both branch modes are byte-identical to the bigcorpus E3 row. Corpus STT_6_u_nov10_s2Afpralt = the 26,954 Stage-1.5 programs of
+// STT_6_u_core_lpP_fv3 (cafe3 /tests/simspect_alloy_20261108/testsets_twostage/STT_6_u_core_lpP_fv3/xml) re-concretized with that recipe.
+// PREPARED, NOT LAUNCHED. Launcher + commands: scripts/fpralt_20261116/regen_stt_fpralt.sh (header). Docs: wiki/state/COMMANDS.md, claudelog 2026-11-16.
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/fpralt_20261116/testsets",
+    "results_dir": "/tests/fpralt_20261116/results",
+    "results_name": "E3_STT_6_u_nov10_s2Afpralt"
+  },
+  "alloy": {
+    "max_instances": 93041,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/stt-master/build/X86/gem5.opt",
+    "config_script": "/work/stt-master/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type": "DerivO3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 4,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "cache_setup": "random_all",
+    "cache_setup_fill_bytes": "64kB"
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "vocab_rj": {
+      "rmw": true,
+      "jmp": true
+    },
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    }
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "fpr": {
+    "enabled": true,
+    "loads": "consumed",
+    "p": 0.5,
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  }
+}

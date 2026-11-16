@@ -1,0 +1,156 @@
+// reconstlhook 2026-11-16: ReCon (recon scheme 2) on the store-shadow corpus Recon_6_u_stl_core_lpP_s2A.
+// Copy of runconfigs/bigcorpus_20261115/E2w_STT_6_u_core_lpP_s2A.jsonc (the E2w gem5 block: warm cache, 3x3 timing grid, no extra_args).
+// Changed ONLY: paths.testset_dir/results_dir/results_name; gem5.binary/config_script -> /work/gem5-recon-modded-stl (= gem5-recon-modded +
+// gem5-hooks/stl/apply_stl_hooks.py); speculation -> stl_bypass (as runconfigs/overnight_20261111/stl_final_A.jsonc); gem5.stl_* = the
+// store hold of runconfigs/run_config_STT_6_stl.jsonc (5000 cycles, no_alias). The timing grid's stalls apply to branches only; these tests
+// have none, so the store hold (fixed 5000) is the only stall. testset_dir holds a symlink to the corpus (cafe1 /tests/reconstl_20261116/testsets/...,
+// cafe3 a copy) plus the shard testsets of scripts/reconstl_20261116/shard_stl.py. Window: gem5_common.stl_window (wiki/design/STL_SPECULATION.md 'Window check').
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/reconstlhook_20261116/testsets",
+    "results_dir": "/tests/reconstlhook_20261116/results",
+    "results_name": "rstl_E2w_Recon_6_u_stl_core_lpP_s2A"
+  },
+  "alloy": {
+    "max_instances": 93041,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": false,
+    "data_flow": true,
+    "branch_modes": [
+      "stl_bypass"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/gem5-recon-modded-stl/build/X86/gem5.opt",
+    "config_script": "/work/gem5-recon-modded-stl/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type": "X86O3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 4,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "stl_ann_enable": true,
+    "stl_store_addr_stall_cycles": 5000,
+    "stl_alias_pred": "no_alias"
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "vocab_rj": {
+      "rmw": true,
+      "jmp": true
+    },
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    }
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "fpr": {
+    "enabled": true,
+    "loads": "consumed",
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  }
+}

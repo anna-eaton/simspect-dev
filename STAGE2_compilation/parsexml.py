@@ -2107,6 +2107,17 @@ def pass5_emit_llvm(
                   before the copy-back: pxor %xmmJ,%xmmJ; por %xmmK,%xmmJ
                   (value-preserving; J != K drawn from xmm_regs, or K+1 mod 16
                   when xmm_regs has one entry), copy-back from %xmmJ.
+    "p" (optional; Anna 2026-11-16, xmm-fix-agent): the probability that an
+      eligible load (by "loads") is routed. Each eligible load is decided
+      independently with its own rng, seeded "fpr_p:<func_name>", so the
+      register/form draws above are not shifted, and a load that is not routed
+      is emitted exactly as with fpr off (its value stays in its integer
+      register). So vector routing is an alternative concretization of a
+      load, next to the integer one, rather than applied to every load.
+      Absent = every eligible load is routed and the output is byte-identical
+      to before the key existed; when present, the .ann.json "fpr" block also
+      records "p" and "n_eligible" (the number of eligible loads), next to
+      "routes" (the routed ones). p = 1.0 gives the same .ll as absent.
     The chosen registers are stored in pass4_result["fpr_routes"] for the
     .ann.json (see emit_branch_annotations).
 
@@ -2280,6 +2291,8 @@ def pass5_emit_llvm(
     # ---- Opt-in FPR (xmm) routing of load results (see docstring) ----
     _fpr_on = bool(fpr_cfg and fpr_cfg.get("enabled"))
     _fpr_routes: List[Dict[str, Any]] = []
+    _fpr_p: Optional[float] = None   # optional per-load routing probability (docstring "p"); None = route every eligible load
+    _fpr_n_eligible = 0
     if _fpr_on:
         import zlib as _zlib
         _fpr_regs = [int(x) for x in fpr_cfg.get("xmm_regs", list(range(16)))]
@@ -2292,6 +2305,11 @@ def pass5_emit_llvm(
         if not _fpr_forms or any(f not in ("route", "direct", "route_alu", "direct_alu") for f in _fpr_forms):
             raise ValueError(f"fpr_cfg.forms must be a non-empty subset of route/direct/route_alu/direct_alu: {_fpr_forms}")
         _fpr_rng = random.Random(_zlib.crc32(f"fpr:{func_name}".encode()))
+        if "p" in fpr_cfg:
+            _fpr_p = float(fpr_cfg["p"])
+            if not 0.0 <= _fpr_p <= 1.0:
+                raise ValueError(f"fpr_cfg.p must be in [0, 1]: {_fpr_p}")
+            _fpr_p_rng = random.Random(_zlib.crc32(f"fpr_p:{func_name}".encode()))
         _fpr_consumed: Set[str] = set()
         for _r in instructions:
             for _sl in _r["slots"].values():
@@ -2301,10 +2319,15 @@ def pass5_emit_llvm(
 
     def fpr_route(rec: Dict[str, Any], out_name: str, phys: Optional[str]) -> Tuple[str, str, str]:
         """(load destination, asm suffix, extra clobber) for a load; ("$0", "", "") when off."""
+        nonlocal _fpr_n_eligible
         if not _fpr_on or not phys:
             return "$0", "", ""
         if _fpr_loads == "consumed" and out_name not in _fpr_consumed:
             return "$0", "", ""
+        if _fpr_p is not None:
+            _fpr_n_eligible += 1
+            if _fpr_p_rng.random() >= _fpr_p:
+                return "$0", "", ""   # integer concretization: emitted exactly as with fpr off
         k = _fpr_rng.choice(_fpr_regs)
         form = _fpr_rng.choice(_fpr_forms) if len(_fpr_forms) > 1 else _fpr_forms[0]
         if rec.get("xm") and form.startswith("direct"):
@@ -3209,6 +3232,10 @@ def pass5_emit_llvm(
         # Read by emit_branch_annotations -> .ann.json "fpr" (absent when off).
         pass4_result["fpr_routes"] = {
             "loads": _fpr_loads, "xmm_regs": _fpr_regs, "routes": _fpr_routes}
+        if _fpr_p is not None:
+            # only when the key is set, so default output stays byte-identical
+            pass4_result["fpr_routes"]["p"] = _fpr_p
+            pass4_result["fpr_routes"]["n_eligible"] = _fpr_n_eligible
 
     if write_out:
         if out_path is None:

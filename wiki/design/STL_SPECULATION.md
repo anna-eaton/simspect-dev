@@ -14,7 +14,8 @@ For the agent writing the manifest of active builds, models and experiments. Eve
 
 | Build | STL hooks? | Status | Notes |
 |---|---|---|---|
-| `/work/gem5-recon-stl` (cafe2) | yes | active, but **stale** | Copy of `gem5-recon-modded` taken before the 2026-10-30 resolve hooks: no BR lines, old-style branch force, no CPU-wake fix (`wiki/findings/audits/2026-11-07/HOOK_AUDIT.md`, verdict BORDERLINE). `gem5.opt` md5 `9ac3ac66…`. Flags `--stl-ann-file`, `--stl-store-stall-cycles N`, `--stl-alias-pred {no_alias,alias,off}`. Schemes as recon-modded: 0 Unsafe, 1 Delay/NDA-like, 2 STT, 3 DoM. Registry: `specs/gem5_builds.json` id `gem5-recon-stl`. |
+| `/work/gem5-recon-modded-stl` (cafe3 tree; binary + configs also on cafe1) | **yes** | **active, current (2026-11-16)** | Copy of today's `gem5-recon-modded` (the E2w binary, with the resolve hooks) + `apply_stl_hooks.py` unchanged. md5 `06240ccea173d11b3b2be61adcdbe387`. Without STL flags its records equal recon-modded's. Section "gem5-recon-modded-stl (2026-11-16)". Registry id `gem5-recon-modded-stl`. |
+| `/work/gem5-recon-stl` (cafe2) | yes | superseded by `gem5-recon-modded-stl`; **stale** | Copy of `gem5-recon-modded` taken before the 2026-10-30 resolve hooks: no BR lines, old-style branch force, no CPU-wake fix (`wiki/findings/audits/2026-11-07/HOOK_AUDIT.md`, verdict BORDERLINE). `gem5.opt` md5 `9ac3ac66…`. Flags `--stl-ann-file`, `--stl-store-stall-cycles N`, `--stl-alias-pred {no_alias,alias,off}`. Schemes as recon-modded: 0 Unsafe, 1 Delay/NDA-like, 2 STT, 3 DoM. Registry: `specs/gem5_builds.json` id `gem5-recon-stl`. |
 | `/work/amulet/hooks_stl_work/{InvisiSpec,CleanupSpec,SpecLFB}` (cafe2, copies of the three AMuLeT hooks-v2 trees, built 2026-11-09) | **yes** | built and verified; no run config points at them yet | Same flags and `STL:` lines as recon-stl; with no STL flag the trace is byte-identical to the in-place binary. md5 InvisiSpec `376198d5…`, CleanupSpec `c7989d25…`, SpecLFB `f2e3e9fe…`. Registry ids `amulet-<Build>-stl`. Section "Port to the AMuLeT builds (2026-11-09)". The in-place amulet trees are unchanged and have no STL hooks. |
 | every other build (`/work/stt`, `gem5-recon-modded`, `gem5-spt`, the in-place amulet trees, amulet-STT) | no | port needed to run STL | Port = `gem5-hooks/stl/apply_stl_hooks.py <gem5_root>` (anchor-based, idempotent, refuses unless every anchor matches once) + rebuild. `stl_hooks_vs_gem5_v22.0.0.2.diff` is an older upstream reference, before the 2026-10-30 barrier/alias fixes. Rebuilds need Anna's OK (DECIDE). |
 
@@ -58,6 +59,7 @@ Tools: `STAGE1_alloy/models/proposed/derive_stl.py` (main model → STL draft; r
 | Shadows store-only + alias: 60 tests, STT vs Unsafe vs `alias` | **done** 2026-11-07 | 59/60 valid; STT 0/32 sent vs Unsafe 32/32; `alias` 0. cafe2 `results/STT_6_shadows_draft/` (`stl_A_stt.json`, `stl_B_unsafe.json`, `stl_C_stt_alias.json`, `cfg_stl.jsonc`) |
 | Full `STT_6_stl` testset + sweep (Recon-STT, unit 2) | **planned, blocked** | needs the STL window checker (not written; `check_ld`/`check_br` verdicts are not meaningful for STL tests: no `lc`, `fnc` = the store) and, ideally, a refreshed `gem5-recon-stl`. Until then score with `gem5-hooks/stl/stl_hooktest.py` |
 | `Recon_6_stl` on `gem5-recon-stl` (unit 5) | planned | needs the draft approved; ReCon mode on that build unverified |
+| ReCon on store shadows, row E2w-stl (`Recon_6_u_stl_core_lpP_s2A`, 60,342 tests, `gem5-recon-modded-stl`) | **done** 2026-11-16 | UV2 2,906; 58 br_x twin-hit candidates; R-SA-13 23,659; `../state/EVAL_MANIFEST.md` row E2w-stl |
 | `STT_6_stl` on schemes 1 and 3 (units 11, 12) | planned | untested; shadow-tracker sharing across schemes not verified |
 | STL on amulet ×3 (units 4, 6, 7) | **hooks built, controls done** 2026-11-09 | 60 `STT_6_stl` tests per build, in copies of the trees; section "Port to the AMuLeT builds (2026-11-09)". `gem5-spt` (unit 10) not started |
 | SPT STL generation | blocked | RS DECIDE |
@@ -95,7 +97,7 @@ Tools: `STAGE1_alloy/models/proposed/derive_stl.py` (main model → STL draft; r
 | Concretization, branch mode `stl_bypass` | written + tested: 500/500 instances concretize and compile to x86; the existing modes are byte-identical before/after (120/120 STT_6 `.ll` + `.ann.json`). 2026-10-30: every true-alias load is annotated, not only the first (2/60 tests gain a second one) |
 | Harness flags (`gem5.stl_*` → `SIMSPECT_STL_*` → `--stl-*`) | written; off unless a config sets `gem5.stl_ann_enable` |
 | gem5 hooks `gem5-hooks/stl/` | **built** into `/work/gem5-recon-stl` (copy of gem5-recon-modded, 2026-10-30); two hook bugs found and fixed by the controls; all controls pass on 60 tests (see Hook test). 2026-11-09: ported to copies of the three AMuLeT builds, controls pass there too (Port section) |
-| Window checker | proposed below, **still not written** (2026-11-08) |
+| Window checker | **built 2026-11-16** (agent reconstlhook): store-shadow mode in `gem5_common.process_one`, keyed off `stl_annotations`; section "Window check (built 2026-11-16)" |
 | STL models for the other main models (2026-11-08) | drafts `proposed/Recon_6_stl.als`, `proposed/SPT_6_oneLP_stl.als` via `proposed/derive_stl.py`; split cores in `proposed_twophase/`. Recon works; SPT generates nothing yet (see "STL for every main model") |
 
 ## The primitive: a false-negative alias prediction
@@ -206,7 +208,40 @@ Bugs the controls found, both fixed:
 
 **Signal on recon builds.** The real cache send is `Memory request (pkt: …) from inst [sn:N] was sent` (`lsq_unit.cc:1546`). `Doing memory access` is not a send: STT's delay unit bounces a tainted load after it (`lsq_unit.cc:2104`). See the gate finding in `wiki/findings/bug/recon_cache_reach_gate/`.
 
-## Proposed window check (not built)
+## gem5-recon-modded-stl (2026-11-16)
+
+*Agent reconstlhook, Anna's option (a) of 2026-11-16: make ReCon's store-shadow tests runnable and scorable on the build of the reported ReCon rows.*
+
+- **Build.** cafe3 `cp -a /work/gem5-recon-modded /work/gem5-recon-modded-stl` (source binary md5 `762efbc608e1c803368d19d1101abcbd`, the E2w binary, which has the 2026-10-30 resolve hooks), then `python3 gem5-hooks/stl/apply_stl_hooks.py /work/gem5-recon-modded-stl` (unchanged script; all 7 files' anchors matched once; `*.pre-stl` backups), then `cd /work/gem5-recon-modded-stl && nice -n 10 /usr/bin/scons build/X86/gem5.opt -j 24`. The first build failed because 6 generated include stubs in `build/X86/mem/ruby/protocol/` (`DataBlock.hh`, `Set.hh`, `TimerTable.hh`, `WriteMask.hh`, `TBETable.hh`, `BoolVec.hh`) hold an absolute `#include "/work/gem5-recon/build/..."` from the tree the recon-modded build was originally made in; they were repointed to `/work/gem5-recon-modded-stl/build/...`. Logs: cafe3 `/tests/reconstlhook_20261116/logs/build{,2}.log`. `gem5.opt` md5 **`06240ccea173d11b3b2be61adcdbe387`**; the binary and `configs/` were copied to cafe1 at the same path (same md5). `/work/gem5-recon-modded` itself was not touched.
+- **Hook diff:** `gem5-hooks/stl/stl_hooks_vs_gem5-recon-modded_20261116.diff` (5 `src/cpu/o3` files + `configs/common/Options.py` + `configs/example/se.py`). Same hooks and `STL:` lines as `gem5-recon-stl`; every resolve-hook (`BR:`) line is still there.
+- **Hooks off = recon-modded.** 12 E2w stems x 2 modes through `pipeline.py gem5` with the E2w config on the new binary vs `gem5-recon-modded`: 24/24 records byte-identical.
+- **Store stays unresolved for the stall:** every valid test has `stl_hold` and `stl_release` 5000 cycles apart (e.g. inst-000006: hold 2672500, release 5173000 at 500 ticks/cycle), and the `stl_hold` gate fails a test when the hook did not fire.
+- **Address resolution.** The window ends at `stl_release`, printed immediately before `LSQ::executeStore`, the call that computes the store's address (`effAddrValid`, where ReCon's `shadow_tracker.cc` frees the store shadow) and runs `checkViolations` (the `mem_order_squash` lands at the same tick in every validation test). So the hook's "address resolves" and ReCon's coincide; no decision was needed.
+
+## Window check (built 2026-11-16)
+
+Implemented as a mode of the existing checkers, not a new checker: `gem5_common.process_one` calls `stl_pairs_of(ann)`; only when the `.ann.json` has `stl_annotations` (every `stl_bypass` test, never a branch test) does it apply `stl_window` + `stl_transient_view`:
+
+1. **Window = the branch window + the store shadow.** Each annotated store S becomes an extra entry in the `unresolved` list that `check_branch_resolutions` gates on (`source: "stl"`): the transmission signal must come before S's `stl_release`. lc / fnc keep their meaning (fnc = S, so `before_fnc` is implied). This mirrors how check_ld / check_br use branch resolution for branch-shadow tests.
+2. **Transient view.** The checker sees only pipeview records fetched, LSQ records inserted and commit squashes broadcast before the earliest memory-order squash S causes. After that squash L and X replay with the right value (architectural); matching by PC alone would score the replay.
+3. **Validity gates** (`criteria.stl_hold/stl_pred/stl_bypass/stl_squash`; any False = `status: invalid`, never a hit, verdict kept in `issued_in_window_unvalidated`): the hook held S; a `pred_no_alias` for an annotated load (only with `--stl-alias-pred=no_alias`); the first annotated load instance executed before `stl_release`; a `mem_order_squash` caused by S of a load younger than S and at or before that instance (16-byte granularity).
+4. **Transmission criteria unchanged:** check_ld's data-obtained gate (incl. `store_forward`), check_br's redirect (Commit `Squashing due to branch mispred`). One support change: `stl_transient_view` returns a `CommitSquashes` dict marked `commit_traced`, and check_br reads that marker, because check_br infers "the Commit flag was on" from a non-empty squash dict, which is false for a store-shadow test with no branch mispredict at all (a first draft without the marker fell back to "branch completed" and scored 32/32 false positives at scheme 2). `run_gem5` always adds the Commit flag.
+5. **Informational only:** `parse_lsq` gains `sent_tick` (Recon's real send, `Memory request ... was sent`, `lsq_unit.cc:1546`), and each record's `stl.xmit_sent_tick` is the transient X's send. Not part of any verdict (the recon gate finding, `wiki/findings/bug/recon_cache_reach_gate/`, is still Anna's call); it counts X loads that sent inside the window but the gate scores as not obtained.
+6. Record fields: `stl` (stores, per-store hold/release/squash ticks and seqs, load sn, gates, notes, `t_squash`, `xmit_sn`, `xmit_sent_tick`); `branch_resolutions` holds the store entries.
+
+**Branch-shadow scoring is byte-identical:** 12 E2w stems x 2 modes (6 ld + 6 br_x per mode, incl. the UV3 stems inst-003908 / inst-013804 / inst-000685), `pipeline.py gem5` with the E2w config on `gem5-recon-modded`, HEAD `gem5_common.py` vs the new one: 24/24 records identical (cafe3 `/tests/reconstlhook_20261116/results/e2w_regress_{old,new}`, `regdiff.py`).
+
+**Validation** (E2w gem5 block + hold 5000, `no_alias` unless noted; cafe3 `/tests/reconstlhook_20261116/results/val_*`):
+
+| run | 60 minimal `STT_6_stl` tests (28 ld, 32 br_x) | 40 corpus tests (24 ld, 14 br_x valid) |
+|---|---|---|
+| scheme 0 (Unsafe) | ld 27/28, br_x 32/32 hit | ld 22/24, br_x 13/14 |
+| scheme 2 (ReCon) | **ld 0/28, br_x 0/32** | ld 15/24, br_x 8/14 (fanout/fpr tests; classified with the corpus) |
+| scheme 0, `alias` control | 0 hits; 60/60 invalid (no bypass) | 0 hits; 40/40 invalid |
+
+Hand-checked test `STT_6_stl` inst-000006: S `movq %r9,(%rsi)`, L `movq (%rsi),%r15`, alias load `movq (%rsi),%rax`, X `movq (%rsi,%rax),%r11`. S held 2672500 → released 5173000; L executes at 2672500; the squash names L, caused by S. Scheme 0: X sends at 2675000, hit. Scheme 2: X executes, never sends (delay unit), no hit. The one scheme-0 minimal ld non-hit sent inside the window but scored not obtained: the recon gate gap.
+
+## Proposed window check (design of 2026-10-30; built as above with the differences noted there)
 
 Per test: S, L and the xmit X are known by address from the ann. All times come from one pipeview trace (`O3PipeView` + `LSQUnit`).
 
@@ -231,7 +266,7 @@ Per test: S, L and the xmit X are known by address from the ann. All times come 
 ## Open
 
 - **Answered:** build = copy `/work/gem5-recon-stl` (Anna, 2026-10-30); threat model = control + store shadows (above).
-- **Window checker** still to write (above), then a full STT_6_stl testset + sweep. The 60-test result already says STT holds on these shapes.
+- **Window checker** built 2026-11-16 ("Window check (built 2026-11-16)"). The full ReCon store-shadow corpus run is in `../state/EVAL_MANIFEST.md` (row E2w-stl).
 - **Contract granularity.** Is "everything after an unresolved store" right for STT Futuristic, or only loads that may alias it? See Generation.
 - **Other defenses.** Drafted 2026-11-08 (next section). The hooks still port by re-running `apply_stl_hooks.py` on each tree; `/work/gem5-recon-stl` and, since 2026-11-09, the copies `/work/amulet/hooks_stl_work/<Build>` of the three AMuLeT builds have them (Port section).
 

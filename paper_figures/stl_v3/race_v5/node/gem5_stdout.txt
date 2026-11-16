@@ -1,0 +1,32 @@
+gem5 Simulator System.  http://gem5.org
+gem5 is copyrighted software; use the --copyright option for details.
+
+gem5 compiled Oct 30 2026 21:42:10
+gem5 started Nov 16 2026 17:39:52
+gem5 executing on 543cef85d966, pid 1317056
+command line: /work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt --outdir=/tmp/race_inst-000125_zj4o8qm_/m5out --debug-flags=O3PipeView,LSQUnit,Commit --debug-file=pipeview.txt /work/gem5-spt/configs/example/se_exp.py --cmd=/tmp/race_inst-000125_zj4o8qm_/inst-000125 --cpu-type=DerivO3CPU --caches --scheme=2 --abs-max-tick=100000000000 --branch-ann-file=/tmp/race_inst-000125_zj4o8qm_/branch_ann_se.json --branch-ann-base=0x401020 --applyDDIFT=1 --fwdUntaint=1 --bwdUntaint=1 --configImpFlow=Lazy --freeParam=3 --scheme=SpectreSafeFence --trackInstsFile=/tests/race_v5_20261116/track.txt
+
+info: Standard input is not a terminal, disabling listeners.
+**********
+info: Configure for DerivO3CPU. needsTSO=0; scheme=SpectreSafeFence; applyDDIFT=1; implicitFlow=Lazy; moreTransmitInsts=None, printROB=None, printDelayCycles=None, disableUntaint=False, fwdUntaint=1, bwdUntaint=1, idealUntaint=None, enableShadowL1=None, bottomlessShadowL1=None, untaintTier=0, freeParam=3, printRegRenaming=None
+info: ignoring loads listed in the following file: None
+info: tracking insts listed in the following file: /tests/race_v5_20261116/track.txt
+info: tracking regs listed in the following file: None
+**********
+Global frequency set at 1000000000000 ticks per second
+Info: simulation uses scheme: SpectreSafeFence; needsTSO=0; allowSpecBufHit=0
+isInvisiSpec = 0, applyDDIFT = 1, ifPrintROB = 0, moreTransmitInsts = 0, printDelayCycles = 0, printRegRenaming = 0
+implicit flow handling: Lazy
+Disable untainting? no
+Perform forward untainting? yes
+Perform backward untainting? yes
+Perform ideal untainting? no
+Shadow L1 enabled? no
+Using untaint tier 0
+Free Param = 3
+Reading file /tests/race_v5_20261116/track.txt for insts to track...
+===
+	0x401c8a
+===
+**** REAL SIMULATION ****
+[00177e] 401c8a.264 inserted into ROB

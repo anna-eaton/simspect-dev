@@ -56,7 +56,7 @@ def check_br(by_pc, xmit_pc, lc_pc, fnc_pc, unresolved, ticks_per_cycle, lsq_by_
     # the Commit log (`squash_by_pc`). Fall back to the complete tick only when
     # no Commit trace is present (e.g. a build/run that didn't emit it), which
     # preserves the legacy behaviour for non-delay defenses.
-    commit_traced = bool(squash_by_pc)
+    commit_traced = bool(squash_by_pc) or getattr(squash_by_pc, "commit_traced", False)
     xmit_squashes = squash_by_pc.get(xmit_pc, []) if squash_by_pc else []
     if commit_traced:
         # earliest squash this branch broadcast (0 => it never redirected:

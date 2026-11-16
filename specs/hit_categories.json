@@ -796,7 +796,22 @@
       },
       "diag": "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py",
       "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
-      "description": "UV3 (ReCon): only the oldest taint source is kept. Internal label R-SA-8 (candidate), OTB / getOldestTaint."
+      "description": "UV3 (ReCon): only the oldest taint source is kept. Internal label R-SA-8 (candidate), OTB / getOldestTaint.",
+      "variant_labels": [
+        "R-SA-8 confirmed (store shadow; oldest-source taint replay)",
+        "R-SA-8 confirmed (store shadow; oldest-source taint replay) (ld)",
+        "R-SA-8 confirmed (store shadow; oldest-source taint replay) (main run, no twin, RMW)"
+      ],
+      "variant_scope": {
+        "testsets": [
+          "Recon_6_u_stl_core_lpP_s2A"
+        ],
+        "rows": [
+          "E2w-stl"
+        ],
+        "evidence": "STAGE3_gem5/triage/oldest_taint_replay.py (classify.py bucket --oldest-taint)",
+        "added": "2026-11-16 rstltriage"
+      }
     },
     "r_sa13_recon_sse_load": {
       "label": "R-SA-13",
@@ -824,7 +839,20 @@
       },
       "diag": "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py",
       "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
-      "description": "R-SA-13 (ReCon): the transmitter's taint is lost through an SSE load producer (FP routing). Labels below."
+      "description": "R-SA-13 (ReCon): the transmitter's taint is lost through an SSE load producer (FP routing). Labels below.",
+      "variant_labels": [
+        "R-SA-13 (annotated load is an SSE load; replay, RMW)"
+      ],
+      "variant_scope": {
+        "testsets": [
+          "Recon_6_u_stl_core_lpP_s2A"
+        ],
+        "rows": [
+          "E2w-stl"
+        ],
+        "evidence": "STAGE3_gem5/triage/oldest_taint_replay.py load_fp (classify.py bucket --oldest-taint)",
+        "added": "2026-11-16 rstltriage"
+      }
     },
     "r_sa9_recon_twin_untaint": {
       "label": "R-SA-13 main / R-SA-9 twin (E2LT-1)",

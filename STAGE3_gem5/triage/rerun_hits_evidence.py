@@ -45,7 +45,7 @@ def load_jsonc(p):
 
 def campaign_hits(camp, kinds):
     out = {}
-    for wr in sorted(Path(camp).glob("mispredict_*/*/window-results.json")):
+    for wr in sorted(list(Path(camp).glob("mispredict_*/*/window-results.json")) + list(Path(camp).glob("stl_bypass/*/window-results.json"))):
         mode, kind = wr.parts[-3], wr.parts[-2]
         if kinds and kind not in kinds:
             continue
@@ -57,7 +57,7 @@ def campaign_hits(camp, kinds):
 
 def campaign_raw(camp, wanted):
     raw = collections.defaultdict(list)
-    for f in sorted(Path(camp).glob("mispredict_*/_sweep_raw/*.json")):
+    for f in sorted(list(Path(camp).glob("mispredict_*/_sweep_raw/*.json")) + list(Path(camp).glob("stl_bypass/_sweep_raw/*.json"))):
         mode = f.parts[-3]
         m = re.search(r"grid(\d+)", f.name)
         for r in json.loads(f.read_text()):
@@ -108,8 +108,16 @@ def an_recon_stlf(stem, mode, wds, raws, rerun_hit, A):
         L = tr.read_text(errors="replace").splitlines()
         idx = [k for k, l in enumerate(L) if "Executing load PC (0x" + x in l]
         br = gc.parse_branch_events(tr)
-        ctrl = [d for s in br.values() for d in s.values() if d.get("resolve_hold")]
-        cv = min((d["resolve_visible"] for d in ctrl if d.get("resolve_visible")), default=None)
+        # store-shadow tests: the window ends when the annotated store's address resolves (STL
+        # stl_release, gem5_common.stl_window). Every E2w-stl record's window is the store alone
+        # (branch_resolutions source 'stl' in 60,342/60,342), so a branch held by the timing grid's
+        # 'resolved' stall is not the window end (rstltriage 2026-11-16: inst-021161 was scored
+        # 'other' because cv was such a branch). No STL events on branch tests -> unchanged.
+        cv = min((e["tick"] for e in gc.parse_simspect_events(tr)
+                  if e["struct"] == "STL" and e["kind"] == "stl_release"), default=None)
+        if cv is None:
+            ctrl = [d for s in br.values() for d in s.values() if d.get("resolve_hold")]
+            cv = min((d["resolve_visible"] for d in ctrl if d.get("resolve_visible")), default=None)
         for k in idx:
             sn = re.search(r"sn:(\d+)", L[k]).group(1)
             win = L[k:k + 6]

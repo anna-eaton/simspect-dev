@@ -330,6 +330,7 @@ _KIND_TO_CHECKER = {
     "ld":      "check_ld.py",       # load → cache state leak at complete
     "br_x":    "check_br.py",       # branch → fetch redirect at resolution
     "other_x": "check_other.py",    # variable-latency → timing at complete
+    "str":     "check_st.py",       # store → address exposed at LSQ execute (SPT §7.4)
 }
 # Fallback: kinds that don't have a specialised checker use the load check
 # (most conservative — checks complete in retirement window).

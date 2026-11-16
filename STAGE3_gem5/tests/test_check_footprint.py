@@ -132,6 +132,21 @@ class TestParser(unittest.TestCase):
 
 
 class TestInvisiSpec(unittest.TestCase):
+    def test_w3_store_footprint_ignored_on_load_only_defenses(self):
+        """W-3 (2026-11-16): InvisiSpec and SpecLFB count only load micro-ops; CleanupSpec counts any."""
+        for crit, expect in (("invisispec", False), ("speclfb", False), ("cleanupspec", True)):
+            t = Trace().base()
+            t.lines = [l.replace(":0:12:  synthetic", ":0:12:  MOV_M_R : st rdi, DS:[r13]") for l in t.lines]
+            t.ev(2000, "L1D", "fill", line=0x3000, seq=12); t.squash()
+            r = t.run(crit)
+            self.assertEqual(bool(r["leak"]), expect, crit)
+
+    def test_w3_load_footprint_still_counts(self):
+        t = Trace().base()
+        t.lines = [l.replace(":0:12:  synthetic", ":0:12:  MOV_R_M : ld r11, DS:[r13 + r11]") for l in t.lines]
+        t.ev(2000, "L1D", "fill", line=0x3000, seq=12); t.squash()
+        self.assertTrue(t.run("invisispec")["leak"])
+
     def test_in_window_spec_fill_leaks(self):
         t = Trace().base(); fid = t.ev(2000, "L1D", "fill", line=0x3000, seq=12); t.squash()
         r = t.run("invisispec")

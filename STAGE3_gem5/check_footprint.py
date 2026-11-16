@@ -45,6 +45,7 @@ from typing import Dict, List, Optional
 os.environ.setdefault("SIMSPECT_GEM5_DBG_FLAG", "O3PipeView")
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from gem5_common import is_load_micro_op  # noqa: E402  (W-3 op_class filter)
 from gem5_common import (best_record, check_branch_resolutions,  # noqa: E402
                          parse_pipeview, parse_pipeview_by_seq,
                          parse_simspect_events, run_batch)
@@ -215,14 +216,31 @@ def evaluate(crit: dict, events: List[dict], pv_seq: Dict[int, dict],
         _w_cache[tick] = ok
         return ok
 
+    op_class = mode.get("op_class")   # W-3 (Anna 2026-11-16): "load" = only load micro-ops count
+    _op_unknown: set = set()
+
+    def op_ok(seq) -> bool:
+        if op_class is None:
+            return True
+        if op_class != "load":
+            raise ValueError(f"unknown actor op_class {op_class!r}")
+        rec = pv_seq.get(seq)
+        verdict = is_load_micro_op(rec.get("disasm", "")) if rec else None
+        if verdict is None:          # no pipeview record or no micro-op text: cannot tell,
+            _op_unknown.add(seq)     # so keep it (never hide a possible leak) and report it
+            return True
+        return verdict
+
     def is_actor(seq) -> bool:
         if seq is None:
             return False
         if impl == "squashed_after_lc":
-            return tm.squash_of(seq) is not None and (lc_seq is None or seq > lc_seq)
-        if impl == "before_visibility_point":
-            return True       # per-event test below
-        raise ValueError(f"unknown actor impl {impl!r}")
+            base = tm.squash_of(seq) is not None and (lc_seq is None or seq > lc_seq)
+        elif impl == "before_visibility_point":
+            base = True       # per-event test below
+        else:
+            raise ValueError(f"unknown actor impl {impl!r}")
+        return base and op_ok(seq)
 
     def actor_event_in_window(ev) -> bool:
         if impl == "before_visibility_point":
@@ -237,7 +255,7 @@ def evaluate(crit: dict, events: List[dict], pv_seq: Dict[int, dict],
                lc_seq=lc_seq, lc_unretired_but_specified=disqualified,
                n_simspect_events=len(events), n_attributed_events=n_attr,
                n_unjoined_seqs=len(unjoined), unjoined_seqs=unjoined[:20],
-               n_squashes=len(tm.squashes))
+               n_squashes=len(tm.squashes), actor_op_class=op_class)
 
     form = crit["leak"]["form"]
     if form == "exists":
@@ -255,6 +273,7 @@ def evaluate(crit: dict, events: List[dict], pv_seq: Dict[int, dict],
     if disqualified:
         out["issued_in_window"] = False
     out["in_window"] = out.get("in_window", False) and not disqualified
+    out["n_actor_op_unknown"] = len(_op_unknown)   # kept because their micro-op was unknown
     return out
 
 

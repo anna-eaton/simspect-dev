@@ -10,10 +10,10 @@
   "checkers": {
     "ld": "check_ld.py",
     "br_x": "check_br.py",
-    "str": "NEEDS: store-transmitter checker"
+    "str": "check_st.py"
   },
   "alloy_leakage_function": "Loads.inaddr+(Branchxs).inreg+Stores.inaddr",
-  "note": "24 untriaged str store-addr hits — store checker not yet built",
+  "note": "Store checker built 2026-11-16 (STAGE3_gem5/check_st.py, agent sptstore): signal = LSQUnit 'Executing store PC' tick (printed after SPT's fence deferral in iew_impl.hh), same window/branch/lc disqualifier as check_ld, no data-obtained gate; validated on a hand-made test (Unsafe hit, E11 SPT held). The old '24 untriaged str hits' were scored by check_ld's fallback and are not re-scored. Known model artifact to bucket at classification: SPT's backward untaint rules depend on the operation (e.g., MOV and invertible ADD [SPT §6]), which our abstract ALU op does not name, so its specification untaints only the transmitted value and its producer and is conservative: it can flag an execution that SPT allows.",
   "builds": [
     "/work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt (DerivO3CPU; se.py --scheme=2 → SpectreSafeFence, variant via extra_args; unit spt_fence)"
   ],
