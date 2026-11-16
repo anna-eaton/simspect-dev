@@ -1,0 +1,176 @@
+\anna{have a running example of STT load misordering bug, putting in to replace bad figure before, little figures throughout, starting with STT in intro. dumpign into tix with claude from my drawings we'll see if that works in a few hours}
+\section{Formal model}
+We propose a formal language for specifying HSCDs. This formal language allows us to specify the particular security guarantees of a given HSCD, and then generate violating examples to do targeted testing on an implementation.
+We survey the literature of hardware defenses to Spectre attacks, and hardware-implemented HSCDs more broadly, and conclude that a formal HSCD specification should consist of three components: a leakage contract, an execution contract, and a protection set.
+\textbf{1. Leakage contract}
+A leakage contract is the set of pairs of \textit{transmitters} (instructions that leak one or more operands via a hardware side channel) and their unsafe operand(s), as recognized by the defense.
+\textbf{2. Execution contract}
+An execution contract characterizes what speculative control- and data-flow is allowed on the microarchitecture by identifying what \textit{speculation primitives} (instructions that initiate speculative executions, e.g., a conditional branch) the defense considers. 
+\textbf{3. Protection set}
+A protection set is the set of architectural state (memory and registers) that the defense promises to not leak architecturally and/or speculatively. Along with the protection set we encode a protection set update rule, that represents the updates that a given protection set undergoes with each instruction.
+% todo these components sufficient for now etc etc 
+
+\subsection{Example contract}
+% scope of the types of defenses we can represent
+For example, we define the defense specification for Speculative Taint Tracking, or STT, a defense that prevents leakage by delaying 'tainted' transmitters. STT's leakage function is (load, load address), (branch, input register), and (reg-op transmitter, input address). STT does not consider stores to transmit any operands. STT's execution contract is either that an instruction is non-speculative upon commit, or that an instruction is non-speculative when there exists no older unresolved branches. STT's protection set is all memory, with no protection set updates. 
+
+\subsection{Execution contracts in practice}
+\subsection{Scope of defenses}
+% \begin{wrapfigure}{r}{.5\textwidth}
+%   \begin{center}
+%     \includegraphics[width=.5\textwidth]{images/examplefigure.png}
+%   \end{center}
+%   \caption{We generate a test from STT using our pipeline.}
+
+%   \label{fig:pipeline}
+  
+% \end{wrapfigure}
+% \begin{figure}[h]
+%   \centering
+%   \includegraphics[width=0.4\textwidth]{images/examplefigure.png}
+%   \caption{We generate a test from STT using our pipeline.}
+%   \label{fig:pipeline}
+% \end{figure}
+
+
+
+
+\section{Synthesizing test executions from a formal model of a defense}
+We use the \toolname formal specification of a defense as the input to our test generation and execution pipeline. Our goal is to produce a bespoke litmus testing suite and simulator harness that allows us to validate a prototype. First we generate a complete set of abstract violating executions.
+
+\subsection{Test format}
+MCM litmus test generation work uses an axiomatic execution model to generate \textit{test programs}, which fix architectural behavior. HSC leakage is microarchitectural, so we would like to be able to fix microarchitectural behavior. Therefore, from our formal model onward we consider test cases as \textit{executions} rather than programs — rather a snapshot of in-flight instructions from an assembly program at a specific cycle in the processor, with a particular speculative program order. We generate violating executions, which include a program as well as microarchitectural metadata. The metadata that we consider is speculation outcome (branch target address, branch taken/not taken, load-store address aliasing), as well whether an instruction has committed. An execution is not a program that we can run. Once we generate an execution, we then produce a pair of an assembly program and an annotation set that aims to induce and enforce this execution. We call this pair a leakage-inducing litmus test, or LILT. LILTs are useful to us in our testing regime because we are \textit{targeting} leakage, and to have the best chance of inducing microarchitectural speculation and hitting our desired violating state, we take control of microarchitectural knobs via forcing speculation to match our annotations. This is particularly simple in our white box simulator context, as we just instrument the simulator with prediction directives, but could also be accomplished via pretraining a predictor in contexts where instrumentation is not available. We develop both implicit and explicit ways to do both these prediction directives and other microarchitectural controls, such as extending speculation windows and commit times. Modeling executions with metadata is also the natural way to capture the details of execution contracts as defined in natural language by these HSCD proposals, as they too describe microarchitectural behavior that \textit{may} occur.
+% why execution contracts use these 
+% fix this last sentence
+
+\subsection{Abstract execution syntax}
+A \toolname{} litmus test suite starts as an axiomatic execution model containing a defense-specific security contract. The three components of the contract, \textbf{leakage contract, execution contract, and protection set,} are defined with respect to the syntax of an \textit{abstract execution}. We only specify instructions to the degree that our surveyed HSCDs differentiate, to keep violation forms limited, leaving enumeration across instruction types to a tunable concretization phase. 
+
+Execution syntax is as follows: abstract executions will be represented as directed  graphs of \textbf{Instruction} nodes, connected through \textbf{speculative program order} (spo) edges which provide a total order on the Instructions. Instructions have a type, and can be transmitters (\textbf{Load, Store, Branch\_x, Other\_x}), or non-transmitters (\textbf{Branch\_n, Other\_n}). Other\_x and Other\_n instructions are register-register instructions, like ALU operations. Each instruction has some or all of its input and output operands specified through \textbf{Operand} objects. Operands can be inputs (\textbf{in\_mem, in\_reg, in\_addr}) or outputs (\textbf{out\_reg, out\_mem}) and are unique to an instruction and relate it to one \textbf{State} object. State has type either \textbf{Reg} or \textbf{Mem}. Instructions can have boolean flags \textbf{committed}, which means an instruction has left the ROB, and is non-speculative (continuous set at end of spo); and \textbf{resolved}, which means a branch knows its target and condition and a memory instruction knows its address. Finally, there are \textbf{rf} and \textbf{ddi} edges between operands, which respectively represent reads-from relationships between output and input operands of different instructions, and data-dependence-internal relationships between input and output operands of the same instruction. These edges can be used to create data dependence graphs between state elements at various points in the execution. There is also a set of axioms—rules expressed in first-order logic that define valid edge placements for a given program with respect to instruction type and operands, which may admit multiple executions. 
+\anna{right now I am making this into a figure}
+
+We then embed our defense properties as a domain specific language (DSL) for defining HSCDs within our model, defined as a set of predicates on this syntax. \textbf{A \textbf{violation} occurs when there exists a data dependency from a state element in the \textbf{protection set} updated by the most recently committed instruction, to a leaked operand of a transmitter as defined by the \textbf{leakage contract}, that is under speculation as defined by the \textbf{execution contract}. }
+% fix the resolved definition
+
+\subsection{Generation}
+We express our complete axiomatic model of violating executions in the Alloy Analyzer~\cite{jackson2002alloy}, which supports SAT-based finite model finding for axiomatic specifications. The Alloy model-finder includes three phases of test generation. First, we use the model syntax to generate \textit{all possible} violating executions up to a bound on program length. Second, we impose a \textbf{minimality criterion}, which acts as a filter to ensure that our initial corpus of tests contain only components that are necessary to make them leaky executions. These two steps have the effect of generating a set of \textit{skeleton executions} that make up the set of all backbones of leakage that could occur \anna{say this better todo}. Finally, the first of our enumeration steps also lives in the Alloy model—we interleave additional instructions into the leakage path that use some leakage-necessary state. This will be explained in our concretization and enumeration phase, but must be completed in the Alloy so that we can solve for effects on the LP. 
+
+Our test generator leverages Alloy's backend to synthesize violating executions, guided by a formal \textit{minimality criterion} that determines whether a newly generated test can expose bugs not detectable by previously generated tests. For example, if the test suite already contains a program whose execution graph exhibits a particular leakage pattern, a new test with an isomorphic execution graph (e.g., with extraneous instructions that do not meaningfully contribute to the leakage) should be rejected as redundant. This criterion will ensure our test suite completely covers all possible leakage paths (LPs) (up to a bounded test size) prohibited by a given defense specification, while avoiding combinatorial explosion of the test space. 
+% and enumerate all possible violating executions, within a set of bounds. The first bound is program length. We generate short programs (todo: specify exact lengths used for STT run) because the goal of the model is to capture the minimal \textit{leakage path} (LP), and 
+We have later concretization passes that can insert non-LP instructions to exercise their effects on leakage, but leave this and other such expansions out of the axiomatic model for the most part, to prioritize variation across fundamental types of HSCAs over other things like program length or instruction type.
+
+% . The remaining bounds prune excess state from the model to achieve the same goal. If we generated every execution without this minimality, our test set would be targeted, but enormous, and if we cropped it it could for instance be diverse across instruction types but not across fundamental variants of HSCAs. 
+% % what length
+
+To form a minimality criterion for our executions, we adopt the method of relaxing our executions from MCM litmus test generation. We generate violating tests that, degraded by any one element from a target group, no longer violate our security contract, showing that each test component is necessary for leakage to occur. The space of relaxations that we implement is as follows:
+\begin{enumerate}
+    \item \textbf{Remove Instruction (RI)}: remove an instruction from the execution
+    \item \textbf{Remove Operand (RO)}: remove an operand from the execution
+    \item \textbf{Remove State (RS)}: remove a state element from the execution
+    \item \textbf{Shift Commit (RC)}: make the last uncommitted instruction committed (shifts head of ROB, only relevant when execution contract considers the commit flag)
+    \item \textbf{Add Resolved (RR)}: make an unresolved instruction resolved (only relevant when execution contract considers the resolved flag)
+\end{enumerate}
+Note that all relaxations must make the test weaker, so they shift behavior in a way that could break a violating path and make the execution legal.
+
+We want to eventually complicate our executions with addition non-LP instructions and state, to exercise the effects that these additions, or timing changes generally, might have on leakage. The goal of the abstract execution phase is to generate the fundamental components of leakage, and we will insert these complications for the most part in our concretization phase, not in our Alloy model. However, there is one exception, as we do have to delineate between two sets of state, the state used by the LP and not used by the LP. We want to insert non-LP instructions that can use LP state to better exercise a defense's protection set tracking, while preventing these additional instructions from affecting leakage behavior. We therefore make the design choice to insert these particular spacers in the execution model, where we can confirm they do not break LP dataflow. This approach leaves us with the following relaxations enabled in our final generation pipeline: \textbf{RS}, so that all state elements are necessary to the leakage path, and \textbf{RR+RC}, depending on the execution contract semantics. We also add the constraint that all instructions must have at least one specified operand (which will necessarily use LP state). We then end with a suite of all executions up to a certain size that contain a violating path interleaved with instructions that use state from that violating path, but may not contribute to the path. All instructions may still have unspecified operands.
+
+% Understand that we migt have effects of spacing + unnecessary instructions included,
+% we leave room to insert these in the enumeration phase
+% reserving sets of variables 
+% separate instruction and operand removal
+
+% partial specification of instruction operands
+
+\section{Test concretization}
+Once we have our complete set of abstract executions, we want to convert these executions to LILTs made up of real assembly programs and their corresponding annotations. Our goals in this stage are to 1. specify real instructions and state, 2. convert execution metadata to program modifications and speculation annotations, and 3. to insert complications that further diversify test shape and exercise defense mechanisms. We generate programs in LLVM so that our infrastructure can target flexible assembly, but require manual register definitions to maintain program integrity that currently implement X86-64 register naming, but could be easily modified. All aspects of our concretization passes are tunable, and instruction specification can be randomized such that test diversity can be achieved without enumerating over every test option, which would be infeasible for large numbers of potential instructions. 
+
+\subsection{State and instruction specification}
+We replace abstract instructions with LLVM IR instructions that match the abstract type. We select from a table of eligible instructions with matching operands, where a candidate instruction must use at least the operands specified by the execution. We maintain a 1-to-1 mapping of memory state objects to memory addresses, as well as a 1-to-1 mapping of register state objects to physical registers from the list of caller-saved registers (we have no function calls in our executions). We specify these physical registers via LLVM side-effect. We also specify all memory instructions as volatile, and use fake.use() for generated, unused registers, so that nothing is compiled away in translation to assembly. Unspecified memory addresses each receive a unique memory address, and unspecified registers sample uniformly from the pool of unused caller-saved registers. We force all registers so that we can control physical register aliasing despite LLVM SSA code requirements. We then compile the LLVM down to X86 while maintaining fixed registers.  
+
+\subsection{Translating speculation}
+We convert execution flags to program instructions and speculation annotations that together induce the desired execution. We use our unresolved flag to request insertion of mispredicted speculative behavior. For now, we choose to only instrument speculation primitives (instructions that generate speculation) that exist within the gem5 simulator. The first is control-flow speculation. We convert branch instructions flagged as unresolved into one of two mispredicted states, mispredicted taken, and mispredicted not taken. For mispredicted taken, we insert dummy instructions in between the branch and the subsequent execution instructions, and set the branch condition to resolve to not-taken. We then add the branch PC to our annotation dictionary with a BTB value of the subsequent execution instruction, and assume all annotated PCs are taken. For mispredicted not taken, we set the branch to resolve to an end block at the end of our program, and annotate the BTB to fall through. For data-flow speculation, we target the store-set predictor. We instrument one kind of misprediction, a mispredicted alias between a load and store. We consider an unresolved load as a speculation primitive when it has an unresolved store earlier in speculative program order, and no intervening stores. We define the store and load as having different addresses, but then annotate the load to include the store in its store set. 
+
+\subsection{Test preparation and additional complications}
+At the start of our programs, we set all registers to 0, and allocate memory of the appropriate size so that our Alloy-specified memory exists, and all of our registers can be used as a load offset in order to transmit, without violating memory restrictions. Our final amendment to LILT programs is to insert additional non-control instructions containing only non-LP operands in between the execution-specified instructions. This allows timing effects to be seen on leakage behavior. This can also be used to implicitly lengthen certain time windows such as the time before the last-uncommitted instruction in our program commits, or the time before the speculation primitive resolves its speculation, creating a broader window for our leakage to occur. 
+
+
+\section{Test execution}
+Given our executable binaries and corresponding metadata, we then instrument the simulator with a harness that initializes the simulator, runs the litmus test suite, and captures the state from affected transmitters, automatically determining if anticipated potential violations occurred. We establish a pipeline for violation detection and bug localization based on a given test's leakage scenario. This means forcing resolution annotations by setting predictor directives, and then running the test and measuring if the target transmitter hit a target stage in the window when our execution-specified last-committed and first-noncommitted instructions are correct. This target stage is defense-implementation specific, for instance for STT, the implementation requires us to check for transmitter completion because load stalls do not occur until immediately before the completion stage.  Our simulator harness has two aims: first it must check for transmitter completion under the microarchitectural restrictions described in the test, and second it attempts to stretch all relevant time windows to induce said microarchitectural conditions.
+
+\subsection{Forcing speculation annotations}
+To enforce the speculation conditions created in our enumeration phase, we translate the annotations provided in our LILTs into forced predictor state. For control-flow speculation, we directly override the branch prediction unit for the PCs specified in the annotation, jumping to the BTB value specified. For data-flow speculation, we override the store set predictor for the PCs specified in our annotation, predicting an alias with the specified store. We also override the effAddrValid flag on the specified store, forcing the store to remain unresolved until the end of our program. This can cause the simulator to hang, so we only force this unresolved flag for a \textit{timeout} number of cycles, and then allow it to revert to its computed value. We use a combination of implicit and explicit control — we set all of our speculation directives explicitly, but implicitly lengthen resolution windows for control-flow speculation by flushing predicates from cache. 
+
+\subsection{Widening committed windows}
+To increase the amount of time during which our transmitter can complete and match the microarchitectural execution trace, we want to up the time between the commit of the 'last committed' and 'first non-committed' instructions as specified in our Alloy abstract execution. To do this we can either insert dummy instructions between these two instructions, or manually stall the commit of the first non-committed instruction. We also allow this boundary to float in the Alloy model, choosing not to minimize non-committed instructions, so that there are more possible execution options available. 
+
+\subsection{Monitoring test behavior}
+We run our tests with all the aformentioned instrumentation, writing out the gem5 flags to a pipeline trace document for each test. To do this we had to slightly modify gem5's stage reporting to make sure it sat accurately with respect to the defense timing. Then we built a window-check script which parsed the pipelines and checked for completion of the target transmitter within the committed-uncommitted time window, under speculation as described in the abstract execution. It is important to note that this method of detecting leakage is simple in that it doesn't require any probing or inference, the attacker model is specified implicitly in the defense model, by deciding which transmitters the defense considers. These transmitters will not be allowed to complete while speculative and dependent on protected state. 
+
+
+Note: each def is different timing for complettion etc
+
+
+\anna{not sure where to have a natural language intuition proof of the backbones being contained within a certian lenght, I'd like to have that proof just for STT for starters, to match wtih running ex, will draw out with the rest of ex drawings and then claude could maybe turn drawings into tex}
+% \subsection{Test specification and enumeration}
+% Once we have generated a minimal set of abstract litmus tests, we concretize the tests. We convert the alloy abstract models into LLVM IR tests, through a series of steps. First, we specify instructions, by replacing abstract alloy instructions with corresponding LLVM instructions, and annotating if there are branch predictions or address predictions that should occur in a given instruction. Then we add interleaved instructions to exercise the timing space of our defense. Then we specify register and memory addresses in the program, beyond the register and memory specified by the alloy. We fill from the set of unused registers. Finally, we enable filtration of our generated tests by various criterion, including instruction priority, and speculation primitive (cause of speculation) priority. 
+
+% Our formal HSCD specifications will axiomatically model how defenses permit or forbid program executions. Specifically, executions will be represented as directed graphs (e.g., Fig.\ref{fig:alloy}) whose labeled edges capture dynamic control-flow (the \textit{program order}, or \texttt{po}, relation) and data-flow (the \textit{reads-from}, or \texttt{rf}, relation). 
+
+% One set of axioms—rules expressed in first-order logic defines valid edge placements for a given program, which may admit multiple executions.
+% A second set distinguishes permitted from forbidden executions by defining predicates over their edges. Such specifications enable automated reasoning tools, like SAT solvers, to generate forbidden executions and test that hardware implementations correctly prohibit them. This approach has proven effective for validating memory consistency model implementations in prior work\cite{lustig}. We adapt it to generate test programs whose illegal executions expose hardware side-channel leakage prevented by a defense.
+
+
+
+% Our Alloy model takes program executions and minimizes them to make sure that tests contain leakage threads. We do this through \textit{relaxations}. We define a definition of leakage in our axiomatic model, such that the final model must leak, but any relaxed version of the model must not leak, such that the model is minimal along the direction of our relaxations. 
+% We define four types of relaxations. First, we remove instructions. If an instruction is not necessary for the program to violate the defense specification, it is removed. Second, we remove operands. If an operand is unnecessary, we remove it, and leave the model with a floating operand with only the state type (memory or register) specified, such that we can fill in the state in the enumeration phase. Third, we modify committed flags. We have a flag on each instruction determining whether it is committed or uncommitted, and we turn the last uncommitted instruction to committed in a relaxation step. This checks whether all of the uncommitted instructions are necessary to generate a violation. The last thing we permute is our resolved flag. We change all unresolved instructions to resolved in a series of relaxations. 
+% This decouples implementation development and proofs of security, enabling flexible iteration on the implementation of a defense specification without requiring iterative proof effort, and also allowing validation to precise and bespoke specifications.
+
+% We will also study parameterization strategies for defense specifications, e.g., by synthesizing tests featuring generic transmitters and speculation primitives, then enumerating their concrete instantiations with specific opcodes during post-processing to minimize stress on the SAT solvers. We will consider common SCD implementation techniques in exploring which metadata to include with the final concretized tests — e.g. speculation primitives could be annotated with their desired prediction outcomes, so transient execution can be forced in the simulator. Additionally, we want to understand how to encode initial state and scheduling requirements to pass to the simulator. By the end of the test generation process, we will produce executable binaries with simulator instrumentation annotations.
+
+ 
+
+% We will explore various initializations of architectural and microarchitectural state in the simulator, e.g. fixing predictor outcomes or filling caches, along with which modifications to scheduling are most conducive to leakage generation.
+% \anna{Finally, we will study the space of possible model syntax so the model is robust across SCD implementations — can generate tests that exercise commonly seen SCD implementation techniques. not sure if this is an unnecessary last sentence but I'm tryng to address the amulet limitation about implementation awareness}
+
+% \begin{wrapfigure}{r}{\textwidth}
+%   \begin{center}
+%     \includegraphics[width=\textwidth]{images/pipeline.png}
+%   \end{center}
+%   \caption{The pipeline generates and executes tests from a defense specification.}
+
+%   \label{fig:pipeline}
+  
+% % will be used as an intermediate representation, serving as 
+% \end{wrapfigure}
+
+
+\begin{figure*}[h]
+  \centering
+  \includegraphics[width=\textwidth]{images/pipeline.png}
+  \caption{The pipeline generates and executes tests from a defense specification.}
+
+  \label{fig:pipeline}
+\end{figure*}
+
+
+
+% Our tests will consist of a \caroline{what is meant by a series?} series of instructions along with corresponding 
+% initialization, scheduling, classifying the test result, and localizing bugs
+
+% instrumentation techniques to answer the question of how to run test programs in a way that is most likely to trigger leakage, e.g. changing the scheduler to space test instructions differently\todo{should I have one more example here?}.
+
+
+
+% \caroline{We make it sound like consistency was solved above. What is different about this? Maybe should clarify earlier that the prior work is black-box and this could be whit-box.} consistency.}
+% — Hardware proposals generally lack sufficient early-stage validation. We will explore generalizing this minimal litmus set  process to rigorously validate other properties of hardware models where benchmark testing is insufficient, e.g. cache coherence. We will enable specification-driven validation with quantifiable coverage for arbitrary properties on optimized hardware, and iterate in the early stages of proposal development. 
+
+
+
+
+% We will use our formal language for specifying hardware SCDs as a target for both  verifying a defense's ability to enforce some high-level security property and validating implementations for compliance. This decouples effort, since the former can be performed once, while the latter occurs on implementation changes. The latter can also be specialized to explicitly target probable implementation bugs, since security of the defense specification has already been established. The proposed research will develop automated methods for validating arbitrary defense specifications written in our formal language against security properties that underpin established secure programming techniques, such as CT-SEQ, CT-COND, and ARCH-SEQ\cite{guarnieri2021contracts}.
+
+
+% We use our formal language for specifying HSCDs as a target for both  verifying a defense's ability to enforce some high-level security property and validating implementations for compliance. This decouples effort, since the former can be performed once, while the latter occurs on implementation changes. The latter can also be specialized to explicitly target probable implementation bugs, since security of the defense specification has already been established. The proposed research will develop automated methods for validating arbitrary defense specifications written in our formal language against security properties that underpin established secure programming techniques, such as CT-SEQ, CT-COND, and ARCH-SEQ\cite{guarnieri2021contracts}.
+
+
+

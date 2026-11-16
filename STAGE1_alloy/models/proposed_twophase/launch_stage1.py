@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """launch_stage1.py — run every Stage-1 partition of every family in parallel, unattended.
 
-DRAFT TOOLING (2026-11-08, simspect-c8). Runs inside a workspace laid out as
+Runs inside a workspace laid out as
   <ws>/STAGE1_alloy/{alloy6.jar, a6CountModels.class, models/proposed_twophase/run_stage1.py}
   <ws>/parts/<family>/{partitions.json, <family>__<part>.als}   (from partition_stage1.py)
 and, for each partition, calls run_stage1.py (wall-clock timeout, disk guard, full java

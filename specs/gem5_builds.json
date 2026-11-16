@@ -1,6 +1,6 @@
 {
   "_doc": "Canonical registry of every gem5 build SimSpect runs against. ONE entry per distinct build tree. Each build = a different defense implementation; gem5 is ground truth. 'timing_hooks' records whether the build carries the two window-realizing hooks SimSpect needs: branch_force (--branch-ann-file BTB override + per-branch resolve-stall) and fnc_commit_stall (hold the first-not-committed insn at the ROB head, 150 cyc). 'status' summarizes hook coverage. 'resolve_hooks' (2026-10-30) = the BR resolve lines + forced-not-taken (wiki/design/RESOLUTION_HOOKS.md). Source: wiki/design/MODELS_AND_BUILDS.md + METHODS_INSTRUMENTATION.md + gem5-hooks/README.md + AMULET_BUGS_DETECTION_ACCOUNTING.md. Viewed in the dashboard Utilities > gem5 builds tab.",
-  "_last_reviewed": "2026-11-08",
+  "_last_reviewed": "2026-11-09",
   "timing_hook_legend": {
     "branch_force": "--branch-ann-file BTB override (force branch direction) + per-branch resolve-stall. Realizes the modeled mispredict + holds the branch unresolved. Vanilla builds reject --branch-ann-file.",
     "fnc_commit_stall": "fncCommitStallPC/Cycles \u2014 stalls commit of the first-not-committed insn at the ROB head (recon/STT use 150 cyc), widening the speculative window so the slow VP/squash cases land in-window.",
@@ -227,6 +227,34 @@
       }
     },
     {
+      "id": "amulet-InvisiSpec-stl",
+      "path": "/work/amulet/hooks_stl_work/InvisiSpec",
+      "repo": "no git (copy of /work/amulet/amulet-gem5-InvisiSpec_AE-v1.1 incl. build/, taken 2026-11-10 04:04 UTC, backup gem5.opt.* binaries excluded)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level (--ruby)",
+      "config_script": "configs/example/se.py",
+      "defense": "InvisiSpec (same as amulet-InvisiSpec) + SimSpect-STL hooks",
+      "scheme": "UnsafeBaseline | SpectreSafeInvisibleSpec | FuturisticSafeInvisibleSpec (pipeline --scheme=2 -> SpectreSafeInvisibleSpec)",
+      "variants": "--stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred; everything amulet-InvisiSpec has",
+      "intention": "STL (store bypass) on InvisiSpec. In scope only for FuturisticSafeInvisibleSpec (InvisiSpec Sec. IV Table I); SpectreSafeInvisibleSpec is the out-of-threat-model control.",
+      "binary": "/work/amulet/hooks_stl_work/InvisiSpec/build/X86_MESI_Two_Level/gem5.opt",
+      "md5": "376198d5f5f4fd77cb022ba19d5d4924",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "resolve_hooks": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "Built 2026-11-09 (session stl-port) in a COPY of the in-place tree, /work/amulet/hooks_stl_work/InvisiSpec (the in-place tree and binary are untouched, other campaigns use them). Hooks = the recon-stl STL hooks (same flags, same print lines), applied by gem5-hooks/stl/apply_stl_hooks_amulet.py --build InvisiSpec, rebuilt by gem5-hooks/stl/build_stl_amulet.sh (log /work/amulet/hooks_stl_work/build_InvisiSpec_stl.log, rc=0); applied diff gem5-hooks/amulet-InvisiSpec/stl_hooks.diff (patch -p1 from the tree root); backups *.pre-stl next to each file. Port differences from recon-stl: mem_order_squash prints only in a run given --stl-ann-file (stlTraceOn), so a run without STL flags is byte-identical to the in-place hooks-v2 binary; old trees keep one memory-dependence producer per instruction (alias mode with a load barrier in flight waits on the younger of barrier and paired store). Verification (wiki/design/STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'): hooks off = in-place binary on the 10 hooks-v2 verify cases (every trace line, sim ticks) and on the 60 STT_6_stl tests; STL controls on the 60 STT_6_stl tests."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-InvisiSpec/stl_hooks.diff (on top of simspect_hooks.diff + resolve_hooks.diff + hooks_v2_vs_v1resolve.diff)",
+      "flags": [
+        "amulet",
+        "ruby-only",
+        "stl"
+      ]
+    },
+    {
       "id": "amulet-SpecLFB",
       "path": "/work/amulet/amulet-gem5-SpecLFB_AE-v1.1",
       "repo": "no git (AMuLeT AE artifact)",
@@ -254,6 +282,33 @@
         "pre_hook_binary": "/work/amulet/amulet-gem5-SpecLFB_AE-v1.1/build/X86/gem5.opt.pre-simspect-hooks-20261028",
         "pristine_sources": "/work/amulet/backups/SpecLFB-pre-simspect-hooks-20261028.tgz"
       }
+    },
+    {
+      "id": "amulet-SpecLFB-stl",
+      "path": "/work/amulet/hooks_stl_work/SpecLFB",
+      "repo": "no git (copy of /work/amulet/amulet-gem5-SpecLFB_AE-v1.1 incl. build/, taken 2026-11-10 04:04 UTC, backup gem5.opt.* binaries excluded)",
+      "cpu": "DerivO3CPU / X86, classic caches (no Ruby protocol)",
+      "config_script": "configs/example/se.py",
+      "defense": "SpecLFB (same as amulet-SpecLFB) + SimSpect-STL hooks",
+      "scheme": "Speclfb | unsafebaseline (pipeline --scheme=2 -> Speclfb)",
+      "variants": "--stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred; everything amulet-SpecLFB has",
+      "intention": "STL (store bypass) on SpecLFB: memory-order MUSLs (SpecLFB Sec. 5; lsq_unit.cc setmUSL, rob.cc preStoreResolved).",
+      "binary": "/work/amulet/hooks_stl_work/SpecLFB/build/X86/gem5.opt",
+      "md5": "f2e3e9fe1419a67d5ce1aba9a51805d8",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "resolve_hooks": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "Built 2026-11-09 (session stl-port) in a COPY of the in-place tree, /work/amulet/hooks_stl_work/SpecLFB (the in-place tree and binary are untouched, other campaigns use them). Hooks = the recon-stl STL hooks (same flags, same print lines), applied by gem5-hooks/stl/apply_stl_hooks_amulet.py --build SpecLFB, rebuilt by gem5-hooks/stl/build_stl_amulet.sh (log /work/amulet/hooks_stl_work/build_SpecLFB_stl.log, rc=0); applied diff gem5-hooks/amulet-SpecLFB/stl_hooks.diff (patch -p1 from the tree root); backups *.pre-stl next to each file. Port differences from recon-stl: mem_order_squash prints only in a run given --stl-ann-file (stlTraceOn), so a run without STL flags is byte-identical to the in-place hooks-v2 binary; old trees keep one memory-dependence producer per instruction (alias mode with a load barrier in flight waits on the younger of barrier and paired store). Verification (wiki/design/STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'): hooks off = in-place binary on the 10 hooks-v2 verify cases (every trace line, sim ticks) and on the 60 STT_6_stl tests; STL controls on the 60 STT_6_stl tests."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-SpecLFB/stl_hooks.diff (on top of simspect_hooks.diff + resolve_hooks.diff + hooks_v2_vs_v1resolve.diff)",
+      "flags": [
+        "amulet",
+        "stl"
+      ]
     },
     {
       "id": "amulet-CleanupSpec",
@@ -284,6 +339,34 @@
         "pre_hook_binary": "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt.pre-simspect-hooks-20261028",
         "pristine_sources": "/work/amulet/backups/CleanupSpec-pre-simspect-hooks-20261028.tgz"
       }
+    },
+    {
+      "id": "amulet-CleanupSpec-stl",
+      "path": "/work/amulet/hooks_stl_work/CleanupSpec",
+      "repo": "no git (copy of /work/amulet/amulet-gem5-CleanupSpec_AE-v1.1 incl. build/, taken 2026-11-10 04:04 UTC, backup gem5.opt.* binaries excluded)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level (--ruby)",
+      "config_script": "configs/example/se.py",
+      "defense": "CleanupSpec (same as amulet-CleanupSpec) + SimSpect-STL hooks",
+      "scheme": "--scheme_invisispec=UnsafeBaseline --scheme_cleanupcache=Cleanup_FOR_L1L2 (baseline: --scheme_cleanupcache=UnsafeBaseline); --scheme accepted and ignored",
+      "variants": "--stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred; everything amulet-CleanupSpec has",
+      "intention": "STL (store bypass) on CleanupSpec: every transient instruction is unsafe (Sec. 2.1), so a store-bypass squash must be cleaned like a branch squash.",
+      "binary": "/work/amulet/hooks_stl_work/CleanupSpec/build/X86_MESI_Two_Level/gem5.opt",
+      "md5": "c7989d25487c18b5aeec78a1e7108afc",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "resolve_hooks": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "Built 2026-11-09 (session stl-port) in a COPY of the in-place tree, /work/amulet/hooks_stl_work/CleanupSpec (the in-place tree and binary are untouched, other campaigns use them). Hooks = the recon-stl STL hooks (same flags, same print lines), applied by gem5-hooks/stl/apply_stl_hooks_amulet.py --build CleanupSpec, rebuilt by gem5-hooks/stl/build_stl_amulet.sh (log /work/amulet/hooks_stl_work/build_CleanupSpec_stl.log, rc=0); applied diff gem5-hooks/amulet-CleanupSpec/stl_hooks.diff (patch -p1 from the tree root); backups *.pre-stl next to each file. Port differences from recon-stl: mem_order_squash prints only in a run given --stl-ann-file (stlTraceOn), so a run without STL flags is byte-identical to the in-place hooks-v2 binary; old trees keep one memory-dependence producer per instruction (alias mode with a load barrier in flight waits on the younger of barrier and paired store). Verification (wiki/design/STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'): hooks off = in-place binary on the 10 hooks-v2 verify cases (every trace line, sim ticks) and on the 60 STT_6_stl tests; STL controls on the 60 STT_6_stl tests."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-CleanupSpec/stl_hooks.diff (on top of simspect_hooks.diff + resolve_hooks.diff + hooks_v2_vs_v1resolve.diff)",
+      "flags": [
+        "amulet",
+        "ruby-only",
+        "stl"
+      ]
     },
     {
       "id": "amulet-STT",

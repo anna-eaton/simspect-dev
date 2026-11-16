@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Usage: python3 mk_mf_queries.py            -> writes queries/mf/<name>.als + queries/mf/RUNLIST.tsv
-"""mk_mf_queries.py -- builds every validation query of the model-fixes session (2026-11-08) as a scratch
+"""mk_mf_queries.py -- builds every validation query of the model-fixes review as a scratch
 copy of a model (never written into STAGE1_alloy/models/). Each query = model text with `run gen_lit` body
 replaced by `gen_useful_litmus and q` (gen) or `q` alone (facts only), plus aux definitions appended.
 RUNLIST.tsv: name, limit, timeout_s, expectation. Run each with ../runq_mf.sh (one Java at a time).

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """launch_stage15.py — Stage 1.5: pin every Stage-1 core into its production model, in parallel.
 
-DRAFT TOOLING (2026-11-08, simspect-c8). For each family whose Stage 1 is complete (every
+For each family whose Stage 1 is complete (every
 partition `done` in <ws>/status/stage1_status.json), every core <ws>/out/<core_fam>/<part>/
 stage1_xml/inst-*.txt becomes one Alloy run of the PRODUCTION model (exactly 6 instructions,
 its own minimality) with the structural seed `seed_core` from STAGE1_alloy/stage_seed.py
 conjoined into `run gen_lit` (stage_pipeline.build_seeded_model). The production model text is
 otherwise unchanged; seeded copies are written to <ws>/s15/<family>/models/.
 
-Size (Anna, 2026-11-08): about --budget instances per family, split evenly over its cores:
+Size: about --budget instances per family, split evenly over its cores:
 per-core cap = max(1, ceil(budget / n_cores)). A core run stops at its cap, at --timeout, or
 when Alloy exhausts (fewer instances than the cap = every flesh-out of that core).
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-bucket_hits.py — fixed-harness version (2026-11-07) of the per-results "big test":
+bucket_hits.py — fixed-harness version of the per-results "big test":
 run every diagnostic in this folder against every hit and bucket each hit by the
 FIRST cause that matches, leaving only unexplained hits as NEW candidates.
 
@@ -43,7 +43,7 @@ def _discover():
 
 
 def _cache_setup_of(window_json):
-    """stem -> cache_setup the test actually ran with (2026-11-09). From the record
+    """stem -> cache_setup the test actually ran with. From the record
     (pipeline.py keeps it on non-warm runs; `random` differs per test), else from the
     campaign manifest when it names one fixed strategy, else "unknown"."""
     try:

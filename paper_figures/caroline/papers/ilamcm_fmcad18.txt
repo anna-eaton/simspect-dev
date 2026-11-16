@@ -1,0 +1,1759 @@
+ILA-MCM: Integrating Memory Consistency Models with
+Instruction-Level Abstractions for Heterogeneous System-on-Chip Verification
+Hongce Zhang, Caroline Trippel, Yatin A. Manerkar, Aarti Gupta, Margaret Martonosi, Sharad Malik
+Princeton University, USA
+
+Abstract—Modern Systems-on-Chip (SoCs) integrate heterogeneous compute elements ranging from non-programmable
+specialized accelerators to programmable CPUs and GPUs. To
+ensure correct system behavior, SoC verification techniques
+must account for inter-component interactions through shared
+memory, which necessitates reasoning about memory consistency
+models (MCMs) This paper presents ILA-MCM, a symbolic
+reasoning framework for automated SoC verification, where
+MCMs are integrated with Instruction-Level Abstractions (ILAs)
+that have been recently proposed to model architecture-level
+program-visible states and state updates in heterogeneous SoC
+components.
+ILA-MCM enables reasoning about system-wide properties
+that depend on functional state updates as well as ordering
+relations between them. Central to our approach is a novel facet
+abstraction, where a single program-visible variable is associated
+with potentially multiple facets that act as auxiliary state variables. Facets are updated by ILA “instructions,” and the required
+orderings between these updates are captured by MCM axioms.
+Thus, facets provide a symbolic constraint-based integration
+between operational ILA models and axiomatic MCM specifications. We have implemented a prototype ILA-MCM framework
+and use it to demonstrate two verification applications in this
+paper: (a) finding a known bug in an accelerator-based SoC, plus
+a new potential bug under a weaker MCM, and (b) checking that
+a recently proposed low-level GPU hardware implementation is
+correct with respect to a high-level ILA-MCM specification.
+
+I. I NTRODUCTION
+Systems-on-Chip (SoCs) integrate specialized hardware to
+meet the power-performance requirements posed by emerging
+applications. Specialized hardware can be programmable (e.g.,
+Graphics Processing Units or GPUs) or non-programmable
+(e.g., an AES cryptographic accelerator). They outperform
+general purpose processors in specific domains like machine
+learning [1], scientific computation [2], and cryptographic operations [3]. The multiple processing units in an SoC typically
+run concurrently. This concurrency can be difficult to reason
+about, leading to design and implementation bugs in functional
+correctness as well as security. Furthermore, when SoC
+components interact via shared memory or memory-mapped
+input and output (MMIO), one also needs to reason about
+memory consistency models (MCMs). Although programmers
+generally find it easier to think about concurrent code with
+sequentially consistent (SC) ordering semantics, modern
+instruction set architectures (ISAs) have weaker MCMs in an
+effort to achieve better performance and scalability.
+This work was supported in part by the Applications Driving Architectures
+(ADA) Research Center, a JUMP Center co-sponsored by SRC and DARPA.
+This work was supported in part by the National Science Foundation, XPS
+Program, Grant No. 1628926.
+
+Previous MCM verification efforts have focused on
+modeling and analyzing MCMs at different levels of the
+software/hardware stack in parallel systems [4–11]. These
+approaches typically use small parallel programs, called litmus
+tests, for reasoning about the MCMs themselves. They focus
+on ordering relations between simple instructions, rather
+than on symbolic reasoning of complex control and data
+flow in programs, which is often needed in SoC verification.
+Moreover, none of these efforts consider non-programmable
+hardware accelerators, which may not have an ISA.
+Recently, an instruction-centric operational model for heterogeneous SoC components has been proposed, called an
+Instruction-Level Abstraction (ILA) [12]. Analogous to a processor ISA, an ILA models a hardware component’s programvisible states and their updates in the form of instructions. This
+provides a well-defined interface between sequential software
+and the underlying hardware component. For an accelerator,
+its ILA instructions correspond to commands at its interface.
+ILAs have been successfully generated (using semi-automated
+synthesis-based techniques) for many accelerators in practice [12–14]. In the rest of this paper, we use “instructions” to
+denote ILA instructions, which correspond to instructions in
+a processor ISA or to derived instructions for an accelerator.
+An ILA can uniformly model rich instruction semantics
+(i.e., including control and data flow) of a single processing
+unit, e.g., a processor or an accelerator. Although existing
+MCM specifications and verifiers are well-suited for
+representing orderings between memory operations of multiple
+processing units, they lack such rich instruction models. We
+show that for general SoC verification, it is essential to reason
+about both rich instructions in heterogeneous components and
+memory orderings between them.
+In this paper, we address this central challenge by proposing
+a general symbolic framework called ILA-MCM, shown in
+Figure 1. In this framework, each processing unit in an
+SoC, such as a programmable processor or an accelerator,
+is uniformly represented by an ILA. The MCM is described
+using axioms, as in previous efforts [4–11], but is integrated
+with the ILA operational models. This enables our ILAMCM framework to reason about functional state updates in
+instructions as well as the effects of MCMs, thereby supporting
+expressive properties involving both states and orderings for
+SoC verification.
+A novel feature of our ILA-MCM framework is the facet
+abstraction, where a single program variable in an instruction
+can be associated with multiple auxiliary state variables called
+facets in the verification model. Facets are useful for modeling
+
+ILA
+
+(operational
+model)
+
+al
+
+rator
+
+load
+add
+jeq
+
+processor
+
+Bounded
+program
+sketch
+
+MCM Axioms
+for memory
+ordering
+
+read
+compute
+read
+
+add
+
+compute
+
+jeq
+
+Facets
+
+(operational
+model)
+
+write
+
+load
+
+...
+
+ILA
+
+for integration
+
+Model Constraints
+Property Constraints
+
+write
+
+...
+
+Bounded
+program
+sketch
+
+accelerator
+
+SMT
+Solver
+
+Fig. 1. The ILA-MCM Framework for heterogeneous SoC verification
+
+ILA subsystems MCM
+memory
+and consistency
+effects,ILA
+where different
+Axioms
+load
+(operational
+read
+(operational
+for memory
+observers
+see logically
+distinct
+model)in an
+add SoC may
+model) values of the
+compute
+ordering The write
+jeq
+same program-visible
+variable.
+allowed values of facets
+load
+read
+are constrainedaddby the operational semantics
+of the instructions
+compute
+Bounded
+Facets
+Bounded
+as well
+as the jeq
+memory consistency
+axioms.
+Thus, facets form
+write
+program
+program
+foroperational
+integration
+sketchlink between
+...
+a critical
+ILA
+... models
+sketchand axiomatic
+accelerator
+MCM specifications.
+processor
+Another feature is that our verification procedure supports
+Model
+Constraints
+both operational and
+axiomatic
+models in general.
+(For exSMT
+Solveroperational
+ample, our second application uses a low-level
+Property Constraints
+model for memory consistency.) The executions of operational
+models (e.g., ILAs) are based on a program sketch [15]1 ,
+which depends on the property to be verified. This creates
+symbolic trace events (events, in short). Each event is guarded
+by a condition and updates the state in an ILA or a facet.
+The axioms are then instantiated, which may create additional
+events or impose happens-before [16] ordering relations between events. We refer to these sets of constraints as the model
+constraints. Finally, we add property constraints that refer to
+states and ordering requirements for verification.
+We use standard theories in first order logic to capture all
+constraints, including the semantics of instructions in a program and happens-before ordering relations between events.
+The formula comprising all constraints is checked by a Satisfiability Modulo Theory (SMT) solver [17]. Our framework
+supports diverse verification tasks formulated as SMT queries,
+including finding bugs (via falsification) or proving correctness
+(via verification condition generation). We have implemented
+a prototype ILA-MCM framework and demonstrate its use in
+two challenging SoC verification applications in this paper.
+To summarize, this paper makes the following contributions:
+ILA-MCM framework: We propose a framework that
+combines operational models for processing cores (including accelerators) with axiomatic memory consistency
+models to enable SMT-based reasoning of complex interactions between hardware, software, and memory subsystems in heterogeneous SoCs.
+• Facet
+abstraction: We propose the facet abstraction,
+where a single program-visible state variable can be
+•
+
+1 Similar to automated program synthesis, the “holes” in our program sketch
+are filled in by a solver.
+
+associated with multiple logically-distinct variables, to
+represent updates on program-visible states with memory
+consistency effects. The facets provide the basis for a
+constraint-based integration of ILAs with MCMs.
+• Evaluation on real-world SoCs designs: First, we show
+an application of the ILA-MCM framework for finding
+security bugs in SoC firmware [18], where our support for
+expressive properties enables finding a malicious exploit
+from a program sketch. Second, we show an application
+for checking correctness of a low-level GPU hardware
+implementation [19] against a high-level ILA-MCM specification, where our instruction-centric approach enables
+its decomposition into simpler verification tasks.
+An overview of various components in the ILA-MCM
+framework is shown in Figure 2, annotated by the section numbers that describe these components. We start by introducing
+the relevant background on ILAs and MCMs.
+II. BACKGROUND
+A. Instruction-Level Abstraction (ILA)
+An ILA is a uniform abstraction for hardware accelerators
+as well as general-purpose/specialized programmable processors [12]. It is an operational model that captures updates
+by hardware to program-visible states (i.e., the states that are
+accessible or observable via a user-facing program instruction).
+It can be viewed as a generalization of the processor ISA in the
+heterogeneous context, where the instructions for accelerators
+are defined as the commands on their interface that update
+program-visible states. In an ILA, each instruction has a
+decode condition, and the instruction executes only when this
+condition is true. An ILA also supports hierarchy, where an
+instruction at a high level can be represented as a sequence
+of child instructions at a lower level, as shown in Figure 2
+for Instr A of ILA1 (under the “ILAs” column). Thus,
+the granularity of ILA instructions can vary, ranging from
+processor instructions to software functions. Furthermore, an
+ILA is used for modeling a sequential thread of control, while
+parallelism is modeled using multiple such threads.
+B. Memory Consistency Model (MCM)
+An MCM provides a specification to a programmer of the
+order in which memory operations appear to execute [20].
+Sequential consistency (SC), defined by Lamport [21],
+specifies that: (1) memory accesses preserve the order within
+each thread of a program, and (2) across threads, there is an
+order of accesses that every observer agrees upon. Despite the
+intuition of SC, nearly all modern ISAs adopt MCMs weaker
+than SC. A weak MCM allows certain memory accesses to
+be reordered within a program, and supplies fences or other
+synchronization mechanisms to enforce required orders when
+necessary. For example, the Total Store Order (TSO) model
+allows a load to be reordered with earlier stores that access a
+different address to allow the store-buffer optimization [22].
+Figure 3 illustrates the effects of MCMs on a small multithreaded program with a proposed outcome, called a litmus
+test. In this litmus test, each thread executes a store (st)
+
+(a) ILA+MCM Framework (Components)
+ILAs (𝐼)
+
+Program Sketch (𝑃)
+Instr 1 : op ?,?
+
+Instr 2 : store M[1000], ?
+Abstract
+store_DV_N_WG_REL
+Transition
+Instr
+3
+:
+load
+r?,
+M[?]
+l s1:store_DV_N |
+STORE
+P1 for
+ll s2:STORE (not s1)
+| ILA1
+
+(a)
+
+ssible
+ental
+ons
+
+lock.proc
+
+Abstract
+Transition
+§ III-A
+
+lock.CE
+
+Instr A … Instr Z
+
+States: S
+
+hierarchy (optional)
+Child-instr 1
+Child-instr
+2
+Sets
+of possible
+environmental
+transitions
+
+§ II-A
+
+Child-instr n
+
+(b) Processor Instruction: SetLock @t1
+
+Toggle: lock ≔ ¬ 𝑙𝑜𝑐𝑘
+
+Toggle.wfe.local
+lock.dev
+
+lock := r[?]
+
+happens-before
+relation (HB)
+
+Facets: F variable.agent
+Facet events: Instr.wfe.<attr>
+
+Ordering
+relations
+
+𝜙 𝑆⃗, 𝐹⃗ , 𝑅
+
+Instr.rfe.<attr>
+
+e.g. rf, fr,
+co, ppo
+
+Write-facet event:
+Instr.wfe.<attr>
+Read-facet event:
+Instr.rfe.<attr>
+
+𝑆⃗: states
+𝐹⃗ : facets
+𝑅: orderings
+
+§ II-B
+
+§ III-B
+
+Facet-Axioms
+§ III-C
+
+SetLock.wfe.local
+T1: @t2
+
+Verification
+Axiom
+T1:
+T2:
+T2:
+Procedure
+lock.procst:=[x],
+r[?]1
+st [y], 1 TSO_Write
+st
+[y], 1
+st
+[x],
+1
+SetLock.wfe.global @t3 FacetOrder
+ppo
+§
+III-D
+ppo
+adds the blue
+HB
+lock.dev := lock.proc
+ld r2, [x] HB
+ld r1, [y]
+fr fr
+ldrelation
+r1, [y] fr fr ld r2, [x]
+lock.CE
+:= lock.proc
+
+(a) r1 == 0 ∧ r2 == 0:
+Forbidden under SC
+Fig. 2. Components of the ILA-MCM framework, with example fragments.
+
+lock. proc
+T1:
+T1:
+T2:≔ ¬ 𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+T2:
+Write-facetst
+[y],
+1
+st
+[y], 1
+st [x], 1 Toggle.wfe.global
+st [x], 1
+events
+ppo
+ppo
+(wfevt)
+lock. dev ≔ 𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+ld r2,
+ld r1, [y] fr lock.
+ld r1, [y] fr fr ld r2, [x]
+fr CE
+≔ [x]
+𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+r1
+==
+0
+∧
+r2
+==
+0:
+(a)
+(b) r1 == 0 ∧ r2 == 0:
+Permitted under TSO
+Forbidden under SC
+
+d facets of lock
+
+Property (𝜙)
+
+storeDV,N
+
+(b) Illustrated Example
+Proc, Device, CE
+P2
+P3
+P1
+…
+…
+SetLock r? …
+…
+
+Instruction
+
+ILA1:
+
+…
+
+B[s2.rfe.WG, s1.rfe.WG]
+…
+\ SameWg[s1,s2] )
+P2
+for
+ILA2
+HB[s2.rfe.DV, s1.rfe.DV]
+
+Axioms (𝐴)
+
+Facets (𝐹)
+
+(b) Instruction and facet-events
+
+Fig. 3. A forbidden outcome in SC can become permitted under a weaker
+MCM. Arrows show the ordering relations (in blue) between instructions.
+
+T1:
+
+T2:
+Problem:
+st [r2], 1
+Abstract Transition
+Later
+WG-read-facet
+ld
+r1, [y] ppo
+and stthen
+where
+all memory
+Reorderlocations
+[x], a1 load (ld) instruction,
+Environmental
+can happen before
+data0. Figure
+Transitions
+ppo
+and
+registers are initially
+3(a)
+the SC
+ldone
+r1,assumes
+[r3]
+the earlier
+p1, r1, 0 outcome where both load
+WG @1a program
+L1 setp.eq
+MCM,
+and1 thus
+st [y],
+FETCH
+@2
+rfINVforbids
+L1 [19]
+loadDV,N
+r1, [18]: forbidden
+r2==r3
+ctrl
+instructions
+return
+a cycle: permitted
+of edges that
+fr 0. This is evident in
+r2!=r3
+FETCH
+L1 [18] @3
+ld r2, [x] order between the store and
+comprise the preserved
+program
+LD r1 @p1
+[18] @4
+∧ r2 == 0:
+TSO
+(a) r1 == 0
+(b) Reordering
+load Abstract
+instructions
+(shown
+and
+theallowed
+order in
+between
+Observable
+underas
+TSOppo edges)
+if r2!=r3
+Transition
+the read in one thread and the write in the other (shown by
+r2 [19] @6
+na r2, [19]
+from-read (fr) LD
+edges).
+In contrast,load
+under
+TSO (Figure 3(b)),
+the ppo edges are removed (since a read can be reordered with
+an earlier write), so the proposed outcome is permitted since
+there is no cycle. In general, MCMs also consider the co edge
+(coherence order between writes to the same address) and the
+rf edge (reads-from order from a write to a load which reads
+from that value).
+
+C. Gaps in Prior Work
+Despite a rich history of prior work in MCM verification,
+they lack some key capabilities described below.
+Symbolic Reasoning with Conditional Orderings. Our main
+goal is to support general verification of SoC software and
+hardware. However, most prior efforts in MCM verification rely upon an explicit enumeration over addresses, data,
+and conditional predicates that may affect orderings between
+memory operations. Specifically, we consider the following
+two types of conditional orderings: ¶ relations involving
+predicated instructions or instructions after branches, and ·
+relations involving address/data-dependent values.
+For example, Figure 4(a) shows ¶, with a predicate p1 on
+the last load instruction in thread T2. Note that the existence
+of the load event and the related fr edge (shown as a dashed
+
+T1:
+
+(See also Fig.
+r1 5)
+== 0 ∧ r2 == 0:
+
+(b)
+
+T2:
+ld r1, [y] ppo
+st [x], 1
+data
+ppo
+setp.eq p1, r1, 0
+st [y], 1 rf
+ctrl
+fr
+@p1 ld r2, [x]
+(a)
+
+r1 == 0 ∧ r2 == 0:
+Observable under TSO
+
+Permitted under TSO
+
+st [r2], 1
+Reorder
+
+ld r1, [r3]
+r2==r3 : forbidden
+r2!=r3 : permitted
+
+(b) Reordering allowed in TSO
+if r2!=r3
+
+Fig. 4. Examples of conditional orderings. (a) @p1 ld executes iff p1 is
+true, i.e., iff r1==0 (setting/using predicate p1 is marked in red). (b) In
+TSO, store-to-load reordering is allowed if the addresses are different.
+
+arrow) are control-dependent. If this control-dependency is
+ignored, the analysis will incorrectly deduce that the graph
+is cyclic, i.e., the outcome is unobservable. Figure 4(b) shows
+an example for case ·, where reordering is allowed only when
+the addresses in registers r2 and r3 are different.
+In prior MCM efforts based on relational models, e.g.,
+using Alloy [5] or Check tools [7–11], the addresses and
+data are modeled by relational predicates, e.g., whether two
+addresses are the same. However, such relations have to
+be pre-specified and are not explored symbolically in the
+solver. Similarly, Herd uses enumeration over all possible
+values of relevant addresses/data. In contrast, ILA-MCM uses
+symbolic reasoning to represent ordering relations dependent
+on complex contro/data flow and avoids explicit enumeration.
+Rich Instruction-Centric Models. Most previous efforts in
+MCM verification focus on ordering relations between instructions, rather than on updates of program-visible states.
+For example, arithmetic instructions are abstracted away in
+relational models [5]. In Herd [4], the instructions are hardcoded and do not model bit-precise hardware (e.g., there is no
+register overflow behavior). Our goal is to support SoC verification by modeling rich instruction semantics for processors
+as well as non-programmable accelerators, which is required
+for reasoning about general (not just litmus) programs.
+Expressive Properties. MCM verification has typically focused on specifying orderings and litmus tests, while program/processor verification has focused on state-based veri-
+
+fication or control-oriented properties. We aim to support SoC
+verification using a wide range of expressive properties that
+can refer to both states and orderings.
+III. ILA-MCM F RAMEWORK
+We now provide details of the main components of our
+ILA-MCM framework (shown in Figure 2): program sketches,
+facets, axioms, and verification procedure.
+A. Program Sketch
+We leverage existing work on programming by
+sketches [23, 24] to synthesize a program that would
+exercise a bug or abstractly capture unbounded executions.
+Our program sketch comprises: (1) a set of partially-specified
+state updates in instructions (and any child instructions), and
+(2) a partial order on them. Holes (shown as question marks
+in Figure 2) are allowed in the sketch. These are filled in
+by the SMT solver during verification. Examples of holes
+include symbolic values (e.g., content of a memory location)
+or fields in an instruction encoding (e.g., address/data field
+of the store and load in Figure 2).
+The program sketch, which needs to be provided by the
+user, typically depends on the correctness property. Although
+a program sketch has a bounded number of instructions, one
+can use an outer procedure to iteratively increase the bound, to
+perform a deeper search for bugs or for a proof by induction
+using given invariants. In the first column in Figure 2(b), the
+example considers an SoC with a processor, a device, and
+a cryptographic engine (CE). Thus, there are three program
+sketches (P1, P2, P3) and a SetLock instruction is illustrated
+in the program sketch (P1) for the processor. The second
+column (under ILA) shows the related event, which updates
+the lock variable by the value of some register (left as a hole
+r?) and associates a symbolic timestamp t1 with the event.
+B. The Facet Abstraction
+To reason about the interactions between SoC components
+via shared memory, we need to establish a relation between
+program variables in instructions of different ILA models via
+axioms in MCMs. We model this using a novel abstraction
+described below.
+1) State Variables for Facets: Facets are auxiliary variables
+associated with a shared program-visible state variable that can
+be observed by an “agent,” which may be a thread, a physical
+structure or a processing core/accelerator, depending on the
+ILA modeling granularity. Facets reflect the fact that different
+agents may observe distinct values of the same shared variable
+in different orders. For example, the store-to-load reordering
+in TSO can result in the load seeing the new value from the
+store earlier than instructions on another thread. In general,
+each agent can potentially have its own facet for a shared
+variable. In our experience, this per-agent-facet is general
+enough to model weak consistency behaviors. (More facets can
+be added if one wishes to model memory consistency at the
+microarchitecture level, e.g., with store-buffers or caches, etc.)
+
+We use the notation variable.agent for the facet that
+corresponds to a specific agent’s view of a given program
+variable. For the example considered in Figure 2(b), suppose
+there is an on-chip interconnect between the three components,
+and that there is a register in the device denoting a lock.
+The device observes its value by directly reading the register,
+which is regarded as the facet of the device (denoted lock.dev).
+The device provides a memory-mapped interface, where other
+agents can access the lock register as if accessing a memory
+location. We model the lock register seen by the other agents
+as facets, denoted lock.proc and lock.CE, respectively.
+2) State Updates for Facets: Continuing with our example,
+the ILA instruction SetLock on the processor can update the
+lock by writing to the memory-mapped address of the lock
+register in the device. The new value may first appear in the
+processor’s local buffer, then go into a cache, and through the
+interconnect, propagate to the device and finally update the
+device’s register. This could result in different agents seeing
+different values in different orders. We model this by creating
+new events: write-facet events to update facets, and read-facet
+events to read facets.
+For example, TSO can be modeled such that each agent
+has a facet for a shared program variable. A store instruction
+creates two write-facet events, one to its own facet (local
+write-facet event) and the other to all other facets (global
+write-facet event). A load instruction corresponds to one readfacet event, since it only needs to read from its own facet.
+In general, any instructions or child-instructions accessing
+shared variables can have associated facet events. The values
+that facet read/write events use for updates are derived from
+the ILA instruction semantics, while the orderings of facet
+read/write events are specified by the facet-axioms in the
+MCM. We use the notation instr.wfe/rfe.<attr> to refer to
+the write-facet events (wfe) or read-facet events (rfe), related
+to a given instruction (instr), with a given attribute <attr>. In
+the TSO model, <attr> can be local or global. The example
+in Figure 2(b) shows two write-facet events (under Facets)
+related to the SetLock instruction under the TSO model.
+C. Facet-Axioms for Integrating ILAs and MCMs
+So far, we have described facets as state variables, and new
+facet events associated with ILA instructions that update or
+read them. The orderings between these events are specified
+by MCM axioms. For SC and TSO, the complete set of facetaxioms can be found in the Appendix. We highlight some
+fragments of these in Figure 5. Note that we uniformly use
+happens-before relations (denoted as HB) to specify orderings between events. In the SC model (top part), all facet
+read/write events are synchronous (i.e., these events occur
+at the same time) with the instructions (lines 1-2). In the
+TSO model (lower part), the two write-facet events (local
+or global) of a store instruction happen after the instruction
+and follow the program order (lines 3-9). These axioms are
+similar to those used in prior work, e.g., in the µspec TSO
+model [7], except that facet-axioms relate instructions with
+facet read/write events, while µspec axioms relate instructions
+
+1: Axiom SC_WriteFacetOrder
+2: forall w:WRITE | Sync[ w , w.wfe.global ]
+…
+3: Axiom TSO_WriteFacetOrder
+4: forall w:WRITE | HB[ w , w.wfe.local ] /\
+5:
+HB[ w.wfe.local , w.wfe.global ]
+6: Axiom TSO_Store
+7: forall w1:WRITE | forall w2: WRITE (not w1) |
+8:
+PO[ w1, w2 ] => HB[ w1.wfe.local, w2.wfe.local]
+9:
+/\ HB[ w1.wfe.global, w2.wfe.global]
+…
+10: Axiom RF_CO_FR
+11: forall r:READ | exists w:WRITE |
+12:
+SameAddress[w,r] /\ SameData[w,r]/\ w.decode /\RF[w,r]/\(
+13:
+forall w2:WRITE (not w) | ( SameAddress[w,w2] /\
+14:
+w2.decode )=> CO[w2,w] \/ FR[r,w2] )
+15: Define RF[ w, r] := …
+16: Define CO[w1,w2] := …
+17: Define FR[ r, w] := …
+
+Fig. 5. SC and TSO axioms (fragments)
+
+with microarchitectural structures like pipeline stages and
+caches. Further, axioms for other MCMs can be similarly
+defined. We have designed these axioms by hand (similar to
+prior MCM work); addressing their correctness is beyond the
+scope of this work.
+The main highlight of the facet-axioms is that the relations
+over facet events in the MCM are linked with control/data
+flow in the ILA instructions via predicates interpreted over
+ILA state variables and facets. Consider the RF CO FR axiom
+(lines 10-14), which states that: (a) all read events should
+read from some executed write event with the same address,
+and the data values of read and write should match, (b) if
+a read r reads from a write w, any other executed write w2
+should not interfere. Here, the predicates SameAddress and
+SameData are interpreted over ILA state variables and facets.
+Similarly, the symbolic decode condition of an instruction
+(denoted instruction.decode) is a predicate over ILA state
+variables. Note also that the definitions of rf, fr, and co edges
+are based on the happens-before relation over facet-events.
+D. ILA-MCM Verification Procedure
+Our verification procedure is shown in Algorithm 1. Among
+its inputs, the first is a program sketch P (T, R), where T is
+a set of instances2 of partially-specified (child-) instructions,
+and R is a partial order. Other inputs are a set of ILAs I,
+the axioms A, and a property φ. For each possible instruction
+instance, the algorithm creates a trace step (simply called step)
+using the instruction semantics3 (line 5). We also associate
+a symbolic timestamp with the step, encoded as an integer
+(ta for step a). Values of timestamps only reflect relative
+orderings. Recall that the instructions/child-instructions may
+lead to facet read/write events, and steps are also created for
+these events (lines 6-8). Next, any happens-before orderings
+in the program sketch are interpreted as a less-than relation
+on the associated timestamps (line 10). Then, we instantiate
+the quantifiers and interpret the predicates in the axioms over
+2 Multiple occurrences of the same (child-) instruction are regarded as
+separate instances in a trace.
+3 Although not shown here, we use a concurrent static single assignment
+(CSSA) encoding [25, 26], where uses of shared state variables are encoded
+as π-variables and updates to them are encoded as new definitions.
+
+Algorithm 1 ILA-MCM Verification Procedure
+1: procedure V ERIFY(P (T, R), I, A, φ)
+2:
+. P (T, R): program sketch P , where T is a set of instances
+
+3:
+4:
+5:
+6:
+7:
+8:
+9:
+10:
+11:
+12:
+13:
+14:
+15:
+
+of (child-) instructions and R is a partial order, I: set of
+ILAs, A: axioms, φ: property
+C←>
+. C is set of constraints
+for each ts ∈ T do
+C ← C ∧ CreateStep(ts, I)
+T 0 ← AssocFacetEvent(ts, A)
+. Get facet-events
+for each ts0 ∈ T 0 do
+C ← C ∧ CreateStep(ts0 , I)
+for each a → b ∈ R do
+C ← C ∧ ta < t b
+. Orders are on timestamps
+C ← C ∧ InstantiateAxioms(A)
+C ← C ∧ ¬φ
+if SMTCheck(C) = SAT then
+return INVALID, GetModel(C)
+else return VALID
+
+the set of steps (line 11), and add the negation of the property
+(line 12). Finally, the set of constraints is checked by an SMT
+solver. (Our prototype uses Z3 [27].) If the constraints are
+satisfiable, we get a counterexample in the form of an event
+trace; otherwise, the property is valid within the space allowed
+by the program sketch. To verify unbounded correctness,
+we can check whether given invariants are inductive and
+use abstractions to model nondeterministic environments, as
+discussed later in Section IV-B.
+IV. V ERIFICATION A PPLICATIONS
+A. Security Bug in a Firmware Load Protocol
+1) System Overview: The SoC [18] used in this application
+consists of a processor, a device, and a cryptographic
+accelerator engine (CE). The processor runs a driver that
+loads a firmware image onto the device. The CE is responsible
+for authenticating the image before it can be used by the
+device. The SoC has a system memory (SM) that all three
+agents can access, and an isolated memory (IM) that can only
+be written by the device but is readable by both the device
+and the CE. The threat model assumes that the driver on the
+processor can be compromised. The attacker’s goal is to fool
+the device into running a malicious firmware image that does
+not carry a correct signature.
+2) ILAs and Instructions: The first step is to construct an
+ILA for each of the agents: the processor, the device, and
+the CE. The set of instructions and child instructions are
+shown in Figure 6(a) (along with a legend). The processor
+uses store operations to send commands to the memorymapped device or the accelerator interface, and can query the
+status via reading through this interface. The ILA instructions
+in the processor (device driver) are Send Command Reset,
+Store Firmware, or Send Command Load. The processor
+also has a Receive Report instruction that, when triggered by an interrupt, reads from the device’s status register to learn the result of firmware image authentication.
+The device ILA has three instructions: Reset, Load and
+Handle CE Response. The CE ILA has only one instruction
+(Authentication), which handles the authentication request.
+
+No.
+1.
+2.
+3.
+4.
+5.
+5a.
+5b.
+6.
+6a.
+6b.
+7.
+7a.
+7b.
+7c.
+
+(Child-) instructions in three ILAs
+Send Command: Reset
+Reset
+Store Firmware to SM
+Send Command: Load Firmware
+Load Firmware (child: 5a, 5b)
+Copy Firmware from SM to IM
+Send Authentication Request
+Authentication (child: 6a, 6b)
+Verify Signature
+Send Response
+Handle Response (child: 7a-7c)
+Read Status Bit
+Send Interrupt to Processor
+If ( status == PASS )
+PC := IMAGE_ADDR
+8.
+Receive Report
+Lock Write Lock := “LOCK”
+E.
+E. @T
+E. @T1→T2
+
+Processor Device CE
+1.
+
+3. @3
+
+4.
+
+The lock operation added in Design B
+Gray boxes participate in writing
+the malicious image
+
+(a)
+
+CE
+
+2. @3
+4. @8→9
+
+5a.
+
+5a. @6
+
+1. @11→12
+
+5b. @7
+
+3. @12→16
+
+6. (Lock)
+
+3. @7
+4. @8
+
+6. @8
+
+6a.
+
+5. @9
+
+6b.
+
+5a. @10
+
+7.
+
+5b. @11
+
+7a.
+7b.
+
+7. @16
+
+7c.
+
+7a. @17
+7b. @18
+
+Design A and Design B
+have the same execution
+flow, except that Design B
+has a child instruction
+Lock in Step 6.
+
+(b)
+
+CE
+
+3. @7→8
+
+5. @5
+
+5b.
+
+Device
+
+1. @1→2
+
+2. @2
+
+4. @4
+
+8.
+
+Processor
+
+5.
+
+E represents an event
+E represents an event, T is the
+timestamp
+T1 is the time of local facet update,
+T2 is the time of global facet update
+
+Device
+
+1. @1
+
+2.
+
+3.
+
+Processor
+
+7c. @19
+
+6a. @9
+
+4. @16→17
+
+5. @10
+5a. @15→16
+5b. @16→17
+2. @17
+5. @18
+
+6b. @13
+
+5a. @23→26
+5b. @33→35
+
+6. @21
+Lock. @22→24
+6a. @25
+6b. @34→36
+
+7. @37
+7a. @38
+7b. @39
+7c. @40
+
+(c)
+
+(d)
+
+Fig. 6. (a) Instructions/child-instructions in the ILAs, plus legend. (b) Intended execution flow for Designs A and B, where a dashed arrow indicates an
+agent triggering an instruction in another agent via instruction-decode conditions. (c) Malicious exploit for Design A under SC, with event timestamps (@T)
+generated by the SMT solver. (d) Malicious exploit for Design B under TSO, with timestamps for local/global facet updates also generated by the SMT solver.
+
+The intended execution flow of these instructions is shown
+in Figure 6(b). First, the driver sends a Reset command to the
+device by writing into the command register and the device
+performs reset (Step 1 and 2). The driver stores the firmware
+image in a dedicated region in SM (3) and invokes the device
+(4). Upon receiving the Load Firmware command (5), the
+device copies the firmware image into its IM (child-instruction
+5a) and sends an authentication request to the CE (5b). The
+CE checks the signature of the image in IM (6a), stores the
+result into its register and signals the device of its completion
+(6b). The device will read the verification result from the CE’s
+address space (7a) and report the result to the driver (7b). If
+the result indicates that the image is authenticated, the device
+sets its own program counter to point to the firmware location
+in IM and starts its execution from there (7c). Finally, the
+processor handles the interrupt and knows that the firmware
+image has been loaded (8).
+We refer to the above implementation as Design A, which
+is known to have a time-of-check to time-of-use (TOCTOU)
+vulnerability. Prior work originally identified and presented a
+solution to this vulnerability, namely Design B [18], where the
+device protects IM contents with a lock that is accessible only
+by the device and the CE. Once locked, the image stored in
+IM cannot be changed. Our ILA model for Design B is similar
+to Design A, except that the CE has an extra child-instruction
+Lock in ILA instruction 6 which enables the lock.
+3) Program Sketch: We created a program sketch based
+on the instructions shown in Figure 6(a), where the solver
+explores which instructions to include in the malicious exploit
+by creating a hole for the decode condition of each instruction.
+Further, the values and addresses of the stores by the driver
+
+are left as holes in the program sketch.
+4) Facets and Axioms: In this application, we consider two
+possible MCMs: SC and TSO. We use facets and axioms
+(shown in the Appendix) to model the MCMs.
+5) The Property: The SoC should ensure the following safety property φ: (DevP C = F wAddr) →
+Check(IM [F wAddr]) 6= F AIL. It says that when the device’s
+program counter points to the region holding the firmware
+image, the image should not be malicious. Our verification
+procedure aims to synthesize an exploit that violates this
+property.
+6) Results: Under the SC model, our verification procedure
+successfully reproduced the known malicious exploit [18] for
+Design A in 3.5 seconds, with a bound of 30 ILA instructions.
+The malicious exploit is shown in Figure 6(c), where the
+timestamps (@T) found by the SMT solver are shown for each
+event. Note that the correct image is authenticated, but the
+firmware overwrites it with a malicious image, which is then
+executed. This is a TOCTOU vulnerability.
+Design B is intended to fix the above issue and works
+correctly under the SC model. However, under the TSO
+model, our verification procedure found a malicious exploit
+in 6.5 seconds, with a 32-instruction bound. To the best of
+our knowledge, this TSO-based vulnerability was not known
+before. The resulting trace is shown in Figure 6(d), where the
+essential problem is around timestamp 22 to 24. Although the
+CE updates the device’s lock register at time 22, the device
+does not see this update until later. As shown, at time 23, the
+device overwrites the firmware with a malicious image. This
+bug can be fixed by adding a fence on the CE to ensure that the
+device sees the lock before the CE proceeds to authenticate.
+
+Abstract
+B. Verifying Correctness of a GPU Implementation
+Axiom store_DV_N_WG_REL
+Transition
+forall s1:store_DV_N |
+Sets of possible
+STORE
+Graphics Processing Units (GPUs) often use very weak
+forall s2:STORE (not s1) |
+environmental
+( HB[s2.rfe.WG, s1.rfe.WG]
+consistency models that allow for a large amount of buffering
+Abstract
+transitions
+Transition
+/\ SameWg[s1,s2] )
+and reordering of memory requests, to provide mitigation
+=> HB[s2.rfe.DV, s1.rfe.DV]
+storeDV,N
+of high memory latency. An operational model of a GPU
+(a)
+(b)
+implementation is discussed by Wickerson et al. [19]. The implementation is intended to be compliant with OpenCL [28] (a Fig. 7. (a) An axiom for instruction storeDV,N (b) related program sketch
+variant of the heterogeneous-race-free (HRF) MCM [29]), with GPU performs a series of operations to achieve the effect of an
+an extension called remote scope promotion (RSP) proposed instruction in the high-level specification. These operations are
+by AMD. Under OpenCL, all programs must be free of data modeled as child instructions, which make use of the physical
+races (i.e., two unsynchronized accesses to the same address locks, FIFOs, and caches to guarantee correct data transfers
+with at least one write); the behavior is undefined otherwise. and orderings.
+Synchronization can be achieved by an acquire-load reading
+We model 13 child instructions.
+Some examples are LD
+Instruction Toggle: lock ≔ ¬ 𝑙𝑜𝑐𝑘
+Processor lock.proc
+from a release-store with or promoted to a matched scope.
+(load
+from L1 cache to register), ST (store from register to
+Toggle.wfe.local
+We aim to verify that the given hardware implementation L1Device
+cache),lock.dev
+FLUL1 WG (flush the L1 cache in its workgroup),
+lock. proc ≔ ¬ 𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+is correct with respect to a high-level specification model INVlock WG (invalidate
+L1 cache of its workgroup). Inside a
+L1
+Write-facetToggle.wfe.global
+that we build in ILA-MCM. We should mention that our GPU, therelock.CE
+are also events
+other environmental transitions, e.g., a
+CE
+(wfevt)
+lock. dev ≔ 𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+specification is actually more conservative than the language- store may later trigger
+a cacheline
+CEflush.
+≔ 𝑙𝑜𝑐𝑘.We
+𝑝𝑟𝑜𝑐 model these
+level OpenCL+RSP model described by Wickerson et al. – state changes by child instructionslock.
+as well.
+developing an equivalent ILA-MCM model for the latter is (a) Agents and facets of lock (b) Instruction and facet-events
+3) Verification: We verify correctness of the implementaleft to future work.
+tion
+by checking that: (1) the program variables are updated to
+1) ILA-MCM Specification Model: This model comprises
+the
+same
+values as in the specification, and (2) the ordering of
+the functions of store, load, and atomic increment operations,
+the
+updates
+is correct. The first check corresponds to functional
+plus the ordering relations they enforce. Each operation may
+equivalence
+checking between child-instructions on the GPU
+have additional attributes that affect the ordering relations: (a)
+and
+the
+instructions
+in an ILA-MCM model, which can be
+whether it is a release (for a store), an acquire (for a load),
+handled
+using
+prior
+techniques
+[12]. Therefore, we focus here
+neither, or both, (b) the scope of the synchronization, and (c)
+on
+the
+second
+check,
+where
+we use our facet-axioms as
+whether it promotes the scope of a remote synchronization. We
+properties,
+and
+check
+if
+it
+is
+possible
+to synthesize a sequence
+model these operations using ILA instructions, where different
+of
+child
+instructions
+whose
+execution
+can violate the property.
+attributes lead to different instructions, e.g., store-relaxed and
+To
+ensure
+correctness
+using
+bounded
+traces,
+we need to further
+store-release are modeled as two distinct instructions. They
+use
+invariants
+and
+abstractions.
+have the same state updates, but the difference in their orderWe perform verification as follows. First we choose an
+ings is captured by the associated MCM axioms.
+instruction
+from the ILA-MCM specification model, collect
+The system has a hierarchical structure comprising M
+axioms
+that
+refer to this instruction, and verify these axioms
+devices, each device with N workgroups, with a workgroup
+one
+by
+one.
+Since our facets and axioms are all instructionhaving L threads. For a shared program variable, each thread
+centric,
+this
+instruction-based decomposition of the overall
+possesses a facet, and additionally each workgroup (and each
+verification
+problem
+is directly enabled by our ILA-MCM
+device) also has a facet. A store instruction will first update the
+framework,
+thereby
+providing
+a potential scalability benefit
+facet of its own thread (TH-facet update), then the facet of its
+in
+comparison
+to
+handling
+all
+axioms
+monolithically.
+workgroup (WG-facet update) and the device facet (DV-facet
+An axiom may refer to other related instructions. For
+update). A load instruction will have a TH-facet-read event
+example, in the axiom in Figure 7(a) for the storeDV,N
+(and potentially WG-facet-read and DV-facet-read events).
+For each instruction, we use facet-axioms to model the instruction, there is a reference to another store instruction
+enforced ordering requirements. For example, for the store- (of any type). We build a program sketch accordingly, as
+release (device scope, no remote promotion) instruction shown in Figure 7(b) for this example. Here, each of the two
+storeDV,N , one of its axioms is shown in Figure 7(a). It white boxes (storeDV,N and STORE) denotes the sequence of
+says that for a storeDV,N instruction s1 , for all the other child instructions that implement the high-level specification
+store instructions s2 different from s1 , if they are on the same instruction, respectively. Since GPU operations may trigger
+workgroup and there is a happens-before relation on their WG- environment transitions, we also add them in our program
+facet updates, then their DV-facet update events also follow sketch. Finally, we add abstract transitions before and between
+a happens-before relation. For each instruction, there can be the two sequences of child instructions. An abstract transition
+multiple axioms specifying its ordering relations with different is allowed to update the state to any value (i.e., it is a
+havoc operation), which is constrained subsequently by given
+types of instructions under different conditions.
+2) SoC Implementation: The implementation model, from invariants. The given invariants are checked separately on all
+Wickerson et al. [19], is fully operational (does not require child instructions (some require checking on all pairs). An
+facets or axioms). It contains a number of GPUs, where each example invariant is that the tail of a FIFO never passes the
+
+T1:
+
+st [x],
+ppo
+st [y],
+
+(
+
+CE
+
+(wfevt)
+
+(a) Agents and facets of lock
+
+lock. dev ≔ 𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+lock. CE ≔ 𝑙𝑜𝑐𝑘. 𝑝𝑟𝑜𝑐
+
+(b) Instruction and facet-events
+
+data
+ppo
+setp.eq
+p1, r1, 0
+st [y], 1 rf
+ctrl
+fr
+@p1 ld r2, [x]
+(a)
+
+Abstract Transition
+Environmental
+Transitions
+
+FETCHL1 [19] @2
+FETCHL1 [18] @3
+
+INVL1 WG @1
+
+Problem:
+Later WG-read-facet
+can happen before
+the earlier one
+
+loadDV,N r1, [18]
+
+LD r1 [18] @4
+
+Abstract Transition
+
+LD r2 [19] @6
+
+loadna r2, [19]
+
+Fig. 8. The counterexample found for loadDV,N , where the addresses,
+timestamps and specific environmental transitions are generated by the solver
+
+head, i.e., the FIFO does not underflow. In the future, we aim
+to maintain a library of invariants and abstract transitions for
+reuse. Further, the ILA-MCM verification procedure could be
+integrated with a general-purpose theorem prover to formally
+ensure their soundness and aid bookkeeping.
+Although our ILA-MCM specifications are parametric, we
+do not perform parametric verification here, since the GPU
+implementation is fixed by a concrete system configuration
+(M, N, L). We currently performed verification for M, N, L =
+2 and M, N, L = 3.
+4) Results: For the original GPU implementation verified
+by Wickerson et al. [19], our verification failed with counterexamples for the following 5 instructions: loadDV,N , loadDV,R ,
+storeDV,R , fetch incDV,N , and fetch incDV,R . Among
+them, loadDV,N , fetch incDV,N , storeDV,R match with
+the buggy scenarios discussed in the previous work [19].
+Specifically, Figure 8 shows a buggy trace that we found for
+instruction loadDV,N , where the facet-read event of the later
+non-atomic load instruction comes earlier than the facet-read
+event of the load-acquire instruction. This violates the loadacquire semantics. On the other hand, the counterexamples
+for fetch incDV,R and loadDV,R are false positives, since
+these traces cannot be extended to litmus tests with a property
+violation without having data races (prohibited by OpenCL).
+Interestingly, the proposed changes by Wickerson et al. to the
+compiler mappings of OpenCL+RSP operations strengthened
+the ordering guarantees of the hardware operations to match
+our ILA-MCM model. Under their new compiler mappings,
+we successfully validated that the hardware implementation
+is compliant with our ILA-MCM model. This validation was
+completed in 14 minutes 9 seconds (for M, N, L = 3) on a
+laptop with a 2.8GHz Core-i5 processor and 16GB memory.
+V. R ELATED W ORK
+A. Hardware Specification and Verification
+A number of formal hardware abstractions have been developed that enable verification. Kami [30, 31] is a Coq-based
+framework that supports hardware design and verification in
+Bluespec. In comparison to Kami, ILA-MCM is an ISA-level
+abstraction that provides the interface between hardware and
+software. In addition to verifying hardware, it can also be used
+for verifying correctness/security of software interacting with
+accelerators, as demonstrated in our paper. Furthermore, it can
+reason about a wide range of memory consistency behaviors,
+including SC, TSO, and HRF. In contrast, currently Kami has
+
+r1 == 0 ∧ r2 == 0:
+Observable under TSO
+
+ld r1, [r3]
+r2==r3 : forbidden
+r2!=r3 : permitted
+
+(b) Reordering allowed in TSO
+if r2!=r3
+
+only been applied for SC. Finally, the ILA-MCM framework
+targets automated reasoning using SMT solvers, in contrast to
+interactive theorem-proving in Kami.
+ISA-Formal [32, 33] has been developed to formally
+model and verify ARM processors. As its name suggests, it
+is an ISA-level model. However, it has not been applied to
+accelerators or other heterogeneous SoC components. Further,
+as far as we know, it has not been integrated with MCMs to
+reason about multicore memory consistency.
+B. MCM and Program Verification
+We have already discussed prior MCM verification tools and
+techniques. For reasoning about general concurrent programs,
+there are many related efforts in weak consistency models [34–
+36], logics [37, 38], and verification tools [39–41]. Here we
+discuss details of specific related ideas.
+1) Facets vs. ViCLs: In the Check tools [7–11], the Value
+in Cache Lifetime (ViCL) abstraction has been proposed to
+capture cache occupancy. Although both facets and ViCLs can
+model multiple “live” data for the same memory location, they
+are inherently different. First, facets are state variables that are
+updated according to instructions in ILAs and MCM axioms;
+they are not created or destroyed. In contrast, ViCLs have creation and expiration events in happens-before graphs. Second,
+facets are more general than ViCLs and are not necessarily
+tied to caches or other microarchitectural structures. Third,
+facets enable integration of axiomatic MCMs with operational
+instruction semantics, while the latter are ignored by ViCLs.
+2) Facets vs. Views: In recent work [34, 40], a view
+abstraction was proposed to model the C11 MCM. Our facets
+are different from views as follows: (i) a view is a map
+from locations to timestamps, whereas facets are auxiliary
+state variables, (ii) the views assign explicit timestamps to
+events, whereas facet-axioms associate events with symbolic
+timestamps, whose values are not fixed but explored implicitly
+during verification, (iii) unlike views, facets have been applied
+in automated SMT-based reasoning.
+VI. C ONCLUSIONS
+In this paper, we have presented the ILA-MCM framework,
+which combines the benefits of operational ILA models with
+axiomatic MCMs for reasoning about concurrent interactions
+between heterogeneous components in an SoC. We have
+introduced a novel facet abstraction that models consistency
+effects on program-visible states, and use facet-axioms to
+specify consistency ordering requirements. This provides a
+constraint-based integration between operational ILA models
+and axiomatic MCM specifications. Our SMT-based verification procedure supports symbolic reasoning for expressive
+properties involving both rich instruction semantics and orderings. We have demonstrated two verification applications
+of our prototype ILA-MCM framework, where we reasoned
+about an SoC firmware program and a GPU hardware implementation, respectively. Our support for expressive properties
+allowed synthesizing a malicious exploit in the first case,
+and our instruction-centric approach enabled compositional
+verification in the second.
+
+R EFERENCES
+[1] C. Pilato, Q. Xu, P. Mantovani, G. Di Guglielmo, and L. P.
+Carloni, “On the Design of Scalable and Reusable Accelerators
+for Big Data Applications,” in Proceedings of the ACM International Conference on Computing Frontiers, 2016, pp. 406–411.
+[2] I. Ohmura, G. Morimoto, Y. Ohno, A. Hasegawa, and M. Taiji,
+“MDGRAPE-4: a Special-Purpose Computer System for Molecular Dynamics Simulations,” Philosophical Transactions, Series
+A, vol. 372, no. 2021, 2014.
+[3] J. Rott, “Intel Advanced Encryption Standard Instructions
+(AES-NI),” Technical Report, Intel, 2012.
+[4] J. Alglave and M. Tautschnig, “Herding Cats: Modelling, Simulation, Testing, and Data-Mining for Weak Memory,” ACM
+Transactions on Programming Languages and Systems, vol. 36,
+no. 2, pp. 1–7, 2014.
+[5] J. Wickerson, M. Batty, T. Sorensen, and G. A. Constantinides,
+“Automatically Comparing Memory Consistency Models,” in
+Proceedings of the Symposium on Principles of Programming
+Languages (POPL), 2016.
+[6] J. Bornholt and E. Torlak, “Synthesizing Memory Models from
+Framework Sketches and Litmus Tests,” in Proceedings of the
+Conference on Programming Language Design and Implementation (PLDI), 2017, pp. 467–481.
+[7] D. Lustig, M. Pellauer, and M. Martonosi, “PipeCheck: Specifying and Verifying Microarchitectural Enforcement of Memory
+Consistency Models,” in Proceedings of the Annual International Symposium on Microarchitecture (MICRO), 2015, pp.
+635–646.
+[8] Y. A. Manerkar, D. Lustig, M. Pellauer, and M. Martonosi,
+“CCICheck: Using hb Graphs to Verify the CoherenceConsistency Interface,” in Proceedings of the Annual International Symposium on Microarchitecture (MICRO), 2015, pp. 26–
+37.
+[9] D. Lustig, G. Sethi, M. Martonosi, and A. Bhattacharjee,
+“COATCheck : Verifying Memory Ordering at the HardwareOS Interface,” in Proceedings of the International Conference
+on Architectural Support for Programming Languages and
+Operating Systems (ASPLOS), no. 212, 2016, pp. 233–247.
+[10] C. Trippel, Y. A. Manerkar, D. Lustig, M. Pellauer, and
+M. Martonosi, “TriCheck : Memory Model Verification at the
+Trisection of Software, Hardware, and ISA,” in Proceedings of
+International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS), 2017, pp.
+119–133.
+[11] Y. A. Manerkar, D. Lustig, M. Martonosi, and M. Pellauer,
+“RTLCheck : Verifying the Memory Consistency of RTL Designs,” in Proceedings of the Annual International Symposium
+on Microarchitecture (MICRO), 2017, pp. 463–476.
+[12] B.-Y. Huang, H. Zhang, P. Subramanyan, Y. Vizel, A. Gupta,
+and S. Malik, “Instruction-Level Abstraction (ILA): A Uniform
+Specification for System-on-Chip (SoC) Verification,” 2018.
+[Online]. Available: http://arxiv.org/abs/1801.01114
+[13] P. Subramanyan, Y. Vizel, S. Ray, and S. Malik, “Templatebased Synthesis of Instruction-Level Abstractions for SoC Verification,” in Proceedings of the Conference on Formal Methods
+in Computer-Aided Design (FMCAD), 2017, pp. 160–167.
+[14] P. Subramanyan, B.-Y. Huang, Y. Vizel, A. Gupta, and
+S. Malik, “Template-based Parameterized Synthesis of Uniform Instruction-Level Abstractions for SoC Verification,” IEEE
+Transactions on Computer-Aided Design of Integrated Circuits
+and Systems, no. 99, 2017.
+[15] R. Alur, R. Bodik, G. Juniwal, M. M. Martin, M. Raghothaman,
+S. A. Seshia, R. Singh, A. Solar-Lezama, E. Torlak, and
+A. Udupa, “Syntax-guided synthesis,” in Formal Methods in
+Computer-Aided Design (FMCAD), 2013, pp. 1–8.
+[16] L. Lamport, “Time, Clocks, and the Ordering of Events in
+
+a Distributed System,” Communications of the ACM, vol. 21,
+no. 7, pp. 558–565, 1978.
+[17] C. W. Barrett, R. Sebastiani, S. A. Seshia, and C. Tinelli,
+“Satisfiability Modulo Theories,” Handbook of Satisfiability,
+vol. 185, pp. 825–885, 2009.
+[18] S. Krstic, J. Yang, D. W. Palmer, R. B. Osborne, and E. Talmor,
+“Security of SoC Firmware Load Protocols,” in Proceedings
+of the International Symposium on Hardware-Oriented Security
+and Trust, 2014, pp. 70–75.
+[19] J. Wickerson, M. Batty, B. M. Beckmann, and A. F. Donaldson,
+“Remote-Scope Promotion : Clarified , Rectified , and Verified,”
+in Proceedings of the ACM SIGPLAN International Conference
+on Object-Oriented Programming, Systems, Languages, and
+Applications (OOPSLA), 2015.
+[20] S. V. Adve and K. Gharachorloo, “Shared Memory Consistency
+Models: A Tutorial,” Computer, vol. 29, no. 12, pp. 66–76,
+1996.
+[21] L. Lamport, “How to Make a Multiprocessor Computer that
+Correctly Executes Multiprocess Progranm,” IEEE Transactions
+on Computers, no. 9, pp. 690–691, 1979.
+[22] Intel, “Intel R 64 and IA-32 Architectures Software Developers
+Manual,” Volume 3A: System Programming Guide, Chapter 8:
+Multiple-Processor Management, no. 253665-067US, 2018.
+[23] A. Solar-Lezama, R. Rabbah, R. Bodı́k, and K. Ebcioğlu,
+“Programming by Sketching for Bit-Streaming Programs,” in
+Proceedings of the Conference on Programming Language
+Design and Implementation (PLDI), 2005, pp. 281–294.
+[24] A. Solar-Lezama, L. Tancau, R. Bodik, S. Seshia, and
+V. Saraswat, “Combinatorial Sketching for Finite Programs,” in
+Proceedings of the International Conference on Architectural
+Support for Programming Languages and Operating Systems
+(ASPLOS), 2006, pp. 404–415.
+[25] J. Lee, D. A. Padua, and S. P. Midkiff, “Basic Compiler
+Algorithms for Parallel Programs,” in Symposium on Principles
+and Practice of Parallel Programming, 1999, pp. 1–12.
+[26] C. Wang, S. Kundu, R. Limaye, M. Ganai, and A. Gupta, “Symbolic Predictive Analysis for Concurrent Programs,” Formal
+Aspects of Computing, vol. 23, no. 6, pp. 781–805, 2011.
+[27] L. De Moura and N. Bjørner, “Z3: An Efficient SMT Solver,” in
+Proceedings of the International Conference on Tools and Algorithms for the Construction and Analysis of Systems (TACAS),
+2008, pp. 337–340.
+[28] L. Howes and A. Munsh, “The OpenCL Specification,” 2015.
+[Online]. Available: https://www.khronos.org/registry/OpenCL/
+specs/opencl-2.0.pdf
+[29] D. R. Hower, B. A. Hechtman, B. M. Beckmann, B. R. Gaster,
+M. D. Hill, S. K. Reinhardt, and D. A. Wood, “HeterogeneousRace-Free Memory Models,” in Proceedings of the International Conference on Architectural Support for Programming
+Languages and Operating Systems (ASPLOS), 2014, pp. 427–
+440.
+[30] J. Choi, M. Vijayaraghavan, B. Sherman, A. Chlipala, and
+Arvind, “Kami: a platform for high-level parametric hardware
+specification and its modular verification,” Proceedings of the
+ACM on Programming Languages (PACMPL), vol. 1, no. ICFP,
+pp. 24:1–24:30, 2017.
+[31] M. Vijayaraghavan, A. Chlipala, Arvind, and N. Dave, “Modular
+Deductive Verification of Multiprocessor Hardware Designs,” in
+Proceedings of the International Conference on Computer Aided
+Verification (CAV), 2015, pp. 109–127.
+[32] A. Reid, “Trustworthy Specifications of ARM R v8-A and v8-M
+System Level Architecture,” in Proceedings of the Conference
+on Formal Methods in Computer-Aided Design (FMCAD),
+2017, pp. 161–168.
+[33] A. Reid, R. Chen, A. Deligiannis, D. Gilday, D. Hoyes,
+W. Keen, A. Pathirane, O. Shepherd, P. Vrabel, and A. Zaidi,
+“End-to-End Verification of ARM R Processors with ISA-
+
+Formal,” in Proceedings of the International Conference on
+Computer Aided Verification (CAV), 2016, pp. 42–58.
+[34] J. Kang, C.-K. Hur, O. Lahav, V. Vafeiadis, and D. Dreyer,
+“A Promising Semantics for Relaxed-Memory Concurrency,” in
+Proceedings of the Symposium on Principles of Programming
+Languages (POPL), 2017, pp. 175–189.
+[35] O. Lahav and D. Dreyer, “Repairing Sequential Consistency in
+C/C++11,” in Proceedings of the Conference on Programming
+Language Design and Implementation (PLDI), 2016.
+[36] O. Lahav, N. Giannarakis, and V. Vafeiadis, “Taming ReleaseAcquire Consistency,” in Proceedings of the Symposium on
+Principles of Programming Languages (POPL), 2016, pp. 649–
+662.
+[37] V. Vafeiadis and C. Narayan, “Relaxed Separation Logic: A
+Program Logic for C11 Concurrency,” in Proceedings of the
+ACM SIGPLAN International Conference on Object Oriented
+Programming Systems Languages & Applications (OOPSLA),
+2013, pp. 867–884.
+[38] A. Turon, V. Vafeiadis, and D. Dreyer, “GPS: Navigating
+Weak Memory with Ghosts, Protocols, and Separation,” in
+Proceedings of the International Conference on Object Oriented
+Programming Systems Languages & Applications (OOPSLA),
+2014, pp. 691–707.
+[39] R. Jung, D. Swasey, F. Sieczkowski, K. Svendsen, A. Turon,
+L. Birkedal, and D. Dreyer, “Iris: Monoids and Invariants as an
+Orthogonal Basis for Concurrent Reasoning,” in Proceedings
+of the Symposium on Principles of Programming Languages
+(POPL), 2015, pp. 637–650.
+[40] J.-O. Kaiser, H.-H. Dang, D. Dreyer, and O. Lahav, “Strong
+Logic for Weak Memory : Reasoning About Release-Acquire
+Consistency in Iris,” in Proceedings of the European Conference
+on Object-Oriented Programming (ECOOP), 2017, pp. 1–17.
+[41] A. J. Summers and P. Müller, “Automating Deductive Verification for Weak-Memory Programs,” in Proceedings of the
+International Conference on Tools and Algorithms for the
+Construction and Analysis of Systems (TACAS), 2018, pp. 190–
+209.
+
+A PPENDIX
+FACET-A XIOMS FOR SC AND TSO
+The facet-axioms for SC and TSO are shown in Figure 9 and
+Figure 10, respectively. In the SC model, all facet read/write
+events are synchronous with the instructions (lines 7-10 in
+Figure 9), while in TSO model, the two write-facet events of a
+store instruction follow the program order of the stores (lines
+7-13 in Figure 10). Read-facet events are still synchronous
+(lines 14-15). Fences ensure that previous writes are globally
+visible at that point, and read-modify-write (RMW) is atomic
+in the sense that its read and write facets are not breakable
+
+(lines 17-21). We define additional functions to specify the
+corresponding read-from, from-read, and coherence-order relations based on happens-before (HB) relations over facet events,
+e.g., lines 13-15 in Figure 9 and lines 23-31 in Figure 10.
+These functions are defined for use in the first axiom in both
+models.
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+
+Axiom RF_CO_FR
+forall r:READ | exists w:WRITE |
+SameAddress[w,r] /\ SameData[w,r]/\ w.decode /\
+RF[w,r] /\( forall w2:WRITE (not w) |
+( SameAddress[w,w2] /\ w2.decode )=>
+CO[w2,w] \/ FR[r,w2] )
+Axiom SC_WriteFacetOrder
+forall w:WRITE | Sync[ w , w.wfe.global ]
+Axiom SC_ReadFacetOrder
+forall r: READ | Sync[ r , r.rfe.global ]
+Define RF[w,r] := HB[ w.wfe.global , r.rfe.global ]
+Define FR[r,w] := HB[ r.rfe.global , w.wfe.global ]
+Define CO[w1,w2] := HB[ w1.wfe.global , w2.wfe.global ]
+
+Fig. 9. Facet-Axioms for SC
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+
+Axiom RF_CO_FR
+forall r:READ | exists w:WRITE |
+SameAddress[w,r] /\ SameData[w,r]/\ w.decode /\
+RF[w,r] /\( forall w2:WRITE (not w) |
+( SameAddress[w,w2] /\ w2.decode )=>
+CO[w2,w] \/ FR[r,w2] )
+Axiom TSO_WriteFacetOrder
+forall w:WRITE | HB[ w , w.wfe.local ] /\
+HB[ w.wfe.local , w.wfe.global ]
+Axiom TSO_Store
+forall w1:WRITE | forall w2: WRITE (not w1) |
+PO[ w1, w2 ] => HB[ w1.wfe.local, w2.wfe.local]
+/\ HB[ w1.wfe.global, w2.wfe.global]
+Axiom TSO_ReadFacetOrder
+forall r:READ | Sync[ r , r.rfe.local ]
+Axiom TSO_Fence
+forall f:FENCE | forall w: WRITE | PO[w,f] =>
+HB[ w.wfe.global, f ]
+Axiom TSO_RMW
+forall i:RMW |
+Sync[i.rfe.local, i.wfe.local, i.wfe.global]
+Define RF[w,r] :=
+SameCore[w,r] => HB[w.wfe.local , r.rfe.local ] /\
+~SameCore[w,r] => HB[w.wfe.global, r.rfe.local ]
+Define FR[r,w] :=
+SameCore[w,r] => HB[r.rfe.local , w.wfe.local ] /\
+~SameCore[w,r] => HB[r.rfe.local, w.wfe.global ]
+Define CO[w1,w2] :=
+SameCore[w1,w2] => HB[w1.wfe.local, w2.wfe.local] /\
+~SameCore[w1,w2] => HB[w1.wfe.global, w2.wfe.global]
+
+Fig. 10. Facet-Axioms for TSO
+
+

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage (Anna runs it; the model-fixes agent did NOT): bash STAGE3_gem5/triage/model_audit_20261108/apply_rf_fact.sh
+# Usage (run by hand, edits models in place): bash STAGE3_gem5/triage/model_audit_20261108/apply_rf_fact.sh
 # Applies rf_from_most_recent_writer (verbatim STT_6.als:161-169, inserted after `fact same_state_rf`) IN PLACE to the
 # 7 in-use models listed in results/model_fixes_20261108/rf_patched/HASHES.txt. For each file it refuses unless the
 # current sha256 equals the recorded OLD hash, copies the pre-built patched copy over it, and checks the NEW hash.

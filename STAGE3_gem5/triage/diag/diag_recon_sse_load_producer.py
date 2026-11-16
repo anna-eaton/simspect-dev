@@ -11,7 +11,7 @@ diag_recon_sse_load_producer.md next to this file.
 
 Signature (static, NEEDS_GEM5=False), all must hold:
   * the transmitter's backward register slice ends at a direct SSE load (`movq mem,%xmmK` = ldfp)
-    (_fv2_slice.transmitter_slice, the bug agent's bucket_fp.py rule);
+    (_fv2_slice.transmitter_slice);
   * the GPR-only twin (same stem + mode in STT_6_fv2, same build) ran ok and did NOT hit
     (diagnostics/twin_fv2/<mode>/<kind>/window-results.json).
   OR, when the GPR twin also hit (it hits there by A2 store forwarding), the faithful rerun evidence
@@ -19,7 +19,7 @@ Signature (static, NEEDS_GEM5=False), all must hold:
     own STL_CHECK as `isTainted=0 isSpeculative=1` and EVERY producer on the slice is an SSE load: gem5
     itself says the address lost its taint, and the only source is the never-speculative ldfp.
   OR (NDA) the same with nda_fwd_evidence.json showing the SSE producer's own STL_CHECK isSpeculative=0.
-Bug agent's population check (first 300 tests): E2 121/121 and E8 50/50 fp-only hits have this
+Population check (first 300 tests): E2 121/121 and E8 50/50 fp-only hits have this
 producer, 0/177 fv2fp tests without it hit. Verdict: real gem5 defense bug, known.
 """
 import sys

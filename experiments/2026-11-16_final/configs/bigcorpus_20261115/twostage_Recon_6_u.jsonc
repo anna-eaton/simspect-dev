@@ -1,0 +1,40 @@
+// bigcorpus 2026-11-15 (agent bigcorpus): copy of runconfigs/overnight_20261111/twostage_Recon_6_u.jsonc written by scripts/bigcorpus_20261115/make_configs.py.
+// Changed ONLY: paths.testset_dir, twostage_lp.corpus, stage2_config, stage1.reuse_cores (node paths)
+// Docs: wiki/state/RUNNING.md 'Big corpus 2026-11-15'; results -> wiki/state/EVAL_MANIFEST.md 'Big corpus bug coverage (2026-11-15)'.
+{
+  "paths": {
+    "testset_dir": "/tests/bigcorpus_20261115/testsets"
+  },
+  "twostage_lp": {
+    "family": "Recon_6_u",
+    "core_model": "Recon_6_u_core_ri",
+    "lp_model": "Recon_6_u_lpP",
+    "corpus": "Recon_6_u_core_lpP_s2A",
+    "stage2_config": "runconfigs/bigcorpus_20261115/stage2_final_A.jsonc",
+    "stage2_postpasses": false,
+    "stage1": {
+      "reuse_cores": [
+        "/tests/bigcorpus_20261115/cores/Recon_6_u_core_ri/k3/stage1_xml"
+      ],
+      "reuse_sha256": "21d860dfd83045ac261c0b9efabd66b6702f4baaaf26a61120e722cad5ac1347"
+    },
+    "stage15": {
+      "slots": 28,
+      "job_timeout": 600,
+      "budget_s": 9000,
+      "cap": 100,
+      "walk_p": 0.05,
+      "shuffle_seed": 20261116,
+      "spread": 2,
+      "dedup_level": "seed",
+      "xmx": "4g",
+      "target_distinct": 60000
+    },
+    "stream": {
+      "interval": 120,
+      "jobs": 24,
+      "min_batch": 200,
+      "max_batch": 1500
+    }
+  }
+}

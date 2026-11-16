@@ -1,0 +1,256 @@
+\section{Related Work}
+\notebr
+\auditnote{cite}{related}{To cite background from here, point back to it instead of repeating it: e.g.\ ``Building on the axiomatic models of Sec.~\ref{sec:bg-axiomatic}, \ldots'' or ``Unlike the contract-based validators of Sec.~\ref{sec:bg-litmus}, \ldots''. Keep each paper's detailed description in one place.}
+\notebr
+\auditnote{cite}{related}{\textbf{RELATED-WORK PASS}: this is still bullets; write it as prose, about 0.75 page (1.5 columns). Proposed five parts, each ending with one sentence on how SimSpect differs: \textbf{Triaged 2026-11-03}: about 33 papers are kept as CITE notes below; the other 82 are in a commented CUT LIST at the end of each part (bib entries kept).}
+\notebr
+\auditnote{cite}{related}{(1) \emph{Validating defense implementations}: AMuLeT, Revizor, Hide and Seek, SpecDoctor, IntroSpectre, Scam-V, and SpecCheck (PACT 2023), the closest gem5-based tool, which you must cite and differentiate (a register-based FSM monitor in gem5 that flags potential transient data leakage from a generic attack description, not from a defense's own guarantee); at RTL, UPEC and Contract Shadow Logic; concurrent model checking of defense designs (S\&P 2026). SimSpect: a simulator prototype checked against the defense's own guarantee, with directed enumeration rather than random programs.}
+\notebr
+\auditnote{cite}{related}{(2) \emph{Leakage contracts and speculation security definitions}: Guarnieri et al.\ S\&P 2021, Spectector, Cheang et al., Cauligi et al.'s SoK (one cite standing in for the software-side formal work), LCM, SynthLC, LEAVE. SimSpect: our leakage contract is the transmitter component, as in SynthLC; Guarnieri's contract is an observation clause plus an execution clause. Cite trap: the bib key \texttt{synthlc} is Wang et al., CCS 2025, not SynthLC; SynthLC (Hsiao et al.) is in the RTL2M$\mu$PATH paper, so cite it as \cite{rtl2upath}.}
+\notebr
+\auditnote{cite}{related}{(3) \emph{Axiomatic memory models and litmus synthesis}: Herding Cats, Wickerson et al., RTLCheck; for litmus synthesis, Lustig et al., CheckMate, Trippel et al.'s MeltdownPrime/SpectrePrime, TransForm. The rest of the MCM lineage (the other Check tools, Simner et al.'s Arm semantics, x86-TSO) is proposed for Background (Sec.~\ref{sec:bg-axiomatic}); point back to it here. SimSpect: MCM-style minimal litmus enumeration brought to speculation-security defenses.}
+\notebr
+\auditnote{cite}{related}{(4) \emph{Execution models of speculation}: The Code That Never Ran, Cats vs.\ Spectre, InSpectre, Pensieve, RTL2MuPATH. SimSpect: an abstract snapshot of $\mu$arch state (resolved/committed flags) rather than a full operational semantics.}
+\notebr
+\auditnote{cite}{related}{(5) \emph{Spectre hardware defenses}: the defenses you test, and the classes of the rest (delay or taint-track, invisible speculation, undo, data-oblivious; their cites are in the intro's second paragraph).}
+\notebr
+% Bullets for now -- to be written into prose.
+
+\subsection{Validating speculative-execution defenses}
+\notebr
+\auditnote{write}{writing}{Structure problems. Related Work is still bullet points, and AMuLeT is described four times (intro, II-B, V-B, VI-A), with the intro version misdescribing it (AMuLeT runs one program on two inputs with equal contract traces). The Results split the AMuLeT comparison across V-B, V-C and V-E, and V-F repeats the load gate from IV-C3. The paper has no Conclusion, and the Acknowledgments placeholder must go for double-blind review. \newline \textbf{PROPOSED TEXT} (edits the sentence just before this note): Write VI as prose. Keep one AMuLeT description in VI-A (move II-B there). Merge V-B, V-C and V-E into 'Comparison with AMuLeT' and fold V-F into V-A. Add a short Conclusion and delete the acknowledgments for submission. \newline \textit{Source:} related.tex:2 '\% Bullets for now'; intro.tex:21, background.tex:6, results.tex:122-138; fu-2025-amulet.pdf Def. 2.1; bare\_conf\_compsoc.tex:601.}
+\notebr
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item \textbf{AMuLeT}~\cite{amulet} --- the only prior automated validator of Spectre-defense
+\notebr
+  simulator prototypes; randomized differential testing over architecturally-equivalent
+  program/input pairs, flagging a violation when speculative execution
+\urgentbr
+\urgentnote{\textbf{VOCAB}: ``flagging a violation'' $\to$ ``flagging a \emph{contract violation}'' (AMuLeT's own term, its Def.~2.1), and the same for ``every detected violation'' a few lines below, so neither reads as our model-level violation.}
+\notebr
+leaks more than
+  architectural execution. Limitations \toolname{} addresses:
+  \begin{itemize}\setlength{\itemsep}{0pt}
+  \item generation is random, so it is agnostic to whether a test even contains the
+    ingredients for Spectre leakage --- wasting runs and requiring manual root-causing of
+    every detected violation;
+  \item it is not specialized to common defense techniques or the bug classes implementing
+    them invites, which targeted generation could pursue;
+  \item it does not exploit the white-box simulator to bias scheduling toward likely-buggy
+    windows;
+  \item it conflates verifying that a defense prevents speculative leakage with discovering
+    new unsafe instruction operands;
+  \item it tests against a sequential model, so it cannot test defenses that protect data
+    speculatively even after it has leaked architecturally~\cite{protean}.
+  \end{itemize}
+\end{itemize}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{fadiheh2019upec}: UPEC formal RTL detection of transient-execution leaks; formal verification counterpart to SimSpect's simulation-based validation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{hur2022specdoctor}: Differential fuzzing of RTL CPUs for transient-execution bugs; fuzzing alternative to SimSpect's model-guided tests.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{ghaniyoun2021introspectre}: Pre-silicon gadget fuzzing + RTL simulation to find transient execution vulnerabilities; close in spirit (simulation-based validation).}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{nemati2020scamv}: Scam-V: validates abstract side-channel models against hardware via generated test programs; directly analogous model-vs-implementation test generation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{mckevitt2023speccheck}: SpecCheck describes a generic transient-execution attack as a register-based FSM and implements it in gem5 to flag potential transient data leakage (mckevitt-2023-speccheck.pdf abstract). It is the closest gem5-based tool; the difference to state is that it checks a generic attack pattern, while \toolname{} tests a defense's simulated implementation against that defense's own guarantee.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{dong2026interplay}: Model checking of secure-speculation processor designs (S\&P 2026); formal verification of defenses, recent concurrent work.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{amulet} (already in the bib): Closest competitor: fuzz-tests gem5 secure-speculation defenses against contracts; SimSpect instead derives tests from axiomatic defense models.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{revizor} (already in the bib): Contract-based black-box CPU fuzzing; SimSpect replaces random generation with model-directed generation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{oleksenko2023hideseekspectresefficient} (already in the bib): Efficient contract-based fuzzing (Revizor follow-up).}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{contractshadow} (already in the bib): Formal RTL verification of secure speculation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 14 more candidates for part (1) validating defenses are in the source comment just below this note. Their bib entries stay, so any of them can come back.}
+\notebr
+% ---- CUT from part (1) validating defenses in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{fadiheh2020formal}: UPEC-OO for out-of-order processors; formal transient-execution vulnerability detection in RTL.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{fadiheh2023exhaustive}: Exhaustive UPEC-based detection of transient side channels in RTL (IEEE TC).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{hur2021difuzzrtl}: Coverage-guided differential RTL CPU fuzzing; background for hardware fuzzing.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{buiras2021observation}: Scam-V follow-up validating side-channel models via observation refinement (MICRO 2021).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{weber2021osiris}: Fuzzing for microarchitectural timing side channels; transmitter-discovery related work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{moghimi2020medusa}: Automated attack synthesis (Transynther) for MDS-style leaks; automated exploit generation related work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{rajapaksha2023sigfuzz}: Fuzzing framework for microarchitectural timing side channels in RTL.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{oleksenko2020specfuzz}: Speculation-exposing fuzzing of software for Spectre gadgets; software-side testing contrast.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{wang2021oo7}: Binary analysis to detect and patch Spectre gadgets; software-side detection.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{solt2024cascade}: Cascade: CPU fuzzing via valid program generation; hardware fuzzing related work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{xiao2020speechminer}: Framework to measure speculative execution vulnerabilities on real CPUs.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{zagieboylo2023specverilog}: SpecVerilog: IFC type system for secure speculation in HDL; design-time verification of defenses.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{weber2026trevex}: Black-box detection of data-flow transient execution vulnerabilities (S\&P 2026); recent testing work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{blackbox} (already in the bib): Background on formal verification of secure processors.}\notebr
+
+\subsection{Formal models of secure speculation}
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item Hardware--software leakage contracts and speculative non-interference
+  ~\cite{guarnieri2021contracts}
+\urgentbr
+\urgentnote{\textbf{VOCAB}: ``Hardware--software leakage contracts'' $\to$ ``Hardware--software contracts'' (Guarnieri et al.'s own name; you use leakage contract for the transmitter component, as SynthLC does). Also cite Spectector~\cite{guarnieri2020spectector} for speculative non-interference here: Spectector defines it (guarnieri-2020-spectector.pdf \S1); the contracts paper builds on it.}
+\notebr
+ --- the security properties
+  \toolname{}'s contracts target. % \todo{add other contract/SNI works}
+\item Axiomatic, happens-before microarchitectural execution models~\cite{herdingcats,lustig}
+  --- the modeling style \toolname{} adapts to express leakage predicates.
+\end{itemize}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{guarnieri2021contracts}: Published S\&P 2021 hardware--software contracts (an observation clause and an execution clause per instruction). Map our three components onto its two clauses once, in the leakage-contracts paragraph proposed for Sec.~\ref{sec:bg-defenses}, and point back to it here; the protection set has no counterpart in a contract.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{guarnieri2020spectector}: Defines speculative non-interference (SNI) and checks it on software by symbolic execution (guarnieri-2020-spectector.pdf \S1). Cite it as the end-to-end relational property that \toolname{}'s per-execution leakage predicate is contrasted with (as the intro does), not as what a leak means in \toolname{}.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{cheang2019formal}: Early formal definition of secure speculation as an information-flow property, trace-property-dependent observational determinism (TPOD), not a trace property; background for what it means for a defense to prevent speculative leakage. (From the 2026-11-09 audit's reading of ePrint 2019/310; the PDF is not in the local library.)}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{disselkoen2019code}: Models speculative evaluation attacks with a pomset-style (relaxed-memory-inspired) semantics; closest prior bridge between MCM-style semantics and Spectre.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{ponce2022cats}: Published S\&P 2022 version of Cats vs. Spectre (replaces CoRR entry); an axiomatic (cat) model of speculative execution, the closest axiomatic analogue to SimSpect's Alloy models.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{guanciale2020inspectre}: InSpectre: formal framework modeling microarchitectural features (OoO, speculation) and analyzing countermeasures; closest formal-model-of-defense prior work.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{cauligi2022sok}: SoK of formal foundations for software Spectre defenses; survey anchor for the formal-models subsection.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{lcms} (already in the bib): Leakage containment models: axiomatic contracts in the uhb/Alloy style; SimSpect's most direct conceptual parent.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{synthlc} (already in the bib): Wang et al., CCS 2025, synthesis of sound and precise leakage contracts for open-source RISC-V processors. Despite its key, this entry is not SynthLC: SynthLC (Hsiao et al., MICRO 2024) is in the RTL2M$\mu$PATH paper, \texttt{rtl2upath}. Consider renaming this key.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{leave} (already in the bib): Verifies RTL against leakage contracts.}
+\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 11 more candidates for part (2) contracts and security definitions are in the source comment just below this note. Their bib entries stay, so any of them can come back.}
+\notebr
+% ---- CUT from part (2) contracts and security definitions in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{cauligi2020constanttime}: Speculative constant-time semantics (Pitchfork); a software-side formal speculation model contrasting with SimSpect's hardware-defense models.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{mohr2024synthesizing}: Synthesizes leakage contracts for RISC-V processors from test cases; contrasts with SimSpect, which starts from a defense model and generates tests.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{mosier2024serberus}: Trippel-group compile-time Spectre protection for crypto code built on contract reasoning; related formal-speculation work from the same line as lcms.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{fabian2022combinations}: Semantics combining multiple speculation sources; relevant to SimSpect modeling multiple speculation primitives in one contract.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{patrignani2021exorcising}: Secure-compilation view of speculative non-interference; formal speculation background.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{vassena2021blade}: Type-based automatic insertion of protections against speculative leaks (Blade); formal speculation semantics with transmitter/protect notions similar to SimSpect's protection set.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{barthe2021highassurance}: Speculative constant-time for verified crypto (Jasmin); software-side formal speculation.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{shivakumar2023declassified}: Shows declassification interacts with speculation; relevant to SimSpect's distinction between speculative and non-speculative (declassified) data.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{shivakumar2023typing}: Type system for Spectre v1 in high-speed crypto (selective SLH); software formal speculation work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{daniel2021haunter}: Relational symbolic execution for Spectre-PHT/STL (Binsec/Haunted); software-level speculative leak detection including store-to-load forwarding.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{mcilroy2019spectre}: Formal model of speculation showing software mitigations are insufficient; motivation for hardware defenses that SimSpect validates.}\notebr
+\auditnote{cite}{related}{\textbf{PROPOSED NEW SUBSECTION} (3): axiomatic memory models and model formalization.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{manerkar2017rtlcheck}: Verifies RTL against axiomatic uhb models using litmus tests; analogous to SimSpect checking implementations against axiomatic models.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{memalloy} (already in the bib): Alloy-based comparison of MCMs and distinguishing litmus tests.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{herdingcats} (already in the bib): cat axiomatic MCM framework.}
+\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 23 more candidates for part (3) axiomatic models are in the source comment just below this note. Their bib entries stay, so any of them can come back. Most of these are already proposed in the Background notes (Sec.~\ref{sec:bg-axiomatic}), so here just point back to that section.}
+\notebr
+% ---- CUT from part (3) axiomatic models in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{lustig2014pipecheck}: Introduces microarchitectural happens-before (uhb) axiomatic pipeline models; foundation of the Check-tools lineage SimSpect builds on.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{lustig2016coatcheck}: Extends uhb modeling to the hardware-OS interface; part of the Check suite of axiomatic microarchitecture models.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{manerkar2015ccicheck}: uhb graphs for the coherence-consistency interface; axiomatic microarchitecture modeling.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{trippel2017tricheck}: Full-stack (HLL/ISA/uarch) MCM verification with litmus tests; methodological ancestor of SimSpect's model-to-test pipeline.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{lustig2015armor}: Formal ordering-specification (MOSTs) for translating between MCMs; axiomatic MCM modeling.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{manerkar2020realitycheck}: Modular/hierarchical axiomatic microarchitectural MCM verification (preprint).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{manerkar2018pipeproof}: Proves uhb microarchitectural models correct for all programs, not just litmus tests; contrasts bounded test generation with unbounded proof.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{norman2023pipesynth}: Synthesizes uhb microarchitectural axioms; related to deriving axiomatic models automatically.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{hsiao2021rtl2uspec}: rtl2uspec synthesizes uhb models from RTL; related work on obtaining axiomatic hardware models.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{batty2011mathematizing}: Axiomatic formalization of the C++11 memory model; canonical axiomatic MCM work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{sarkar2011power}: Operational POWER model validated against hardware with litmus tests; model-vs-hardware testing analogous to SimSpect model-vs-gem5.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{pulte2018simplifying}: Axiomatic and operational ARMv8 models; canonical axiomatic MCM work.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{flur2016modelling}: Operational ARMv8 concurrency+ISA model tested against hardware.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{simner2020ifetch}: Simner et al.: relaxed semantics for instruction fetch in Armv8-A, extending axiomatic models beyond plain loads/stores.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{simner2022vm}: Simner et al.: relaxed virtual-memory semantics for Armv8-A; axiomatic system-level modeling.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{simner2025exceptions}: Simner et al. (ISCA 2025): precise exceptions in relaxed architectures; axiomatic modeling at an architecture venue, closest Simner paper to 'relaxed exception semantics'.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{armstrong2019sail}: Sail ISA semantics for ARMv8-A/RISC-V/CHERI; formal ISA substrate used by axiomatic tools.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{alglave2010fences}: Generic axiomatic framework for weak memory models with fences (precursor of herd/cat).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{lahav2017repairing}: RC11 repair of C11 axiomatic model; example of axiomatic model debugging/refinement.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{alglave2018linux}: Linux-kernel memory model in cat; axiomatic model of a real-world specification.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{owens2009x86tso}: x86-TSO; the axiomatic/operational model of the ISA SimSpect targets (x86 gem5).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{memsynth} (already in the bib): Synthesis of axiomatic memory models.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{jackson2002alloy} (already in the bib): The modeling language SimSpect uses.}\notebr
+\auditnote{cite}{related}{\textbf{PROPOSED NEW SUBSECTION} (4): execution models of speculation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{rtl2upath} (already in the bib): Synthesizes uPATH models and leakage signatures from RTL; complementary bottom-up modeling of speculation. Includes SynthLC (leakage-contract synthesis).}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{pensieve} (already in the bib): models early-stage defense designs and checks them against speculative non-interference by bounded model checking (yang-2023-pensieve.pdf abstract). It is the prior work closest to our early-stage framing, so say the difference: it checks a model of the design against a generic property, while \toolname{} tests the simulated implementation against the defense's own guarantee.}
+\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 3 more candidates for part (4) execution models of speculation are in the source comment just below this note. Their bib entries stay, so any of them can come back.}
+\notebr
+% ---- CUT from part (4) execution models of speculation in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{canella2019systematic}: Systematic taxonomy of transient execution attacks and defenses; framing for the attack/defense space SimSpect covers.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{primeandprobe} (already in the bib): Cache side-channel transmitter background.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{gem5} (already in the bib): Simulator substrate.}\notebr
+
+\subsection{Spectre hardware defenses}
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item The hardware defenses \toolname{} expresses and tests: STT~\cite{yu2019stt}, SpecShield,
+  NDA~\cite{nda}, DoM, SDO~\cite{sdo}, SPT~\cite{spt}
+\reviewtag{[TODO: SPO was a typo for SDO]}%
+, and related schemes~\cite{doppelganger,sdo,protean}.
+\urgentbr
+\urgentnote{This list is out of date: \toolname{} has Alloy models only for STT, ReCon and SPT, and tests InvisiSpec, CleanupSpec and SpecLFB with STT's test set; SpecShield, NDA, DoM and SDO are not expressed or tested. \textbf{PROPOSED TEXT} (edits the item just before this note): The hardware defenses \toolname{} expresses: STT~\cite{yu2019stt}, ReCon~\cite{recon} and SPT~\cite{spt}; it also tests InvisiSpec~\cite{yan2018invisispec}, CleanupSpec~\cite{saileshwar2019cleanupspec} and SpecLFB~\cite{cheng2024speclfb} with STT's test set and a defense-specific leakage criterion. \textit{Source:} simspect STAGE1\_alloy/models/; specs/leakage/*.json.}
+\notebr
+  % \todo{tighten/complete the defense citations}
+\end{itemize}
+\notebr
+\auditnote{cite}{related}{Defense breaks and SoKs, good motivation for systematic validation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{hu2021sok}: SoK of hardware defenses against speculative execution attacks; survey anchor for the defense list.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{li2022unxpec}: Attack on undo-based defenses (CleanupSpec); example of a defense flaw found after publication, motivating systematic validation.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{behnia2021interference}: Speculative interference attacks break invisible-speculation schemes; motivates validating defenses against their stated threat model.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{chakraborty2022timed}: Timed speculative attacks via store-to-load forwarding bypass cache-based countermeasures; relevant to SimSpect's STLF/SLF findings.}
+\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 2 more candidates for part (5) hardware defenses and breaks are in the source comment just below this note. Their bib entries stay, so any of them can come back.}
+\notebr
+% ---- CUT from part (5) hardware defenses and breaks in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{aimoniotis2022doin}: DOIN!: attack on speculative delay schemes via inclusive caches; another post-publication defense break.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{spectre} (already in the bib): The attack class defenses target.}\notebr
+
+\subsection{Litmus testing and test generation}
+\begin{itemize}\setlength{\itemsep}{1pt}
+\item Memory-consistency litmus-test methodology~\cite{herdingcats} that \toolname{}'s
+  minimal-execution enumeration builds on. % \todo{add Spectre litmus benchmark + fuzzing cites}
+\end{itemize}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{trippel2018meltdownprime}: Trippel et al. synthesize Spectre/Meltdown variants with CheckMate-style microarchitectural happens-before models; precursor of SimSpect's model-driven exploit synthesis.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{hossain2020transform}: Published ISCA 2020 TransForm (replaces CoRR `transform`); Alloy-based axiomatic transistency models with synthesized litmus tests, the most direct methodological precedent for SimSpect.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{lustig} (already in the bib): Alloy-based exhaustive minimal litmus-test synthesis; SimSpect's generation methodology descends from it.}
+\notebr
+\auditnote{cite}{related}{\textbf{CITE}~\cite{checkmate} (already in the bib): uhb-based security litmus test synthesis; SimSpect's direct precursor.}
+\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 6 more candidates for part litmus testing and test generation are in the source comment just below this note. Their bib entries stay, so any of them can come back.}
+\notebr
+% ---- CUT from part litmus testing and test generation in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{armstrong2021isla}: Isla: combines full ISA semantics with axiomatic concurrency models to evaluate litmus tests; tool-level analogue of SimSpect's concretization.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{maradhaim2010generating}: Generates litmus tests that distinguish memory models; the original model-driven litmus generation idea SimSpect applies to defenses.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{maradhaim2011litmus}: DAC 2011 follow-up: litmus tests for comparing memory consistency models.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{alglave2011litmus}: litmus tool for running tests on real hardware; analogue of SimSpect's gem5 test harness.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{perple} (already in the bib): Litmus-test execution on hardware.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{mcmutants} (already in the bib): Mutation testing of MCM test suites; analogous to evaluating test-suite quality.}\notebr
+\auditnote{cite}{related}{\textbf{CUT LIST} (2026-11-03 triage): 23 more candidates for part extra hardware defenses (not in the intro's lean list) are in the source comment just below this note. Their bib entries stay, so any of them can come back.}
+\notebr
+% ---- CUT from part extra hardware defenses (not in the intro's lean list) in the 2026-11-03 triage (bib entries kept). To restore one, delete its leading "% ". ----
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{aimoniotis2024janus}: JANUS [delay, RL-guided]: reinforcement-learning policy for selective speculative defense. (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{castes2024sharing}: Core-gapped confidential VMs [partition/isolation]: blocks cross-domain transient attacks by not sharing cores (system-level). (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{chen2025mustt}: muSTT [taint-tracking]: microarchitecture design for speculative taint tracking. (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{choudhary2023declassiflow}: Declassiflow [static analysis, software]: models non-speculative knowledge to relax hardware defenses like STT/SPT; software side of the defense space.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{cui2023ssft}: Speculative Secret Flow Tracking [taint-tracking]: tracks speculatively accessed secret flows (JCST). (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{daniel2023prospect}: ProSpeCT [taint-tracking/delay, provable]: tracks secrets and blocks their speculative leakage for constant-time code (Proteus RISC-V).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{fustos2019spectreguard}: SpectreGuard [taint/secret annotation, delay]: software-marked secret regions block forwarding of speculative secrets.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{ganjisaffar2025specasan}: SpecASan [delay on memory-safety violation]: uses memory tagging to block speculative out-of-bounds accesses.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{green2023safebet}: SafeBet [delay with safe-access prediction] (preprint): allows only provably safe speculative accesses. (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{hajiabadi2024levioso}: Levioso [delay, compiler-informed]: compiler-provided dependence info restricts delays to truly dependent instructions. (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{hajiabadi2025cassandra}: Cassandra [sequential-execution enforcement]: replaces branch prediction for crypto code with recorded control flow. (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{jin2023specterminator}: SpecTerminator [delay by instruction class]: blocks speculative side channels on RISC-V based on transmitter classes.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{kim2024perspective}: Perspective [OS-level speculation control]: principled framework for secure speculation in the OS (HW/OS co-design). (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{kiriansky2018dawg}: DAWG [partition]: way-partitioned caches isolate protection domains.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{kvalsvik2025shadowbinding}: ShadowBinding [taint-tracking/delay microarchitecture]: realizable in-core implementations of secure speculation schemes like STT/NDA. (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{li2019conditional}: Conditional Speculation [delay]: blocks only security-dependent speculative loads (with cache-hit filters).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{schwarz2020context}: ConTExT [taint/secret annotation, delay]: memory marked secret is never used speculatively (HW+SW).}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{taram2019csf}: Context-Sensitive Fencing [delay/fence]: microcode-injected fences on demand.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{tran2020clearing}: Clearing the Shadows [delay, HW/SW co-design]: compiler-assisted reduction of delay-scheme overhead.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{trujillo2026register}: Register hiding + ShadowCFI [limit secret reachability]: restricts which secrets transient execution can reach (S\&P 2026). (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{wu2025rcp}: Reversible Coherence Protocol [undo/reversible coherence]: published TDSC version of the ReversiSpec/RCP preprint (arXiv 2006.16535). (Mechanism tag inferred from title/abstract snippet, not the full paper; confirm before citing in a mechanism-specific sentence.)}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{zhao2020invarspec}: InvarSpec [delay relaxation]: program analysis identifies speculation-invariant instructions safe to execute early.}\notebr
+% \auditnote{cite}{related}{\textbf{CITE}~\cite{zhao2022pinned}: Pinned Loads [delay relaxation]: pins loads early so they become non-speculative sooner (reduces delay of secure schemes).}\notebr

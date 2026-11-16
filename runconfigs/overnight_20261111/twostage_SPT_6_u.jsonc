@@ -1,0 +1,48 @@
+// DO NOT USE TONIGHT (protcheck + coordinator 2026-11-12): SPT at but 8 has an unproven 6-step untaint fixpoint (DECIDE SPT-BOUND); SPT runs at exactly 6 until Anna decides. launch_alloy.sh skips SPT_6_u unless SPT_LPP_OK=1.
+// overnight-exp 2026-11-11: overnight Stage 1b (Alloy) for SPT_6_u, node cafe3. Copy of runconfigs/twostage_lp/STT_6_u.jsonc with: node-local paths (cores copied from cafe2, testsets under /tests/overnight_20261111), corpus name *_fv4, stage2_config = the final Stage-2 config (fv4 + the ilv-vocab and abs-vocab keys, written when both are DONE), stage2_postpasses false, Stage 1.5 target_distinct 60000 (regen-lp: 25000) and budget_s 9000 (regen-lp: 4500), new queue shuffle seed 20261117.
+// X2a (Alloy only, Anna 2026-11-12): python3 twostage_lp.py --config <this> --ws /tests/overnight_20261111/ws_SPT_6_u --alloy-only   (scripts/overnight_20261111/launch_alloy.sh). X2b later: scripts/overnight_20261111/launch_stage2.sh. Docs: wiki/state/RUNNING.md 'Overnight autopilot 2026-11-11'.
+// SPT: Stage-1 cores = cafe2 /tests/simspect_alloy_20261109u/out/SPT_6_u_core_ri (made by proposed/ultimate/SPT_6_u_core_ri.als, sha256 b9ace9ed..., checked on cafe2 2026-11-11). k1/k2/k3/k5_rest/k6_rest EXHAUSTED; k4 (57,194 cores) and the k5/k6 Branchxs/Loads/Stores partitions stopped at DISK_GUARD on 2026-11-09, so Stage 1a is NOT complete for SPT (URGENT 'fix SPT so its Stage 1a reaches UNSAT').
+// SPT models are NOT in models/: the launcher installs proposed/ultimate/SPT_6_u_core_ri.als and loosepin/SPT_6_u_lpPc.als (generated 2026-11-11 by overnight-exp with the same make_loosepin.py command as STT/Recon lpPc; defense block byte-identical) into the NODE SNAPSHOT's models/ only. Pending DECIDEs: SPT-BOUND (fixpoint 6 at but 8), 'approve SPT_6_u_lpP (generated, unreviewed)'.
+{
+  "paths": {
+    "testset_dir": "/tests/overnight_20261111/testsets"
+  },
+  "twostage_lp": {
+    "family": "SPT_6_u",
+    "core_model": "SPT_6_u_core_ri",
+    "lp_model": "SPT_6_u_lpP",
+    "corpus": "SPT_6_u_core_lpP_fv4",
+    "stage2_config": "runconfigs/overnight_20261111/stage2_final_A.jsonc",
+    "stage2_postpasses": false,
+    "stage1": {
+      "reuse_cores": [
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k3/stage1_xml",
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k4/stage1_xml",
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k5_Branchxs/stage1_xml",
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k5_Loads/stage1_xml",
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k5_Stores/stage1_xml",
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k6_Loads/stage1_xml",
+        "/tests/overnight_20261111/cores/SPT_6_u_core_ri/k6_Stores/stage1_xml"
+      ],
+      "reuse_sha256": "b9ace9edeff8cb2349945233b81f197de874edc86c79721b02da6e15564a0574"
+    },
+    "stage15": {
+      "slots": 28,
+      "job_timeout": 600,
+      "budget_s": 9000,
+      "cap": 100,
+      "walk_p": 0.05,
+      "shuffle_seed": 20261117,
+      "spread": 2,
+      "dedup_level": "seed",
+      "xmx": "4g",
+      "target_distinct": 60000
+    },
+    "stream": {
+      "interval": 120,
+      "jobs": 24,
+      "min_batch": 200,
+      "max_batch": 1500
+    }
+  }
+}

@@ -20,11 +20,11 @@ the xmit pc, by an instance that never retired, followed by
 `L1D:cleanup_skip line=<same line> seq=<same seq> why=nohitinfo`. Anything else,
 including a missing evidence entry, stays NEW.
 
-Cache setup (2026-11-09, cache-random): the textbook chain needs the RMW line to be
+Cache setup: the textbook chain needs the RMW line to be
 absent at the start (gem5.cache_setup cold, or random's cold half). Every evidence
 variant must carry the record's own `cache_setup` (the strategy that test actually
 ran with; under `random` it differs per test); a variant without it (evidence built
-by the pre-2026-11-09 uv3_rmw_evidence.py) is not bucketed. The xmit pc the
+by an older uv3_rmw_evidence.py) is not bucketed. The xmit pc the
 evidence compares against is the record's own (re-resolved under cold), never the
 original annotation. The reason string names the cache_setup, and bucket_hits.py
 splits its summary by it.

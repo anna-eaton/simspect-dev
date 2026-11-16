@@ -1,6 +1,6 @@
 #!/bin/bash
 # Usage: ./runq_mf.sh <query.als (absolute)> <limit> <timeout_s> [label]
-# model-fixes (2026-11-08) runner: waits until no other a6Count* java runs on the Mac (one Java at a time),
+# Waits until no other a6Count* java runs on the Mac (one Java at a time),
 # then runs a6CountModels from STAGE1_alloy with Java 17 under gtimeout, writing XML to <query>.out/ and the
 # java log to <query>.out.log. Appends one line per run to queries/model_fixes_runs.log:
 #   <start> <label> <query> limit=<N> rc=<rc> secs=<s> <Total models line>

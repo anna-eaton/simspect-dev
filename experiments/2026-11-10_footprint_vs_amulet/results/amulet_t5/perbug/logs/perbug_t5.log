@@ -1,0 +1,15 @@
+== SpecLFB: 248 violations, classes {'UV6': 150, 'squashed_load_not_flagged_speculative': 42, 'unsafe_load_resent_after_LFB_stall': 51, 'unclassified': 5}, mismatches []
+  UV6: found 32/32 (viol 150); programs 37.6/29.5/1; PxI 5258.8/4130.0/140; CPU-s 96.8/75.94/6.73
+  jmp_shadow: found 24/32 (viol 47); programs 90.3/79.0/5; PxI 12640.8/11060.0/700; CPU-s 248.1/198.375/13.53
+  violations_with_jmp_shadow: 47
+  jmp_shadow_among_non_UV6: 40
+  non_UV6: 98
+  non_UV6_by_class_and_jmp: {'squashed_load_not_flagged_speculative|jmp_shadow=True': 40, 'unsafe_load_resent_after_LFB_stall|jmp_shadow=False': 51, 'squashed_load_not_flagged_speculative|jmp_shadow=False': 2, 'unclassified|jmp_shadow=False': 5}
+== CleanupSpec: 246 violations, classes {'UV3': 236, 'UV4': 4, 'UV5': 4, 'unclassified': 2}, mismatches []
+  UV3: found 31/32 (viol 236); programs 20.0/17/1; PxI 2795.5/2380/140; CPU-s 80.4/69.93/6.8
+  UV4: found 4/32 (viol 4); programs 80.5/88.5/10; PxI 11270.0/12390.0/1400; CPU-s 364.3/353.745/37.86
+  UV5: found 4/32 (viol 4); programs 80.2/81.0/43; PxI 11235.0/11340.0/6020; CPU-s 362.0/383.865/209.87
+  KV2: found 0/32 (viol 0); programs -; PxI -; CPU-s -
+== InvisiSpec: 271 violations, classes {'UV1': 262, 'UV1+other': 8, 'unclassified': 1}, mismatches []
+  UV1: found 28/32 (viol 270); programs 13.3/13.5/1; PxI 1860.0/1890.0/140; CPU-s 176.3/186.365/15.5
+  UV2: found 0/32 (viol 0); programs -; PxI -; CPU-s -

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """make_s15_model.py — build a Stage-1.5 model at a larger instruction bound and/or with a looser pin.
 
-stage15-bound session, 2026-11-08. SCRATCH/DRAFT TOOLING: writes NEW .als files only (never edits
+SCRATCH/DRAFT TOOLING: writes NEW .als files only (never edits
 an existing model). Input = a production model (STT_6.als, Recon_6.als, SPT_6_oneLP_v2.als, ...) and
 one Stage-1 core (an inst-*.txt from a6CountModels). Output = a copy of the production model with
 ONLY these mechanical, scope-tied edits:
@@ -178,7 +178,7 @@ def pin_pred(rels, mode):
 
 
 SHAPES = {
-    # verbatim from STAGE1_alloy/models/proposed/STT_6_s4.als (s4-variant, 2026-11-08)
+    # verbatim from STAGE1_alloy/models/proposed/STT_6_s4.als
     "s4_shape": """
 fun s4_pred_feed : Instruction -> Instruction {
 	(Loads & uncommitted) <: (outreg.rf.(~inreg)) :> (unresolved & (Branchns+Branchxs))
@@ -191,7 +191,7 @@ pred s4_shape {
     and some (t.inaddr & l2.outreg.^(rf + ddi))
 }
 """,
-    # verbatim from STAGE1_alloy/models/proposed/STT_6_a3c.als (s4-variant, 2026-11-08)
+    # verbatim from STAGE1_alloy/models/proposed/STT_6_a3c.als
     "a3c_shape": """
 fun a3c_prot_ops : Operand {
 	last_committed_protset_p[no_p].(~opstate) + last_committed_protset_p[no_p].(~opstate).(^(op_edges_p[no_p]))

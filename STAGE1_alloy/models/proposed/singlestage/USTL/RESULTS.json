@@ -1,0 +1,1068 @@
+{
+ "family": "USTL",
+ "generated_by": "models/USTL/collect_ustl_results.py",
+ "cafe2_workspace": "/tests/singlestage_20261109",
+ "models": [
+  {
+   "variant": "V0 n6_prod",
+   "model": "/tests/singlestage_20261109/models/USTL/base/STT_6_u_stl.als",
+   "model_sha256": "f08dad0cb2690399d059b0e4ac9cd170a86ab5fcdd52e9a9817e34ca83a8458e",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als",
+   "base_sha256": "f08dad0cb2690399d059b0e4ac9cd170a86ab5fcdd52e9a9817e34ca83a8458e",
+   "generator_command": "none (V0 = base model unchanged)",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/base/STT_6_u_stl.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 468
+    },
+    {
+     "seed": "1",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 775
+    },
+    {
+     "seed": "2",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 818
+    },
+    {
+     "seed": "3",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 845
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 40000,
+     "distinct": 23455,
+     "sizes": {
+      "6": 23455
+     },
+     "kind_sequences": 2822,
+     "xm_kinds": {
+      "TBranchx": 10877,
+      "TLoad": 12578
+     },
+     "alu_feeds_xmit": 296,
+     "two_load_merge": 1,
+     "unnecessary_avg": 2.92,
+     "unnecessary_hist": {
+      "1": 40,
+      "2": 1892,
+      "3": 21523
+     },
+     "bare_avg": 0.82,
+     "unresolved_brs_hist": {
+      "0": 23455
+     },
+     "contain_core_exact_pin": 23159,
+     "contain_core_path_pin": 23455,
+     "no_core_even_path_pin_examples": []
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 3960,
+     "default∩2": 3931,
+     "default∩3": 3888,
+     "1∩2": 5690,
+     "1∩3": 5655,
+     "2∩3": 5667
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 40000,
+     "distinct": 23455,
+     "unresolved_stores_hist": {
+      "1": 23455
+     },
+     "unresolved_brs_hist": {
+      "0": 23455
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl/store_hist.json"
+  },
+  {
+   "variant": "V1",
+   "model": "/tests/singlestage_20261109/models/USTL/STT_6_u_stl_flat_n8_prod.als",
+   "model_sha256": "56aba2419105b5b6697336d833856aa32083ef99410561270123c3eab5301b5e",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als",
+   "base_sha256": "f08dad0cb2690399d059b0e4ac9cd170a86ab5fcdd52e9a9817e34ca83a8458e",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/USTL/STT_6_u_stl_flat_n8_prod.als",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_prod",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/STT_6_u_stl_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 5395,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 5021,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 9870,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 5175,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 25461,
+     "distinct": 21770,
+     "sizes": {
+      "8": 21770
+     },
+     "kind_sequences": 10360,
+     "xm_kinds": {
+      "TLoad": 12541,
+      "TBranchx": 9229
+     },
+     "alu_feeds_xmit": 197,
+     "two_load_merge": 7,
+     "unnecessary_avg": 4.98,
+     "unnecessary_hist": {
+      "2": 9,
+      "3": 27,
+      "4": 422,
+      "5": 21312
+     },
+     "bare_avg": 1.24,
+     "unresolved_brs_hist": {
+      "0": 21770
+     }
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 689,
+     "default∩2": 649,
+     "default∩3": 664,
+     "1∩2": 1042,
+     "1∩3": 996,
+     "2∩3": 967
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 9870,
+      "distinct": 9870,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 5395,
+      "distinct": 5395,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 5175,
+      "distinct": 5175,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 5021,
+      "distinct": 5021,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_prod/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 25461,
+     "distinct": 21770,
+     "unresolved_stores_hist": {
+      "1": 21770
+     },
+     "unresolved_brs_hist": {
+      "0": 21770
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 9870,
+      "distinct": 9870,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 5395,
+      "distinct": 5395,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 5175,
+      "distinct": 5175,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 5021,
+      "distinct": 5021,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_prod/store_hist.json"
+  },
+  {
+   "variant": "V2",
+   "model": "/tests/singlestage_20261109/models/USTL/STT_6_u_stl_flat_n8_prod_nospacer.als",
+   "model_sha256": "7e3f7b82912273fa6a6408ec351cc4146fa615210b7947b8b855a9e6bbf3c67b",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als",
+   "base_sha256": "f08dad0cb2690399d059b0e4ac9cd170a86ab5fcdd52e9a9817e34ca83a8458e",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/USTL/STT_6_u_stl_flat_n8_prod_nospacer.als",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_prod_nospacer",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/STT_6_u_stl_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 8069,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 4191,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 4233,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 4160,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 20653,
+     "distinct": 15756,
+     "sizes": {
+      "8": 15756
+     },
+     "kind_sequences": 6089,
+     "xm_kinds": {
+      "TBranchx": 6444,
+      "TLoad": 9312
+     },
+     "alu_feeds_xmit": 197,
+     "two_load_merge": 4,
+     "unnecessary_avg": 4.97,
+     "unnecessary_hist": {
+      "1": 2,
+      "2": 3,
+      "3": 38,
+      "4": 351,
+      "5": 15362
+     },
+     "bare_avg": 0.0,
+     "unresolved_brs_hist": {
+      "0": 15756
+     }
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 1392,
+     "default∩2": 1285,
+     "default∩3": 1340,
+     "1∩2": 1134,
+     "1∩3": 1156,
+     "2∩3": 1151
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 8069,
+      "distinct": 8069,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 4233,
+      "distinct": 4233,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 4160,
+      "distinct": 4160,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 4191,
+      "distinct": 4191,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_prod_nospacer/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 20653,
+     "distinct": 15756,
+     "unresolved_stores_hist": {
+      "1": 15756
+     },
+     "unresolved_brs_hist": {
+      "0": 15756
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 8069,
+      "distinct": 8069,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 4233,
+      "distinct": 4233,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 4160,
+      "distinct": 4160,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 4191,
+      "distinct": 4191,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_prod_nospacer/store_hist.json"
+  },
+  {
+   "variant": "V3",
+   "model": "/tests/singlestage_20261109/models/USTL/STT_6_u_stl_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "1deeb81381d1089de6afaf9b4d0ea2a6529f9de41d4ea8115185e49adf4c73bc",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als",
+   "base_sha256": "f08dad0cb2690399d059b0e4ac9cd170a86ab5fcdd52e9a9817e34ca83a8458e",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/STT_6_u_stl.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --minimality leak_rs --out STAGE1_alloy/models/proposed/singlestage/USTL/STT_6_u_stl_flat_n8_leakrs_nospacer.als",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_leakrs_nospacer",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/STT_6_u_stl_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 4648,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 4842,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 4559,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 9609,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 23658,
+     "distinct": 22875,
+     "sizes": {
+      "8": 22875
+     },
+     "kind_sequences": 5570,
+     "xm_kinds": {
+      "TLoad": 13495,
+      "TBranchx": 9380
+     },
+     "alu_feeds_xmit": 192,
+     "two_load_merge": 2,
+     "unnecessary_avg": 4.98,
+     "unnecessary_hist": {
+      "2": 8,
+      "3": 46,
+      "4": 414,
+      "5": 22407
+     },
+     "bare_avg": 0.0,
+     "unresolved_brs_hist": {
+      "0": 22875
+     }
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 136,
+     "default∩2": 149,
+     "default∩3": 128,
+     "1∩2": 165,
+     "1∩3": 158,
+     "2∩3": 153
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 9609,
+      "distinct": 9609,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 4648,
+      "distinct": 4648,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 4842,
+      "distinct": 4842,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 4559,
+      "distinct": 4559,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_leakrs_nospacer/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 23658,
+     "distinct": 22875,
+     "unresolved_stores_hist": {
+      "1": 22841,
+      "2": 34
+     },
+     "unresolved_brs_hist": {
+      "0": 22875
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 9609,
+      "distinct": 9609,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 4648,
+      "distinct": 4648,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 4842,
+      "distinct": 4842,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 4559,
+      "distinct": 4559,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/STT_6_u_stl_flat_n8_leakrs_nospacer/store_hist.json"
+  },
+  {
+   "variant": "V0 n6_prod",
+   "model": "/tests/singlestage_20261109/models/USTL/base/Recon_6_u_stl.als",
+   "model_sha256": "625ae48035c606fc06ec78663c2f9fc01946f8dd97589e72ab51833eca51da67",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als",
+   "base_sha256": "625ae48035c606fc06ec78663c2f9fc01946f8dd97589e72ab51833eca51da67",
+   "generator_command": "none (V0 = base model unchanged)",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/base/Recon_6_u_stl.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 753
+    },
+    {
+     "seed": "3",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 1469
+    },
+    {
+     "seed": "2",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 1477
+    },
+    {
+     "seed": "1",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 1490
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 40000,
+     "distinct": 24013,
+     "sizes": {
+      "6": 24013
+     },
+     "kind_sequences": 2898,
+     "xm_kinds": {
+      "TBranchx": 10959,
+      "TLoad": 13054
+     },
+     "alu_feeds_xmit": 380,
+     "two_load_merge": 1,
+     "unnecessary_avg": 2.91,
+     "unnecessary_hist": {
+      "1": 50,
+      "2": 2079,
+      "3": 21884
+     },
+     "bare_avg": 0.81,
+     "unresolved_brs_hist": {
+      "0": 24013
+     },
+     "contain_core_exact_pin": 23633,
+     "contain_core_path_pin": 24013,
+     "no_core_even_path_pin_examples": []
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 3808,
+     "default∩2": 3838,
+     "default∩3": 3856,
+     "1∩2": 5399,
+     "1∩3": 5364,
+     "2∩3": 5405
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 40000,
+     "distinct": 24013,
+     "unresolved_stores_hist": {
+      "1": 24013
+     },
+     "unresolved_brs_hist": {
+      "0": 24013
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 10000,
+      "distinct": 10000,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl/store_hist.json"
+  },
+  {
+   "variant": "V1",
+   "model": "/tests/singlestage_20261109/models/USTL/Recon_6_u_stl_flat_n8_prod.als",
+   "model_sha256": "0b528ab684173ec323604923c0a348eb9d3fd9194fa3c08c1a91c41303e23c74",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als",
+   "base_sha256": "625ae48035c606fc06ec78663c2f9fc01946f8dd97589e72ab51833eca51da67",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/USTL/Recon_6_u_stl_flat_n8_prod.als",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_prod",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/Recon_6_u_stl_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 2449,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 2508,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 2495,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 5712,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 13164,
+     "distinct": 11932,
+     "sizes": {
+      "8": 11932
+     },
+     "kind_sequences": 6258,
+     "xm_kinds": {
+      "TBranchx": 4991,
+      "TLoad": 6941
+     },
+     "alu_feeds_xmit": 127,
+     "two_load_merge": 2,
+     "unnecessary_avg": 4.97,
+     "unnecessary_hist": {
+      "2": 6,
+      "3": 24,
+      "4": 249,
+      "5": 11653
+     },
+     "bare_avg": 1.3,
+     "unresolved_brs_hist": {
+      "0": 11932
+     }
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 234,
+     "default∩2": 241,
+     "default∩3": 224,
+     "1∩2": 288,
+     "1∩3": 280,
+     "2∩3": 283
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 5712,
+      "distinct": 5712,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 2449,
+      "distinct": 2449,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 2508,
+      "distinct": 2508,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 2495,
+      "distinct": 2495,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_prod/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 13164,
+     "distinct": 11932,
+     "unresolved_stores_hist": {
+      "1": 11932
+     },
+     "unresolved_brs_hist": {
+      "0": 11932
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 5712,
+      "distinct": 5712,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 2449,
+      "distinct": 2449,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 2508,
+      "distinct": 2508,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 2495,
+      "distinct": 2495,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_prod/store_hist.json"
+  },
+  {
+   "variant": "V2",
+   "model": "/tests/singlestage_20261109/models/USTL/Recon_6_u_stl_flat_n8_prod_nospacer.als",
+   "model_sha256": "37857df045158f27c24fa3f4e703d544b36634ac678e29d3f768f0414867937f",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als",
+   "base_sha256": "625ae48035c606fc06ec78663c2f9fc01946f8dd97589e72ab51833eca51da67",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/USTL/Recon_6_u_stl_flat_n8_prod_nospacer.als",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_prod_nospacer",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/Recon_6_u_stl_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 2830,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 2546,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 2652,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 6253,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 14281,
+     "distinct": 11607,
+     "sizes": {
+      "8": 11607
+     },
+     "kind_sequences": 4821,
+     "xm_kinds": {
+      "TBranchx": 4621,
+      "TLoad": 6986
+     },
+     "alu_feeds_xmit": 128,
+     "two_load_merge": 4,
+     "unnecessary_avg": 4.97,
+     "unnecessary_hist": {
+      "2": 2,
+      "3": 24,
+      "4": 253,
+      "5": 11328
+     },
+     "bare_avg": 0.0,
+     "unresolved_brs_hist": {
+      "0": 11607
+     }
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 777,
+     "default∩2": 728,
+     "default∩3": 763,
+     "1∩2": 490,
+     "1∩3": 544,
+     "2∩3": 484
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 6253,
+      "distinct": 6253,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 2830,
+      "distinct": 2830,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 2546,
+      "distinct": 2546,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 2652,
+      "distinct": 2652,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_prod_nospacer/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 14281,
+     "distinct": 11607,
+     "unresolved_stores_hist": {
+      "1": 11607
+     },
+     "unresolved_brs_hist": {
+      "0": 11607
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 6253,
+      "distinct": 6253,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 2830,
+      "distinct": 2830,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 2546,
+      "distinct": 2546,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 2652,
+      "distinct": 2652,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_prod_nospacer/store_hist.json"
+  },
+  {
+   "variant": "V3",
+   "model": "/tests/singlestage_20261109/models/USTL/Recon_6_u_stl_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "5a89eb08477edc78974fa08c27acdd42ec4e62e4e9965f05c3aed653fe43e68b",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als",
+   "base_sha256": "625ae48035c606fc06ec78663c2f9fc01946f8dd97589e72ab51833eca51da67",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/Recon_6_u_stl.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --minimality leak_rs --out STAGE1_alloy/models/proposed/singlestage/USTL/Recon_6_u_stl_flat_n8_leakrs_nospacer.als",
+   "out_dir": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_leakrs_nospacer",
+   "lint": "LINT OK   /tests/singlestage_20261109/models/USTL/Recon_6_u_stl_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_finished": true,
+   "runs": [
+    {
+     "seed": "2",
+     "instances": 2937,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 3029,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 2990,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 6775,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census": {
+    "UNION": {
+     "instances": 15731,
+     "distinct": 15368,
+     "sizes": {
+      "8": 15368
+     },
+     "kind_sequences": 4367,
+     "xm_kinds": {
+      "TLoad": 9534,
+      "TBranchx": 5834
+     },
+     "alu_feeds_xmit": 167,
+     "two_load_merge": 2,
+     "unnecessary_avg": 4.97,
+     "unnecessary_hist": {
+      "2": 4,
+      "3": 46,
+      "4": 349,
+      "5": 14969
+     },
+     "bare_avg": 0.0,
+     "unresolved_brs_hist": {
+      "0": 15368
+     }
+    },
+    "PAIRWISE_OVERLAP": {
+     "default∩1": 85,
+     "default∩2": 70,
+     "default∩3": 71,
+     "1∩2": 58,
+     "1∩3": 77,
+     "2∩3": 46
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 6775,
+      "distinct": 6775,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 3029,
+      "distinct": 3029,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 2937,
+      "distinct": 2937,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 2990,
+      "distinct": 2990,
+      "parse_errors": 0
+     }
+    }
+   },
+   "census_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_leakrs_nospacer/census.json",
+   "store_hist": {
+    "UNION": {
+     "instances": 15731,
+     "distinct": 15368,
+     "unresolved_stores_hist": {
+      "1": 15335,
+      "2": 33
+     },
+     "unresolved_brs_hist": {
+      "0": 15368
+     }
+    },
+    "per_run_dir": {
+     "default": {
+      "instances": 6775,
+      "distinct": 6775,
+      "parse_errors": 0
+     },
+     "1": {
+      "instances": 3029,
+      "distinct": 3029,
+      "parse_errors": 0
+     },
+     "2": {
+      "instances": 2937,
+      "distinct": 2937,
+      "parse_errors": 0
+     },
+     "3": {
+      "instances": 2990,
+      "distinct": 2990,
+      "parse_errors": 0
+     }
+    }
+   },
+   "store_hist_path": "/tests/singlestage_20261109/out/USTL/Recon_6_u_stl_flat_n8_leakrs_nospacer/store_hist.json"
+  }
+ ],
+ "notes": {
+  "agent": "singlestage-ustl, 2026-11-09. UNAPPROVED DRAFT results.",
+  "generator": "make_s15_model.py anchors all matched the *_u_stl bases; used unchanged, wrapped by USTL/make_ustl_variants.py (adds header + verification). No own generator needed.",
+  "verification": "per variant: defense block (from the 'Specific defense model' banner to EOF of the base) byte-identical in the output; every other diff line classified as IX sigs / idx sum / idx_surjective sum / lt_ix / fold / scope line, or the requested shape/minimality clause; IX0..IX7 sigs, both (IX0+..+IX7) sums and lt_ix (7 disjuncts) regenerated; fold 8 deep (base: 7 deep); check_bound_consistency.py OK on all 6 new + 2 base models. Comment-only losses: the base fold's '-- [u-1]' tags and the stray 'å' on the IX0 comment.",
+  "v3_minimality_before": "let gen_useful_litmus {\n  not secure_speculation_scheme_p[no_p]\n  //all i: resolved | ...\n  all i: (unresolved - first_uncommitted) | secure_speculation_scheme_p[RR->i]\n  secure_speculation_scheme_p[RC->first_uncommitted + RR->first_uncommitted]\n  all s: State | secure_speculation_scheme_p[RS->s]\n}",
+  "v3_minimality_after": "let gen_useful_litmus {  // [stage15-bound] minimality=leak_rs\n  not secure_speculation_scheme_p[no_p]\n  all s: State | secure_speculation_scheme_p[RS->s]\n}",
+  "v0_core_coverage": "cores = /tests/simspect_alloy_20261109u/out/{STT,Recon}_6_u_stl_core_ri, 858 inst-*.txt each, all in k3 (k1,k2,k4,k5_*,k6_* report 'Total models: 0'). STT: cross-tab over 23455 distinct programs: (alu_feeds_xmit=False, exact-pin covered) 23159, (alu_feeds_xmit=True, NOT exact-pin covered) 296, nothing else; all 23455 covered under path pin. Recon: 380 not exact-pin covered = alu_feeds_xmit 380 (numerically equal; cross-tab not run for Recon).",
+  "cafe2_logs": [
+   "/tests/singlestage_20261109/logs/USTL__driver.log",
+   "/tests/singlestage_20261109/logs/USTL__census.log",
+   "/tests/singlestage_20261109/logs/USTL__<stem>.nohup.txt",
+   "/tests/singlestage_20261109/out/USTL/<stem>/run_flat.log"
+  ]
+ }
+}

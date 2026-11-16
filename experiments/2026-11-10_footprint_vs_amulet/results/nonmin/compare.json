@@ -1,0 +1,283 @@
+{
+ "estimator": "(N+1)/(K+1) both tools; AMuLeT N=896000, K={\"UV1\": 270, \"UV3\": 236, \"UV4\": 4, \"UV5\": 4, \"UV6\": 150, \"jmp_shadow\": 47}",
+ "bugs": {
+  "UV1": {
+   "minimal": {
+    "K": 2002,
+    "N": 4000,
+    "rate": 0.5005,
+    "rate_ci95": [
+     0.4850048472127571,
+     0.5159951527872428
+    ],
+    "simspect_expected": 1.997503744383425,
+    "amulet_expected": 3306.276752767528,
+    "multiple": 1655.20428287762,
+    "multiple_ci95_simspect_only": [
+     1603.5602513191054,
+     1706.0227782011896
+    ],
+    "first_seed_order": 1,
+    "det_setups": {
+     "full": 2002
+    }
+   },
+   "nonmin": {
+    "K": 1982,
+    "N": 4000,
+    "rate": 0.4955,
+    "rate_ci95": [
+     0.4798888190892615,
+     0.511117760154945
+    ],
+    "simspect_expected": 2.017650025214322,
+    "amulet_expected": 3306.276752767528,
+    "multiple": 1638.6770309267702,
+    "multiple_ci95_simspect_only": [
+     1586.645246467887,
+     1689.8967683269038
+    ],
+    "first_seed_order": 1,
+    "det_setups": {
+     "full": 1982
+    }
+   },
+   "rate_ratio": 0.9900099900099901
+  },
+  "UV3": {
+   "minimal": {
+    "K": 1861,
+    "N": 50232,
+    "rate": 0.03704809683070553,
+    "rate_ci95": [
+     0.035413196373617895,
+     0.03873677045608016
+    ],
+    "simspect_expected": 26.97798066595059,
+    "amulet_expected": 3780.5949367088606,
+    "multiple": 140.13632019094817,
+    "multiple_ci95_simspect_only": [
+     133.8829509027764,
+     146.44803825071006
+    ],
+    "first_seed_order": 11,
+    "det_setups": {
+     "cold": 1770,
+     "full": 91
+    }
+   },
+   "nonmin": {
+    "K": 1659,
+    "N": 52940,
+    "rate": 0.03133736305251228,
+    "rate_ci95": [
+     0.029869522873258447,
+     0.032856878038411266
+    ],
+    "simspect_expected": 31.892168674698794,
+    "amulet_expected": 3780.5949367088606,
+    "multiple": 118.54304971452576,
+    "multiple_ci95_simspect_only": [
+     112.92456693655038,
+     124.2185467480782
+    ],
+    "first_seed_order": 7,
+    "det_setups": {
+     "cold": 1561,
+     "full": 98
+    }
+   },
+   "rate_ratio": 0.8458562175463712
+  },
+  "UV4": {
+   "minimal": {
+    "K": 599,
+    "N": 50232,
+    "rate": 0.011924669533365186,
+    "rate_ci95": [
+     0.010993761726993543,
+     0.012912598414704338
+    ],
+    "simspect_expected": 83.72166666666666,
+    "amulet_expected": 179200.2,
+    "multiple": 2140.4280054943965,
+    "multiple_ci95_simspect_only": [
+     1970.0843002295885,
+     2313.9402184347005
+    ],
+    "first_seed_order": 1,
+    "det_setups": {
+     "cold": 247,
+     "full": 200,
+     "warm": 152
+    }
+   },
+   "nonmin": {
+    "K": 383,
+    "N": 52940,
+    "rate": 0.007234605213449188,
+    "rate_ci95": [
+     0.006530365865249611,
+     0.007993651977092307
+    ],
+    "simspect_expected": 137.8671875,
+    "amulet_expected": 179200.2,
+    "multiple": 1299.8031166770556,
+    "multiple_ci95_simspect_only": [
+     1170.2428691259036,
+     1432.464033025337
+    ],
+    "first_seed_order": 54,
+    "det_setups": {
+     "cold": 153,
+     "warm": 97,
+     "full": 133
+    }
+   },
+   "rate_ratio": 0.6066923023071445
+  },
+  "UV5": {
+   "minimal": {
+    "K": 4,
+    "N": 50232,
+    "rate": 7.963051441312311e-05,
+    "rate_ci95": [
+     2.1697047609864516e-05,
+     0.00020387307702061447
+    ],
+    "simspect_expected": 10046.6,
+    "amulet_expected": 179200.2,
+    "multiple": 17.836900045786635,
+    "multiple_ci95_simspect_only": [
+     3.8881152710972433,
+     36.53409617670952
+    ],
+    "first_seed_order": 7430,
+    "det_setups": {
+     "cold": 4
+    }
+   },
+   "nonmin": {
+    "K": 6,
+    "N": 52940,
+    "rate": 0.00011333585190782018,
+    "rate_ci95": [
+     4.159335939948841e-05,
+     0.0002466679884349374
+    ],
+    "simspect_expected": 7563.0,
+    "amulet_expected": 179200.2,
+    "multiple": 23.69432764775883,
+    "multiple_ci95_simspect_only": [
+     7.453538323060203,
+     44.20295286113848
+    ],
+    "first_seed_order": 2339,
+    "det_setups": {
+     "cold": 6
+    }
+   },
+   "rate_ratio": 1.4232716282584057
+  },
+  "UV6": {
+   "minimal": {
+    "K": 861,
+    "N": 4000,
+    "rate": 0.21525,
+    "rate_ci95": [
+     0.20259993116528224,
+     0.22831733375976893
+    ],
+    "simspect_expected": 4.6415313225058,
+    "amulet_expected": 5933.781456953642,
+    "multiple": 1278.4103013981603,
+    "multiple_ci95_simspect_only": [
+     1202.183714728636,
+     1354.7851613648127
+    ],
+    "first_seed_order": 1,
+    "det_setups": {
+     "full": 429,
+     "cold": 420,
+     "warm": 12
+    }
+   },
+   "nonmin": {
+    "K": 883,
+    "N": 4000,
+    "rate": 0.22075,
+    "rate_ci95": [
+     0.20797954368482025,
+     0.2339296145747366
+    ],
+    "simspect_expected": 4.526018099547511,
+    "amulet_expected": 5933.781456953642,
+    "multiple": 1311.0379425011297,
+    "multiple_ci95_simspect_only": [
+     1234.1051597426663,
+     1388.0872091958845
+    ],
+    "first_seed_order": 4,
+    "det_setups": {
+     "cold": 442,
+     "full": 434,
+     "warm": 7
+    }
+   },
+   "rate_ratio": 1.0255516840882695
+  },
+  "jmp_shadow": {
+   "minimal": {
+    "K": 555,
+    "N": 4000,
+    "rate": 0.13875,
+    "rate_ci95": [
+     0.12817904580364103,
+     0.14985158994318953
+    ],
+    "simspect_expected": 7.196043165467626,
+    "amulet_expected": 18666.6875,
+    "multiple": 2594.021057235691,
+    "multiple_ci95_simspect_only": [
+     2392.6781920647536,
+     2797.2328008476616
+    ],
+    "first_seed_order": 19,
+    "det_setups": {
+     "cold": 439,
+     "full": 116
+    }
+   },
+   "nonmin": {
+    "K": 606,
+    "N": 4000,
+    "rate": 0.1515,
+    "rate_ci95": [
+     0.1405216373794289,
+     0.16298999401176406
+    ],
+    "simspect_expected": 6.591433278418451,
+    "amulet_expected": 18666.6875,
+    "multiple": 2831.9618376655835,
+    "multiple_ci95_simspect_only": [
+     2623.0734919501183,
+     3042.483283844471
+    ],
+    "first_seed_order": 5,
+    "det_setups": {
+     "cold": 450,
+     "full": 156
+    }
+   },
+   "rate_ratio": 1.0918918918918918
+  }
+ },
+ "minimum_minimal": [
+  "UV5",
+  17.836900045786635
+ ],
+ "minimum_nonmin": [
+  "UV5",
+  23.69432764775883
+ ]
+}

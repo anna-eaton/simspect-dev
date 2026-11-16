@@ -1,0 +1,17 @@
+[2026-11-10 10:54:45] started T2rt pid=3027461 P=56 sample_frac=1 extra=[--partition 1/2 --exclude-file /tests/simspect_alloy_20261108/firstdet_final/T2rt_cafe3_done_at_split.jsonl --idx-offset 10000000] out=/tests/simspect_alloy_20261108/firstdet_final/T2rt_Footprint_6_u_core_lpP_fv3_cafe1
+[2026-11-10 11:19:48] STOP files written (T2rt)
+[2026-11-10 11:19:53] started T2rt pid=3222150 P=56 sample_frac=1 extra=[--partition 1/2 --exclude-file $F/T2rt_cafe3_done_at_split.jsonl --idx-offset 10000000 --priority-file /tests/simspect_alloy_20261108/firstdet_final/uv5diag/priority_uv5.tsv] out=/tests/simspect_alloy_20261108/firstdet_final/T2rt_Footprint_6_u_core_lpP_fv3_cafe1
+[2026-11-10 11:22:17] STOP files written (T2rt)
+[2026-11-10 11:22:45] started T2u5 cafe1 pid=3222381 P=56 partition 1/2
+[2026-11-10 11:25:29] started T2g pid=3227359 P=56 sample_frac=1 extra=[--partition 1/2 --idx-offset 10000000 --priority-file /tests/simspect_alloy_20261108/firstdet_final/uv5diag/priority_uv5.tsv] out=/tests/simspect_alloy_20261108/firstdet_final/T2g_Footprint_6_u_core_lpP_fv3_cafe1
+[2026-11-10 11:37:27] STOP T2g cafe1 (main: free cafe1 for regen-lp)
+[2026-11-10 11:44:02] started T2g pid=3345070 P=56 sample_frac=1 extra=[--partition 1/2 --exclude-file /tests/simspect_alloy_20261108/firstdet_final/T2g_cafe3_done_for_cafe1.jsonl --idx-offset 10000000 --priority-file /tests/simspect_alloy_20261108/firstdet_final/uv5diag/priority_uv5.tsv] out=/tests/simspect_alloy_20261108/firstdet_final/T2g_Footprint_6_u_core_lpP_fv3_cafe1
+[2026-11-10 13:53:52] started T2g pid=3425746 P=56 sample_frac=1 extra=[--partition 1/2 --exclude-file $F/T2g_cafe3_done_for_cafe1.jsonl --idx-offset 10000000 --priority-file /tests/simspect_alloy_20261108/firstdet_final/uv5diag/priority_uv5.tsv] out=/tests/simspect_alloy_20261108/firstdet_final/T2g_Footprint_6_u_core_lpP_fv3_cafe1
+[2026-11-10 13:55:04] started T2g pid=3425861 P=56 sample_frac=1 extra=[--partition 1/2 --exclude-file /tests/simspect_alloy_20261108/firstdet_final/T2g_cafe3_done_for_cafe1.jsonl --idx-offset 10000000 --priority-file /tests/simspect_alloy_20261108/firstdet_final/uv5diag/priority_uv5.tsv] out=/tests/simspect_alloy_20261108/firstdet_final/T2g_Footprint_6_u_core_lpP_fv3_cafe1
+[2026-11-10 19:29:46] started T1g pid=1565670 P=8 sample_frac=1 extra=[--exclude-file /tests/simspect_alloy_20261108/firstdet_final/T1g_first4000_done_cafe3.jsonl --idx-offset 10000000] out=/tests/simspect_alloy_20261108/firstdet_final/T1g_Footprint_6_u_core_lpP_fv3_full
+[2026-11-10 19:29:46] started T3g pid=1565682 P=8 sample_frac=1 extra=[--exclude-file /tests/simspect_alloy_20261108/firstdet_final/T3g_first4000_done_cafe3.jsonl --idx-offset 10000000] out=/tests/simspect_alloy_20261108/firstdet_final/T3g_Footprint_6_u_core_lpP_fv3_full
+[2026-11-10 19:53:15] STOP T1g full (restart as 2 partitions with exclude-file)
+[2026-11-10 19:53:22] started T1g pid=1676107 P=9 sample_frac=1 extra=[--partition 0/2 --exclude-file /tests/simspect_alloy_20261108/firstdet_final/T1g_done_for_split.jsonl --idx-offset 20000000] out=/tests/simspect_alloy_20261108/firstdet_final/T1g_Footprint_6_u_core_lpP_fv3_fullp0
+[2026-11-10 19:53:22] started T1g pid=1676135 P=9 sample_frac=1 extra=[--partition 1/2 --exclude-file /tests/simspect_alloy_20261108/firstdet_final/T1g_done_for_split.jsonl --idx-offset 30000000] out=/tests/simspect_alloy_20261108/firstdet_final/T1g_Footprint_6_u_core_lpP_fv3_fullp1
+[2026-11-11 00:18:57] classify fullmerged T1g/T3g start (nonmin agent)
+[2026-11-11 01:45:09] classify + report full end

@@ -1,0 +1,36 @@
+mispredict_not_taken/br_x/plain          tests  6170 raw 2735 gated 2735
+       2632  R-SA-13
+         85  R-SA-13 (static only)
+         13  R-SA-8 candidate (br_x twin hit; E2LT-2)
+          5  R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)
+mispredict_not_taken/ld/plain            tests  6251 raw 3540 gated 3540
+       2292  R-SA-13
+        598  A2 STLF bypass
+        540  isTainted=0 (reveal not checked)
+         83  R-SA-13 (static only)
+         16  A2 STLF bypass (main-run evidence, no twin)
+         11  R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)
+mispredict_not_taken/ld/rmw              tests  2763 raw 2721 gated 2660
+       1350  R-SA-13 (static only, RMW)
+       1074  check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)
+        235  A2 STLF bypass (main-run evidence, no twin, RMW)
+         61  disq_not_obtained(never_executed)
+          1  untainted transmitter, no twin (R-SA-13 candidate, RMW)
+mispredict_taken/br_x/plain              tests  6170 raw 2772 gated 2772
+       2670  R-SA-13
+         86  R-SA-13 (static only)
+         11  R-SA-8 candidate (br_x twin hit; E2LT-2)
+          5  R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)
+mispredict_taken/ld/plain                tests  6251 raw 3540 gated 3540
+       2297  R-SA-13
+        597  A2 STLF bypass
+        535  isTainted=0 (reveal not checked)
+         84  R-SA-13 (static only)
+         15  A2 STLF bypass (main-run evidence, no twin)
+         12  R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)
+mispredict_taken/ld/rmw                  tests  2763 raw 2721 gated 2660
+       1361  R-SA-13 (static only, RMW)
+       1069  check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)
+        229  A2 STLF bypass (main-run evidence, no twin, RMW)
+         61  disq_not_obtained(never_executed)
+          1  untainted transmitter, no twin (R-SA-13 candidate, RMW)

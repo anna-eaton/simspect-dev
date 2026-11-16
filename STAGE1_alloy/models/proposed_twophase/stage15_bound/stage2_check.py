@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """stage2_check.py — does Stage 2 (parsexml passes 1-5 + compile_annotate) scale to larger Alloy bounds?
 
-stage15-bound session, 2026-11-08. Read-only use of the repo's STAGE2_compilation (copied into the
+Read-only use of the repo's STAGE2_compilation (copied into the
 workspace unchanged). For each <ws>/xmlgen/<name>/xml/ it runs batch_generate.py (both branch modes),
 once plain and once with fanout v2 (specs/fanout/stt.json's 'fanout_v2' + 'reg_naming'), then
 compile_annotate.py on every .ll, and reports per variant: XML count, instruction count, Reg_s / Mem_s

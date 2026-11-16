@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""make_v2_models.py — builds the three model-fixes drafts (2026-11-08, session model-fixes) from the
+"""make_v2_models.py — builds the three model-fixes drafts from the
 approved/current models by exact, asserted string replacements (each anchor must occur exactly once).
 Writes NEW files only:  STAGE1_alloy/models/proposed/{STT_6_v2,Recon_6_v2,SPT_6_oneLP_v3}.als
 Refuses to overwrite an existing output unless --force. Source models are only read.

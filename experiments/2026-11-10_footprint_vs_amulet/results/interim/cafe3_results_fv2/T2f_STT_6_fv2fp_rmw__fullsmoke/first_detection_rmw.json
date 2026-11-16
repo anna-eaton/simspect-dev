@@ -1,0 +1,94 @@
+{
+ "N_prefix": 20,
+ "n_rows": 20,
+ "n_rmw_in_prefix": 3,
+ "status": {
+  "ok": 20
+ },
+ "hits": 1,
+ "gem5_cpu_s_per_test": 1.403,
+ "total_cpu_s_per_test": 4.386,
+ "targets": {
+  "UV3": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  },
+  "UV4": {
+   "first_idx": 16,
+   "tests_to_first": 17,
+   "stem": "inst-074876",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 23.7,
+   "cum_total_cpu_s": 74.7,
+   "K": 1,
+   "N": 20,
+   "expected_tests_to_first": 10.5,
+   "expected_gem5_cpu_s_to_first": 14.73,
+   "expected_total_cpu_s_to_first": 46.05
+  },
+  "UV5": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  }
+ },
+ "separate_non_amulet": {
+  "CS1": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  },
+  "EM_rmw": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  },
+  "EM_other": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  },
+  "UV3_other_actor": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  },
+  "unattributed": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  }
+ },
+ "excluded_padding": {
+  "UV3_padding": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  },
+  "EM_padding": {
+   "K": 0,
+   "N": 20,
+   "expected_tests_to_first": 21.0,
+   "expected_gem5_cpu_s_to_first": 29.47,
+   "expected_total_cpu_s_to_first": 92.1
+  }
+ },
+ "other": {}
+}

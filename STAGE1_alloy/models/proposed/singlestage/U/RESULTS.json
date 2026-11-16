@@ -1,0 +1,826 @@
+{
+ "family": "U",
+ "agent": "singlestage-u",
+ "date": "2026-11-09",
+ "cafe2_workspace": "/tests/singlestage_20261109",
+ "repo_dir": "STAGE1_alloy/models/proposed/singlestage/U/",
+ "models": [
+  {
+   "variant": "V0",
+   "model": "STT_6_u",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/base/STT_6_u.als",
+   "model_sha256": "529511a18d316e681b651cf67b4713d06581113035fdbcf95d10a552c4340ec8",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/STT_6_u",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u.als",
+   "base_sha256": "529511a18d316e681b651cf67b4713d06581113035fdbcf95d10a552c4340ec8",
+   "generator_command": "none (V0 = the base model unchanged)",
+   "scope": "for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T01:26:19+00:00 LINT OK   /tests/singlestage_20261109/models/U/base/STT_6_u.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "run_flat_start_end": [
+    "2026-11-10T01:26:19+00:00 START pid=2297517 host=543cef85d966 model=/tests/singlestage_20261109/models/U/base/STT_6_u.als sha256=529511a18d316e681b651cf67b4713d06581113035fdbcf95d10a552c4340ec8 scope='for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T01:40:30+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 433
+    },
+    {
+     "seed": "1",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 811
+    },
+    {
+     "seed": "3",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 845
+    },
+    {
+     "seed": "2",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 851
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/STT_6_u/census.json --cores /tests/simspect_alloy_20261109u/out/STT_6_u_core_ri out/U/STT_6_u/default out/U/STT_6_u/1 out/U/STT_6_u/2 out/U/STT_6_u/3",
+   "census_UNION": {
+    "instances": 40000,
+    "distinct": 21982,
+    "sizes": {
+     "6": 21982
+    },
+    "kind_sequences": 3013,
+    "xm_kinds": {
+     "TBranchx": 11131,
+     "TLoad": 10851
+    },
+    "alu_feeds_xmit": 257,
+    "two_load_merge": 7,
+    "unnecessary_avg": 2.77,
+    "unnecessary_hist": {
+     "0": 19,
+     "1": 731,
+     "2": 3570,
+     "3": 17662
+    },
+    "bare_avg": 1.62,
+    "unresolved_brs_hist": {
+     "1": 21982
+    },
+    "contain_core_exact_pin": 21725,
+    "contain_core_path_pin": 21982,
+    "no_core_even_path_pin_examples": []
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 4704,
+    "default∩2": 4651,
+    "default∩3": 4798,
+    "1∩2": 6057,
+    "1∩3": 6141,
+    "2∩3": 6079
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V1",
+   "model": "STT_6_u_flat_n8_prod",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/STT_6_u_flat_n8_prod.als",
+   "model_sha256": "e2486a832679bc42ae4e57ff9ef994b11fd29bd4b3b9d63d0fbc50fdb67401da",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/STT_6_u_flat_n8_prod",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u.als",
+   "base_sha256": "529511a18d316e681b651cf67b4713d06581113035fdbcf95d10a552c4340ec8",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/STT_6_u.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/U/STT_6_u_flat_n8_prod.als",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T01:26:19+00:00 LINT OK   /tests/singlestage_20261109/models/U/STT_6_u_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_flat_start_end": [
+    "2026-11-10T01:26:19+00:00 START pid=2297518 host=543cef85d966 model=/tests/singlestage_20261109/models/U/STT_6_u_flat_n8_prod.als sha256=e2486a832679bc42ae4e57ff9ef994b11fd29bd4b3b9d63d0fbc50fdb67401da scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T01:51:19+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 1456
+    },
+    {
+     "seed": "1",
+     "instances": 5231,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 5142,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 4978,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/STT_6_u_flat_n8_prod/census.json  out/U/STT_6_u_flat_n8_prod/default out/U/STT_6_u_flat_n8_prod/1 out/U/STT_6_u_flat_n8_prod/2 out/U/STT_6_u_flat_n8_prod/3",
+   "census_UNION": {
+    "instances": 25351,
+    "distinct": 20141,
+    "sizes": {
+     "8": 20141
+    },
+    "kind_sequences": 7518,
+    "xm_kinds": {
+     "TLoad": 11927,
+     "TBranchx": 8214
+    },
+    "alu_feeds_xmit": 131,
+    "two_load_merge": 1,
+    "unnecessary_avg": 4.63,
+    "unnecessary_hist": {
+     "1": 1,
+     "2": 14,
+     "3": 134,
+     "4": 7096,
+     "5": 12896
+    },
+    "bare_avg": 1.71,
+    "unresolved_brs_hist": {
+     "1": 20141
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 1263,
+    "default∩2": 1199,
+    "default∩3": 1170,
+    "1∩2": 1463,
+    "1∩3": 1519,
+    "2∩3": 1448
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 5231,
+     "distinct": 5231,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 4978,
+     "distinct": 4978,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 5142,
+     "distinct": 5142,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V2",
+   "model": "STT_6_u_flat_n8_prod_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/STT_6_u_flat_n8_prod_nospacer.als",
+   "model_sha256": "99e56a8123ab7a1b34a441d61dae847aef4935a23d83408045bfeae7c48d563b",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/STT_6_u_flat_n8_prod_nospacer",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u.als",
+   "base_sha256": "529511a18d316e681b651cf67b4713d06581113035fdbcf95d10a552c4340ec8",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/STT_6_u.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/U/STT_6_u_flat_n8_prod_nospacer.als",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T01:51:20+00:00 LINT OK   /tests/singlestage_20261109/models/U/STT_6_u_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_flat_start_end": [
+    "2026-11-10T01:51:19+00:00 START pid=2611232 host=543cef85d966 model=/tests/singlestage_20261109/models/U/STT_6_u_flat_n8_prod_nospacer.als sha256=99e56a8123ab7a1b34a441d61dae847aef4935a23d83408045bfeae7c48d563b scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T02:16:20+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "3",
+     "instances": 4151,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 8827,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 4105,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 4149,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/STT_6_u_flat_n8_prod_nospacer/census.json  out/U/STT_6_u_flat_n8_prod_nospacer/default out/U/STT_6_u_flat_n8_prod_nospacer/1 out/U/STT_6_u_flat_n8_prod_nospacer/2 out/U/STT_6_u_flat_n8_prod_nospacer/3",
+   "census_UNION": {
+    "instances": 21232,
+    "distinct": 17985,
+    "sizes": {
+     "8": 17985
+    },
+    "kind_sequences": 6324,
+    "xm_kinds": {
+     "TLoad": 10669,
+     "TBranchx": 7316
+    },
+    "alu_feeds_xmit": 116,
+    "two_load_merge": 5,
+    "unnecessary_avg": 4.64,
+    "unnecessary_hist": {
+     "1": 1,
+     "2": 10,
+     "3": 109,
+     "4": 6234,
+     "5": 11631
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 17985
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 635,
+    "default∩2": 568,
+    "default∩3": 618,
+    "1∩2": 862,
+    "1∩3": 857,
+    "2∩3": 844
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 8827,
+     "distinct": 8827,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 4149,
+     "distinct": 4149,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 4105,
+     "distinct": 4105,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 4151,
+     "distinct": 4151,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V3",
+   "model": "STT_6_u_flat_n8_leakrs_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/STT_6_u_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "9fca170c7ba0dfa51282718157b8437ca18cf40a0347565f7f06358cd7a639db",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/STT_6_u_flat_n8_leakrs_nospacer",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/STT_6_u.als",
+   "base_sha256": "529511a18d316e681b651cf67b4713d06581113035fdbcf95d10a552c4340ec8",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/STT_6_u.als --pin none --n 8 --operands 16 --intbits 6 --minimality leak_rs --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/U/STT_6_u_flat_n8_leakrs_nospacer.als",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T01:51:20+00:00 LINT OK   /tests/singlestage_20261109/models/U/STT_6_u_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_flat_start_end": [
+    "2026-11-10T01:51:19+00:00 START pid=2611233 host=543cef85d966 model=/tests/singlestage_20261109/models/U/STT_6_u_flat_n8_leakrs_nospacer.als sha256=9fca170c7ba0dfa51282718157b8437ca18cf40a0347565f7f06358cd7a639db scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T02:16:20+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "3",
+     "instances": 4511,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 4470,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 4494,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 9428,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/STT_6_u_flat_n8_leakrs_nospacer/census.json  out/U/STT_6_u_flat_n8_leakrs_nospacer/default out/U/STT_6_u_flat_n8_leakrs_nospacer/1 out/U/STT_6_u_flat_n8_leakrs_nospacer/2 out/U/STT_6_u_flat_n8_leakrs_nospacer/3",
+   "census_UNION": {
+    "instances": 22903,
+    "distinct": 22513,
+    "sizes": {
+     "8": 22513
+    },
+    "kind_sequences": 5863,
+    "xm_kinds": {
+     "TLoad": 12662,
+     "TBranchx": 9851
+    },
+    "alu_feeds_xmit": 118,
+    "two_load_merge": 3,
+    "unnecessary_avg": 4.32,
+    "unnecessary_hist": {
+     "0": 1,
+     "1": 21,
+     "2": 77,
+     "3": 564,
+     "4": 13957,
+     "5": 7893
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 17210,
+     "2": 5220,
+     "3": 61,
+     "4": 17,
+     "5": 4,
+     "6": 1
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 69,
+    "default∩2": 78,
+    "default∩3": 68,
+    "1∩2": 73,
+    "1∩3": 64,
+    "2∩3": 77
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 9428,
+     "distinct": 9428,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 4494,
+     "distinct": 4494,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 4470,
+     "distinct": 4470,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 4511,
+     "distinct": 4511,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V0",
+   "model": "Recon_6_u",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/base/Recon_6_u.als",
+   "model_sha256": "dba2d523eb7fb77757fb4730736a9d4beecbb24a41e343c59f3bd3f822c6f897",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/Recon_6_u",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als",
+   "base_sha256": "dba2d523eb7fb77757fb4730736a9d4beecbb24a41e343c59f3bd3f822c6f897",
+   "generator_command": "none (V0 = the base model unchanged)",
+   "scope": "for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T02:16:20+00:00 LINT OK   /tests/singlestage_20261109/models/U/base/Recon_6_u.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "run_flat_start_end": [
+    "2026-11-10T02:16:20+00:00 START pid=2774964 host=543cef85d966 model=/tests/singlestage_20261109/models/U/base/Recon_6_u.als sha256=dba2d523eb7fb77757fb4730736a9d4beecbb24a41e343c59f3bd3f822c6f897 scope='for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T02:41:21+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 753
+    },
+    {
+     "seed": "1",
+     "instances": 8933,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 8760,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "2",
+     "instances": 8819,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/Recon_6_u/census.json --cores /tests/simspect_alloy_20261109u/out/Recon_6_u_core_ri out/U/Recon_6_u/default out/U/Recon_6_u/1 out/U/Recon_6_u/2 out/U/Recon_6_u/3",
+   "census_UNION": {
+    "instances": 36512,
+    "distinct": 21584,
+    "sizes": {
+     "6": 21584
+    },
+    "kind_sequences": 2948,
+    "xm_kinds": {
+     "TBranchx": 10651,
+     "TLoad": 10933
+    },
+    "alu_feeds_xmit": 292,
+    "two_load_merge": 5,
+    "unnecessary_avg": 2.77,
+    "unnecessary_hist": {
+     "0": 26,
+     "1": 651,
+     "2": 3477,
+     "3": 17430
+    },
+    "bare_avg": 1.63,
+    "unresolved_brs_hist": {
+     "1": 21584
+    },
+    "contain_core_exact_pin": 21292,
+    "contain_core_path_pin": 21584,
+    "no_core_even_path_pin_examples": []
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 4051,
+    "default∩2": 3885,
+    "default∩3": 3894,
+    "1∩2": 4951,
+    "1∩3": 4864,
+    "2∩3": 4756
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 8933,
+     "distinct": 8933,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 8819,
+     "distinct": 8819,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 8760,
+     "distinct": 8760,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V1",
+   "model": "Recon_6_u_flat_n8_prod",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_prod.als",
+   "model_sha256": "9f92fadb92c74c5416a45b64fe15e6aad3808b36d1544b31849670b7d9bb52b4",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/Recon_6_u_flat_n8_prod",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als",
+   "base_sha256": "dba2d523eb7fb77757fb4730736a9d4beecbb24a41e343c59f3bd3f822c6f897",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/U/Recon_6_u_flat_n8_prod.als",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T02:16:20+00:00 LINT OK   /tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_flat_start_end": [
+    "2026-11-10T02:16:20+00:00 START pid=2774965 host=543cef85d966 model=/tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_prod.als sha256=9f92fadb92c74c5416a45b64fe15e6aad3808b36d1544b31849670b7d9bb52b4 scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T02:41:20+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "2",
+     "instances": 2521,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 2530,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 2530,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 5735,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/Recon_6_u_flat_n8_prod/census.json  out/U/Recon_6_u_flat_n8_prod/default out/U/Recon_6_u_flat_n8_prod/1 out/U/Recon_6_u_flat_n8_prod/2 out/U/Recon_6_u_flat_n8_prod/3",
+   "census_UNION": {
+    "instances": 13316,
+    "distinct": 11596,
+    "sizes": {
+     "8": 11596
+    },
+    "kind_sequences": 5055,
+    "xm_kinds": {
+     "TLoad": 6990,
+     "TBranchx": 4606
+    },
+    "alu_feeds_xmit": 89,
+    "two_load_merge": 0,
+    "unnecessary_avg": 4.63,
+    "unnecessary_hist": {
+     "1": 2,
+     "2": 8,
+     "3": 97,
+     "4": 4075,
+     "5": 7414
+    },
+    "bare_avg": 1.75,
+    "unresolved_brs_hist": {
+     "1": 11596
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 375,
+    "default∩2": 369,
+    "default∩3": 334,
+    "1∩2": 399,
+    "1∩3": 400,
+    "2∩3": 406
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 5735,
+     "distinct": 5735,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 2530,
+     "distinct": 2530,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 2521,
+     "distinct": 2521,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 2530,
+     "distinct": 2530,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V2",
+   "model": "Recon_6_u_flat_n8_prod_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_prod_nospacer.als",
+   "model_sha256": "e702e4cd1f16cdb8a6b628f0996e3b362fd61bed28eaf77fc956acef3384998d",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/Recon_6_u_flat_n8_prod_nospacer",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als",
+   "base_sha256": "dba2d523eb7fb77757fb4730736a9d4beecbb24a41e343c59f3bd3f822c6f897",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/U/Recon_6_u_flat_n8_prod_nospacer.als",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T02:41:21+00:00 LINT OK   /tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_flat_start_end": [
+    "2026-11-10T02:41:21+00:00 START pid=2955353 host=543cef85d966 model=/tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_prod_nospacer.als sha256=e702e4cd1f16cdb8a6b628f0996e3b362fd61bed28eaf77fc956acef3384998d scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T03:06:21+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "2",
+     "instances": 2782,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 2418,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 2481,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 5860,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/Recon_6_u_flat_n8_prod_nospacer/census.json  out/U/Recon_6_u_flat_n8_prod_nospacer/default out/U/Recon_6_u_flat_n8_prod_nospacer/1 out/U/Recon_6_u_flat_n8_prod_nospacer/2 out/U/Recon_6_u_flat_n8_prod_nospacer/3",
+   "census_UNION": {
+    "instances": 13541,
+    "distinct": 11991,
+    "sizes": {
+     "8": 11991
+    },
+    "kind_sequences": 4835,
+    "xm_kinds": {
+     "TLoad": 7201,
+     "TBranchx": 4790
+    },
+    "alu_feeds_xmit": 91,
+    "two_load_merge": 1,
+    "unnecessary_avg": 4.63,
+    "unnecessary_hist": {
+     "0": 2,
+     "1": 1,
+     "2": 11,
+     "3": 82,
+     "4": 4191,
+     "5": 7704
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 11991
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 309,
+    "default∩2": 331,
+    "default∩3": 322,
+    "1∩2": 344,
+    "1∩3": 316,
+    "2∩3": 355
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 5860,
+     "distinct": 5860,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 2418,
+     "distinct": 2418,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 2782,
+     "distinct": 2782,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 2481,
+     "distinct": 2481,
+     "parse_errors": 0
+    }
+   }
+  },
+  {
+   "variant": "V3",
+   "model": "Recon_6_u_flat_n8_leakrs_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "71811ae0673c9e864f1dfb9d0c8657fd7a2fadaae315f0ca32ed8ef5be82ca9d",
+   "cafe2_out": "/tests/singlestage_20261109/out/U/Recon_6_u_flat_n8_leakrs_nospacer",
+   "base_file": "STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als",
+   "base_sha256": "dba2d523eb7fb77757fb4730736a9d4beecbb24a41e343c59f3bd3f822c6f897",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/Recon_6_u.als --pin none --n 8 --operands 16 --intbits 6 --minimality leak_rs --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/U/Recon_6_u_flat_n8_leakrs_nospacer.als",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": "2026-11-10T02:41:21+00:00 LINT OK   /tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "run_flat_start_end": [
+    "2026-11-10T02:41:21+00:00 START pid=2955352 host=543cef85d966 model=/tests/singlestage_20261109/models/U/Recon_6_u_flat_n8_leakrs_nospacer.als sha256=71811ae0673c9e864f1dfb9d0c8657fd7a2fadaae315f0ca32ed8ef5be82ca9d scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+    "2026-11-10T03:06:21+00:00 END"
+   ],
+   "errors_in_log": [],
+   "runs": [
+    {
+     "seed": "2",
+     "instances": 3405,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "3",
+     "instances": 2912,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "1",
+     "instances": 3337,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    },
+    {
+     "seed": "default",
+     "instances": 7010,
+     "verdict": "TIMEOUT",
+     "secs": 1500
+    }
+   ],
+   "census_cmd": "nice -n 10 python3 tools/census_flat.py --jobs 8 --json out/U/Recon_6_u_flat_n8_leakrs_nospacer/census.json  out/U/Recon_6_u_flat_n8_leakrs_nospacer/default out/U/Recon_6_u_flat_n8_leakrs_nospacer/1 out/U/Recon_6_u_flat_n8_leakrs_nospacer/2 out/U/Recon_6_u_flat_n8_leakrs_nospacer/3",
+   "census_UNION": {
+    "instances": 16664,
+    "distinct": 16494,
+    "sizes": {
+     "8": 16494
+    },
+    "kind_sequences": 5035,
+    "xm_kinds": {
+     "TLoad": 9610,
+     "TBranchx": 6884
+    },
+    "alu_feeds_xmit": 104,
+    "two_load_merge": 2,
+    "unnecessary_avg": 4.12,
+    "unnecessary_hist": {
+     "0": 38,
+     "1": 115,
+     "2": 250,
+     "3": 1006,
+     "4": 11174,
+     "5": 3911
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 12661,
+     "2": 3737,
+     "3": 56,
+     "4": 32,
+     "5": 6,
+     "6": 2
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 34,
+    "default∩2": 35,
+    "default∩3": 39,
+    "1∩2": 17,
+    "1∩3": 25,
+    "2∩3": 33
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 7010,
+     "distinct": 7010,
+     "parse_errors": 0
+    },
+    "1": {
+     "instances": 3337,
+     "distinct": 3337,
+     "parse_errors": 0
+    },
+    "2": {
+     "instances": 3405,
+     "distinct": 3405,
+     "parse_errors": 0
+    },
+    "3": {
+     "instances": 2912,
+     "distinct": 2912,
+     "parse_errors": 0
+    }
+   }
+  }
+ ]
+}

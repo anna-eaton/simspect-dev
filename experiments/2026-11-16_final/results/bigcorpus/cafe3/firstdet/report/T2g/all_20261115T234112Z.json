@@ -1,0 +1,178 @@
+{
+ "generated_utc": "2026-11-15T23:41:18Z",
+ "corpus_pairs_now": 50232,
+ "seed": 20261109,
+ "gen_cpu_per_test": null,
+ "gen_cpu_source": null,
+ "defenses": {
+  "invisispec": {
+   "dir": "/tests/bigcorpus_20261115/firstdet/T1g_Footprint_6_u_nov10_s2A",
+   "N": 1948,
+   "rows_mode": "all",
+   "dropped": {
+    "after_classify_snapshot": 2052
+   },
+   "hits": 1948,
+   "unclassified_hits": 0,
+   "status": {
+    "ok": 1948
+   },
+   "cache_setups": {
+    "warm": 994,
+    "full": 954
+   },
+   "total_cpu_s_per_test": 6.9,
+   "gem5_cpu_s_per_test": 1.427,
+   "all_signatures": {
+    "UV1_transient": 954,
+    "UV1": 954,
+    "other_DTLB": 994,
+    "other_DIR": 986,
+    "other_L2": 986,
+    "other_L1D": 994
+   },
+   "all_corpus_pairs_run": false
+  },
+  "cleanupspec": {
+   "dir": "/tests/bigcorpus_20261115/firstdet/T2g_Footprint_6_u_nov10_s2A",
+   "N": 10335,
+   "rows_mode": "all",
+   "dropped": {
+    "after_classify_snapshot": 784
+   },
+   "hits": 424,
+   "unclassified_hits": 0,
+   "status": {
+    "ok": 10335
+   },
+   "cache_setups": {
+    "warm": 3515,
+    "cold": 3433,
+    "full": 3387
+   },
+   "total_cpu_s_per_test": 6.5,
+   "gem5_cpu_s_per_test": 2.527,
+   "all_signatures": {
+    "EM_rmw": 62,
+    "UV3": 261,
+    "UV3_other_actor": 39,
+    "UV4": 32,
+    "EM_other": 25,
+    "unattributed": 25,
+    "UV3_padding": 5,
+    "CS1": 1
+   },
+   "all_corpus_pairs_run": false
+  }
+ },
+ "bugs": {
+  "UV1": {
+   "defense": "invisispec",
+   "known_amulet_bug": true,
+   "K": 954,
+   "N": 1948,
+   "expected_tests": 2.04,
+   "censored": false,
+   "first_seed_order": 1,
+   "first_seed_stem": "mispredict_taken/inst-013156",
+   "first_stream_order": 1,
+   "det_setups": {
+    "full": 954
+   },
+   "amulet_pooled_programs": 23.7,
+   "amulet_pooled_test_cases": 3318.0,
+   "multiple_tests": 1625.8,
+   "simspect_cpu_s_per_test": 6.9,
+   "simspect_expected_cpu_s": 14.1,
+   "simspect_expected_cpu_s_exec_only": 14.1,
+   "amulet_pooled_cpu_s": 270,
+   "multiple_cpu": 19.17
+  },
+  "UV3": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 261,
+   "N": 10335,
+   "expected_tests": 39.45,
+   "censored": false,
+   "first_seed_order": 54,
+   "first_seed_stem": "mispredict_not_taken/inst-009588",
+   "first_stream_order": 79,
+   "det_setups": {
+    "cold": 240,
+    "full": 21
+   },
+   "amulet_pooled_programs": 27.1,
+   "amulet_pooled_test_cases": 3794.0,
+   "multiple_tests": 96.2,
+   "simspect_cpu_s_per_test": 6.5,
+   "simspect_expected_cpu_s": 256.4,
+   "simspect_expected_cpu_s_exec_only": 256.4,
+   "amulet_pooled_cpu_s": 105,
+   "multiple_cpu": 0.41
+  },
+  "UV4": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 32,
+   "N": 10335,
+   "expected_tests": 313.21,
+   "censored": false,
+   "first_seed_order": 96,
+   "first_seed_stem": "mispredict_taken/inst-015065",
+   "first_stream_order": 121,
+   "det_setups": {
+    "warm": 9,
+    "full": 9,
+    "cold": 14
+   },
+   "amulet_pooled_programs": 1600,
+   "amulet_pooled_test_cases": 224000,
+   "multiple_tests": 715.2,
+   "simspect_cpu_s_per_test": 6.5,
+   "simspect_expected_cpu_s": 2036.0,
+   "simspect_expected_cpu_s_exec_only": 2036.0,
+   "amulet_pooled_cpu_s": 6171,
+   "multiple_cpu": 3.03
+  },
+  "UV5": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 0,
+   "N": 10335,
+   "expected_tests": 10336.0,
+   "censored": true,
+   "first_seed_order": null,
+   "first_seed_stem": null,
+   "first_stream_order": null,
+   "det_setups": {},
+   "amulet_pooled_programs": 1600,
+   "amulet_pooled_test_cases": 224000,
+   "multiple_tests": 21.7,
+   "simspect_cpu_s_per_test": 6.5,
+   "simspect_expected_cpu_s": 67188.9,
+   "simspect_expected_cpu_s_exec_only": 67188.9,
+   "amulet_pooled_cpu_s": 6171,
+   "multiple_cpu": 0.09
+  }
+ },
+ "minimum": {
+  "bugs_present": [
+   "UV1",
+   "UV3",
+   "UV4",
+   "UV5"
+  ],
+  "all_5": false,
+  "tests": {
+   "bug": "UV5",
+   "multiple": 21.7,
+   "upper_bound": true
+  },
+  "cpu": {
+   "bug": "UV5",
+   "multiple": 0.09,
+   "upper_bound": true
+  }
+ }
+}

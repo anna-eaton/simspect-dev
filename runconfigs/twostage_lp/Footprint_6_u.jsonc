@@ -1,0 +1,39 @@
+// twostage_lp.py config for Footprint_6_u (regen-lp 2026-11-10): Stage 1 RI cores (Footprint_6_u_core_ri) -> Stage 1.5 core-pinned loose-pin lpP (Footprint_6_u_lpP + per-core path-style seed_core) -> Stage 2 recipe v3.
+// production run 2026-11-10 (regen-lp) used exactly these settings (Stage 1.5 resumed once with the shuffle added).
+// Run: python3 twostage_lp.py --config runconfigs/twostage_lp/Footprint_6_u.jsonc --ws <work dir>   (make twostage-lp CONFIG=... WS=...). Docs: wiki/state/COMMANDS.md.
+{
+  "paths": {
+    "testset_dir": "/tests/simspect_alloy_20261108/testsets_twostage"
+  },
+  "twostage_lp": {
+    "family": "Footprint_6_u",
+    "core_model": "Footprint_6_u_core_ri",
+    "lp_model": "Footprint_6_u_lpP",
+    "corpus": "Footprint_6_u_core_lpP_fv3",
+    "stage2_config": "runconfigs/regen_lp_20261110/stage2_fv3.jsonc",
+    "stage1": {
+      "jobs": 8,
+      "cap": 200000,
+      "timeout_s": 10800,
+      "xmx": "8g",
+      "wait_k": 6
+    },
+    "stage15": {
+      "slots": 40,
+      "job_timeout": 300,
+      "budget_s": 5400,
+      "cap": 25,
+      "walk_p": 0.05,
+      "shuffle_seed": 20261110,
+      "spread": 2,
+      "dedup_level": "seed",
+      "xmx": "4g"
+    },
+    "stream": {
+      "interval": 120,
+      "jobs": 24,
+      "min_batch": 50,
+      "max_batch": 150
+    }
+  }
+}

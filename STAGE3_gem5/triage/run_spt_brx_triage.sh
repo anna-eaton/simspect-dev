@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Triage driver (2026-11-07): for every br_x hit of an SPT campaign, run the
+# Triage driver: for every br_x hit of an SPT campaign, run the
 # x86 condition slice and the gem5-spt pending-squash probe at the hit's grid.
 # Usage (in the container, from the fixed repo copy):
 #   STAGE3_gem5/triage/run_spt_brx_triage.sh <campaign_dir> <config> <testset_root> <outdir> [jobs]

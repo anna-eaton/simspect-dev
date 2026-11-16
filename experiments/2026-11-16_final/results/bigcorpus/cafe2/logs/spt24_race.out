@@ -1,0 +1,76 @@
+[2026-11-15T21:49:52Z] START d=1 config=runconfigs/bigcorpus_20261115/race_sptfence_d1_STT_6_u_core_lpP_s2A.jsonc stems=/tests/simspect_alloy_20261108/bugwork/a5/stems
+SIMSPECT_BRANCH_ANN_ENABLE=1
+SIMSPECT_CACHE_SETUP=random_all
+SIMSPECT_CACHE_SETUP_FILL_BYTES=64kB
+SIMSPECT_COMMIT_IEW_DELAY=1
+SIMSPECT_GEM5_BIN=/work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt
+SIMSPECT_GEM5_CPU=DerivO3CPU
+SIMSPECT_GEM5_DBG_FILE=pipeview.txt
+SIMSPECT_GEM5_DBG_FLAG=O3PipeView,LSQUnit
+SIMSPECT_GEM5_DIR=/work/gem5-spt
+SIMSPECT_GEM5_EXTRA=--applyDDIFT=1 --fwdUntaint=1 --bwdUntaint=1 --configImpFlow=Lazy --freeParam=3 --scheme=SpectreSafeFence
+SIMSPECT_SE_CONFIG=/work/gem5-spt/configs/example/se_exp.py
+/tests/bigcorpus_20261115/race/spt24_d1.json {'no_data': 24} race 0 of 24
+inst-013157 no_data never_executed False
+inst-000178 no_data never_executed False
+inst-039949 no_data never_executed False
+inst-039432 no_data never_executed False
+inst-038517 no_data None False
+inst-041153 no_data never_executed False
+inst-041592 no_data never_executed False
+inst-041302 no_data never_executed False
+inst-042121 no_data never_executed False
+inst-041836 no_data never_executed False
+inst-043878 no_data never_executed False
+inst-000953 no_data None False
+inst-060367 no_data never_executed False
+inst-040085 no_data None False
+inst-036299 no_data None False
+inst-064173 no_data None False
+inst-064809 no_data never_executed False
+inst-045593 no_data never_executed False
+inst-039955 no_data None False
+inst-041499 no_data None False
+inst-034285 no_data never_executed False
+inst-040235 no_data None False
+inst-041823 no_data None False
+inst-039409 no_data None False
+[2026-11-15T21:51:05Z] END d=1
+[2026-11-15T21:51:05Z] START d=4 config=runconfigs/bigcorpus_20261115/race_sptfence_d4_STT_6_u_core_lpP_s2A.jsonc stems=/tests/simspect_alloy_20261108/bugwork/a5/stems
+SIMSPECT_BRANCH_ANN_ENABLE=1
+SIMSPECT_CACHE_SETUP=random_all
+SIMSPECT_CACHE_SETUP_FILL_BYTES=64kB
+SIMSPECT_COMMIT_IEW_DELAY=4
+SIMSPECT_GEM5_BIN=/work/gem5-spt/build/X86_MESI_Two_Level/gem5.opt
+SIMSPECT_GEM5_CPU=DerivO3CPU
+SIMSPECT_GEM5_DBG_FILE=pipeview.txt
+SIMSPECT_GEM5_DBG_FLAG=O3PipeView,LSQUnit
+SIMSPECT_GEM5_DIR=/work/gem5-spt
+SIMSPECT_GEM5_EXTRA=--applyDDIFT=1 --fwdUntaint=1 --bwdUntaint=1 --configImpFlow=Lazy --freeParam=3 --scheme=SpectreSafeFence
+SIMSPECT_SE_CONFIG=/work/gem5-spt/configs/example/se_exp.py
+/tests/bigcorpus_20261115/race/spt24_d4.json {'window_hit': 5, 'no_data': 16, 'other_miss': 2, 'skip': 1} race 0 of 24
+inst-039949 window_hit reached_cache True
+inst-000178 window_hit reached_cache True
+inst-039432 window_hit reached_cache True
+inst-041302 no_data never_executed False
+inst-041153 other_miss reached_cache False
+inst-041592 window_hit reached_cache True
+inst-036299 no_data None False
+inst-041836 other_miss reached_cache False
+inst-042121 no_data never_executed False
+inst-039955 no_data None False
+inst-040085 no_data None False
+inst-039409 no_data None False
+inst-043878 window_hit reached_cache True
+inst-060367 no_data never_executed False
+inst-038517 no_data None False
+inst-041823 no_data None False
+inst-041499 no_data None False
+inst-000953 no_data None False
+inst-034285 no_data never_executed False
+inst-045593 no_data never_executed False
+inst-040235 no_data None False
+inst-064809 no_data never_executed False
+inst-064173 no_data None False
+inst-013157 skip None None
+[2026-11-15T21:53:10Z] END d=4

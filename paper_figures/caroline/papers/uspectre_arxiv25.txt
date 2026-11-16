@@ -1,0 +1,2398 @@
+arXiv:2501.12890v1 [cs.CR] 22 Jan 2025
+
+Analyzing and Exploiting Branch Mispredictions in
+Microcode
+Nicholas Mosier
+
+Hamed Nemati
+
+nmosier@stanford.edu
+Stanford University
+Stanford, USA
+
+hnnemati@kth.se
+KTH Royal Institute of Technology
+Stockholm, Sweden
+
+John C. Mitchell
+
+Caroline Trippel
+
+jcm@stanford.edu
+Stanford University
+Stanford, USA
+
+trippel@stanford.edu
+Stanford University
+Stanford, USA
+
+Abstract
+We present µSpectre, a new class of transient execution attacks that exploit microcode branch mispredictions to transiently leak sensitive data. We find that many long-known
+and recently-discovered transient execution attacks, which
+were previously categorized as Spectre or Meltdown variants,
+are actually instances of µSpectre on some Intel microarchitectures. Based on our observations, we discover multiple
+new µSpectre attacks and present a defense against µSpectre
+vulnerabilities, called µSLH.
+
+1
+
+Introduction
+
+Modern processors typically implement CISC ISAs, like x86,
+by translating each architectural instruction (macro-op) into
+a sequence of one or more micro-operations (micro-ops) at
+decode time, which are then issued to the execution unit and
+executed independently. Translation of simple macro-ops,
+which generate a single micro-op (e.g., an x86 load mov eax,
+[rsp]) or even a few micro-ops (e.g., three micro-ops for
+call [rax] on x86 [2]), can be incorporated directly into the
+decode logic itself. However, complex macro-ops (like cpuid)
+require so many micro-ops to implement that their implementations must be stored in a special micro-instruction
+memory, called the microsequencer ROM (MSROM) [44].
+The MSROM is a collection of microprograms, each of
+which implements a single macro-op (or a family of related
+macro-ops). Micro-ops stored in the MSROM are collectively
+called microcode.
+Like architectural programs, microprograms may contain
+branches, including conditional branches. These conditional
+microcode branches (µbranches) transfer control to another
+microcode address within the same microprogram, conditioned on some predicate computed at runtime. As with
+conditional macro-op branches, the CPU predicts the direction of a µbranch before its predicate has been computed
+and speculatively executes micro-ops along the predicted microcode control-flow path. If the microprogram exits, speculative execution continues at the next macro-op. Recent
+
+research [18] has discovered that on Intel’s Goldmont microarchitecture [27], conditional µbranches are statically predicted not-taken. Our experiments show this also is the case
+on other Intel microarchitectures (Goldmont Plus, Haswell,
+Kaby Lake, and Golden Cove).
+1.1
+
+This Paper
+
+In this paper, our key observation is that, like conditional
+(macro-op) branch mispredictions, conditional µbranch mispredictions can create transient execution windows spanning many macro-ops, during which macro-ops may leak
+sensitive data.
+Based on this observation, our first contribution is the
+discovery of a new class of transient execution attacks, called
+µSpectre, which exploit conditional µbranch mispredictions
+to transiently leak sensitive data.
+Importantly, µSpectre differs from the two established
+classes of transient execution attacks: Spectre [6, 7, 25, 32,
+34, 57] (including Phantom [58]) and Meltdown [13, 35, 37,
+46, 48, 51, 52]. Unlike Spectre and Phantom, which exploit
+mispredictions at the macro-op level, µSpectre exploits mispredictions at the micro-op level within the CPU’s internal
+µcode. Unlike Meltdown, µSpectre does not involve delayed
+fault handling [14].
+However, µSpectre attacks can masquerade as Spectre and
+Meltdown attacks at the macro-op level, depending on what
+the mispredicted µbranch is guarding. Indeed, we find that
+many long-known transient execution attacks (e.g., Rogue
+System Register Read [26]) as well as more recently discovered attacks (e.g., Zero Dividend Injection [40]), previously
+thought to be Spectre or Meltdown variants, are in fact instances of µSpectre on some Intel microarchitectures.
+After defining µSpectre attacks, as our second contribution, we report multiple new µSpectre vulnerabilities that we
+found during our evaluation of the microcode of the Intel
+Goldmont microarchitecture. For example, we discover Outof-Bounds Performance Counter Read (µSpectre-MEB-PCIDX),
+which we exploit to leak the contents of a microarchitectural
+buffer that is architecturally inaccessible at all privilege levels (§6.2).
+
+To mitigate µSpectre attacks, our third contribution is
+the µSLH defense, inspired by speculative load hardening
+(SLH, [15]), which inserts a data dependency on microcode
+branch predicates to force architectural registers that may
+hold unauthorized/incorrect data to return zero along mispredicted microcode paths. µSLH can be deployed on existing
+Intel CPUs via microcode updates to fix all discovered µSpectre vulnerabilities.
+
+branch misprediction. µSLH can be deployed via microcode
+updates to mitigate most vulnerabilities discussed in this
+paper, including Rogue System Register Read and µSpectre-MEB-PCIDX (§7).
+Responsible Disclosure. We disclosed an earlier version
+of this report to Intel in June 2024 and this version in January
+2025. Intel shared our report with its industry partners, but
+has not released a CVE or any microcode updates in response
+to our findings.
+
+Contributions. We summarize our contributions as follows.
+
+2
+
+• Characterization of µbranch execution behaviors (§3): We
+characterize the execution and (mis)prediction behaviors
+of microcode branches on a selection of Intel Atom (Goldmont, Goldmont Plus, Gracemont) and Core (Haswell,
+Kaby Lake, Golden Cove) microarchitectures. To our knowledge, we are the first to document the following: (1) the
+size, in macro-ops, of transient execution windows that
+µbranch mispredictions introduce; (2) that µbranch mispredictions are detected out-of-order but corrected in-order
+at retirement; and (3) that the targets of indirect µbranches
+are not predicted.
+• µSpectre attacks (§4): We present µSpectre, a novel class
+of transient execution attacks that exploit conditional
+µbranch mispredictions to leak sensitive architectural or
+microarchitectural state without authorization. We identify three variants of µSpectre attacks: Microcode Exception Bypass (µSpectre-MEB), Microcode Value Injection
+(µSpectre-MVI), and Microcode-Internal Leakage (µSpectre-MIL). Finally, we extend the taxonomy of Canella et
+al. [14] to include µSpectre and its variants.
+• Reclassifying Known Transient Execution Attacks as µSpectre (§5): We demonstrate how a number of known Spectre
+and Meltdown attacks—specifically, Rogue System Register Read [26], Meltdown-BND [14], Zero Dividend Injection [40], and String Comparison Overrun [40]—are
+in fact instances of µSpectre. When possible, we provide
+the actual microprograms that implement the vulnerable
+instructions and explain how the observed vulnerabilities
+arise due to mispredicted conditional microcode branches.
+• Disclosing New µSpectre Vulnerabilities (§6): We disclose
+two new µSpectre vulnerabilities—Overflow Check Bypass (µSpectre-MEB-OF) and Out-of-Bounds Performance
+Counter Read (µSpectre-MEB-PCIDX)—that impact Intel
+Goldmont processors and possibly others. The latter, to
+our knowledge, is the first transient execution attack capable of leaking the contents of an internal, architecturally
+inaccessible microarchitectural buffer that, to our knowledge, does not directly correspond to any architectural
+state.
+• Mitigating µSpectre with µSLH (§7): We present µSLH,
+a µSpectre defense inspired by speculative load hardening [15]. µSLH uses conditional select micro-ops to conditionally zero out sensitive data following a microcode
+
+Background
+
+In this section, we give background on transient execution
+attacks, of which µSpectre is one, and Intel microcode.
+2.1
+
+Hardware Side Channel Attacks
+
+In a hardware side-channel attack, a transmit instruction
+(or transmitter) in the victim program modulates (changes
+the state of) a channel (a hardware resource) in an operanddependent manner, and a receiver (the attacker) observes the
+channel modulation to infer the operand value [30]. Hardware resources that can form channels include caches [41,
+62, 63], branch predictors [4, 20], functional units [8, 22],
+memory ports [5], and others [21, 38, 42, 53, 54, 56, 59, 60].
+A receiver observes a transmitter’s channel modulations
+via their effects on non-deterministic aspects of program
+execution, e.g., execution time [11, 23, 41], resource contention [4, 5, 8, 21, 38, 42, 59], and more [10, 24, 33, 36, 45, 50].
+2.2
+
+Transient Execution Attacks
+
+Transient execution attacks [14] are hardware side channel
+attacks where the transmitter is transient (i.e., bound-tosquash [64]). In other words, transient execution attacks
+leak via (transient) transmitters sensitive architectural or
+microarchitectural state without authorization.
+Canella et al. [14] systematically classify all transient execution attacks known at the time of publication as either
+Spectre attacks [1, 7, 9, 25, 32, 34, 39, 43, 49, 57, 58], which exploit control-flow or data-flow mispredictions, or Meltdown
+attacks [13, 35, 37, 46, 48, 51, 52], which exploit delayed fault
+handling. While we generally adopt the Canella et al. classification scheme, we refine it in §4.5 to include µSpectre
+and other recent attacks [6, 7, 58] that have been discovered
+since the scheme’s first publication.
+2.3
+
+Micro-ops, Microprograms, and Microcode
+
+Rather than executing architectural instructions (macro-ops)
+directly, modern x86 processors first translate them into a sequence of one or more RISC-like micro-operations (micro-ops,
+or µops for short) before passing them to the CPU’s backend
+for execution [27]. This translation process is performed at
+decode time.
+The decoder has two units for translating macro-ops to
+micro-ops. The Micro-Instruction Translation Engine (MITE)
+2
+
+uses hard-wired decode logic to directly translate simple
+macro-ops into three or fewer micro-ops [27] (or, on Intel’s
+recent Golden Cove microarchitecture, four). The microsequencer indirectly translates complex macro-ops (into three
+or more micro-ops) by fetching their micro-op implementations—
+called microprograms—from an in-core read-only memory
+called the microseqeuncer ROM (MSROM). Microcode collectively refers to all microprograms stored in the MSROM. We
+say a macro-op is microcoded if its microprogram resides in
+the MSROM, and it is thus decoded by the microsequencer,
+not the MITE. A microcoded macro-op is associated with
+a microcode entrypoint, the first microcode address in its
+microprogram.
+Because microprograms may contain many micro-ops
+(e.g., as many as 138 for xsave on Golden Cove [2]), the
+microsequencer generally cannot fetch the entire microprogram in a single cycle. Thus, the microsequencer maintains
+a microprogram counter (µpc), which holds the next MSROM
+address from which to fetch micro-ops. At each cycle, the microsequencer fetches up to three micro-ops from the current
+µpc (or four, on some recent Intel processors like Golden
+Cove) and then updates the next µpc accordingly. Once the
+current microprogram ends (indicated with the SEQW UEND0
+sequence word, §2.3.3), the microsequencer loads the microcode entrypoint of the next microcoded macro-op into
+µpc and proceeds fetching micro-ops from there.
+Like architectural (macro-op) code, microcode may contain branches, including conditional branches, which transfer
+control to another microcode address by updating the µpc.
+These conditional microcode branches (µbranches) and the class
+of transient execution attacks they give rise to are the focus of
+this paper.
+
+2.3.3 Microcode Details. In this section, we discuss relevant features of the microcode on Intel Goldmont efficiency
+cores (and most likely all other modern Intel efficiency cores),
+based on the findings of Ermolov et al. [18, 19]. Please see
+their report for more details.
+Microcode register file. Micro-op register operands can
+encode both architectural registers as well as non-architectural scratch registers. We define the microcode register file
+to be the set of registers that are directly addressable via
+micro-op register operands.
+Goldmont’s microcode register file includes architectural
+integer and floating-point registers (e.g., rax and xmm0) as
+well as non-architectural integer and floating-point scratch
+registers (tmp0–tmp15 and tmm0–tmm15, respectively). Scratch registers are used to hold the results of intermediate
+macro-op computations.
+Arithmetic flags. In addition to maintaining the global
+RFLAGS architectural register, microcode also attaches arithmetic flags to each integer register in the microcode register
+file. Upon writing to an integer register, the CPU updates its
+associated arithmetic flags based on the computation that
+produced value being written.
+Triads. Microcode in the MSROM is organized into microop triads, groups of three micro-ops. When active, the microsequencer fetches one triad per cycle from the MSROM.
+We find in §3.3.3 that the microsequencer speculatively ignores (i.e., does not take) microcode branches that are not
+the last (i.e., third) in their triad, even if the branch is unconditional.
+
+2.3.1 Microcode on Goldmont. Ermolov et al. dumped
+and reverse engineered (most of) the microcode on Intel’s
+Goldmont efficiency core [28] and published their results [17–
+19]. To our knowledge, Goldmont is the only Intel microarchitecture whose microcode is publicly available. Thus, we
+will frequently reference Goldmont microcode and microprograms throughout this paper.
+
+Sequence words. In addition to micro-ops, the MSROM
+stores sequence words, one per micro-op triad. Sequence
+words encode what we call microsequencer directives, which
+influence how the microsequencer fetches subsequent microops. We write microsequencer directives as SEQW <directive> in our microcode listings throughout the paper. Relevant microsequencer directives for this paper are the following:
+
+2.3.2 Microcode on Other Cores. While we do not have
+a microcode dump for Intel microarchitectures beyond the
+Goldmont efficiency core, we infer that the microcode of
+more recent Intel efficiency cores—e.g., Goldmont Plus, Tremont, and Gracemont—closely resembles that of Goldmont,
+based on how closely the values of microcode-related performance counters match up across generations. For example,
+results published to uops.info [2] indicate that the microprogram implementing the macro-op rcl m16, cl consists
+of 18/18/19/18 micro-ops on Goldmont / Goldmont Plus /
+Tremont / Gracemont efficiency cores, respectively. In contrast, all Intel performance cores from Sandy Bridge (2011)
+through Golden Cove (2021) use 10 or 11 micro-ops [2].
+
+• SEQW UEND0 marks the end of the microprogram. It
+instructs the microsequencer to stop fetching microops.
+• SEQW LFNCEWAIT delays the execution of all subsequent micro-ops until all loads or load-like micro-ops
+(e.g., control register reads) that precede the most recent SEQW LFNCEMARK have executed. Microprograms
+implicitly start with a SEQW LFNCEMARK.
+• SEQW SYNCWAIT delays the execution of all subsequent
+micro-ops until all instructions that precede the most
+recent SEQW SYNCMARK have executed. Microprograms
+implicitly start with a SEQW SYNCMARK, based on the
+behaviors we have observed on Goldmont.
+3
+
+regcond ,immtgt and UJMPcc regcond ,regtgt ) conditionally
+transfer control to the microcode address held in regtgt /immtgt
+if and only if the condition register regcond ’s flags satisfy the
+condition code cc (encoded in the micro-op’s opcode).
+
+• SEQW SYNCFULL delays the execution of all subsequent
+micro-ops until all prior micro-ops have executed.
+• SEQW GOTO uaddr informs the microsequencer to redirect control to microcode address uaddr (i.e., µpc ←
+uaddr). Unlike µbranches, SEQW GOTO control-flow
+transfers are not micro-ops and are resolved directly
+in the microsequencer at fetch/decode time. Furthermore, SEQW GOTOs are never predicted (discussed in
+§3.1).
+Ermolov et al. [18, 19] are the first to document the semantics
+of these microsequencer directives. Their work contains a
+more comprehensive list of microsequencer directives and
+their semantics.
+
+3
+
+3.3
+
+Ermolov et al. [18] first discovered that conditional direct/indirect µbranches are statically predicted not-taken on the
+Goldmont microarchitecture. Motivated by this observation,
+we systematically evaluate the prediction of all four types of
+µbranches on Goldmont and other microarchitectures. We
+summarize our novel findings in Table 1 and as follows:
+• Conditional direct µbranches are statically predicted
+not-taken on all Intel microarchitectures we evaluate (Goldmont, Goldmont Plus, Haswell, and Golden
+Cove; §3.3.1).
+• All µbranches, including unconditional ones, are statically predicted not-taken on Goldmont if they are not
+the last in their triad (§3.3.2).
+• Unconditional indirect µbranches are not predicted if
+they are the last of their triad, contrary to Ermolov et
+al.’s suggestion [18] (§3.3.3).
+
+Microcode Branches
+
+In this section, we characterize the behavior of microcode
+branches in modern Intel CPUs. All conclusions we make
+are based on our observations when studying the Intel Goldmont (Apollo Lake, Celeron N3350), Goldmont Plus (Gemini
+Lake, Celeron N4000), Haswell (Haswell, Core i3-4170T), and
+Golden Cove (Alder Lake, Core i9-12900KS) microarchitectures (platform and SKUs in parentheses).
+3.1
+
+Microcode Control-Flow
+
+3.3.1 Prediction of conditional microcode branches.
+Ermolov et al. [18] observe that conditional direct and indirect microcode branches are always statically predicted
+not-taken under all circumstances on Goldmont cores. We
+have run many experiments on our Goldmont core that reaffirm this. Moreover, based on our experiments, this behavior
+appears consistent across modern Intel processors: all cores
+we evaluated exhibit static prediction of conditional microcode
+branches.
+Below, we describe one example of how we have inferred
+the existence of a statically-predicted conditional microcode
+branch in the cld instruction for Intel microachitectures
+other than Goldmont, with no public microcode available.
+
+Based on the reverse engineering by Ermolov et al. of Intel
+Goldmont’s microcode [18], Intel microcode has two distinct
+mechanisms to redirect microarchitectural control flow: microcode sequence words and microcode branches.
+Some microcode sequence words (§2.3.3), like SEQW GOTO,
+are control-flow transfer directives that the microsequencer
+handles at decode time. Microcode sequence words can encode both unconditional direct control-flow transfers and
+conditional direct control-flow transfers that depend solely
+on the processor’s current operating mode (e.g., the current
+ring, whether in a VM, etc.) but, importantly, not any runtime
+data (e.g., whether a flag in a control register is set).
+Microcode branches, in contrast, are micro-ops that encode
+control-flow transfers that may depend on data computed
+at runtime. Microcode branches grant microcode the ability
+to make data-dependent decisions, which are necessary to
+implement complex instructions in the x86 ISA.
+3.2
+
+Prediction of Microcode Branches
+
+Example: cld. The cld (“Clear Direction Flag”) instruction, clears the direction (DF) flag in x86’s RFLAGS register [16]. The direction flag DF determines the direction of
+x86 string operations, like movsb, which performs a bytewise copy of memory from rsi to rdi. If DF is reset (to 0),
+then rsi and rdi are incremented after each byte copy; if
+DF is set (to 1), then rsi and rdi are decremented. Using
+the UOPS_RETIRED.MS performance counter, we confirm that
+cld is microcoded on all Intel cores we evaluate.
+Hypothesis: We expect to find a conditional µbranch in
+cld’s microprogram for the following reasons. First, DF is
+a non-arithmetic flag, which is unlikely to be renamed and
+thus likely requires full serialization of the instruction stream
+to modify it (e.g., line 2 in Listing 2 does not execute until
+all prior instructions have executed, and no subsequent instructions execute until line 2 has executed). Thus, if DF is
+set, then cld must write zero to DF and serialize execution
+
+Microcode Branches
+
+Intel Goldmont microcode contains four types of microcode
+branches, originally discovered by Ermolov et al. [19]: unconditional direct branches (UJMP immtgt ), conditional direct
+branches (UJMPcc regcond , immtgt ), unconditional indirect
+branches (UJMP regtgt ), and conditional indirect branches
+(UJMPcc regcond, regtgt ).
+Sequential semantics. Unconditional branches (i.e., UJMP
+immtgt and UJMP regtgt ) always transfer control to the microcode address held in the register regtgt or given in the
+immediate value immtgt . Conditional branches (i.e., UJMPcc
+4
+
+µbranch type
+
+micro-assembly
+
+cond. direct
+
+UJMPcc regcond ,immtgt
+
+prediction, first or second
+in triad
+statically not-taken
+
+uncond. direct
+cond. indirect
+uncond. direct
+
+UJMP immtgt
+UJMPcc regcond ,regtgt
+UJMP regtgt
+
+statically not-taken
+statically not-taken
+statically not-taken
+
+prediction, last in triad
+
+confirmed microarchitectures
+
+statically not-taken
+
+Goldmont,
+Goldmont
+Plus, Haswell, Kaby Lake,
+Golden Cove
+Goldmont
+Goldmont
+Goldmont
+
+statically taken
+statically not-taken
+statically taken
+not predicted
+Table 1. Microsequencer’s prediction of microcode branches based on position in triad, based on our experimentation. Plain
+text indicates reaffirmed behaviors previously observed in prior work [18]. Bold text indicates newly observed behaviors in
+this work. Strikethrough text represents refuted behaviors suggested in prior work [18].
+
+(slow path). However, if DF is already cleared, then cld need
+not do anything (fast path). Thus, we hypothesize that all
+1
+Intel microarchitectures implement cld using a microcode 2
+branch conditioned on DF.
+3
+Goldmont microprogram: To start, using an adaptation of 4
+the microcode tracing technique proposed by Borrello et 5
+al. [12], we successfully identified the microprogram imple- 6
+7
+menting cld on Goldmont, reproduced in Listing 1, which 8
+indeed contains a conditional µbranch (bolded). Listing 2 9
+presents higher-level pseudocode representing the micropro- 10
+gram in Listing 1. Note that unk_abc indicates a micro-op 11
+12
+with an unknown opcode 0xabc.
+13
+Inferring prediction semantics via nanobenchmarks: To con- 14
+firm that cld’s conditional µbranch in Listing 1 is statically 15
+predicted not-taken, we craft targeted nanobenchmarks and
+run them under Abel et al.’s nanoBench tool [3] on a Goldmont core. Given a snippet of assembly or machine code—i.e.,
+the nanobenchmark—and a requested performance counter
+event, nanoBench replicates the snippet many times (1000
+times by default), executes the replicated code in a loop, and 1
+reports the average number of events per executed snippet. 2
+We run the nanobenchmarks described below and monitor 3
+4
+the UOPS_ISSUED.ANY and UOPS_RETIRED.ANY performance
+counters [16] to determine how many micro-ops are issued
+and retired, respectively, per snippet.
+Nanobenchmark 1. To start, we run the simple nanobenchmark consisting of the single instruction (macro-op) “cld”
+(expanded to “for (i=0;i<n;++i){cld;cld;cld;. . . }”
+by nanoBench) on our Goldmont core. We expect cld’s microprogram to take the fast path every time, since DF is clear
+by default, and thus the branch should not be taken. As expected, we observe that exactly three micro-ops issue and
+retire per iteration, corresponding to the fast path in Listing 1. This indicates that no micro-ops along the slow path
+were transiently issued, thus the branch was conclusively
+not mispredicted taken. We also observe three micro-ops
+issued and retired on all other Intel cores we evaluate.
+Nanobenchmarks 2 and 3. However, the above results do
+not prove that the branch was predicted not-taken, let alone
+5
+
+Listing (1) Goldmont microprogram implementing cld
+cld :
+tmp1 = unk_109 (1) // reads DF into tmp1
+UJMPC(tmp1, .slow)
+. fast :
+NOP
+SEQW UEND0
+. slow :
+tmp5 = RDCREG64 ( RFLAGS )
+BTS_WRCREG64 ( tmp5 , 10 , RFLAGS )
+NOP
+SEQW SYNCFULL
+unk_256 (0)
+SEQW LFNCEWAIT
+SEQW UEND0
+
+(a) Simplified microprogram
+Listing (2) Pseudocode for cld
+if ( DF ) {
+RFLAGS . DF = 1;
+serialize ();
+}
+
+(b) Microprogram pseudocode
+
+Figure 1. Microprogram implementing cld on Goldmont,
+located at MSROM address U06d0 in Goldmont’s microcode
+disassembly [18]. We use CustomProcessingUnit [12] to verify this mapping.
+
+that it is statically (i.e., always) predicted not-taken. To prove
+this, we run nanobenchmark 2 “std; lfence” and nanobenchmark 3 “std; lfence; cld.” By comparing the difference
+in issued/retired micro-ops between these two nanobenchmarks, we can determine if introducing cld in nanobenchmark 3 introduces a µbranch misprediction. std is the “set
+direction flag” instruction, and we use lfence to serialize the
+instruction stream. For nanobenchmark 2, we observe 7/7
+
+micro-ops issued/retired; for nanobenchmark 3, we observe
+17/13 micro-ops issued/retired. Thus, cld in nanobenchmark
+3 causes the issue/retirement of +10/+6 additional micro-ops.
+Four issued micro-ops are not retired and thus are transiently issued, implying a microcode branch misprediction
+of cld. This proves that cld’s microcode branch is always
+transiently mispredicted not-taken, causing the transient
+issue of the two remaining micro-ops along the fast path and
+the first two micro-ops of the next macro-op (std).
+Conclusions: We ran the aforementioned nanobenchmarks on
+all three other Intel cores we consider (§3), and we observed
+similar results. Thus, we draw the following conclusions.
+First, on all evaluated Intel cores, cld is microcoded using
+a conditional µbranch that introduces a fast path of exactly
+three micro-ops and a slow path of a platform-dependent
+number of micro-ops.
+Second, all studied cores statically predict the outcome
+of said conditional µbranch. On Goldmont, we are certain
+cld’s µbranch is statically predicted not-taken. We cannot
+be certain that this is also the case for the other cores whose
+microcode is not public—hypothetically, all µbranches could
+be statically predicted taken instead. However, we see no
+reason why Intel would make this opposite design choice
+for some cores but not others. Thus, we make the following
+claim with high confidence:
+
+wait for prior µbranches to resolve for safety reasons. For
+example, a mispredicted µbranch may cause a subsequent
+indirect µbranch to jump to the wrong target and transiently
+execute unbuffered writes to microarchitectural state that
+persist even if the writes are subsequently squashed. Like Ermolov et al. [19], we observe multiple types of micro-ops that
+perform such unbuffered writes, including control register
+writes (WRCREG) and micro-RAM writes (WRURAM).
+3.3.4 Detection and Resolution of Microcode Branch
+Predictions. On all Intel cores we have studied, we observe
+that while they are detected out-of-order, all µbranch mispredictions are resolved (i.e., corrected) in-order. In fact, all of
+our observations support the conclusion that mispredictions
+are resolved when the µbranch retires. However, when the
+microsequencer detects a µbranch misprediction, it appears
+to stop issuing micro-ops along the mispredicted path to
+the execution backend. This narrows the transient execution
+window following µbranch mispredictions whose predicates
+resolve quickly (i.e., depend on immediately available data).
+Even so, as we discuss in the following section (§3.4), these
+transient execution windows are still large enough to leak
+sensitive data.
+3.4
+
+Observation 1
+
+Transient Execution Following Microcode
+Branch Mispredictions
+
+Not only are conditional microcode branches statically predicted not-taken, but we also observe that transient execution windows following mispredicted branches can span
+several subsequent macro-ops.
+Specifically, we observe that all evaluated Intel cores transiently execute up to 12 macro-ops following the mispredicted
+conditional µbranch in cld, even though its predicate only
+depends on one micro-op (line 2) which executes in a single cycle. One some cores, this transient macro-op execution window is much larger: for example, we observed that
+Goldmont Plus may transiently execute up to 22 macro-ops
+following the conditional µbranch misprediction in cld.
+Furthermore, if a conditional µbranch predicate depends
+on long-latency macro-op operands, we observe a macro-op
+transient execution window that appears to be limited only
+by the size of the reorder buffer. From these results, we make
+the following observation:
+
+Intel cores statically predict that conditional microcode branches are not-taken.
+3.3.2 Prediction of Unconditional Direct Microcode
+Branches. We are the first to observe that on Goldmont
+cores, unconditional direct µbranches are statically (mis)predicted not-taken if they are not the last micro-op in their
+triad (Table 1). (If they are the last in their triad, they are
+always predicted taken, as previously observed by Ermolov
+et al. [18].) We are unsure if this behavior is also present
+on other Intel cores. In the Goldmont microcode, we found
+multiple unconditional branches that are not the last in their
+triad. However, all of these were directly followed by the
+SEQW SYNCFULL microsequencer directive (§2.3.3), which instructs the microsequencer to stop fetching micro-ops until
+all prior micro-ops have retired, thus acting as a speculation fence. Instead, we verified this behavior by introducing
+vulnerable unconditional direct µbranches via microcode
+patches.
+
+Observation 2
+All evaluated Intel cores can transiently execute several macro-ops following a conditional µbranch misprediction, regardless of the latency of its predicate.
+If the predicate is long-latency, they can execute as
+many subsequent macro-ops as fit in the ROB.
+
+3.3.3 Unconditional Indirect Microcode Branches. On
+Goldmont cores (and likely other Intel cores), the targets of
+unconditional indirect microcode branches that are the last
+in their triad are never predicted. Furthermore, they do not
+execute at least until all prior conditional (and possibly unconditional) µbranches have resolved (and possibly not until
+retirement). We suspect that indirect microcode branches
+
+Now, we turn to exploiting these transient execution windows following µbranch mispredictions in §4.
+6
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+
+meb_vulnerable_inst:
+pred = f(input arch state) // resolves to true
+UJMPcc(pred, .exception) // check for exception
+...
+[data = access_secret()]
+[out_arch_reg = data]
+SEQW UEND0
+. exception :
+SIGEVENT ( event )
+...
+SEQW UEND2
+
+(a) µSpectre-MEB vulnerability pattern (microcode)
+
+void attack1 () {
+u64 data;
+// sequentially faults,
+// but transiently returns secret
+asm ("meb_vulnerable_inst %0" : "=r"(data));
+leak(data);
+}
+void attack2 () {
+// sequentially faults, but transiently
+// allows following macro-ops to access secret
+asm ("meb_vulnerable_inst %0" :: "r"(idx);
+u64 *addr = compute_address(idx);
+u64 data = *addr; // returns secret
+leak(data); // transmitter
+}
+
+(b) µSpectre-MEB attack templates (architectural programs)
+
+Figure 2. Structure of µSpectre-MEB (a) vulnerabilities and (b) attacks.
+
+4 µSpectre Attacks
+
+exploit a conditional µbranch whose taken path raises a hardware exception. Such µbranches are vulnerable because even
+if the exception condition is satisfied, the microsequencer
+statically mispredicts the µbranch not-taken (per Observation 1, §3.3.1). This creates a transient execution window
+that may span into subsequent macro-ops (per Observation
+2, §3.4), allowing an attacker to leak sensitive data that was
+meant to be protected by raising the exception.
+
+We present µSpectre, a new class of transient execution attacks that exploit transient execution following conditional
+µbranch mispredictions to leak sensitive or unauthorized
+data. Many existing Spectre and Meltdown attacks are actually instances of µSpectre attacks on some or all the Intel
+microarchitectures we study; we will discuss these attacks in
+§5. In this section, we define µSpectre attacks (§4.1), describe
+three variants of µSpectre attacks (§4.2–4.4), and incorporate µSpectre into the established transient execution attack
+taxonomy (§4.5).
+In this paper, we focus on exploiting conditional direct
+µbranch mispredictions. However, µSpectre can also exploit
+conditional indirect branch mispredictions (which comprise
+6.0% of conditional branches in Goldmont’s microcode disassembly [18]). µSpectre cannot exploit unconditional indirect
+branches, as they are not predicted (i.e., are executed at retirement).
+
+4.2.1 MEB Vulnerability and Attack Details. Figure 2a
+shows the structure of microprograms that are vulnerable
+to µSpectre-MEB. The predicted execution path through the
+microprogram is bold; sequentially executed instructions
+are plain text (black and not bolded); the vulnerable, mispredicted µbranch is red; and transiently executed instructions
+following the mispredicted µbranch are gray. [Bracketed]
+lines are not present in all MEB vulnerabilities. Highlighted
+expressions contain sensitive data. We use these conventions
+throughout the rest of the paper.
+The vulnerable µbranch on line 3 sequentially branches
+to an exception routine (.exception, line 9) but is mispredicted not-taken (§3.3.1) and transiently executes the rest of
+the microprogram and subsequent macro-ops. Some MEB
+vulnerabilities (e.g., µSpectre-MEB-REG, §5.1) but not others
+(e.g., µSpectre-MEB-OF, §6.1) access sensitive data (line 5)
+and expose it via an output architectural register of the microprogram (line 6) following the mispredicted µbranch. (We
+will discuss how this can be exploited to leak sensitive data
+next.)
+Figure 2b shows two attack patterns that can be used
+to exploit µSpectre-MEB vulnerabilities. Attack pattern 1
+(attack1, lines 1 to 6) can be used to exploit MEB-vulnerable
+microprograms that transiently expose sensitive data to subsequent macro-ops via an architectural output of the vulnerable macro-op (lines 5 and 6 in Figure 2a). Attack pattern 2
+(attack2, lines 8 to 14 in Figure 2b) can be used to exploit
+
+4.1 µSpectre Vulnerabilities
+An architectural instruction’s (macro-op’s) microprogram is
+vulnerable to µSpectre if it contains a conditional µbranch
+whose misprediction can be exploited by an architectural
+program to leak sensitive architectural or microarchitectural state without authorization. Some types of µSpectre
+vulnerabilities, such as µSpectre-MVI-ZDI (§5.3) or µSpectreMEB-FSGSBASE (§5.1.1) masquerade as apparent instances
+of Spectre or Meltdown, depending on the consequences of
+the vulnerable µbranch misprediction. Other µSpectre vulnerabilities do not resemble any existing transient execution
+attacks at all, like µSpectre-MEB-PCIDX (§6.2).
+4.2 µSpectre-MEB: Microcode Exception Bypass
+The first variant of µSpectre attacks we identify is microcode
+exception bypass, or µSpectre-MEB for short. These attacks
+7
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+mvi_vulnerable_inst :
+pred = f(input arch state) // resolves to true
+UJMPcc(pred, .slow) // check for slow path
+.fast:
+[output arch state = incorrect result]
+SEQW UEND0
+. slow :
+output arch state = correct result
+SEQW UEND0
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+(a) µSpectre-MVI vulnerability pattern (microcode)
+
+void mvi_attack () {
+u64 input = ...;
+u64 output;
+asm ("mvi_vulnerable_inst %0"
+: "=r"(output) : "r"(input));
+u64 *addr = compute_address(output);
+u64 data = *addr; // secret access
+leak(data); // transmitter
+}
+
+(b) µSpectre-MVI attack pattern (architectural program)
+
+Figure 3. Structure of µSpectre-MVI (a) vulnerabilities and (b) attacks.
+other MEB vulnerabilities, which allow subsequent macroops to both transiently access and leak sensitive architectural state (e.g., secret memory locations) that they otherwise
+would not. The variable idx represents any invalid data that
+(a) triggers the exception in the MEB-vulnerable macro-op
+and (b) is used to transiently access out-of-bounds secret
+data that leaks. In both cases, the attacker can leak secret
+data via a transmitter (§2.1).
+
+microprogram computes (line 2) whether to take the fast path
+or slow path, which correspond to the not-taken and taken
+directions of the vulnerable µbranch (line 3), respectively.
+Because the µbranch is always predicted not-taken (Observation 1, §3.3.1), the microprogram will transiently execute
+the fast path (lines 4 to 6). This transient path either updates architectural state with data that is invalid due to the
+misprediction (line 5) or, in some cases, does not update architectural state when it ought to (as in cld’s microprogram,
+Listing 1, which only updates DF on the slow path in line 10
+but not on the fast path). After the end of the microprogram’s
+fast path is reached (line 6), the processor transiently executes subsequent macro-ops (Observation 2, §3.4), which
+leverage the invalid architectural state to transiently access
+and leak sensitive data.
+µSpectre-MVI can be exploited to leak sensitive data via
+the attack pattern shown in Figure 3b. First, the attacker
+primes the input architectural state in order to trigger the
+misprediction (line 2). Then, the program executes an instruction whose microprogram is vulnerable to µSpectre-MVI,
+causing the transient execution of subsequent macro-ops
+on invalid results. These subsequent macro-ops use these
+invalid results to compute (line 6) and dereference (line 7) a
+pointer to sensitive data, which is then leaked (line 8).
+Note that the transiently executed instructions following the vulnerable instruction will be re-executed using the
+correct results (produced by the microprogram’s slow path)
+when the µbranch misprediction resolves (unlike in µSpectre-MEB).
+
+4.2.2 Comparison to Meltdown. From the perspective of
+the architectural program, µSpectre-MEB attacks appear misleadingly to exploit Meltdown-style delayed fault handling.
+Thus, we say that µSpectre-MEB is Meltdown-presenting.
+However, there are key differences between µSpectre-MEB
+and Meltdown attacks. In Meltdown attacks (§2.2), a faulting
+micro-op partially executes, but delayed handling of the fault
+allows subsequent instructions to transiently execute. In contrast, no faulting instruction enters the instruction stream
+in the first place during a µSpectre-MEB attack, since the exception path was predicted not-taken. One notable similarity
+is that in both Meltdown attacks and microcode exception
+bypass attacks, macro-ops following the faulting macro-op
+transiently execute but do not architecturally commit.
+4.3 µSpectre-MVI: Microcode Value Injection
+The second variant of µSpectre attacks we identify is microcode value injection, or µSpectre-MVI for short. These attacks involve a mispredicted µbranch that causes architecturally incorrect results to be transiently exposed to subsequent macro-ops, i.e., it transiently injects “bad” values
+into the architectural program’s subsequent computation.
+This allows subsequent macro-ops to transiently access and
+leak sensitive data that they otherwise would not. Unlike
+in µSpectre-MEB, the vulnerable macro-op containing the
+mispredicted µbranch does not architecturally fault. Instead,
+once the µbranch misprediction is resolved, execution resumes along the correct, taken path of the µbranch, and any
+transiently executed macro-ops are re-executed with the
+correct outputs of the microprogram.
+Figure 3a shows the structure of a µSpectre-MVI vulnerability. Based on the current architectural state, the vulnerable
+
+Comparison to Spectre. From the perspective of the architectural program, µSpectre-MVI resembles Spectre-style mispredictions, specifically value mispredictions, hence its name;
+MVI also has a similar leakage potential to Spectre. Hence, we
+say that µSpectre-MVI attacks are Spectre-presenting. However, microcode value injections are not value mispredictions
+from a microarchitectural perspective, which involve predicting the output of a single micro-op, like a load [55].
+8
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+
+mil_vulnerable_inst :
+pred = ... // resolves to true
+UJMPcc(pred, .noleak)
+.leak:
+data = access(state) // secret access
+leak(data) // transmitter
+...
+. noleak :
+...
+
+1
+2
+3
+4
+
+(a) µSpectre-MIL vulnerability pattern (microcode)
+
+void mil_attack () {
+[prime_microarchitectural_state();]
+mil_vulnerable_inst(/*inputs*/...);
+}
+
+(b) µSpectre-MIL attack pattern (architectural program)
+
+Figure 4. Structure of a µSpectre-MIL (a) vulnerabilities and (b) attacks.
+4.4 µSpectre-MIL: Microcode-Internal Leaks
+The final µSpectre variant we consider is microcode-internal
+leaks, or µSpectre-MIL for short, in which a vulnerable microprogram both transiently accesses (line 5 in Figure 4a) and
+leaks (line 6) sensitive architectural or microarchitectural
+state due to a prior µbranch misprediction (line 3).
+µSpectre-MIL vulnerabilities can be exploited using the
+simple attack pattern shown below in Figure 4b. First, the
+attacker may need to prime microarchitectural state like the
+cache (line 2), as in µSpectre-MIL-SCO (§5.4). Then, the attacker invokes the MIL-vulnerable instruction with carefully
+selected inputs that will induce the microprogram to transiently access and leak secret data (line 3) via a transient
+transmitter following the vulnerable instruction.
+
+µspectre-MEB-OF
+µspectre-MEB-PCIDX
+
+Spectre-RSB_[34]
+
+µspectre-MEB-BND [14]
+
+Spectre-BTC_[7]
+
+µspectre-MEB-REG [27]
+
+Spectre-STL_[25]
+Spectre
+architectural
+predicted
+outcome is…
+microarchitectural
+misprediction
+
+fault
+Meltdown
+
+µspectre-MVI-ZDI [40]
+
+Spectre-PSF_[1]
+µspectre-MVI-DF
+µspectre-MEB
+
+µspectre-MVI-ARPL
+
+µspectre-MVI
+
+µspectre-MVI-ENTER
+
+µspectre-MIL
+
+µspectre-MIL-SCO [40]
+
+µspectre
+
+transient
+cause is…
+
+µSpectre-MIL Transmitters. In some sense, microcodeinternal leaks transform the macro-op they implement into
+a transmitter (§2.1). What makes MIL transmitters more
+severe than traditional transmitters, however, is their ability
+to transiently access and leak state that they should not access
+architecturally. In contrast, traditional transmitters can only,
+at worst, leak their architectural operands.
+
+Meltdown-MPX [14]
+
+Meltdown-US [35]
+
+µspectre-MIL-PHYS
+
+Meltdown-PF
+
+Meltdown-P [13]
+
+µspectre-MEB-FSGSBASE
+
+Meltdown-NM [48]
+
+Meltdown-RW [31]
+
+µspectre-MEB-OSXSAVE
+
+Meltdown-GP [14]
+
+Meltdown-PK [14]
+
+µspectre-MEB-PCE
+
+Figure 5. Transient execution attack classification tree, simplified from prior work [14] and adapted to include µSpectre and other Spectre variants that have been since discovered [6, 7, 58]. Demonstrated attacks are in red. Presently
+inconclusive results are in gray. Bolded text represents a
+new vulnerability presented in this paper.
+
+Mitigating MIL. Unlike in MEB and MVI, which require
+subsequent macro-ops to transiently leak secrets, µSpectreMIL attacks cause secret data to be both accessed and leaked
+in the same microprogram. As a result, µSpectre-MIL attacks
+cannot be blocked by inserting a speculation fence after the
+vulnerable instruction. Instead, privacy-sensitive programs
+in many cases must eschew using the vulnerable instruction
+altogether to avoid leaking private data.
+In §4.4, we provide an example of a microcode-internal
+leak present on Intel Goldmont cores (and likely all other
+Intel cores).
+4.5
+
+Spectre-PHT_[32]
+Spectre-BTB_[32]
+
+Meltdown attacks. Meltdown attacks [13, 35, 37, 46, 48,
+51, 52] exploit transient execution following a faulting microop. Meltdown attacks typically exploit delayed handling of
+the fault, which permits subsequent macro-ops to transiently
+access and/or leak sensitive data before the CPU squashes
+micro-ops following the fault [14].
+Prediction-based transient execution attacks. All other
+transient execution attacks exploit various types of mispredictions to transiently access and/or leak sensitive data before the misprediction is resolved. Canella et al. [14] consider
+all prediction-based transient execution attacks to be Spectre.
+However, µSpectre is fundamentally different from Spectre;
+for example, it can masquerade as a Meltdown variant. Thus,
+we refine prediction-based transient execution attacks into
+two subclasses based on whether the state being predicted is
+architectural or microarchitectural.
+
+Extending the Transient Execution Attack
+Taxonomy
+
+We extend the transient execution attack taxonomy presented by Canella et al. [14] to incorporate µSpectre attacks
+as follows. Figure 5 visualizes this taxonomy and presents
+all µSpectre attacks/vulnerabilities considered in this work.
+9
+
+Spectre: architectural state predictions. Spectre attacks ex- 1
+ploit (mis)predictions of architectural state following an in- 2
+struction or micro-op. For example, branch predictions— 34
+exploited by Spectre-PHT, Spectre-BTB [32], Spectre-RSB [34], 5
+and Spectre-BTC [7, 58]—predict the architectural program 6
+counter following a macro-op. Spectre-STL and Spectre-PSF 7
+8
+predict the architectural data returned by a load.
+9
+µSpectre: microarchitectural state predictions. In contrast, 10
+µSpectre attacks exploit (mis)predictions of microarchitectural
+state. In this paper, we focus exclusively on mispredictions
+of the microprogram counter (§2.3). We leave it to future
+work to explore whether other types of microarchitectural
+1
+state can be predicted.
+
+5
+
+Reclassifying Existing Attacks as
+µSpectre
+
+Many existing transient execution attacks previously considered to be Meltdown or Spectre variants are, in fact, instances
+of µSpectre. Specifically, we find that Rogue System Register
+Read [26] and Meltdown-BND [14], originally believed to be
+Meltdown variants, are actually instances of µSpectre-MEB
+vulnerabilities, on some Intel processors. Thus, we refer to
+them as µSpectre-MEB-REG (§5.1) and µSpectre-MEB-BND
+(§5.2), respectively. We also find that zero dividend injection
+(ZDI) [40] is an instance of µSpectre-MVI and string comparison overrun (SCO) [40] is an instance of µSpectre-MIL. We
+refer to these as µSpectre-MVI-ZDI (§5.3) and µSpectre-MILSCO (§5.4), respectively.
+5.1
+
+2
+3
+
+rdfsbase / rdgsbase r64 :
+tmp0 = RDCREG64(CR4)
+BT_UJMPNC(tmp0, 16, #GP)
+tmp2 = RDSEG(FS/GS, BASE) // unauthorized access
+r64 = ZEROEXTN(tmp2) // exposed via arch . output
+SEQW UEND0
+# GP :
+SIGEVENT (0 x19 )
+...
+
+(a) MEB-vulnerable microprogram (simplified)
+if (!CR4.FSGSBASE)
+raise # GP ;
+r64 = FS_BASE/GS_BASE;
+
+(b) Pseudocode for vulnerable microprogram
+1
+2
+3
+4
+
+// assume CR4 . FSGSBASE =0
+u64 fsbase;
+asm ("rdfsbase %0" : "=r"(fsbase));
+transmit(fsbase);
+
+(c) Rogue System Register Read attack (architectural program)
+
+Figure 6. MEB-vulnerable microprogram implementing
+rdfsbase/rdgsbase on Goldmont.
+Register Read, i.e., µSpectre-MEB-REG: rdfsbase/rdgsbase,
+xgetbv, and rdpmc. By examining the microprograms implementing them, we find that three of these implement
+privilege checks using a vulnerable conditional µbranch to an
+exception routine, constituting a textbook µSpectre vulnerability. The misprediction of this µbranch creates a transient
+execution window that extends into the following macro-ops
+in which an attacker can leak the privileged state.
+Furthermore, we find that each vulnerable µbranch is predicated on a control register bit that guards whether the microprogram should raise an exception. Thus, we label subvariants of µSpectre-MEB-REG according to the name of the
+guarding control register bit.
+
+Rogue System Register Read
+(µSpectre-MEB-REG)
+
+We are the first to report that some Intel microarchitectures,
+many Rogue System Register Read [26] attacks are in fact
+instances of microcode exception bypass (µSpectre-MEB, §4.2),
+not Meltdown, contrary to the suggestion of prior work [14].
+We call the class of µSpectre-MEB vulnerabilities that enable
+Rogue System Register Read µSpectre-MEB-REG.
+Background. In a Rogue System Register Read attack, an
+unprivileged attacker executes a vulnerable instruction that
+transiently bypasses a privilege check to read privileged state
+(e.g., a system register) and pass it to a subsequent transient
+transmitter, leaking it.
+In the past, this transient behavior has been categorized as
+a Meltdown-style attack due to delayed fault handling [14]
+(§4.5). However, we have discovered this is not case on some
+Intel processors; rather, we observe this behavior is due to a
+microcode exception bypass. To demonstrate this, we perform
+a case study of Rogue System Register Read vulnerabilities
+on the Goldmont microarchitecture, whose microcode is
+public [18].
+
+µSpectre-MEB-FSGSBASE ( rdfsbase/ rdgsbase). It has
+been well known since 2018 [26] that the rdfsbase and
+rdgsbase instructions allow transient access to the FS/GS
+base registers, even if the instructions have been disabled by
+setting CR4.FSGSBASE=0 [16].
+Below, we include the vulnerable Goldmont microprogram
+implementing rdfsbase/rdgsbase (Figure 6a) along with
+corresponding pseudocode (Figure 6b). Annotations have the
+same meaning as described in §4.2.1. r64 is the architectural
+output register of the rdfsbase/rdgsbase instruction.
+If CR4.FSGSBASE is reset, rdfsbase should raise a general
+protection fault (#GP) [16]. However, the processor mispredicts that the control-flow path raising #GP is not-taken and
+
+5.1.1 Case Study: Intel Goldmont. On Goldmont, we
+find that three instructions are vulnerable to Rogue System
+10
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+
+xgetbv :
+tmp0 = RDCREG64(CR4)
+BT_UJMPNC(tmp0, 0x12, #UD)
+tmp0 = SHR32(rcx, 1)
+UJMPNZ(tmp0, #GP)
+tmp0 = READURAM64(0x5b)
+rdx = ZEROEXT32(0)
+tmp0 = SHR64(tmp0, 0x38)
+rax = OR64(tmp0, 1)
+SEQW UEND0
+# UD :
+SIGEVENT (0 x19 )
+...
+# GP :
+SIGEVENT (0 xf5 )
+...
+
+(a) MEB-vulnerable microprogram (simplified)
+1
+2
+3
+4
+5
+6
+
+if (!CR4.OSXSAVE)
+raise # UD ;
+if (rcx > 1)
+raise # GP ;
+rdx = 0;
+rax = XCR0;
+
+(b) Pseudocode for vulnerable microprogram
+1
+2
+3
+4
+
+// assume CR . OSXSAVE = 0
+u32 xcrl, xcrh;
+asm("xgetbv" : "=a"(xcrl), "=d"(xcrh) : "c"(0));
+transmit(xcrl); transmit(xcrh);
+
+(c) Rogue System Register Read attack (architectural program)
+
+Figure 7. MEB-vulnerable microprogram implementing
+xgetbv on Goldmont.
+
+instead transiently executes the rest of the microprogram
+and then subsequent attacker macro-ops as if CR4.FSGSBASE
+were set. The transiently executed attacker macro-ops can
+then leak the value of the FS/GS base registers via a transmitter (§2.1). We name this attack µSpectre-MEB-FSGSBASE.
+
+Listing (3) Goldmont microprogram implementing rdpmc (simplified and without microcode updates)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+
+rdpmc :
+tmp3 = ROL32(rcx, 2)
+tmp1 = ADD8(tmp3, 0x2260)
+tmp7 = RDCREG64(tmp1)
+tmp1 = NOTAND32(
+0x40000003, rcx)
+tmp2 = RDCREG64(CR4)
+tmp2 = AND32(0x100, tmp2)
+UJMPZ(tmp2, #GP)
+UJMPNZ(tmp1, #GP)
+CMP_UJMPZ(tmp3, 13, #GP)
+rax = ZEROEXT32(tmp7)
+rdx = SHR_DSZ64(tmp7, 32)
+SEQW UEND0
+# UD :
+SIGEVENT (0 x19 )
+...
+
+(a) MEB-vulnerable microprogram (simplified)
+Listing (4) Pseudocode for rdpmc
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+
+pmc = rol(rcx, 2);
+addr = pmc + 0x2260;
+data = read_creg(addr);
+if (!CR4.PCE)
+raise # GP ;
+if ((rcx & 0x40000003))
+raise # GP ;
+if (pmc == 13)
+raise # GP ;
+rax = data;
+rdx = data >> 32;
+
+(b) Pseudocode for vulnerable microprogram
+1
+2
+3
+4
+
+// assume CR . PCE = 0
+u32 pmch, pmcl;
+asm("rdpmc" : "=a"(pmcl), "=d"(pmch) : "c"(0));
+transmit(pmch); transmit(pmcl);
+
+(c) Rogue System Register Read attack (architectural program)
+
+Figure 8. MEB-vulnerable microprogram implementing
+rdpmc on Goldmont.
+
+µSpectre-MEB-OSXSAVE ( xgetbv). xgetbv—“get value
+of extended control register”—copies the value in XCR0 into
+rax (and zeroes rdx) [16]. However, xgetbv is only available if the CR4.OSXSAVE is set; if reset, attempting to execute
+xgetbv raises an undefined opcode (#UD) exception. Goldmont’s microprogram for xgetbv (Figure 7) uses a vulnerable
+conditional microcode branch to implement this check. If
+CR4.OSXSAVE=0, it sequentially branches to an undefined
+opcode (#UD) subroutine. However, the branch is predicted
+not-taken and transiently executes the rest of the microprogram and subsequent macro-ops, which may leak the value
+of XCR0 held in rax.
+
+Per our naming convention, we call this attack µSpectre-MEB-OSXSAVE. xgetbv’s microprogram contains a second conditional µbranch (line 5 in Figure 7a); however, this
+branch does not introduce any additional vulnerabilities,
+since it cannot be exploited to return any additional privileged state beyond XCR0.
+Example: rdpmc. rdpmc—“read performance-monitoring
+counters”—reads the 64-bit performance counter at index
+11
+
+rcx into output registers edx:eax. However, rdpmc is only 1
+available if CR4.PCE is set; otherwise, it raises a general pro- 2
+tection (#GP) exception. Below is the vulnerable micropro- 34
+gram for rdpmc, without microcode patches applied. (Intel’s 5
+microcode patch fixes an unrelated vulnerability in rdpmc, 6
+7
+which we discuss in §6.2.)
+Notably, rdpmc’s microprogram contains three vulnerable 8
+9
+microcode branches. Only the first branch, however, gives 10
+rise to rdpmc’s vulnerability to Rogue System Register Read: 11
+it checks if the bit CR4.PCE is set, and if not, branches to 12
+code that raises a #GP exception. However, it is statically pre- 13
+dicted not-taken, even if CR4.PCE=0, allowing the following 14
+15
+micro-ops to transiently copy the requested performance 16
+counter value into output registers rax and rdx, which a 17
+malicious program can then transiently leak. Per our naming 18
+convention, we call this attack µSpectre-MEB-PCE.
+The two following conditional branches give rise to a separate vulnerability that, to the best of our knowledge, has
+never been publicly disclosed but has been silently fixed by In- 1
+tel in a microcode update. We discuss this novel vulnerability 2
+in §6.2 and present Intel’s patch to rdpmc’s microprogram 3
+4
+in Figure 15.
+5.1.2 Rogue System Register Read on other Intel Microarchitectures. In §5.1.1, we show that all three Rogue
+System Register Read vulnerabilities on Goldmont are in
+fact due to microcode exception bypasses. However, according to Intel [29], many other instructions—such as rdtsc,
+swapgs, smsw—are vulnerable to Rogue System Register Read
+on some Intel processors. We have not yet tested these other
+vulnerable instructions for microcode exception bypass.
+5.2
+
+Meltdown-BND (µSpectre-MEB-BND)
+
+We report for the first time that Meltdown-BND is a µSpectre-MEB vulnerability, not a Meltdown variant involving delayed fault handling as originally reported [14]. However,
+we empirically confirm that Canella et al.’s classification of a
+related vulnerability, Meltdown-MPX, is indeed an instance
+of Meltdown involving delayed fault handling.
+
+5
+6
+7
+8
+
+bound r32 , m32 :
+tmp0 = LD32(DS, m32base, m32idx, m32scale,
+m32disp)
+tmp1 = LA2LIN32(DS, m32base, m32idx,
+m32scale, m32disp)
+tmp0 = SUB32(tmp0, r32)
+UJMPL(tmp0, #BR)
+tmp0 = LD32(tmp1, 4)
+tmp0 = SUB32(tmp0, r32)
+UJMPG(tmp0, #BR)
+NOP
+SEQW UEND0
+# BR :
+tmp1 = RDCREG64 (0 x701 )
+...
+SIGEVENT (0 x15 )
+...
+
+(a) MEB-vulnerable microprogram (simplified)
+void bound ( i32 r32 , i32 * m32 ) {
+i32 lower_bound = m32[0];
+if (r32 < lower_bound)
+raise # BR ;
+i32 upper_bound = m32[1];
+if (r32 > upper_bound)
+raise # BR ;
+}
+
+(b) Pseudocode for vulnerable microprogram
+1
+2
+3
+4
+5
+6
+
+void foo ( i32 idx , i32 bnd [2] , u8 * buf ) {
+// assume idx > bnd [1]
+asm ("bound %0, %1" :: "r"(idx), "m"(bnd));
+u8 value = buf[idx];
+transmit(value);
+}
+
+(c) Meltdown-BND attack (architectural program)
+
+Figure 9. MEB-vulnerable microprogram implementing
+bound on Goldmont.
+
+5.2.1 Background. Meltdown-BND and Meltdown-MPX,
+first reported by Canella et al. [14], exploit transient execution following a failed bounds check performed by a hardware bounds check instruction. Architecturally, the bounds
+check instruction raises a bounds-range-exceeded exception
+(#BR) when the pointer or array index passed to it is out of
+bounds. Before the exception is raised, however, the CPU
+transiently executes subsequent instructions, which can access and leak out-of-bounds sensitive data. Meltdown-BND
+exploits transient execution following a faulting bound instruction (which is not available in 64-bit mode) [16]. MeltdownMPX exploits transient execution following a faulting bndcl,
+bndcu, or bndcn instruction, which are provided as part of Intel’s (now deprecated) Memory Protection Extensions (Intel
+MPX) [16].
+12
+
+Canella et al. concluded that both Meltdown-BND and
+Meltdown-MPX arise due to Meltdown-style lazy handling
+of the #BR exception. To evaluate these claims, we perform a
+case study on the Goldmont microarchitecture to better understand the microprograms that compromise the vulnerable
+instructions in Meltdown-BND and Meltdown-MPX.
+5.2.2 Case Study: µSpectre-MEB-BND (Meltdown-BND)
+on Intel Goldmont. We find that Meltdown-BND, which
+involves transient execution following a faulting bound instruction, is a µSpectre microcode exception bypass vulnerability. Thus, we refer to it as µSpectre-MEB-BND.
+Below is the microprogram implementing bound r32,
+m32 on Goldmont, where ridx is a 32-bit array index being
+
+1
+2
+3
+4
+5
+6
+
+bndcn bnd , m64 :
+tmp0 = LD64(m64base, m64idx, m64scale, m64disp)
+tmp0 = SUB64(bnd.ub, tmp0)
+tmp0 = SELECTBE(tmp0, 0x15)
+SIGEVENT(tmp0)
+SEQW UEND0
+
+(a) Non-µSpectre-vulnerable microprogram
+1
+2
+3
+
+void * ptr = * m64 ;
+uint64_t fault = ( ptr > bnd . ub ? # BR : 0);
+raise fault ; // if fault == 0 , then no - op
+
+(b) Pseudocode for non-vulnerable microprogram
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+
+Figure 10. Non-µSpectre-vulnerable microcode implementing bndcn on Goldmont, which gives rise to Meltdown variant Meltdown-MPX [14].
+
+. slow :
+... // perform 128 - bit by 64 - bit division
+rax = ... // quotient
+rdx = ... // remainder
+SEQW UEND0
+}
+
+Figure 11. Hypothesized MVI-vulnerable microprogram for
+Haswell’s div microprogram, giving rise to µSpectre-MVIZDI.
+
+checked against a 32-bit lower and upper bound stored at
+*m32 and *(m32+4), respectively.
+Goldmont’s microprogram implementing bound contains
+two vulnerable conditional branches, the first checking the
+lower bound and the second checking the upper bound. Both
+branch to microcode that raises a #BR exception if the check
+fails. However, since they are statically mispredicted nottaken (Observation 1, §3.3.1), they allow subsequent macroops to execute even if either check fails. We conclude that the
+vulnerability in bound is in fact an instance of µSpectre-MEB,
+not Meltdown.
+
+Background. Oleksenko et al. [40] recently discovered
+that while performing 64-bit division, some Intel processors speculate that the upper 64 bits of the 128-bit dividend
+are zero. They call this zero dividend injection (ZDI), which
+occurs as follows. The division instruction div r64 architecturally computes the division rdx:rax / r64. However,
+they observe that if rdx is non-zero and takes a long time to
+resolve (e.g., due to a cache miss), then the processor transiently performs the division 0:rax / r64 (as if rdx=0) and
+then transiently executes subsequent instructions with the
+incorrect quotient (in rax) and remainder (in rdx).
+Oleksenko et al. attribute this transient behavior to “the
+first documented case of value prediction in a commercial
+CPU” [40]. Contrary to their conclusion, we deduce that ZDI
+is in fact an instance of µSpectre-MVI by performing the
+following case study on a Haswell CPU.
+
+5.2.3 Case Study: Meltdown-MPX on Intel Goldmont.
+We confirm Canella et al.’s classification of Meltdown-MPX
+as a Meltdown variant [14] by examining the MPX bounds
+check instruction bndcn on Goldmont. We choose bndcn
+rather than bndcl or bndcu because it is the only microcoded
+instruction of the three. This means that we can view its
+microprogram implementation in the MSROM (§2.3).
+Figure 9 contains the microprogram implementing bndcn
+on Goldmont. The instruction bndcn bnd, m64 raises a #BR
+exception if the 64-bit address pointed to by m64 is greater
+than the upper bound bnd.UB provided in bounds register
+bnd, where bnd.UB is not in one’s complement form [16].
+Notably, Figure 10a contains no conditional µbranches.
+However, Canella et al. still observe transient execution following these instructions; thus, we concur that MeltdownMPX is indeed due to delayed fault handling—in this case,
+the #BR raised by the fourth micro-op SIGEVENT(tmp0) in
+Figure 10a.
+5.3
+
+div r64 :
+...
+tmp0 = OR64(rdx, rdx)
+UJMPNZ(tmp0, .slow)
+.fast:
+... // perform 64-bit by 64-bit division
+rax = ... // quotient
+rdx = ... // remainder
+SEQW UEND0
+
+Case Study on Haswell. We determined that ZDI is due
+to a mispredicted µbranch as follows. First, we confirmed
+that our Haswell core exhibits ZDI by leaking the transiently
+computed quotient in rax via a cache side channel. No other
+cores we tested exhibited ZDI. Second, since Haswell’s microcode is not public, we ran a series of nanobenchmarks
+with nanoBench [3] to profile the sequential and transient
+execution paths of the microprogram implementing 64-bit
+division. The first nanobenchmark, “mov rdx, 0; mov rax,
+0; mov rcx, 2; div rcx” sets rdx to zero and issues/retires
+39/39 micro-ops. The second nanobenchmark, “mov rdx, 1;
+mov rax, 0; mov rcx, 2; div rcx” sets rdx to a nonzero
+value and issues/retires 61/49 micro-ops. In both cases, all
+micro-ops are delivered from the MSROM (§2.3) according
+to the IDQ.MS_UOPS performance counter [16], thus div is
+microcoded.
+Because div’s microprogram retires a different number
+of micro-ops depending on whether rdx is zero (39 vs. 49),
+
+Zero Dividend Injection (µSpectre-MVI-ZDI)
+
+We report for the first time that Zero Dividend Injection
+(ZDI) [40] occurs due to a mispredicted conditional µbranch
+and thus is an instance of microcode value injection (§4.3).
+We call the resulting vulnerability µSpectre-MVI-ZDI.
+13
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+
+5.4 String Comparison Overrun (µSpectre-MIL-SCO)
+
+repne_scasb :
+tmp4 = OR64(rcx)
+UJMPZ(tmp4, .zerolen)
+. loop :
+tmp1 = LDZXn(rdi)
+tmp10 = SUB64(tmp1, rax)
+rdi = ADDSUB64(rdi, 1)
+tmp4 = SUB64(tmp4, 1)
+UJMPZ(tmp10, .done) // transmitter
+UJMPZ(tmp4, .done)
+SEQW GOTO .loop
+
+We are the first to report that String Comparison Overrun
+(SCO) [40] is an instance of µSpectre-MIL. Thus, we refer to
+these vulnerabilities as µSpectre-MIL-SCO.
+Background. Oleksenko et al. also discovered that some
+x86 string instructions—in particular repe/repne cmps and
+repe/repne scas—compare data past the given string length
+(in rcx) and can leak the outcome of the comparisons into
+the cache state [40]. They call this vulnerability String Comparison Overrun (SCO).
+
+. done :
+GENARITHFLAGS (0 x3f , tmp10 )
+rcx = ZEROEXT64 ( tmp4 , rcx )
+SFENCE (0)
+SEQW SYNCWAIT
+SEQW UEND0
+
+Case Study on Goldmont. We reproduce the (simplified) Goldmont microcode for the SCO-vulnerable macro-op
+repne scasb (scan string pointed to by rdi for byte in register al) in Figure 12.
+The microprogram implementing repne scasb always
+predicts that (1) the length is non-zero, even after being
+decremented, and (2) the current string byte does not equal
+the value in al. Thus, repne scasb compares past the end of
+the string because its microprogram speculates in an infinite
+loop. This speculative loop is only broken when a misprediction of one of the microcode branches is detected.
+Importantly, an attacker can control how long it takes for
+the branch predicates to resolve by either (a) setting the
+string length in rcx to be result of an arbitrarily long latency
+computation or (b) flushing portions of the string pointed
+to by rdi from the cache to delay the resolution of arbitrary
+byte comparisons that may cause the loop to exit.
+
+. zerolen :
+rcx = ZEROEXT64 ( rcx )
+SEQW UEND0
+
+(a) MIL-vulnerable microprogram (simplified)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+
+if (rcx == 0)
+return ;
+while (1) {
+u8 b = *rdi;
+–rcx;
+++rdi;
+if (b == al) // transmitter
+return ;
+if (rcx == 0)
+return ;
+}
+
+6
+
+New µSpectre Vulnerabilities
+
+In this section, we present two novel µSpectre-MEB vulnerabilities and three new µSpectre-MVI speculation primitives
+that we have discovered. In particular, the new vulnerability
+µSpectre-MEB-PCIDX (§6.2) demonstrates how uniquely severe µSpectre vulnerabilities can be, with the potential to leak
+large swaths of microarchitectural state that is not intended
+to be accessible to any program running on the hardware,
+ever.
+While we did not discover any new µSpectre-MIL attacks,
+we show how inverting the taken/not-taken directions of a
+single conditional µbranch while preserving its semantics
+introduces a µSpectre-MIL vulnerability that enables an attacker to leak all of its physical page mappings (§6.4).
+
+(b) Pseudocode for the vulnerable microprogram
+
+Figure 12. MIL-vulnerable microprogram implementing
+repne scasb on Goldmont, giving rise to µSpectre-MILSCO.
+
+we conclude that the microprogram must taken one of two
+different control-flow paths. This implies the presence of a
+conditional µbranch that depends on the value of rdx, which
+holds the upper 64 bits of the dividend. Furthermore, we
+can deduce that the branch was mispredicted when rdx = 1,
+since more instructions are issued than retired (61 vs. 49),
+i.e., 61 − 49 = 12 instructions were transiently issued.
+We conclude that the conditional µbranch’s predicate must
+be “rdx ≠ 0,” since µbranches are statically (mis)predicted
+not-taken (Observation 1, §3.3.1). Thus, we infer that the
+microprogram implementing div has the structure shown
+in Figure 11. We conclude that ZDI is an instance of µSpectre-MVI, since the div’s mispredicted conditional µbranch
+transiently exposes an invalid quotient and remainder to
+subsequent macro-ops.
+
+6.1
+
+Overflow Check Bypass (µSpectre-MEB-OF)
+
+We present Overflow Check Bypass, or µSpectre-MEB-OF,
+which is an instance of microcode exception bypass. µSpectre-MEB-OF exploits a vulnerability in the microprogram
+that implements the into instruction, which generates an
+overflow trap (#OF) if the overflow flag (OF) is set.1 On Goldmont, we find that this check is implemented using a vulnerable conditional µbranch to a routine that raises the #OF
+1 into is not available in 64-bit mode.
+
+14
+
+1
+2
+3
+4
+5
+6
+
+into :
+tmp2 = MOVE_MERGEFLAGS32(4)
+UJMPO(tmp2, #OF)
+SEQW UEND0
+# OF :
+...
+
+1
+2
+3
+4
+5
+6
+7
+8
+Figure 13. MEB-vulnerable microprogram implementing 9
+into on Goldmont (simplified), giving rise to µSpectre-MEB- 10
+11
+OF (§6.1).
+12
+13
+14
+exception. This branch is statically predicted not-taken (per 15
+16
+Observation 1, §3.3.1) and thus allows transient execution of 17
+
+rdpmc :
+tmp3 = ROL32(rcx, 2)
+tmp1 = ADD8(tmp3, 0x2260)
+tmp7 = RDCREG64(tmp1)
+tmp1 = NOTAND32(
+0x40000003, rcx)
+tmp2 = RDCREG64(CR4)
+tmp2 = AND32(0x100, tmp2)
+UJMPZ(tmp2, #GP)
+UJMPNZ(tmp1, #GP) // bounds check
+CMP_UJMPZ(tmp3, 13, #GP) // hole check
+rax = tmp7
+rdx = SHR_DSZ64(tmp7, 32)
+SEQW UEND0
+# GP :
+SIGEVENT (0 x19 )
+...
+
+subsequent macro-ops despite an overflow having occurred.
+An attacker can exploit µSpectre-MEB-OF to transiently
+compute on invalid values that were the result of a signed
+integer overflow, allowing an attacker to potentially access
+and leak out-of-bounds data.
+
+(a) MEB-vulnerable microprogram implementing rdpmc on Goldmont (reproduced with emphasis on µbranches that give rise to
+µSpectre-MEB-PCIDX).
+
+1
+2
+3
+Recall from Listing 3 that on Goldmont, the microprogram 4
+5
+implementing rdpmc contains three vulnerable microcode 6
+branches. The first branch is responsible for µSpectre-MEB- 7
+PCE, which is an instance of the µSpectre-MEB-REG subclass 8
+of µSpectre attacks (§5.1). The second and third branches, 9
+which implement bounds checks on the provided perfor- 10
+11
+mance counter index, give rise to a new vulnerability, which 12
+we call Out-of-Bounds Performance Counter Read, or µSpec- 13
+14
+tre-MEB-PCIDX for short.
+
+int junk ;
+char arr [256 * 512];
+void leak_creg ( u16 creg , u64 byte_sel ) {
+// 0 x2200 <= creg < 0 x2300
+u32 phys_pmc = ( creg - 0 x2260 ) & 0 xFF ;
+u32 pmc = ( phys_pmc >> 2) | ( phys_pmc << 30);
+u32 eax , edx ;
+asm (" rdpmc " : "= a "( eax ) , "= d "( edx ) : " c "( pmc ));
+// TRANSIENT EXECUTION WINDOW //
+u64 data = (( u64 ) edx << 32) | eax ;
+u64 byte = ( data >> ( byte_sel * 8)) & 0 xFF ;
+junk &= arr [ byte * 512];
+// END TRANSIENT EXEC . WINDOW //
+}
+
+6.2
+
+Out-of-Bounds Performance Counter Read
+(µSpectre-MEB-PCIDX)
+
+µSpectre-MEB-PCIDX allows an attacker to pass a malicious out-of-bounds performance counter index to rdpmc via
+architectural register rcx, which causes the microprogram
+to transiently read from an out-of-bounds control register
+address, bypass all the bounds checks via microcode branch
+mispredictions, and transiently pass the out-of-bounds data
+to subsequent macro-ops which leak it.
+
+(b) Proof-of-concept attack exploiting µSpectre-MEB-PCIDX on
+Goldmont (architectural program).
+
+Figure 14. µSpectre-MEB-PCIDX vulnerability in the microprogram implementing rdpmc on Goldmont.
+
+6.2.1 Detailed Explanation and Analysis. We reproduce rdpmc’s microprogram in Figure 14a, this time annotated assuming the rdpmc instruction is enabled, so that
+the first branch is not mispredicted. An attacker can coerce
+rdpmc’s microprogram to transiently return out-of-bounds
+control register data to subsequent macro-ops as follows.
+Reading from out-of-bounds control registers: Line 2 in
+Figure 14a computes the physical performance counter index from the logical index provided in architectural register rcx and assigns it to scratch register tmp3. To compute
+the address of the control register holding the performance
+counter data corresponding to the physical index, line 3 indexes into the performance counter array based at 0x2260
+using the physical performance counter index in tmp3. Interestingly, this is done using an 8-bit addition with a 16-bit
+
+operand via the ADD8 micro-op. We experimentally determined the semantics of the mixed-bitwidth addition to be
+the following. First, the ADD8 performs a conventional 8-bit
+addition between the least-significant bytes of 0x2260 and
+tmp3, wrapping around on overflow. Then, it extends the
+8-bit sum with the upper 8 bits of the immediate 0x2260 and
+writes the result into tmp1. Thus, line 3 effectively computes
+tmp1 = (tmp3 + 0x60) % 256 + 0x2200. Since the attacker
+fully controls tmp3 via the input rcx, the attacker can choose
+rcx such that line 3 computes an arbitrary control register
+address in the range 0x2200-0x2300. Line 4 then reads the data
+at this control register address into tmp7.
+Mispredicting the bounds checks: Lines 5, 6, 10 and 11 check
+the validity of the attacker-controlled performance counter
+index passed in rcx. Specifically, if rcx is not in the range
+15
+
+of Figure 14a, then an attacker could coerce rdpmc to transiently return the data contained in any control register in
+the range 0x0–0x100000000, not just 0x2200–0x2300. This
+would potentially fully compromise the system’s privacy and
+security, depending on how much sensitive data is accessible
+via control registers (our hypothesis is, a lot).
+Even worse, Intel microcode for microarchitectures other
+than Goldmont is not public. Even if we can empirically
+verify that rdpmc is not vulnerable to µSpectre-MEB-PCIDX
+on other microarchitectures, there may be similar, yet-to-bediscovered µSpectre vulnerabilities that allow full transient
+access to microarchitectural arrays. We cannot know for
+sure unless Intel (and AMD) publish their microcode for all
+microarchitectures.
+
+0x0–0x3 or 0x40000000–0x40000002 (inclusive), then the conditional µbranches on lines 10 and 11 are taken in order to
+raise a #GP exception. However, both branches are statically
+predicted not-taken, so the rest of the microprogram executes as if rcx were in bounds.
+Exposing out-of-bounds control register data to subsequent
+macro-ops: Lines 12 and 13 copy the data read from the outof-bounds control register into architectural registers eax
+(lower 32 bits) and edx (upper 32 bits). Line 14 ends the
+microprogram, causing subsequent attacker macro-ops to
+execute. Finally, the attacker can transiently leak the control
+register data in eax and edx using a side channel like the
+cache, as described below.
+6.2.2 Proof-of-Concept Exploit. Figure 14b contains a
+proof-of-concept attack exploiting µSpectre-MEB-PCIDX to
+leak the values of arbitrary control registers in the range
+0x2200–0x2300. Using this approach on an Intel Goldmont
+core with no microcode updates applied, we were able to
+leak all 256 control registers in the range. While most were
+zero (indicating that they are unimplemented), we found
+many control registers that held non-zero data. We have
+not analyzed the purpose of control registers (aside from
+performance counter registers) in this range.
+
+6.3
+
+New Instances of µSpectre-MVI
+
+We discovered three new instances of microcode value injection (µSpectre-MVI) on Goldmont, arising due to µbranch
+mispredictions in the microprograms of cld, arpl, and enter.
+While we have observed subsequent macro-ops to transiently
+compute on the invalid outputs of these microprograms, we
+have so for not been able to demonstrate attacks exploiting
+this fact to transiently leak sensitive data. However, we believe it likely that, under the right circumstances, these three
+vulnerable microprograms can enable subsequent macro-ops
+to transiently leak sensitive data.
+
+6.2.3 Intel’s Mitigation. Intel appears to have silently
+patched the µSpectre-MEB-PCIDX vulnerability years ago
+(we have not yet determined exactly when), so any Goldmontbased systems that have applied Intel’s most recent microcode
+updates are not vulnerable to µSpectre-MEB-PCIDX. We discovered this fix by comparing the Goldmont microcode with
+and without microcode patches using uCodeDisasm [18].
+We show Intel’s fix in Figure 15 in §7.1.1, which inspires
+our µSpectre mitigation technique, µSLH (§7). We have not
+been able to reproduce µSpectre-MEB-PCIDX on any Intel
+microarchitectures other than Goldmont.
+
+cld. cld architecturally clears the direction flag (DF). However, cld’s microprogram always predicts that DF=0 and thus
+does not update it. While we find that macro-ops that depend
+on DF, like lodsb, can transiently execute with DF incorrectly
+being set, we have not yet been able to demonstrate leakage
+of transiently accessed data following such macro-ops.
+arpl. This instruction adjusts the 2-bit requestor privilege level (RPL) field of a 16-bit segment selector. arpl’s
+microprogram predicts that the RPL field does not require
+adjustment and transiently executes subsequent macro-ops
+with the original RPL value. We have not attempted a proofof-concept for arpl yet.
+
+6.2.4 Implications. Our µSpectre-MEB-PCIDX attack represents a new leakage scope that, to our knowledge, has not
+been seen before in any transient execution attack: the leakage of microarchitectural registers that are never architecturally accessible and do not correspond to any architectural
+state whatsoever, to our knowledge. Neither Spectre nor
+Meltdown have been demonstrated to be capable of this.
+However, given that (1) µSpectre-MEB-PCIDX is capable
+of leaking control registers only in a restricted range and that
+(2) Intel has already fixed it, one might assume that µSpectreMEC-PCIDX is an interesting but low severity vulnerability
+that demonstrates the value of microcode updates.
+Our perspective more pessimistic. We see an extremely
+close shave where Intel was one micro-op away—literally—
+from leaking the contents of all control registers on the CRBUS, which accounts for a large portion of microarchitectural state. If an ADD32 micro-op rather than a ADD8 micro-op
+was used to compute the control register address in line 3
+
+enter. The instruction enter imm16, imm8 creates a
+imm16-byte stack frame for the procedure [16]. If imm8 is zero,
+it is effectively the same as push rbp; mov rbp, rsp; sub
+rsp, imm8. If imm8 is non-zero, it pushes additional nested
+frame pointers onto the stack. We find that the microprogram
+implementing enter statically predicts that imm8 is zero, i.e.,
+no nested frame pointers are pushed, regardless of the value
+of imm8. This is remarkable, since the microcode branch
+checking whether imm8 is zero does not depend on runtime
+data, only directly-encoded immediate fields that should be
+available at decode-time. We have not attempted a proof-ofconcept demonstrating leakage due to enter’s microcode
+value injection yet.
+16
+
+6.4
+
+7 µSLH: A µSpectre Mitigation
+
+Rogue Physical Address Load
+(µSpectre-MIL-PHYS, Hypothetical)
+
+We present µSLH, a microcode defense against µSpectre.
+µSLH is inspired by speculative load hardening (SLH) [15,
+47, 65], a Spectre-PHT defense, and Intel’s microcode patch
+that fixes µSpectre-MEB-PCIDX (Figure 15). µSLH can be
+deployed via microcode updates to patch µSpectre vulnerabilities in existing hardware and can be incorporated into
+directly the microcode of future hardware.
+µSLH works by using branchless logic to zero out any
+registers that may hold invalid or privileged data following
+a mispredicted µbranch. Specifically, sequentially following
+each conditional µbranch, µSLH inserts conditional select
+micro-op(s) (SELECTcc), predicated on the inverted condition
+of the preceding µbranch. In effect, this conditional select
+zeroes out the register holding “bad” data unless if the prior
+branch’s predicate resolved to false (i.e., the static prediction
+of not-taken was correct).
+µSLH fully mitigates all µSpectre-MEB vulnerabilities that
+involve passing privileged data to subsequent macro-ops (e.g.,
+all Rogue System Register Read vulnerabilities, §5.1). µSLH
+partially mitigates all µSpectre-MVI attacks that involve directly passing invalid results to subsequent macro-ops (e.g.,
+µSpectre-MVI-ZDI, §5.3). While µSLH could theoretically
+mitigate µSpectre-MIL attacks (e.g., µSpectre-MIL-SCO), we
+predict the overhead would be too high due to the frequent
+occurence of tightly nested microcode loops. Thus, other
+mitigations are needed for such µSpectre-MIL attacks.
+
+During our analysis of Goldmont’s public microcode, we
+discovered a new undocumented instruction with opcode
+0f 0c. This instruction maps to an intriguing microprogram
+with a complex control-flow graph that contains physical
+loads and stores to and from architectural register rax and
+performs port I/O, among other things. We have not yet
+determined what the instruction does, though we suspect it
+might involve some kind of inter-core communication.
+Like the udbgrd and udbgwr undocumented instructions
+(with opcodes 0f 0e and 0f 0f) discovered by Ermolov
+et al. [19], we find that 0f 0c’s microprogram raises an
+undefined opcode (#UD) exception unless the processor has
+been red-unlocked. However, because the microprogram
+checks whether the instruction is enabled using a conditional
+branch to a #UD routine, we observe transient execution
+along the not-taken path, even if the instruction is disabled.
+Fortunately, we have verified through manual inspection that
+the not-taken direction of another branch falls through to
+the #UD routine, so that ultimately no sensitive instructions
+are transiently executed.
+Hypothetical vulnerability. Had the taken/not-taken
+paths of one particular branch been switched, we believe
+that physical-address loads and stores directly from register rax, which bypass address translation, could transiently
+execute, regardless of the privilege level. This would have
+introduced a severe µSpectre-MIL vulnerability, which an
+unprivileged attacker could exploit to infer its page table
+mappings from userspace. We call this hypothetical vulnerability Rogue Physical Address Load, or µSpectre-MIL-PHYS
+for short.
+For example, an attacker could launch a Flush+Reload
+attack [61] to determine whether virtual page address 𝑣 maps
+to phyiscal page address 𝑝 as follows. First, the attacker
+flushes 𝑣 from the cache. Then, the attacker sets rax ←
+𝑝 and executes 0f 0c, which architecturally raises a #UD
+exception but transiently accesses 𝑝. Finally, the attacker
+probes whether virtual address 𝑣 is now cached by timing
+the latency of a load from 𝑣. If 𝑣 is cached, then 𝑣 maps to 𝑝.
+
+Semantics of SELECTcc. µSLH relies on the conditional
+select micro-op, SELECTcc. The micro-op r0 = SELECTcc(r1,
+r2) is equivalent to the C ternary expression r0 = cc(r1.
+flags) ? r2 : 0. That is, if the flags associated with register r1 satisfy condition code cc, then the data in r2 is copied
+into output register r0; otherwise, r0 is zeroed.
+7.1 Defending against µSpectre-MEB with µSLH
+µSLH fully mitigates all µSpectre-MEB vulnerabilities that
+involve passing privileged data to subsequent macro-ops,
+including all µSpectre-MEB-REG (i.e., Rogue System Register
+Read) vulnerabilities (§5.1) as well as µSpectre-MEB-PCIDX
+(§6.2).
+
+Impact. Although it appears that Goldmont’s microprogram for the instruction 0f 0c is not vulnerable to Rogue
+Physical Address Load, we have inferred using microcoderelated performance counters that 0f 0c is implemented on
+all other Intel processors we evaluated. Since other Intel processors’ microcode is not public, we cannot know whether
+0f 0c on those processors is vulnerable to Rogue Physical
+Address Load or related vulnerabilities. Even if all implementations of 0f 0c on all Intel processors are secure, there may
+be other undocumented instructions that transiently execute
+unsafe or leaky instructions before architecturally raising
+an undefined opcode exception.
+
+7.1.1 Mitigating µSpectre-MEB-PCIDX with µSLH. µSLH is inspired by Intel’s mitigation of µSpectre-MEB-PCIDX
+(released via microcode update), shown in Figure 15, along
+with our proposed extension. We mark the new instructions
+inserted for both defenses in green. Intel’s microcode update
+inserts the first SELECTcc instruction (line 12) to zero out the
+control register data in tmp7 if the µbranch implementing
+the bounds check is mispredicted not-taken. As a result, if
+the performance counter index is out of bounds, rax and rdx
+are (transiently) zeroed, blocking any subsequent leakage.
+However, if the performance counter index is in bounds but
+equals 13, the hole check (line 11) is still vulnerable and can
+17
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+
+rdpmc :
+tmp3 = ROL32(rcx, 2)
+tmp1 = ADD8(tmp3, 0x2260)
+tmp7 = RDCREG64(tmp1)
+tmp1 = NOTAND32(
+0x40000003, rcx)
+tmp2 = RDCREG64(CR4)
+tmp2 = AND32(0x100, tmp2)
+UJMPZ(tmp2, #GP)
+UJMPNZ(tmp1, #GP) // bounds check
+CMP_UJMPZ(tmp3, 13, #GP) // hole check
+tmp7 = SELECTZ(tmp1, tmp7) // Intel 's mitigation
+tmp7 = SELECTNZ(tmp3, tmp7) // Our extension
+rax = tmp7
+rdx = SHR_DSZ64(tmp7, 32)
+SEQW UEND0
+
+question: if mitigating Rogue System Register Read is so easy,
+why has Intel not mitigated it? We consider two possibilities.
+First, there are a limited of number of microcode patch registers (prior work finds that there are 32 on Goldmont [17])
+but many Rogue System Register Read vulnerabilities (Intel’s
+documentation lists 13 vulnerable instructions [29]). If Intel
+fixed all the Rogue System Register Read vulnerabilities with
+microcode patches, there might not be many patch registers left for more severe vulnerabilities (e.g., the worst-case
+scenario we describe in §6.2). We speculate that Intel might
+be reserving the remaining microcode patch registers for
+higher-severity vulnerabilities.
+Second, there might be a fundamental limitation of microcode updates that we are overlooking. In our experiments
+in writing custom microcode for a red-unlocked Goldmont
+CPU [19], we found that patching short microprograms
+like rdfsbase/rdgsbase would sometimes trigger faults and
+CPU freezes that we were unable to explain. There may be
+restrictions on under what circumstances a microcode address can be patched, e.g., that it cannot be too close to the
+end of the microprogram. However, this is only speculation.
+
+# GP :
+SIGEVENT (0 x19 )
+...
+
+Figure 15. Intel’s mitigation of µSpectre-MEB-PCIDX on
+Goldmont, plus our extension
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+
+rdfsbase / rdgsbase r64 :
+tmp0 = RDCREG64(CR4)
+BT_UJMPNC(tmp0, 16, #GP)
+tmp2 = RDSEG(FS/GS, BASE)
+tmp2 = SELECTC(tmp0, tmp2)
+r64 = ZEROEXTN(tmp2)
+SEQW UEND0
+
+7.2
+
+Mitigating against µSpectre-MVI with µSLH
+
+µSLH partially mitigates all µSpectre-MVI attacks that involve transiently passing invalid results to subsequent macroops, like in µSpectre-MVI-ZDI. Specifically, µSLH zeroes out
+any invalid outputs produced by the microprogram following
+a misprediction microcode branch. As a result, subsequent
+macro-ops can only transiently compute on one invalid value,
+zero.
+This does not necessarily prevent all transient leaks in
+subsequent macro-ops, however. For example, it is known
+that faulting loads transiently forwarding zero data to dependent micro-ops gives rise to LVI-Null attacks [51]. The
+advantage of µSLH, however, is that it architecturally exposes a universal transient zero-forwarding semantics to all
+instructions vulnerable to microcode value injection.
+
+# GP :
+SIGEVENT (0 x19 )
+...
+
+Figure 16. Our proposed µSLH mitigation for µSpectre-MEBSEGBASE
+transiently pass the corresponding control register’s data to
+subsequent macro-ops. To prevent this, we can simply insert
+a second conditional select directly following the second one
+(line 13).2
+
+Mitigating µSpectre-MVI-ZDI. Figure 17 shows how
+µSLH mitigates µSpectre-MVI-ZDI using two conditional
+selects at the end of the division’s predicted path to conditionally zero out the quotient and remainder in rax and rdx,
+respectively, if the branch was mispredicted. We highlight
+transiently invalid data in red.
+
+7.1.2 Mitigating Rogue System Register Read with
+µSLH. We believe that all Rogue System Register Read vulnerabilities can be mitigated with µSLH, based on our conclusion
+in §5.1.2 that all such vulnerabilities are likely due to mispredicted microcode branches (at least on Intel processors).
+Figure 16 shows how one would mitigate µSpectre-MEBSEGBASE with µSLH.
+We believe all other Rogue System Register Reads on all
+Intel processors can be mitigated similarly. This begs the
+
+7.3
+
+Limitations of µSLH
+
+In theory, µSLH can mitigate µSpectre-MIL vulnerabilities as
+well. However, in practice, we suspect that the overhead of
+doing so would be too high and, instead, another mitigation
+approach should be used. The only confirmed example of
+µSpectre-MIL so far is µSpectre-MIL-SCO, a vulnerability
+in the microprograms implementing repe/repne cmps and
+repe/repne scas (§5.4). Both microprograms on Goldmont
+
+2 In practice, the control register corresponding to performance counter
+
+index 13 is likely not implemented or, if it is, does not contain sensitive
+information. We include this second conditional select for completeness
+and to demonstrate the µSLH approach.
+18
+
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+
+div r64 :
+...
+tmp0 = OR64(rdx, rdx)
+UJMPNZ(tmp0, .slow)
+.fast:
+... // perform 64-bit by 64-bit division
+rax = ... // quotient
+rax = SELECTZ(tmp0, rax)
+rdx = ... // remainder
+rdx = SELECTZ(tmp0, rdx)
+SEQW UEND0
+
+[2] Andreas Abel and Jan Reineke. uops.info: Characterizing latency,
+throughput, and port usage of instructions on intel microarchitectures.
+In ASPLOS, ASPLOS ’19, pages 673–686, New York, NY, USA, 2019.
+ACM.
+[3] Andreas Abel and Jan Reineke. nanobench: A low-overhead tool for
+running microbenchmarks on x86 systems. In 2020 IEEE International
+Symposium on Performance Analysis of Systems and Software (ISPASS),
+August 2020.
+[4] Onur Aciicmez, Jean-Pierre Seifert, and Cetin Kaya Koc. Predicting
+secret keys via branch prediction. IACR’06, 2006.
+[5] Alejandro Cabrera Aldaya, Billy Bob Brumley, Sohaib ul Hassan, Cesar Pereida García, and Nicola Tuveri. Port contention for fun and
+profit. IACR’18, 2018.
+[6] AMD. Security analysis of amd predictive store forwarding. Whitepaper, AMD, March 2021.
+[7] AMD. Techincal guidance for mitigating branch type confusion.
+Whitepaper, AMD, November 2022.
+[8] M. Andrysco, D. Kohlbrenner, K. Mowery, R. Jhala, S. Lerner, and
+H. Shacham. On subnormal floating point and abnormal timing. In
+2015 IEEE Symposium on Security and Privacy, 2015.
+[9] Arm. Straight-Line Speculation. Technical report, Arm, 2020. Accessed: October 29, 2024.
+[10] Michael Backes, Markus Dürmuth, Sebastian Gerling, Manfred Pinkal,
+and Caroline Sporleder. Acoustic side-channel attacks on printers.
+19th USENIX Security Symposium, 2010.
+[11] Daniel J. Bernstein. Cache-timing attacks on aes. Technical report,
+The University of Illinois at Chicago, 2005. https://cr.yp.to/antiforgery/
+cachetiming-20050414.pdf.
+[12] Pietro Borrello, Catherine Easdon, Martin Schwarzl, Roland Czerny,
+and Michael Schwarz. Customprocessingunit: Reverse engineering
+and customization of intel microcode. In 2023 IEEE Security and Privacy
+Workshops (SPW), pages 285–297. IEEE, 2023.
+[13] Jo Van Bulck, Marina Minkin, Ofir Weisse, Daniel Genkin, Baris
+Kasikci, Frank Piessens, Mark Silberstein, Thomas F. Wenisch, Yuval Yarom, and Raoul Strackx. Foreshadow: Extracting the keys to
+the Intel SGX kingdom with transient out-of-order execution. 27th
+USENIX Security Symposium, 2018.
+[14] Claudio Canella, Jo Van Bulck, Michael Schwarz, Moritz Lipp, Benjamin Von Berg, Philipp Ortner, Frank Piessens, Dmitry Evtyushkin,
+and Daniel Gruss. A systematic evaluation of transient execution
+attacks and defenses. In 28th USENIX Security Symposium (USENIX
+Security 19), pages 249–266, 2019.
+[15] Chandler Carruth. Speculative load hardening. https://llvm.org/docs/
+SpeculativeLoadHardening.html. Accessed: 2024-05-15.
+[16] Intel Corporation. Intel® 64 and IA-32 Architectures Software Developer’s Manual, 2024.
+[17] Mark Ermolov, Maxim Goryachy, and Dmitry Sklyarov. glm-ucode.
+https://github.com/chip-red-pill/glm-ucode, 2020.
+[18] Mark Ermolov, Maxim Goryachy, and Dmitry Sklyarov. ucodedisasm.
+https://github.com/chip-red-pill/uCodeDisasm, 2024. Accessed: 202405-18.
+[19] Mark Ermolov, Dmitry Sklyarov, and Maxim Goryachy. Undocumented x86 instructions to control the cpu at the microarchitecture
+level in modern intel processors. Journal of Computer Virology and
+Hacking Techniques, 19(3):351–365, 2023.
+[20] Dmitry Evtyushkin, Ryan Riley, Nael CSE Abu-Ghazaleh, ECE, and
+Dmitry Ponomarev. Branchscope: A new side-channel attack on directional branch predictor. 23rd International Conference on Architectural
+Support for Programming Languages and Operating Systems (ASPLOS),
+2018.
+[21] Ben Gras, Kaveh Razavi, Herbert Bos, and Cristiano Giuffrida. Translation Leak-aside Buffer: Defeating Cache Side-channel Protections
+with TLB Attacks. In USENIX Security’18, 2018.
+
+. slow :
+... // perform 128 - bit by 64 - bit division
+rax = ... // quotient
+rdx = ... // remainder
+SEQW UEND0
+
+Figure 17. Our proposed µSLH mitigation for µSpectre-MVIZDI.
+
+contain tight loops (Figure 12), and µSLH would require inserting two conditional selects per iteration. For repe/repne
+scas, this would grow the loop body size from six micro-ops
+to eight micro-ops. Thus, we would expect at least a 33%
+increase in latency of the string operation, which is likely
+intolerable.
+For now, we concur with Oleksenko et al. [40] that the
+only practical defense against µSpectre-MIL is to avoid using
+the vulnerable instructions altogether.
+
+8
+
+Conclusion
+
+We present µSpectre, a novel class of transient execution attacks that exploit microcode branch mispredictions. µSpectre
+is behind both long-known vulnerabilities, like Rogue System Register Read, and also gives rise to entirely new kinds
+of vulnerabilities with unprecedented leakage potential, like
+Out-of-Bounds Performance Counter Read. Unfortunately,
+Intel has not published its microcode for any of its microarchitectures. As a result, we cannot know for sure what other
+µSpectre vulnerabilities lurk in the microprograms on modern x86 processors.
+
+Acknowledgments
+This work was supported in part by the National Science
+Foundation (NSF), under award numbers CNS-2153936 and
+CAREER CCF-2236855, and the Defense Advanced Research
+Projects Agency (DARPA) under contract W912CG-23-C0025 and subcontract from Galois, Inc. We also gratefully
+acknowledge a gift from Intel.
+
+References
+[1] Security analysis of amd predictive store forwarding.
+https://www.amd.com/system/files/documents/security-analysispredictive-store-forwarding.pdf, 2021. Accessed: 2022-10-18.
+19
+
+[40] Oleksii Oleksenko, Marco Guarnieri, Boris Köpf, and Mark Silberstein.
+Hide and seek with spectres: Efficient discovery of speculative information leaks with random testing. In 2023 IEEE Symposium on Security
+and Privacy (SP), pages 1737–1752. IEEE, 2023.
+[41] Dag Arne Osvik, Adi Shamir, and Eran Tromer. Cache attacks and
+countermeasures: The case of AES. 2006 The Cryptographers’ Track at
+the RSA Conference on Topics in Cryptology (CT-RSA), 2006.
+[42] Peter Pessl, Daniel Gruss, Clémentine Maurice, Michael Schwarz, and
+Stefan Mangard. DRAMA: Exploiting DRAM Addressing for CrossCPU Attacks. In USENIX Security’16, 2016.
+[43] Hany Ragab, Enrico Barberis, Herbert Bos, and Cristiano Giuffrida.
+Rage against the machine clear: A systematic analysis of machine
+clears and their implications for transient execution attacks. In 30th
+USENIX Security Symposium (USENIX Security 21), pages 1451–1468,
+2021.
+[44] Xida Ren, Logan Moody, Mohammadkazem Taram, Matthew Jordan,
+Dean M Tullsen, and Ashish Venkat. I see dead 𝜇ops: Leaking secrets
+via intel/amd micro-op caches. In 2021 ACM/IEEE 48th Annual International Symposium on Computer Architecture (ISCA), pages 361–374.
+IEEE, 2021.
+[45] Asanka P. Sayakkara, Nhien-An Le-Khac, and Mark Scanlon. A survey
+of electromagnetic side-channel attacks and discussion on their caseprogressing potential for digital forensics. CoRR, abs/1903.07703, 2019.
+[46] Michael Schwarz, Moritz Lipp, Daniel Moghimi, Jo Van Bulck, Julian
+Stecklina, Thomas Prescher, and Daniel Gruss. Zombieload: Crossprivilege-boundary data sampling. In Proceedings of the 2019 ACM
+SIGSAC Conference on Computer and Communications Security, pages
+753–768, 2019.
+[47] Basavesh Ammanaghatta Shivakumar, Jack Barnes, Gilles Barthe,
+Sunjay Cauligi, Chitchanok Chuengsatiansup, Daniel Genkin, Sioli
+O’Connell, Peter Schwabe, Rui Qi Sim, and Yuval Yarom. Spectre
+declassified: Reading from the right place at the wrong time. In 2023
+IEEE Symposium on Security and Privacy (SP), pages 1753–1770. IEEE,
+2023.
+[48] Julian Stecklina and Thomas Prescher. LazyFP: Leaking FPU register
+state using microarchitectural side-channels. CoRR, abs/1806.07480,
+2018. http://arxiv.org/abs/1806.07480.
+[49] Daniël Trujillo, Johannes Wikner, and Kaveh Razavi. Inception: Exposing new attack surfaces with training in transient execution. In 32nd
+USENIX Security Symposium (USENIX Security 23), pages 7303–7320,
+2023.
+[50] L. Uhsadel, A. Georges, and I. Verbauwhede. Exploiting hardware
+performance counters. In 2008 5th Workshop on Fault Diagnosis and
+Tolerance in Cryptography, 2008.
+[51] Jo Van Bulck, Daniel Moghimi, Michael Schwarz, Moritz Lippi, Marina
+Minkin, Daniel Genkin, Yuval Yarom, Berk Sunar, Daniel Gruss, and
+Frank Piessens. Lvi: Hijacking transient execution through microarchitectural load value injection. In 2020 IEEE Symposium on Security
+and Privacy (SP), pages 54–72. IEEE, 2020.
+[52] Stephan Van Schaik, Alyssa Milburn, Sebastian Österlund, Pietro Frigo,
+Giorgi Maisuradze, Kaveh Razavi, Herbert Bos, and Cristiano Giuffrida.
+Ridl: Rogue in-flight data load. In 2019 IEEE Symposium on Security
+and Privacy (SP), pages 88–105. IEEE, 2019.
+[53] Jose Rodrigo Sanchez Vicarte, Michael Flanders, Riccardo Paccagnella,
+Grant Garrett-Grossman, Adam Morrison, Christopher W. Fletcher,
+and David Kohlbrenner. Augury: Using data memory-dependent
+prefetchers to leak data at rest. In IEEE Symposium on Security and
+Privacy (SP). IEEE Computer Society, 2022.
+[54] Jose Rodrigo Sanchez Vicarte, Pradyumna Shome, Nandeeka Nayak,
+Caroline Trippel, Adam Morrison, David Kohlbrenner, and Christopher W Fletcher. Opening pandora’s box: A systematic study of new
+ways microarchitecture can leak private data. In 2021 ACM/IEEE
+48th Annual International Symposium on Computer Architecture (ISCA),
+pages 347–360. IEEE, 2021.
+
+[22] Johann Großschädl, Elisabeth Oswald, Dan Page, and Michael Tunstall.
+Side-channel analysis of cryptographic software via early-terminating
+multiplications. In ICISC’09, 2009.
+[23] David Gullasch, Endre Bangerter, and Stephan Krenn. Cache games—
+bringing access-based cache attacks on AES to practice. 2011 IEEE
+Symposium on Security and Privacy (S&P), 2011.
+[24] N. Homma, T. Aoki, and A. Satoh. Electromagnetic information leakage for side-channel analysis of cryptographic modules. 2010 IEEE International Symposium on Electromagnetic Compatibility (EMC), 2010.
+[25] Jann Horn. Speculative execution, variant 4: Speculative store bypass, 2018. https://bugs.chromium.org/p/project-zero/issues/detail?
+id=1528.
+[26] Intel Corporation. Rogue system register read / cve-2018-3640
+/ intel-sa-00115.
+https://www.intel.com/content/www/us/en/
+developer/articles/technical/software-security-guidance/advisoryguidance/rogue-system-register-read.html, 2018.
+Accessed:
+2024-05-14.
+[27] Intel Corporation. Intel® 64 and IA-32 Architectures Optimization
+Reference Manual, 2021. Available at: https://www.intel.com/content/
+www/us/en/developer/articles/technical/intel-sdm.html.
+[28] Intel Corporation. Earlier Generations of Intel® 64 and IA-32 Processor
+Architectures, Throughput, and Latency, 2024. Accessed: 2024-06-09.
+[29] Intel Corporation. Instructions affected by rogue system register
+read. https://www.intel.com/content/www/us/en/developer/articles/
+technical/software-security-guidance/resources/instructionsaffected-rogue-system-register-read.html, 2024. Accessed: 2024-0518.
+[30] Vladimir Kiriansky, Ilia Lebedev, Saman Amarasinghe, Srinivas Devadas, and Joel Emer. Dawg: A defense against cache timing attacks
+in speculative execution processors. In 2018 51st Annual IEEE/ACM
+International Symposium on Microarchitecture (MICRO), 2018.
+[31] Vladimir Kiriansky and Carl Waldspurger. Speculative buffer overflows: Attacks and defenses. CoRR, abs/1807.03757, 2018. http:
+//arxiv.org/abs/1807.03757.
+[32] Paul Kocher, Jann Horn, Anders Fogh, Daniel Genkin, Daniel Gruss,
+Werner Haas, Mike Hamburg, Moritz Lipp, Stefan Mangard, Thomas
+Prescher, et al. Spectre attacks: Exploiting speculative execution.
+Communications of the ACM, 63(7):93–101, 2020.
+[33] Paul C. Kocher, Joshua Jaffe, and Benjamin Jun. Differential power
+analysis. In CRYPTO’99, 1999.
+[34] Esmaeil Mohammadian Koruyeh, Khaled N. Khasawneh, Chengyu
+Song, and Nael B. Abu-Ghazaleh. Spectre returns! Speculation attacks
+using the return stack buffer. 12th USENIX Workshop on Offensive
+Technologies (WOOT), 2018.
+[35] Moritz Lipp, Michael Schwarz, Daniel Gruss, Thomas Prescher, Werner
+Haas, Stefan Mangard, Paul Kocher, Daniel Genkin, Yuval Yarom, and
+Mike Hamburg. Meltdown. arXiv preprint arXiv:1801.01207, 2018.
+[36] Stefan Mangard. A simple power-analysis (SPA) attack on implementations of the aes key expansion. 5th International Conference on
+Information Security and Cryptology (ICISC), 2003.
+[37] Marina Minkin, Daniel Moghimi, Moritz Lipp, Michael Schwarz,
+Jo Van Bulck, Daniel Genkin, Daniel Gruss, Frank Piessens, Berk
+Sunar, and Yuval Yarom. Fallout: Reading kernel writes from user
+space. arXiv preprint arXiv:1905.12701, 2019.
+[38] Ahmad Moghimi, Jan Wichelmann, Thomas Eisenbarth, and Berk
+Sunar. MemJam: A False Dependency Attack Against Constant-Time
+Crypto Implementations. International Journal of Parallel Programming, 47(4), 2019.
+[39] Oleksii Oleksenko, Christof Fetzer, Boris Köpf, and Mark Silberstein.
+Revizor: testing black-box cpus against speculation contracts. In ASPLOS ’22: 27th ACM International Conference on Architectural Support
+for Programming Languages and Operating Systems, Lausanne, Switzerland, 28 February 2022 - 4 March 2022, pages 226–239, 2022.
+
+20
+
+[55] Jose Rodrigo Sanchez Vicarte, Pradyumna Shome, Nandeeka Nayak,
+Caroline Trippel, Adam Morrison, David Kohlbrenner, and Christopher W Fletcher. Opening pandora’s box: A systematic study of new
+ways microarchitecture can leak private data. In 2021 ACM/IEEE
+48th Annual International Symposium on Computer Architecture (ISCA),
+pages 347–360. IEEE, 2021.
+[56] Wenhao Wang, Guoxing Chen, Xiaorui Pan, Yinqian Zhang, XiaoFeng
+Wang, Vincent Bindschaedler, Haixu Tang, and Carl A. Gunter. Leaky
+Cauldron on the Dark Land: Understanding Memory Side-Channel
+Hazards in SGX. In CCS ’17, 2017.
+[57] Johannes Wikner and Kaveh Razavi. {RETBLEED}: Arbitrary speculative code execution with return instructions. In 31st USENIX Security
+Symposium (USENIX Security 22), pages 3825–3842, 2022.
+[58] Johannes Wikner, Daniël Trujillo, and Kaveh Razavi. Phantom: Exploiting decoder-detectable mispredictions. In Proceedings of the 56th
+Annual IEEE/ACM International Symposium on Microarchitecture, pages
+49–61, 2023.
+[59] Y. Xu, W. Cui, and M. Peinado. Controlled-channel attacks: Deterministic side channels for untrusted operating systems. 2015 IEEE
+Symposium on Security and Privacy (S&P), 2015.
+
+[60] Mengjia Yan, Read Sprabery, Bhargava Gopireddy, Christopher
+Fletcher, Roy Campbell, and Josep Torrellas. Attack Directories, Not
+Caches: Side Channel Attacks in a Non-Inclusive World. In IEEE S&P,
+2019.
+[61] Yuval Yarom and Katrina Falkner. {FLUSH+ RELOAD}: A high resolution, low noise, l3 cache {Side-Channel} attack. In 23rd USENIX
+security symposium (USENIX security 14), pages 719–732, 2014.
+[62] Yuval Yarom and Katrina Falkner. FLUSH+RELOAD: A high resolution, low noise, L3 cache side-channel attack. 23rd USENIX Security
+Symposium, 2014.
+[63] Yuval Yarom, Daniel Genkin, and Nadia Heninger. CacheBleed: A
+Timing Attack on OpenSSL Constant Time RSA. IACR’16, 2016.
+[64] Jiyong Yu, Mengjia Yan, Artem Khyzha, Adam Morrison, Josep Torrellas, and Christopher W Fletcher. Speculative taint tracking (stt)
+a comprehensive protection for speculatively accessed data. In Proceedings of the 52nd Annual IEEE/ACM International Symposium on
+Microarchitecture, pages 954–968, 2019.
+[65] Zhiyuan Zhang, Gilles Barthe, Chitchanok Chuengsatiansup, Peter
+Schwabe, and Yuval Yarom. Ultimate {SLH}: Taking speculative load
+hardening to the next level. In 32nd USENIX Security Symposium
+(USENIX Security 23), pages 7125–7142, 2023.
+
+21
+
+

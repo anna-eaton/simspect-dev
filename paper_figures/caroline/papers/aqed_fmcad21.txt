@@ -1,0 +1,1461 @@
+Formal Methods in Computer-Aided Design 2021
+
+Scaling Up Hardware Accelerator Verification using
+A-QED with Functional Decomposition
+Saranyu Chattopadhyay∗ , Florian Lonsing ∗ , Luca Piccolboni † , Deepraj Soni¶ , Peng Wei§ , Xiaofan Zhangk ,
+Yuan Zhou‡ , Luca Carloni† , Deming Chen k , Jason Cong § , Ramesh Karri¶ , Zhiru Zhang‡ , Caroline Trippel∗ ,
+Clark Barrett ∗ , Subhasish Mitra∗
+∗ Stanford University, † Columbia University, ‡ Cornell University, § University of California, Los Angeles,
+¶ New York University, k University of Illinois, Urbana-Champaign
+
+Abstract—Hardware accelerators (HAs) are essential building
+blocks for fast and energy-efficient computing systems. Accelerator Quick Error Detection (A-QED) is a recent formal technique
+which uses Bounded Model Checking for pre-silicon verification
+of HAs. A-QED checks an HA for self-consistency, i.e., whether
+identical inputs within a sequence of operations always produce
+the same output. Under modest assumptions, A-QED is both
+sound and complete. However, as is well-known, large design
+sizes significantly limit the scalability of formal verification,
+including A-QED. We overcome this scalability challenge through
+a new decomposition technique for A-QED, called A-QED with
+Decomposition (A-QED2 ). A-QED2 systematically decomposes an
+HA into smaller, functional sub-modules, called sub-accelerators,
+which are then verified independently using A-QED. We prove
+completeness of A-QED2 ; in particular, if the full HA under
+verification contains a bug, then A-QED2 ensures detection of
+that bug during A-QED verification of the corresponding subaccelerators. Results on over 100 (buggy) versions of a wide
+variety of HAs with millions of logic gates demonstrate the
+effectiveness and practicality of A-QED2 .
+
+I. I NTRODUCTION
+Hardware accelerators (HAs) are critical building blocks
+of energy-efficient System-on-Chip (SoC) platforms [1]–[3].
+Unlike general-purpose processors, HAs implement a set of
+domain-specific functions (e.g., encryption, 3D Rendering,
+deep learning inference), referred to as actions in this paper,
+for improved energy and throughput. Today’s SoCs integrate
+dozens of diverse HAs (e.g., 40+ HAs in Apple’s A12 mobile
+SoC [4]).
+Unfortunately, the energy and throughput improvements enabled by HAs come at the cost of increased design complexity.
+Ensuring that a given SoC will behave correctly and reliably
+requires verifying each and every constituent HA. Furthermore,
+HAs must achieve short design-to-deployment timelines in
+order to meet the needs of a wide variety of evolving applications [5]. Using conventional formal verification techniques
+to verify HAs faces several key challenges. Manually crafting
+extensive design-specific formal properties or full abstract
+functional specifications can be time-consuming and errorprone [6], [7]. Moreover, scaling verification to large HAs
+(with millions of logic gates) is difficult or even infeasible
+using off-the-shelf formal tools.
+A recent formal verification technique targeting HAs,
+Accelerator-Quick Error Detection (A-QED) [8], overcomes
+the first challenge above. A-QED is readily applicable for a
+
+https://doi.org/10.34727/2021/isbn.978-3-85448-046-4_12
+
+popular class of HAs: loosely-coupled accelerators (LCAs) [9],
+[10] (i.e., HAs that are not integrated as part of a central
+processing unit (CPU), but via an SoC’s network-on-chip
+or a bus) that are also non-interfering. Non-interfering HAs
+produce the same result for a given action independent of
+their context within a sequence of actions (not to be confused
+with combinational circuits). In other words, the state of the
+accelerator does not affect future computations, and each
+computation is independent from previous computations. In
+contrast, computations of interfering HAs depend on state
+that is the result of previous computations. A-QED uses
+Bounded Model Checking (BMC) [11] to symbolically check
+sequences of actions for self-consistency. Specifically, it checks
+for functional consistency (FC), the property that identical
+inputs within a sequence of operations always produce the same
+outputs. It was shown that FC checks, together with response
+bound (RB) checks and single-action correctness (SAC) checks,
+provide a thorough verification technique for non-interfering
+LCAs [8]. However, despite its success in discovering bugs
+in moderately-sized HA designs, A-QED suffers from the
+scalability challenges of formal tools. For example, A-QED
+(backed by off-the-shelf formal verification tools) times out
+after 12 hours when run on NVDLA, NVIDIA’s deep-learning
+HA [12] with approximately 16 million logic gates.
+In this paper, we present a new verification approach called
+A-QED with Decomposition (A-QED2 ) to address the scalability
+challenge. First, we introduce a new, more general formal model
+of HA execution, which captures both interfering and noninterfering LCAs. We then show how A-QED2 can decompose
+a large LCA into smaller sub-accelerators in such a way that
+both FC and RB checks can be directly applied to the subaccelerators. Unlike conventional verification approaches based
+on decomposition, no new properties need to be devised to
+apply FC and RB to the decomposed sub-accelerators. Existing
+decomposition approaches can be leveraged to additionally
+check SAC of the sub-accelerators. A-QED2 is complementary
+to verification approaches that rely on design abstraction, which
+can be used to further improve scalability and to simplify the
+effort required for SAC checks on decomposed sub-accelerators.
+This paper presents both a formal foundation of A-QED2
+and an empirical evaluation that demonstrates its bug-finding
+capabilities in practice. We prove that A-QED’s completeness
+guarantees [8] continue to hold for A-QED2 —if the full HA
+
+This article is licensed under a Creative
+Commons Attribution 4.0 International License
+
+under verification contains a bug, then A-QED2 will detect impossible in some cases. The latter uses assume-guarantee
+that bug. Furthermore, we apply A-QED2 to a wide variety of reasoning (e.g., [20]–[25]) and can be applied to decompose a
+non-interfering LCAs (although our theoretical proofs apply large HA into smaller sub-modules. Importantly, the property
+to interfering LCAs as well): 109 different (buggy) versions p of the HA to be verified must also be decomposed into
+of large open-source HAs of up to 200 million logic gates properties of the sub-modules. The properties of the sub(including industrial HAs). Our empirical results focus on modules are verified individually under certain assumptions
+designs which are described in a high-level language (e.g., about the behavior of the other sub-modules. If all the properties
+C/C++) and then translated to Register-Transfer-Level (RTL) of the sub-modules hold under the respective assumptions, then
+designs (e.g., Verilog) using High-Level Synthesis (HLS) it can be concluded that p holds. However, finding the right
+flows, where appropriate optimizations like pipelining and properties for this decomposition can be very challenging.
+parallelism are instantiated. Such HLS-based HA design flows
+Unlike for general compositional reasoning, the two main
+are becoming increasingly common in industry. However, A- components of A-QED2 (FC and RB) do not require decomQED2 is not restricted to these specific HA design styles. Our posing properties. FC, in particular, leverages a universal selfempirical results show:
+consistency property. Self-consistency expresses the property
+1) Off-the-shelf formal tools cannot handle large HAs with that a design is expected to produce the same outputs whenever
+2
+millions of logic gates, even when the HAs are expressed it is provided with the same inputs [26]. In A-QED , selfas high-level C/C++ designs. In our experiments, A-QED consistency is checked independently for each sub-module
+verification of many such HAs times out after 12 hours (sub-accelerator in our case). Importantly, these aspects of AQED2 do not require complex assumptions about the behavior
+or runs out of memory.
+2) A-QED2 is broadly applicable to a wide variety of HAs of the other sub-modules.
+It is challenging to establish general completeness guarantees
+and detects all bugs detected by conventional simulationbased verification. For very large HAs with several for conventional formal verification techniques [27]–[31], since
+million (up to over 200 million) logic gates, A-QED2 completeness depends on the set of properties being checked.
+detects bugs in less than 30 minutes in the worst case Designer-guided approaches [32], [33] require manual effort.
+Automatic generation of properties is usually incomplete and
+and in a few seconds in most cases.
+3) A-QED2 is thorough – it detected all bugs that were depends on abstract design descriptions [34] or models [35],
+detected by conventional (simulation-based) verification or analysis of simulation traces [36], which may be difficult.
+techniques. At the same time, A-QED2 improves verifi- In contrast, we have general completeness results for A-QED2 .
+A-QED2 builds on A-QED [8] and leverages BMC [11],
+cation effort significantly compared to simulation-based
+verification – ∼ 5X improvement on average, with ∼ 9X [37]. Similar approaches based on self-consistency have been
+improvement (one person month with A-QED2 vs. 9 successfully applied to other classes of hardware designs, such
+person months with conventional verification flows) for as processor verification (as symbolic quick error detection
+(SQED) [38]–[43]), as well as to hardware security [44]–[49].
+the large, industrial designs.
+The rest of this paper is organized as follows. Sec. II
+III. F ORMAL M ODEL AND T HEORETICAL R ESULTS
+presents related work. Sec. III presents a formal model of
+In this section, we introduce a formal model for HAs,
+the accelerators targeted by A-QED2 and our decomposition
+2
+define
+functional consistency (FC), single-action correctness
+technique. Sec. IV details the A-QED algorithms. Results are
+(SAC),
+and responsiveness for the model, and show how these
+presented in Sec. V, and Sec. VI concludes.
+properties provide correctness guarantees. We then define a
+II. R ELATED W ORK
+notion of functional composition for our model and show how
+Conventional formal HA verification, e.g., [13]–[16], re- the above properties can be applied in a compositional way.
+Our formal model differs from the one in previous work [8] in
+quires a specification, typically in the form of manually written,
+design-specific properties. These are then combined with a several important ways. It allows multiple inputs to be provided
+formal model of the design and handed to a formal tool, which simultaneously by explicitly modeling the notion of input
+attempts to prove the properties or find counter-examples. For batches. The HAs we consider are batch-mode accelerators
+the verification of latency-insensitive designs, an approach was as they process input batches and produce output batches.
+developed to automatically derive and check properties from Modeling batches is useful because it more closely matches
+the RTL synthesized in HLS flows [17]. However, these derived the interfaces of real HAs. Moreover, input batches enable
+intra-batch checks for FC checking, as we describe below.
+properties are targeted at specific types of bugs.
+Large design sizes have always been a challenge for formal With intra-batch checks, only one input batch is used for FC
+techniques, and various approaches to this problem have checking. Intra-batch checks are more restricted than general
+been proposed. Among techniques to improve scalability are FC checks. However, they are easier to set up and run in
+abstraction [18] and compositional reasoning (cf. [19]). The practice, and they are highly effective at finding bugs, as we
+former removes details of the design, gaining scalability at demonstrate empirically.
+the cost of possible false errors. Finding a scalable abstraction
+Our model also explicitly separates control states and memthat does not generate false errors can be difficult and may be ory states. Control states represent control-flow information
+
+43
+
+such as, e.g., program counters in HLS models of HAs. Memory
+states represent all other state-holding elements, e.g., program
+variables.
+In our model we distinguish starting and ending control
+states in which inputs are provided and the computed outputs
+are ready, respectively. This makes the formulation simpler
+and is also a better match for HLS designs written in a highlevel language, which is our main target in the experimental
+evaluation. Further, our model enables us to formulate the
+notion of strong FC, which leads to a complete approach to
+bug-finding with only two input batches.
+In previous work [8], a ready-valid protocol was used to
+model input/output transactions in RTL designs. In contrast,
+our focus is on HLS designs. Finally, we distinguish so-called
+relevant states, which are parts of the state space that can affect
+output values. This makes it possible to model interfering as
+well as non-interfering HAs. In our experiments we focus on
+non-interfering HAs.
+Before presenting formal definitions, we illustrate terminology informally with an example of a non-interfering batchmode HA as shown in Listing 1 (a slightly modified excerpt
+of an HA implementing AES encryption [50]).
+Function fun of the HA has two sub-accelerators in lines
+8-10 and 13-14 which are identified and verified by A-QED2 .
+Each sub-accelerator applies a certain operation to all inputs
+in an input batch of HA. In general, the batch size of an
+HA is the number of inputs in each batch, which is 256 for
+this HA. The first sub-accelerator ACC1 processes an input
+batch provided via data and stores its output batch in buf.
+The second sub-accelerator ACC2 takes its input batch from
+buf, where it also stores the output batch it produces. The
+control state of the HA is only implicitly represented by the
+program counter when executing function fun. Variables key
+and local_key are global and determine the relevant state of
+the HA on which the result of the encryption operation depends.
+The HA is non-interfering because key and local_key are
+left unchanged by ACC1 and ACC2 . Constants BS, UF, and
+US are used in HLS to configure the generated RTL.
+Listing 1: HA Example (AES Encryption)
+1
+2
+3
+
+# d e f i n e BS ( ( 1 ) << 1 2 ) / / BUF_SIZE
+# d e f i n e UF 2 / / UNROLL_FACTOR
+# d e f i n e US BS / UF / / UNROLL_SIZE
+
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+
+v o i d f u n ( i n t d a t a [ BS ] , i n t b u f [ UF ] [ US ] , i n t key [ 2 ] ) {
+int j , k ;
+// ===ACC1 START===
+f o r ( j = 0 ; j <UF ; j ++)
+f o r ( k = 0 ; k < BS / UF ; k ++)
+b u f [ j ] [ k ] = * ( d a t a + i * BS + j *US + k ) ^ key [ 0 ] ;
+// ===ACC1 END===
+// ===ACC2 START===
+f o r ( j = 0 ; j <UF ; j ++) {
+aes256_encrypt ( local_key [ j ] , buf [ j ] ) ;}
+// ===ACC2 END===
+}
+
+Definition 1. A batch-mode hardware accelerator (HA)
+is a finite state transition system [51], [52] Acc :=
+(b, A, D, O, S, sc,I , sc,F , Sm,I , T ), where
+• b ∈ N with b ≥ 1 is the batch size,
+
+A is a finite set of actions,
+D is a finite set of data values,
+• O is a finite set of outputs,
+• S = SC ×SM is the set of states consisting of control states
+SC and memory states SM = SIn ×SOut ×SR×SN , where
+– SIn = (A × D)b are the input states,
+– SOut = Ob are the output states,
+– SR are the relevant states, and
+– SN are the non-relevant states,
+• sc,I ∈ SC is the unique initial control state, which defines
+the set SI = {sc,I } × SM of initial states,
+• sc,F ∈ SC is the unique final control state, which defines
+the set SF = {sc,F } × SM of final states,
+• Sm,I is the set of allowable initial memory states, which
+defines the set SCI = {sc,I } × Sm,I of concrete initial
+states,
+• and T : S → S is the state transition function.
+•
+•
+
+When referring to different HAs, e.g., Acc 0 and Acc 1 , we use
+subscript notation to identify their components, e.g., Acc 0 :=
+(b0 , A0 , D0 , O0 , S0 , sc,I,0 , sc,F,0 , Sm,I,0 , T0 ).
+We use v = hv1 , . . . , v|v| i to denote a sequence with
+elements denoted vi and length |v|. We concatenate sequences
+(and for simplicity of notation, single elements with sequences)
+using ’·’, e.g., v = v1 · v 0 , where v 0 = hv2 , . . . , v|v| i. We will
+sometimes identify a sequence v with the corresponding tuple,
+and we write v ∈ v to denote that v appears in v. We denote
+the i-th element of a tuple t as t(i).
+An HA Acc operates on a set I b of input batches, where b
+is the batch size and I = A × D. An input batch in ∈ I b has
+b batch elements, each consisting of a pair (a, d) containing
+an action a ∈ A to be executed and data d ∈ D (the data on
+which action a operates).
+A state s ∈ S of Acc with s = (sc , sm ) consists of a
+control state sc ∈ SC and a memory state sm ∈ SM . The
+control state sc represents control-flow-related state (e.g., the
+program counter in an execution of a high-level model of Acc).
+In a run of Acc, the control state starts at a distinguished initial
+state sc,I and ends at a distinguished final state sc,F .
+The memory state represents all other state-holding elements
+of Acc (including, e.g., global variables, local variables,
+function parameters, and memory elements). The memory state
+sm = (sin , sout , sr , sn ) is divided into four parts. The first part,
+sin ∈ SIn , contains the input to Acc. More precisely, in a run of
+Acc, the value of sin in the initial state is considered the input
+for that run. Similarly, at the end of a run of Acc, sout ∈ SOut
+contains the outputs for that run (i.e., the values computed by
+Acc based on the inputs present at the start of the run).
+The relevant state sr represents those state elements (other
+than sin ) that can influence the values of the outputs. Any
+part of the state that can affect the output value in at least
+one execution should be included in the relevant state. As an
+example of when this is needed, consider an encryption HA
+with actions for setting the encryption key and for encrypting
+data. The internal state that stores the key is part of the relevant
+state because it affects the way the output is computed from the
+
+44
+
+input. The non-relevant state sn is everything else. We write
+ctrl (s), mem(s), inp(s), out(s), rel (s), and nrel (s) to denote
+the components sc , sm , sin , sout , sr , and sn , respectively. We
+overload the latter four operators to apply to memory states as
+well, and we lift the notation to sequences of states.
+The set SI of initial states contains all states resulting from
+combining a memory state in SM with the unique initial control
+state sc,I . The concrete initial states, SCI , are a subset of SI ,
+and essentially represent the reset state(s) of the HA. They
+play a role in defining the reachable states (see Definition 3,
+below). The set SF of final states contains all states resulting
+from combining a memory state in SM with the unique final
+control state sc,F . Finally, the transition function T defines the
+successor state for any given state in S.
+Given an input batch in ∈ I b , the HA produces an output
+batch o ∈ Ob as follows. Let s0 ∈ SI be an initial state
+with inp(s0 ) = in, and let s = T (s0 ) = hs1 , . . . , sk i denote
+the sequence of |s| = k successor states generated by the
+transition function T , where si = T (si−1 ) for 1 ≤ i ≤ k, such
+that sk ∈ SF is a final state (and no earlier states in s are
+final states). We also assume, without loss of generality, that
+ctrl (si ) 6= sc,I for i > 0. The final state sk holds the output
+batch out(sk ) = o with o ∈ Ob that is produced for the input
+batch inp(s0 ) = in. Given a sequence s, we write initsym(s)
+and final (s) to denote the subsequence of s containing all
+initial and final states that occur in s, respectively.
+Given a sequence of input batches, an HA generates a
+sequence of output batches based on concatenating executions
+for each input batch.
+
+features of A-QED is that the specification is not needed for
+the main verification technique.
+Definition 4 (Abstract Specification). For an HA Acc, let
+Spec : I × SR → O be an abstract specification function.
+Definition 4 states that the value of an output computed by
+an HA is completely determined by the corresponding input
+and the relevant part of the memory state when the HA was
+started. Note that the inclusion of the relevant memory state
+makes the definition general enough to model interfering HAs.
+To model non-interfering HAs, we can either make the output
+dependent on only the input batch, or require that the relevant
+state does not change in state transitions.
+Based on the abstract specification, we define the functional
+correctness of an HA in terms of the output batches that are
+produced for given input batches as follows.
+Definition 5 (Functional Correctness). An HA Acc is functionally correct with respect to an abstract specification Spec if,
+for all concrete initial states s0 ∈ SCI and all sequences in
+of input batches, if
+• in = hin 1 , . . . , in n i,
+• s = StateSeq(in, s0 ),
+• sI = initsym(s) = hsI ,1 , . . . , sI ,n i,
+• o = out(final (s)) = ho1 , . . . , on i,
+then ∀ j ∈ [1 . . . b]. on (j) = Spec(in n (j), rel (sI ,n )).
+
+A bug is simply a failure of functional correctness.
+As mentioned above, even without a formal specification,
+we can apply the core technique of A-QED. To do so, we
+Definition 2. Let in be a sequence of inputs with n = |in|, leverage the concept of functional consistency, the notion that
+and let s0 ∈ SI . Then, StateSeq(in, s0 ) denotes the sequence under modest assumptions, two identical inputs will always
+of successor states of s0 that result from executing in, which produce the same outputs.
+is defined as follows.
+Definition 6 (Functional Consistency (FC)). An HA Acc is
+0
+• Let s0 be the result of replacing inp(s0 ) with in 1 in s0 . functionally consistent if, for all concrete initial states s0 ∈
+Let s0 = s00 · T (s00 ).
+SCI and for all sequences in of input batches, if
+0
+• If |in| = 1 then StateSeq(in, s0 ) = s
+• in = hin 1 , . . . , in n i, s = StateSeq(in, s0 ),
+• If |in| > 1, then
+• sI = initsym(s) = hsI ,1 , . . . , sI ,n i,
+– let sf = final (s0 ) (which is unique),
+• o = out(final (s)) = ho1 , . . . , on i,
+– let si = (sc,I , mem(sf )),
+then ∀ i ∈ [1, n], j, j 0 ∈ [1, b].
+– let s00 = StateSeq(hin 2 , . . . , in n i, si ).
+in i (j) = in n (j 0 )∧rel (sI ,i ) = rel (sI ,n ) → oi (j) = on (j 0 ).
+0
+00
+– Then, StateSeq(in, s0 ) = s · s .
+Definition 6 illustrates the need for the relevant designation
+In Definition 2, the state si from which each subsequent for memory states. It essentially says that two inputs, even
+input batch is executed is obtained from the final state sf if started at different times and in different batch positions,
+produced from executing the previous input batch. Given an should produce the same output, as long as the relevant part
+HA Acc, we write StateSeq(Acc, in, s0 ) to explicitly refer to of the memory is the same when the two inputs are sent
+the successor states of s0 generated by Acc. If Acc is clear in. The following lemma is straightforward (see the online
+appendix [53] for proofs of this and other results).
+from the context, we omit it.
+Definition 3. A state s ∈ S is reachable if s ∈ SCI or if there
+exists a concrete initial state s0 ∈ SCI and sequence in of
+input batches such that s ∈ StateSeq(in, s0 ). A relevant state
+sr is reachable if sr = rel (s) for some reachable state s.
+
+Lemma 1 (Soundness of FC). If an HA is functionally correct,
+then it is functionally consistent.
+Checking FC requires running BMC over multiple iterations
+of the HA and may be computationally prohibitive for large
+designs or for large values of n. Often, it is possible to verify
+a stronger property, which only requires checking consistency
+across two runs of the HA.
+
+Note that the initial states SI are not necessarily all reachable.
+Next, we define an abstract specification for an HA function.
+Note that we use this to define correctness, but one of the
+
+45
+
+Definition 7 (Strong FC). An HA Acc is strongly functionally
+consistent if, for all reachable initial states s0 , s00 and input
+batches in, in 0 , if
+
+checks can be a very effective approach for cheaply finding
+bugs. Intra-batch checks are applicable only to batch-mode
+HAs; i.e., they are not applicable in the context of A-QED
+targeted at HAs processing sequences of single inputs [8] rather
+than input batches.
+While functional consistency alone can find many bugs,
+it becomes a complete technique (i.e., it finds all bugs) by
+combining it with single-action checks.
+
+s = StateSeq(hini, s0 ), s0 = StateSeq(hin 0 i, s00 ),
+0
+0
+0
+• sF = final (s) = hsF i, sF = final (s ) = hsF i,
+0
+0
+0
+• o = out(sF ) = hoi, o = out(sF ) = ho i,
+then ∀ j, j 0 ∈ [1, b].
+in(j) = in 0 (j 0 ) ∧ rel (s0 ) = rel (s00 ) → o(j) = o0 (j 0 ).
+•
+
+The main difference between FC and strong FC is that the
+initial states s0 and s00 can be any reachable states. In contrast
+to that, the initial state s0 ∈ SCI in the definition of FC is a
+concrete one. It is easy to see that strong FC implies FC, but
+the reverse is not true in general. This is because it may not be
+possible for two reachable initial states s0 and s00 chosen in a
+strong FC check to both appear in a single sequence of states
+resulting from executing a sequence of input batches starting
+in a concrete initial state. Similar to previous work on A-QED
+for non-batch-mode HAs [8], FC checking relies on sequences
+of input batches to reach all reachable states from a concrete
+initial state. For strong FC checking, on the other hand, two
+individual input batches are sufficient because the two initial
+states s0 and s00 can be arbitrarily chosen from the reachable
+states. Like FC, strong FC is a sound approach.
+
+Definition 8 (Single-Action Correctness (SAC)). An HA Acc
+is single-action correct (SAC) with respect to an abstract
+specification Spec if, for every batch element (a, d) and for
+every reachable relevant state sr , there exists some reachable
+initial state s, such that inp(s)(j) = (a, d) for some j,
+rel (s) = sr , and out(final (T (s)))(j) = Spec((a, d), sr ).
+
+Essentially, SAC requires that for each action a, data d, and
+reachable relevant state sr , we have checked that the result is
+computed correctly when starting from some reachable initial
+state s whose relevant state matches sr . For every batch element
+(a, d) and sr , it is sufficient to run a single check where we
+can choose (a, d) to be at any arbitrary position j in the batch
+inp(s). Checking SAC does require using the specification
+explicitly, but these kinds of checks typically already exist in
+unit or regression tests. SAC may even be possible to verify
+Lemma 2 (Soundness of Strong FC). If an HA is functionally using simulation. As we show in Section V, many bugs can
+be discovered without checking SAC at all.
+correct then it is strongly functionally consistent.
+When formalizing single-action checks, we again advocate
+A challenge with using strong FC is that it requires starting using an over-approximation for reachability and encourage
+with reachable initial states. However, we found that in practice the design of HAs with simple over-approximations for the set
+(cf., Section V), it is seldom necessary to add any constraints of reachable relevant states. For the encryption example we
+on the initial states. This may seem surprising given the well- gave above, the set of reachable relevant states is just the set
+known problem of spurious counterexamples that arises when of valid keys, which should be easy to specify.
+using formal to prove functional correctness without properly
+In earlier work, using a slightly different HA model, we
+constraining initial states. There are at least two reasons for showed that SAC and functional consistency ensure correctness
+this. First, many HAs have less dependence on internal state only when the HA is strongly connected (SC), that is, when
+(none for non-interfering HAs) than other kinds of designs. But there exists a sequence of state transitions from every reachable
+second, and more importantly, FC is a much more forgiving state to every other reachable state. The same is true here.
+property than design-specific correctness. Many designs are
+functionally consistent, even when run from unreachable states. Lemma 3 (Completeness of SAC + FC + SC). If an HA is
+In fact, we believe that this is a natural outcome of good strongly connected and single-action correct and has a bug,
+design and that designing for FC is a sweet spot in the trade- then it is not functionally consistent.
+off between design for verification and other design goals. If However, strong functional consistency leads to an even
+designers take care to ensure FC, even from unreachable states, stronger result.
+then strong FC is both sound and easy to formulate.
+Even simpler versions of the checks above can be obtained Lemma 4 (Completeness of SAC + Strong FC). If an HA is
+by making them intra-batch checks. An HA is intra-batch single-action correct and has a bug, then it is not strongly
+functionally consistent if it is functionally consistent when functionally consistent.
+i = n = 1. That is, intra-batch FC checks are based on
+Finally, to address timeliness of results in addition to
+sending a single input batch to the HA. Consequently, it is correctness, we define a notion of responsiveness for our model.
+not necessary to identify and compare the relevant parts of
+the initial states (cf. Definition 6) as there is precisely one Definition 9 (Responsiveness). An HA is responsive with
+initial state being used. Similarly, an HA is intra-batch strongly respect to bound n if, for all concrete initial states s0 ∈ SCI ,
+functionally consistent if it is strongly functionally consistent sequences in of input batches, and input batches in, if
+• s = StateSeq(in, s0 ) = hs0 , . . . , sm i and
+when s0 = s00 and in = in 0 . Again, only one input batch is
+0
+• s = StateSeq(in · in, s0 ) = hs0 , . . . , sm+l i,
+sent to the HA and the relevant parts of the initial states are
+thus always equal. As we will show in Section V, intra-batch then l ≤ n.
+
+46
+
+A. Decomposition for FC Checking
+We now show how FC of a decomposed design can be
+derived from FC of its parts. We first give conditions under
+which two HAs can be composed.
+
+Lemma 5 (Functional Composition and Strong FCD). Let
+Acc 0 = Acc 2 ◦ Acc 1 . If both Acc 1 and Acc 2 are strongly FCD
+then Acc 0 is strongly FCD.
+
+Theorem 1 (Completeness of A-QED2 ). Let Acc 0 , Acc 1 , and
+Definition 10 (Functionally Composable). Acc 1 and Acc 2 are Acc 2 be HAs such that Acc 0 = Acc 2 ◦ Acc 1 and Acc 0 is
+functionally composable if: (i) b1 = b2 ; (ii) O1 = A2 × D2 ; single-action correct. If Acc 1 and Acc 2 are strongly FCD then
+(iii) SC,1 ∩ SC,2 = ∅; (iv) SR,1 = SR,2 ; and (v) SN,1 = Acc 0 is functionally correct.
+0
+0
+0
+SOut,2 × SN
+and SN,2 = SIn,1 × SN
+for some SN
+.
+Theorem 1 states that A-QED2 is complete. That is, by
+contraposition, if an HA Acc 0 has a bug, i.e., it is not
+functionally correct, then either Acc 1 or Acc 2 is not strongly
+FCD, and thus the bug can be detected by A-QED2 .
+Note that there is no corresponding soundness result. This is
+because it is possible to decompose a functionally consistent
+HA into functionally inconsistent sub-accelerators. However,
+as shown in Section V, this appears to be rare in practice, and
+here again we reiterate our position on design for verification
+and advocate that also sub-accelerators should be designed
+with functional consistency in mind.
+Definition 11 (Functional Composition, Sub-Accelerators).
+Functional composition can easily be generalized to more
+Given functionally composable HAs Acc 1 and Acc 2 , we define than two sub-accelerators. Moreover, it can be applied rethe functional composition Acc 0 = Acc 2 ◦ Acc 1 (Acc 1 and cursively to further decompose sub-accelerators. If functional
+Acc 2 are called sub-accelerators of Acc 0 ) as follows: b0 = b1 , decomposition based on Definition 11 is not applicable to
+A0 = A1 , D0 = D1 , O0 = O2 , SC,0 = SC,1 ∪ SC,2 , SM,0 = further decompose a sub-accelerator, then such a sub-accelerator
+SM,1 , sc,I,0 = sc,I,1 , sc,F,0 = sc,F,2 , Sm,I,0 = Sm,I,1 . The can be decomposed using existing formal decomposition
+transition function is defined as follows. T0 (sc , sm ) =
+approaches, though these require significant manual effort. Our
+(i) if sc ∈ SC,1 and sc 6= sc,F,1 then T1 (sc , sm );
+approach identifies conditions under which simple, automatable
+(ii) if sc ∈ SC,2 then T2 (sc , α(sm )); and
+decomposition of FC checking is possible.
+(iii) if sc = sc,F,1 then (sc,I,2 , α(sm )).
+2
+Definition 11 essentially states that an execution of Acc = IV. A-QED F UNCTIONAL D ECOMPOSITION IN P RACTICE
+
+Note in particular that composability requires that the outputs
+of Acc 1 match the inputs of Acc 2 . We also require that the
+two HAs have isomorphic memory states, which is ensured by
+including SOut,2 in the non-relevant states of Acc 1 and SIn,1 in
+the non-relevant states of Acc 2 . In order to map a memory state
+of Acc 1 to the corresponding memory state in Acc 2 , we define
+a mapping function α : SM,1 → SM,2 as follows: α(sm ) =
+(out(sm ), nrel (sm )(1), rel (sm ), (inp(sm ), nrel (sm )(2))). We
+next define functional composition.
+
+0
+
+Acc 2 ◦ Acc 1 is obtained by first running Acc 1 to completion,
+We now present our implementation of A-QED2 , which
+then passing the outputs of Acc 1 to the inputs of Acc 2 , and builds on the theoretical framework of the previous section.
+then running Acc 2 to completion. As a variant of Definition 11, We combine functional decomposition with checks for FC
+it is also possible to define functional composition where (dFC), SAC (dSAC), and responsiveness (dRB).
+the sub-accelerators operate in parallel. This way, the subaccelerators process non-overlapping parts of a given input A. Decomposition for FC: dFC
+batch and produce the respective non-overlapping parts of the
+dFC takes as input a non-interfering LCA design Acc
+output batch.
+(satisfying Definitions 1 and 2) together with designer-provided
+We now introduce a compositional version of FC.
+annotations (explained in this section). dFC decomposes Acc
+Definition 12 (Strong FC for Decomposition (FCD)). An into sub-accelerators (following Definition 11). FC checks
+HA Acc is strongly functionally consistent for decomposition are run on the sub-accelerators and any counterexamples
+(strongly FCD) if it is strongly functionally consistent and, are reported. Note that the way in which Acc is actually
+in addition to o(j) = o0 (j 0 ), the property rel (sF ) = rel (s0F ) decomposed into sub-accelerators has no influence on the
+completeness of A-QED2 (Theorem 1). That said, FC checks
+holds in the conclusion of the implication in Definition 7.
+may scale better for certain decompositions. While failing FC
+Note that strong FCD is stronger than strong FC. In order to
+checks expose consistency issues at the sub-accelerator level,
+stitch together results on sub-accelerators, we need to establish
+it is possible that they do not cause incorrect behaviors at the
+that not only the output but also the relevant memory state is
+full Acc level. However, we did not observe any instances of
+the same after processing identical inputs. The following is
+this in our experiments.
+clear from the definition.
+Our dFC implementation relies on identifying batch operaCorollary 1. If an HA Acc is strongly FCD, then Acc is tions in a given Acc. A batch operation operates on a vector of
+strongly FC.
+inputs, applying some action to each input in order to produce
+a vector of outputs. The input to a batch operation could be
+We now show that composition preserves strong FCD and
+an intermediate output batch of another sub-accelerator or an
+then state our main result.
+input batch to Acc itself. A batch operation produces either an
+
+47
+
+intermediate output batch which is subsequently processed by
+another sub-accelerator or an output batch of Acc itself.
+We assume that Acc is expressed in a high-level language,
+specifically as a C/C++ program1 that implements sequential
+computation of Acc outputs from Acc inputs.2 Batch operations
+in the C/C++ program are identified by finding contiguous
+C/C++ statements called functional blocks that implement
+those batch operations. Each functional block represents a
+sub-accelerator.
+We have developed a set of annotations by which the designer
+can help identify these functional blocks. Examples of such
+annotations are given in Listing 2 (extends Listing 1). It has
+two functional blocks corresponding to batch operations: lines
+15-17 and 32-33.
+Annotations are defined by particular keywords that are
+prefixed by “%” (and denoted in blue) in Listing 2. These
+annotations describe the compute and memory access patterns
+of the functional block as it transforms an input batch into
+an output batch. In practice, hardware designers already use
+similar annotations frequently, e.g., to express parallelization
+opportunities for HLS to generate efficient hardware. As a
+result, we expect manageable effort in creating such annotations
+to support dFC. The HLS research community is actively
+developing new techniques to automatically explore the HA
+design space and derive optimal design points together with
+appropriate parallelization and pipelining [54]–[56]. With tight
+integration of A-QED2 with HLS, we expect that it will be
+possible to generate dFC annotations with low effort.
+
+32
+33
+34
+35
+36
+37
+38
+39
+40
+
+2
+3
+
+B. Decomposition for RB: dRB
+
+# d e f i n e BS ( ( 1 ) << 1 2 ) / / BUF_SIZE
+# d e f i n e UF 2 / / UNROLL_FACTOR
+# d e f i n e US BS / UF / / UNROLL_SIZE
+
+The sub-accelerators for A-QED2 ’s RB checks (Definition 9)
+can be (and often are) different from those for FC because
+RB involves a much simpler check: some output is produced
+within the response bound n. We expect n to be provided by
+the designer for the top-level accelerator. We then use the same
+bound n for each sub-accelerator. The rationale is that if a
+sub-accelerator fails an RB check, then the full accelerator
+would also fail the same RB check.
+For dRB, we generate a static single assignment (SSA)
+representation of the design. We then apply a sliding window
+algorithm to dynamically generate sub-accelerators. Lines of
+code in the SSA that fall within a certain window W form
+the sub-accelerator. Due to SSA form, the inputs of this subaccelerator are variables that are never updated or assigned in
+W while the outputs are the variables which update variables
+outside W . The current size of W is given by the number of
+LOCs that fit in W , and it changes dynamically during a run
+of the algorithm to incorporate the largest sub-accelerator that
+will fit the BMC tool. Once the sub-accelerator is verified, W
+slides by δ LOCs (δ is a parameter) and adjusts its boundary
+to get the next largest sub-accelerator that can be verified.
+We synthesize that sub-accelerator using HLS (since some
+responsiveness bugs only manifest after HLS) and then run
+RB checks using BMC. The initial states of each generated
+
+4
+5
+6
+
+v o i d f u n ( i n t d a t a [ BS ] , i n t b u f [ UF ] [ US ] , i n t key [ 2 ] ) {
+int j , k ;
+
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+
+%IN_SIZE 16 / / v a r i a b l e s p e r i n p u t b a t c h e l e m e n t
+%IN_BATCH_SIZE BS / IN_SIZE / / i n p u t b a t c h s i z e
+%BATCH_MEM_IN d a t a / / i n p u t b a t c h s o u r c e
+%IN_ALLOC_RULE i n ( x ) a d d r r a n g e =
+[ i * BS + x * IN_SIZE :
+i * BS + ( x + 1 ) * IN_SIZE ]
+/ / BATCH_MEM_IN l a y o u t
+// ===ACC1 START===
+f o r ( j = 0 ; j <UF ; j ++)
+f o r ( k = 0 ; k < BS / UF ; k ++)
+b u f [ j ] [ k ] = * ( d a t a + i * BS + j *US + k ) ^ key [ 0 ] ;
+// ===ACC1 END===
+%OUT_SIZE 16 / / v a r i a b l e s p e r o u t p u t b a t c h e l e m e n t
+%OUT_BATCH_SIZE BS / OUT_SIZE / / o u t p u t b a t c h s i z e
+%BATCH_MEM_OUT b u f / / o u t p u t b a t c h s o u r c e
+%IN_ALLOC_RULE o u t ( x ) a d d r r a n g e =
+[ x / US ] [ ( x%US ) * OUT_SIZE :
+( ( x + 1 )%US ) * OUT_SIZE ] / / BATCH_MEM_OUT l a y o u t
+
+25
+26
+27
+28
+29
+30
+
+}
+
+From the annotations, we create sub-accelerators. For example, the annotations in Listing 2 generate two sub-accelerators:
+Acc 1 corresponding to the functional block in Lines 15-17 with
+annotations in Lines 8-13 and 19-24, and Acc 2 corresponding
+to the functional block in Lines 32-33 with annotations in
+Lines 26-30 and 35-39. For each sub-accelerator, we create
+an A-QED2 module for FC checking.3 It generates symbolic
+inputs for the sub-accelerator and symbolically executes the
+corresponding functional block in order to produce symbolic
+expressions for the outputs. For strong FC checks (Definitions 6
+and 7), the relevant states (Definition 1) must additionally be
+identified and explicitly constrained to be consistent across
+sub-accelerator calls processing two input batches. Identifying
+the relevant states is not necessary for intra-batch FC checks
+(discussed in the context of Lemma 2). For example, in subaccelerator Acc1 in Listing 2, key[0] is a relevant state element
+(distinct from the batch input data). Between two calls of Acc1
+during a strong FC check, key[0] must be consistent. In our
+implementation, we ignore reachability and allow all checks
+to start from fully symbolic initial states. This does not lead
+to spurious counterexamples in our experiments.
+
+Listing 2: C/C++ Annotation Example (AES Encryption)
+1
+
+// ===ACC2 START===
+f o r ( j = 0 ; j <UF ; j ++) {
+aes256_encrypt ( local_key [ j ] , buf [ j ] ) ;}
+// ===ACC2 END===
+%OUT_SIZE 16
+%OUT_BATCH_SIZE BS / OUT_SIZE
+%BATCH_MEM_OUT b u f
+%OUT_ALLOC_RULE o u t ( x ) a d d r r a n g e =
+[ ( x%US ) * OUT_SIZE : ( ( x + 1 )%US ) * OUT_SIZE ] [ x / US ]
+
+31
+
+%IN_SIZE 16
+%IN_BATCH_SIZE BS / IN_SIZE
+%BATCH_MEM_IN b u f
+%IN_ALLOC_RULE i n ( x ) a d d r r a n g e =
+[ ( x%US ) * IN_SIZE : ( ( x + 1 )%US ) * IN_SIZE ] [ x / US ]
+
+1 HAs expressed in Verilog or SystemC can be converted into C/C++, and
+then our dFC implementation can be applied. We do this in Sec. V.
+2 Existing HLS tools (e.g., Xilinx Vivado HLS, Mentor Catapult HLS) can
+then optimize Acc, incorporate appropriate pipelining and parallelism, and
+produce Verilog for subsequent logic synthesis and physical design steps. Such
+HLS-based HA design flows are becoming increasingly common.
+
+3 See the online appendix [53] for details.
+
+48
+
+(FC, RB, SAC). Table I also compares A-QED2 intra-batch FC
+vs. A-QED2 strong FC (cf. details in the online appendix [53]).
+Observation 1: HAs from various domains (including
+industry) show that non-interfering LCAs are highly common.
+Observation 2: The vast majority of the studied HAs are
+too big for existing off-the-shelf formal verification tools, for
+both A-QED and conventional formal property verification.
+Observation 3: Table I shows that A-QED2 intra-batch
+FC checks detected bugs inside sub-accelerators (with batch
+sizes > 1) very quickly—under a minute for almost all of the
+designs, and just over a minute for nv_large. For most batchmode sub-accelerators—except two for each of the following
+four designs (amounting to eight sub-accelerators in total):
+grayscale64, grayscale32, mean128, and mean32—intra-batch
+dFC checks were easily completed using off-the-shelf formal
+tools. Strong FC checks incur more complexity. Hence, the
+formal tool timed out after 12 hours for 62 sub-accelerators
+when running strong FC checks, distributed across multiple
+designs. Empirically, we found that intra-batch FC checks
+detected all bugs that were detected by strong FC checks.
+Observation 4: A-QED2 RB and A-QED2 SAC are also
+highly effective in detecting bugs inside sub-accelerators. For
+the first 11 designs (AES to gsm) in Table II, we do not expect
+unresponsiveness bugs (confirmed by simulations). Hence, AQED2 RB checks ran for 12 hours (for increasingly longer input
+sequences) without detecting unresponsiveness. For designs
+with RB bugs, A-QED2 RB checks on sub-accelerators were
+able to detect those in less than 11 minutes on average. For
+A-QED2 dSAC, we observed that a significant fraction (26
+out of 46 bugs (56%)) of these bugs were also detected by
+A-QED2 FC checks. Thus, FC alone is effective at catching a
+wide variety of bugs.
+Observation 5: A-QED2 detected all bugs that were detected
+by conventional (simulation-based) verification techniques.
+Further, all counterexamples produced from verifying subaccelerators corresponded to real accelerator-level bugs. Compared with traditional simulation-based verification, we report
+a ∼ 5X improvement in verification effort on the average,
+with a ∼ 9X improvement for the large, industrial NVDLA
+designs. The overhead of inserting our annotations for dFC
+can be small compared to what designers already insert to
+optimize the design. For ISmartDNN, for example, the total
+number of annotations is 304, which is 2.8% of the total
+lines of code of the design. In the code of the HLS designs
+we considered, pragmas amount to 11% on average. We also
+observe a ∼ 60X improvement in average verification runtime
+compared to conventional simulations.5
+
+sub-accelerator are left unconstrained (i.e., fully symbolic) in
+order to analyze all possible behaviors. The specific size of
+W and its position in the SSA code change dynamically as
+dRB proceeds. dRB terminates when W reaches the end of
+the SSA code or if at any time an RB check fails.
+C. Decomposition for SAC: dSAC
+As mentioned above, and as will be shown in the next section,
+many bugs can be detected using only dFC and dRB. The
+advantage of this is that both of these checks can be run without
+any functional specification. dSAC completes the story, but at
+the cost of requiring specifications. We use standard functional
+decomposition techniques (essentially, writing preconditions,
+invariants, and postconditions) to decompose SAC checks. One
+feature of dSAC is that only a single input in a batch needs be
+checked—all other inputs in the batch can be set to constants
+(we use zero in our experiments). This makes both writing the
+properties and checking them much simpler. The non-input
+part of the initial state for each check is again kept fully
+symbolic for simplicity. If a sub-accelerator is too big, we
+further decompose it using finer-grained functional blocks.
+V. E XPERIMENTAL R ESULTS
+
+We demonstrate the practicality and effectiveness of A-QED2
+for 109 (buggy) versions of several non-interfering LCAs,4
+including open-source industrial designs [12]. We selected these
+designs for the following reasons:
+• They cover a wide variety of HAs (neural nets, image
+processing, natural language processing, security). Most
+are too large for existing off-the-shelf formal tools.
+• They have been thoroughly verified (painstakingly) using
+state-of-the-art simulation-based verification techniques.
+Thus, we can quantify the thoroughness of A-QED2 .
+• With access to buggy versions, we did not have to artificially inject bugs. Bugs we encountered include incorrect
+initialization, incorrect memory accesses, incorrect array
+indexing, and unresponsiveness in HLS-generated designs.
+Many of the designs were already available in sequential
+C or C++. We converted Verilog and SystemC designs
+into sequential C. To facilitate dFC, we manually inserted
+annotations (like those in Listing 2). For A-QED FC, we used
+CBMC for all designs originally represented in sequential C or
+C++. For designs in Verilog and SystemC, we used Cadence
+JasperGold (SystemC designs converted to Verilog via HLS).
+For A-QED2 FC and SAC checks, we used CBMC version
+5.10 [66]. For A-QED and A-QED2 RB checks, we used
+Cadence JasperGold version 2016.09p002 on Verilog designs
+VI. C ONCLUSION
+generated by the HLS tools used by the designers. Lastly, we
+used Frama-C [67] to check for initialization and out-of-bounds
+Our theoretical and experimental results demonstrate that
+bugs on the entire C/C++ designs. We ran all our experiments A-QED2 is an effective and practical approach for verification
+on Intel Xeon E5-2640 v3 with 128GBytes of DRAM.
+5 The conventional verification effort for NVDLA was based on start and end
+Tables I, II, and III summarize our results. We present
+commit dates in its nv_small Github repository. The conventional verification
+2
+comparisons between A-QED (dFC, dRB, dSAC) and A-QED runtime for NVDLA, ISmartDNN, and dnn HAs were obtained by running
+the available simulation tests on our platform. The remaining runtime and
+effort information were provided by the designers.
+
+4 See the online appendix [53] for design details and the software artifact [65].
+
+49
+
+Design (#Gates) (#Versions)
+A-QED FC
+A-QED2 dFC: Intra-batch FC
+A-QED2 dFC: Strong FC
+94 versions in table, 15 in caption† Avg. RT (min) Avg. RT (min) #Bugs #Sub-Acc.(T/P/C/B) Avg. Runtime (min) #Bugs #Sub-Acc.(T/P/C/B)
+OOM
+AES [50]
+(382k)
+(4)
+0.97
+4
+8/7/7/4
+timeout
+0
+8/7/2/0
+ISmartDNN [57] (42M)
+(3)
+timeout
+0.10
+2
+38 / 5 / 5 / 2
+0.18
+2
+38 / 5 / 2 / 2
+grayscale128 [33] (351k)
+(5)
+timeout
+0.03
+3
+3/3/2/2
+0.07
+3
+3/3/2/2
+grayscale64 [33] (194k)
+(5)
+timeout
+0.02
+3
+3/3/2/2
+0.02
+3
+3/3/2/2
+grayscale32 [33] (106k)
+(5)
+8.20
+<0.01
+5
+3/3/3/3
+0.30
+5
+3/3/3/3
+mean128 [33]
+(202k)
+(5)
+timeout
+0.35
+3
+3/3/2/2
+0.17
+3
+3/3/2/2
+mean64 [33]
+(104k)
+(5)
+timeout
+0.38
+3
+3/3/2/2
+0.13
+3
+3/3/2/2
+mean32 [33]
+(54k)
+(5)
+5.53
+0.17
+5
+3/3/3/3
+0.33
+5
+3/3/3/3
+dnn [58]
+(2M)
+(11)
+timeout
+0.03
+5
+34 / 14 / 14 / 5
+0.13
+5
+34 / 14 / 8 / 5
+nv_large [12]
+(16M)
+(23)
+timeout
+1.17
+11
+89 / 46 / 46 / 11
+2.93
+9
+89 / 46 / 21 / 9
+nv_small [12]
+(1M)
+(23)
+timeout
+0.07
+11
+89 / 46 / 46 / 11
+1.03
+11
+89 / 46 / 26 / 11
+
+TABLE I: Avg. RunTimes of FC checks for A-QED and A-QED2 . For A-QED2 , sub-accelerator counts are provided, including the Total
+count that resulted from dFC decomposition, the count with batch sizes greater than one (i.e., Parallel), the count (with batch sizes greater
+than one) for which FC checks were successful on 1 and 2 batches for intra-batch FC and strong FC respectively, and the count for which
+Bugs were detected by FC checks. For A-QED FC, experiments could not complete FC check for a single batch in 12 hours (timeout) or
+exhibited out-of-memory (OOM) errors before timeout. Average runtimes result from dividing the time to detect all bugs by the number of
+bugs. † keypair [59], gsm [60], HLSCNN [61], FlexNLP [62], Dataflow [63], and Opticalflow [64] all time out for A-QED FC and do not
+contain any sub-accelerators with batch size greater than one. One OOB bug was detected in gsm and one initialization bug in keypair.
+
+Design (#Gates) (#Versions)
+Total Versions = 109
+AES [50]
+(382k) (4)
+ISmartDNN [57] (42M) (3)
+grayscale128 [33] (351k) (5)
+grayscale64 [33] (194k) (5)
+grayscale32 [33] (106k) (5)
+mean128 [33]
+(202k) (5)
+mean64 [33]
+(104k) (5)
+mean32 [33]
+(54k) (5)
+dnn [58]
+(2M) (11)
+keypair [59]
+(>200M) (1)
+gsm [60]
+(8.8k) (1)
+nv_large [12]
+(16M) (23)
+nv_small [12]
+(1M) (23)
+HLSCNN [61]
+(323k) (2)
+FlexNLP [62]
+(567k) (9)
+Dataflow [63]
+(296k) (1)
+Opticalflow [64] (555k) (1)
+
+A-QED RB
+A-QED2 dRB
+Avg. RT Avg. RT
+#Sub-Acc.
+#Bugs
+(min)
+(min)
+(T/C/B)
+timeout
+13 / 13 / 0
+timeout
+No RB
+32 / 32 / 0
+timeout
+bug detected 5 / 5 / 0
+timeout
+up to input
+5/5/0
+sequence
+3/3/0
+timeout
+length
+5/5/0
+timeout
+between
+3/3/0
+11 and 24
+1/1/0
+depending on 5 / 5 / 0
+timeout
+timeout
+the design 21 / 21 / 0
+timeout
+7/7/0
+timeout
+No RB bugs expected
+timeout
+timeout
+2.33
+1 25 / 25 / 1
+timeout
+10.77
+9 15 / 15 / 9
+0.45
+0.25
+1
+9/9/1
+timeout
+0.17
+1
+3/3/1
+
+A-QED2 dSAC
+Design (#Gates) (#Versions) Avg. RT
+Bug overlap #Sub-Acc.
+#Bugs
+Total Versions = 109
+(min)
+with dFC
+(T/C/B)
+AES [50]
+(382k) (4) 0.12
+0
+0
+8/8/0
+ISmartDNN [57] (42M) (3) 0.22
+3
+2
+38 / 38 / 3
+grayscale128 [33] (351k) (5) 0.04
+2
+2
+3/2/2
+grayscale64 [33] (194k) (5) 0.01
+2
+2
+3/2/2
+grayscale32 [33] (106k) (5) <0.01
+2
+2
+3/3/2
+mean128 [33]
+(202k) (5) 0.21
+2
+2
+3/2/2
+mean64 [33]
+(104k) (5) <0.01
+2
+2
+3/2/2
+mean32 [33]
+(54k) (5) <0.01
+2
+2
+3/3/2
+dnn [58]
+(2M) (11) 0.01
+6
+0
+34 / 14 / 6
+keypair [59]
+(>200M) (1) timeout
+0
+0
+14 / 14 / 0
+gsm [60]
+(8.8k) (1) timeout
+0
+0
+5/5/0
+nv_large [12]
+(16M) (23) 0.84
+12
+6
+89 / 89 / 12
+nv_small [12]
+(1M) (23) 0.11
+12
+6
+89 / 50 / 12
+HLSCNN [61]
+(323k) (2) 0.45
+1
+0
+25 / 11 / 1
+FlexNLP [62]
+(567k) (9) timeout
+0
+0
+21 / 21 / 0
+Dataflow [63]
+(296k) (1) timeout
+0
+0
+8/8/0
+Opticalflow [64] (555k) (1) timeout
+0
+0
+14 / 14 / 0
+
+TABLE II: RB checks for A-QED and A-QED2 . For A-QED2 ,
+
+TABLE III: SAC checks for A-QED2 . Sub-accelerator counts
+
+sub-accelerator counts produced by dFC are provided, as in Table I.
+A-QED2 RB checks are performed on all sub-accelerators regardless
+of batch size, so P is omitted compared to Table I. For A-QED RB, RB
+checks did not complete even for a input sequence length of 1 within
+12 hours (timeout). Sub-accelerators for which RB checks for at
+least input sequence length of 1 was completed were considered
+Complete. For the first 11 designs, from AES to gsm, no bugs
+related to unresponsiveness were detected by traditional simulationbased verification. Results are omitted for nv_large and nv_small;
+responsiveness related bugs generally result from parallelism and
+pipelining, both of which were lost in our manual translation of
+NVDLA from Verilog to sequential C code.
+
+produced by dSAC are provided, as in Table I. A-QED2 SAC checks
+were performed on all sub-accelerators regardless of batch size, so P
+is omitted compared to Table I.
+
+Further A-QED2 scalability using abstraction.
+2
+• Extension of A-QED beyond sequential (C/C++) code
+to include concurrent programs.
+2
+• Effectiveness of A-QED
+for RTL designs (without
+converting them to sequential C/C++).
+2
+• Applicability of A-QED beyond functional bugs (e.g., to
+detect security vulnerabilities in HAs).
+2
+• Comparison of A-QED and conventional decomposition.
+2
+• Identifying conditions under which A-QED is sound.
+•
+
+of large non-interfering LCAs. A-QED2 exploits A-QED principles to decompose a given HA design into sub-accelerators such
+that A-QED can be naturally applied to the sub-accelerators.
+ACKNOWLEDGMENT
+A-QED2 is especially attractive for HLS-based HA design
+This work was supported by the DARPA POSH program
+flows. A-QED2 creates several promising research directions: (grant FA8650-18-2-7854), NSF (grant A#:1764000), and the
+2
+• Extension of our A-QED experiments to include inter- Stanford SystemX Alliance. We thank Prof. David Brooks,
+fering LCAs (already covered by our theoretical results). Thierry Tambe and Prof. Gu-Yeon Wei from Harvard University,
+• Automation of dFC annotations via HLS techniques.
+and Kartik Prabhu and Prof. Priyanka Raina from Stanford
+• dFC approaches beyond our current implementation.
+University for their design contributions in our experiments.
+
+50
+
+R EFERENCES
+
+[25] H. Koo and P. Mishra, “Functional test generation using design and
+property decomposition techniques,” ACM Trans. Embed. Comput. Syst.,
+vol. 8, no. 4, pp. 32:1–32:33, 2009.
+[26] R. B. Jones, C. H. Seger, and D. L. Dill, “Self-Consistency Checking,”
+in Proc. FMCAD, ser. LNCS, vol. 1166. Springer, 1996, pp. 159–171.
+[27] S. Katz, O. Grumberg, and D. Geist, “"Have I written enough Properties?"
+- A Method of Comparison between Specification and Implementation,”
+in Proc. CHARME, ser. LNCS, vol. 1703. Springer, 1999, pp. 280–297.
+[28] K. Claessen, “A Coverage Analysis for Safety Property Lists,” in
+Proc. FMCAD. IEEE, 2007, pp. 139–145.
+[29] H. Chockler, O. Kupferman, and M. Y. Vardi, “Coverage Metrics for
+Temporal Logic Model Checking,” in Proc. TACAS, ser. LNCS, vol. 2031.
+Springer, 2001, pp. 528–542.
+[30] D. Große, U. Kühne, and R. Drechsler, “Estimating functional coverage
+in bounded model checking,” in Proc. DATE. EDA Consortium, San
+Jose, CA, USA, 2007, pp. 1176–1181.
+[31] H. Chockler, D. Kroening, and M. Purandare, “Coverage in interpolationbased model checking,” in Proc. DAC. ACM, 2010, pp. 182–187.
+[32] J. Choi, M. Vijayaraghavan, B. Sherman, A. Chlipala, and Arvind,
+“Kami: a platform for high-level parametric hardware specification and
+its modular verification,” Proc. ACM Program. Lang., vol. 1, no. ICFP,
+pp. 24:1–24:30, 2017.
+[33] L. Piccolboni, G. Di Guglielmo, and L. P. Carloni, “KAIROS: Incremental
+Verification in High-Level Synthesis through Latency-Insensitive Design,”
+in Proc. FMCAD. IEEE, 2019, pp. 105–109.
+[34] U. Kühne, S. Beyer, J. Bormann, and J. Barstow, “Automated formal verification of processors based on architectural models,” in Proc. FMCAD.
+IEEE, 2010, pp. 129–136.
+[35] M. Soeken, U. Kühne, M. Freibothe, G. Fey, and R. Drechsler, “Automatic
+property generation for the formal verification of bus bridges,” in
+Proc. DDECS. IEEE, 2011, pp. 417–422.
+[36] F. Rogin, T. Klotz, G. Fey, R. Drechsler, and S. Rülke, “Advanced
+verification by automatic property generation,” IET Comput. Digit. Tech.,
+vol. 3, no. 4, pp. 338–353, 2009.
+[37] A. Biere, A. Cimatti, E. M. Clarke, and Y. Zhu, “Symbolic Model
+Checking without BDDs,” in Proc. TACAS, ser. LNCS, vol. 1579.
+Springer, 1999, pp. 193–207.
+[38] D. Lin, E. Singh, C. Barrett, and S. Mitra, “A structured approach to
+post-silicon validation and debug using symbolic quick error detection,”
+in Proc. ITC. IEEE, 2015, pp. 1–10.
+[39] E. Singh, D. Lin, C. Barrett, and S. Mitra, “Logic Bug Detection and
+Localization Using Symbolic Quick Error Detection,” IEEE Transactions
+on Computer-Aided Design of Integrated Circuits and Systems, pp. 1–1,
+2018.
+[40] E. Singh, K. Devarajegowda, S. Simon, R. Schnieder, K. Ganesan, M. R.
+Fadiheh, D. Stoffel, W. Kunz, C. W. Barrett, W. Ecker, and S. Mitra,
+“Symbolic QED Pre-Silicon Verification for Automotive Microcontroller
+Cores: Industrial Case Study,” in Proc. DATE. IEEE, 2019, pp. 1000–
+1005.
+[41] F. Lonsing, K. Ganesan, M. Mann, S. S. Nuthakki, E. Singh, M. Srouji,
+Y. Yang, S. Mitra, and C. W. Barrett, “Unlocking the Power of Formal
+Hardware Verification with CoSA and Symbolic QED: Invited Paper,”
+in Proc ICCAD. ACM, 2019, pp. 1–8.
+[42] M. R. Fadiheh, J. Urdahl, S. S. Nuthakki, S. Mitra, C. Barrett, D. Stoffel,
+and W. Kunz, “Symbolic quick error detection using symbolic initial state
+for pre-silicon verification,” in Proc. DATE. IEEE, 2018, pp. 55–60.
+[43] K. Devarajegowda, M. R. Fadiheh, E. Singh, C. W. Barrett, S. Mitra,
+W. Ecker, D. Stoffel, and W. Kunz, “Gap-free Processor Verification by
+S2 QED and Property Generation,” in Proc. DATE. IEEE, 2020, pp.
+526–531.
+[44] M. R. Fadiheh, D. Stoffel, C. W. Barrett, S. Mitra, and W. Kunz,
+“Processor Hardware Security Vulnerabilities and their Detection by
+Unique Program Execution Checking,” in Proc. DATE. IEEE, 2019,
+pp. 994–999.
+[45] M. R. Fadiheh, J. Müller, R. Brinkmann, S. Mitra, D. Stoffel, and
+W. Kunz, “A Formal Approach for Detecting Vulnerabilities to Transient
+Execution Attacks in Out-of-Order Processors,” in Proc. DAC. IEEE,
+2020, pp. 1–6.
+[46] G. Barthe, P. R. D’Argenio, and T. Rezk, “Secure Information Flow by
+Self-Composition,” in Proc. CSFW-17. IEEE, 2004, pp. 100–114.
+[47] G. Barthe, J. M. Crespo, and C. Kunz, “Relational Verification Using
+Product Programs,” in Proc. FM, ser. LNCS, vol. 6664. Springer, 2011,
+pp. 200–214.
+
+[1] J. Cong, M. A. Ghodrat, M. Gill, B. Grigorian, K. Gururaj, and G. Reinman, “Accelerator-rich architectures: Opportunities and progresses,” in
+Proc. DAC. IEEE, 2014, pp. 1–6.
+[2] L. P. Carloni, “The Case for Embedded Scalable Platforms,” in Proc. DAC.
+IEEE, 2016, pp. 1–6.
+[3] W. J. Dally, Y. Turakhia, and S. Han, “Domain-Specific Hardware
+Accelerators,” Communications of the ACM, vol. 63, no. 7, pp. 48–57,
+2020.
+[4] M. Hill and V. J. Reddi, “Accelerator-level Parallelism,” CoRR, vol.
+abs/1907.02064, 2019, https://arxiv.org/abs/1907.02064.
+[5] T. Norrie, N. Patil, D. H. Yoon, G. Kurian, S. Li, J. Laudon, C. Young,
+N. Jouppi, and D. Patterson, “The Design Process for Google’s Training
+Chips: TPUv2 and TPUv3,” IEEE Micro, 2021.
+[6] H. D. Foster, “Trends in functional verification: a 2014 industry study,”
+in Proc. DAC. ACM, 2015, pp. 48:1–48:6.
+[7] B. Huang, H. Zhang, P. Subramanyan, Y. Vizel, A. Gupta, and S. Malik,
+“Instruction-level abstraction (ILA): A uniform specification for systemon-chip (SoC) verification,” ACM Trans. Design Autom. Electr. Syst.,
+vol. 24, no. 1, pp. 10:1–10:24, 2019.
+[8] E. Singh, F. Lonsing, S. Chattopadhyay, M. Strange, P. Wei, X. Zhang,
+Y. Zhou, D. Chen, J. Cong, P. Raina, Z. Zhang, C. W. Barrett, and
+S. Mitra, “A-QED Verification of Hardware Accelerators,” in Proc. DAC.
+IEEE, 2020, pp. 1–6.
+[9] E. G. Cota, P. Mantovani, G. D. Guglielmo, and L. P. Carloni, “An
+Analysis of Accelerator Coupling in Heterogeneous Architectures,” in
+Proc. DAC. ACM, 2015, pp. 202:1–202:6.
+[10] J. Cong, M. A. Ghodrat, M. Gill, B. Grigorian, and G. Reinman,
+“Architecture support for accelerator-rich CMPs,” in Proc. DAC. ACM,
+2012, pp. 843–849.
+[11] E. Clarke, A. Biere, R. Raimi, and Y. Zhu, “Bounded model checking
+using satisfiability solving,” Formal Methods in System Design, vol. 19,
+no. 1, pp. 7–34, 2001.
+[12] NVIDIA, “NVIDIA Deep Learning Accelerator,” http://nvdla.org/primer.
+html, 2021, [Online]. Accessed: August 2021.
+[13] K. A. Campbell, D. Lin, L. He, L. Yang, S. T. Gurumani, K. Rupnow,
+S. Mitra, and D. Chen, “Hybrid Quick Error Detection: Validation and
+Debug of SoCs Through High-Level Synthesis,” IEEE Transactions on
+Computer-Aided Design of Integrated Circuits and Systems, vol. 38, no. 7,
+pp. 1345–1358, 2019.
+[14] Y. Chi, Y. Choi, J. Cong, and J. Wang, “Rapid Cycle-Accurate Simulator
+for High-Level Synthesis,” in Proc. FPGA. ACM, 2019, pp. 178–183.
+[15] IEEE, “IEEE Standard for Universal Verification Methodology Language
+Reference Manual,” IEEE Std 1800.2-2017, pp. 1–472, 2017.
+[16] Y. Choi, Y. Chi, J. Wang, and J. Cong, “FLASH: Fast, Parallel, and
+Accurate Simulator for HLS,” IEEE Transactions on Computer-Aided
+Design of Integrated Circuits and Systems, vol. 39, no. 12, pp. 4828–4841,
+2020.
+[17] S. Dai, A. Klinefelter, H. Ren, R. Venkatesan, B. Keller, N. R. Pinckney,
+and B. Khailany, “Verifying High-Level Latency-Insensitive Designs
+with Formal Model Checking,” CoRR, vol. abs/2102.06326, 2021.
+[Online]. Available: https://arxiv.org/abs/2102.06326
+[18] E. M. Clarke, O. Grumberg, S. Jha, Y. Lu, and H. Veith, “Counterexampleguided abstraction refinement for symbolic model checking,” J. ACM,
+vol. 50, no. 5, pp. 752–794, 2003.
+[19] D. Giannakopoulou, K. S. Namjoshi, and C. S. Pasareanu, “Compositional
+Reasoning,” in Handbook of Model Checking. Springer, 2018, pp. 345–
+383.
+[20] D. Giannakopoulou, C. S. Pasareanu, and J. M. Cobleigh, “AssumeGuarantee Verification of Source Code with Design-Level Assumptions,”
+in Proc. ICSE. IEEE Computer Society, 2004, pp. 211–220.
+[21] J. M. Cobleigh, D. Giannakopoulou, and C. S. Pasareanu, “Learning
+Assumptions for Compositional Verification,” in Proc. TACAS, ser. LNCS,
+vol. 2619. Springer, 2003, pp. 331–346.
+[22] A. Gupta, K. L. McMillan, and Z. Fu, “Automated assumption generation
+for compositional verification,” Formal Methods in System Design, vol. 32,
+no. 3, pp. 285–301, 2008.
+[23] R. Jhala and K. L. McMillan, “Microarchitecture Verification by
+Compositional Model Checking,” in Proc. CAV, ser. LNCS, vol. 2102.
+Springer, 2001, pp. 396–410.
+[24] C. Y. Cho, V. D’Silva, and D. Song, “BLITZ: Compositional bounded
+model checking for real-world programs,” in Proc. ASE. IEEE, 2013,
+pp. 136–146.
+
+51
+
+[48] J. B. Almeida, M. Barbosa, G. Barthe, F. Dupressoir, and M. Emmi,
+“Verifying Constant-Time Implementations,” in Proc. USENIX. USENIX
+Association, 2016, pp. 53–70.
+[49] W. Yang, Y. Vizel, P. Subramanyan, A. Gupta, and S. Malik, “Lazy
+Self-composition for Security Verification,” in Proc. CAV, ser. LNCS,
+vol. 10982. Springer, 2018, pp. 136–156.
+[50] J. Cong, P. Wei, C. H. Yu, and P. Zhou, “Bandwidth optimization through
+on-chip memory restructuring for HLS,” in Proc. DAC. IEEE, 2017,
+pp. 1–6.
+[51] R. M. Keller, “Formal Verification of Parallel Programs,” Commun. ACM,
+vol. 19, no. 7, pp. 371–384, 1976.
+[52] ——, “A Fundamental Theorem of Asynchronous Parallel Computation,”
+in Parallel Processing, Proc. Sagamore Computer Conference, ser. LNCS,
+vol. 24. Springer, 1974, pp. 102–112.
+[53] S. Chattopadhyay, F. Lonsing, L. Piccolboni, D. Soni, P. Wei,
+X. Zhang, Y. Zhou, L. Carloni, D. Chen, J. Cong, R. Karri, Z. Zhang,
+C. Trippel, C. Barrett, and S. Mitra, “Scaling Up Hardware Accelerator
+Verification using A-QED with Functional Decomposition,” CoRR,
+vol. abs/2108.06081, 2021, FMCAD 2021 proceedings version with
+appendix. [Online]. Available: https://arxiv.org/abs/2108.06081
+[54] S. Wang, Y. Liang, and W. Zhang, “FlexCL: An Analytical Performance
+Model for OpenCL Workloads on Flexible FPGAs,” in Proc. DAC. ACM,
+2017, pp. 27:1–27:6.
+[55] J. Zhao, L. Feng, S. Sinha, W. Zhang, Y. Liang, and B. He, “COMBA:
+A Comprehensive Model-Based Analysis Framework for High Level
+Synthesis of Real Applications,” in Proc. ICCAD. IEEE, 2017, pp.
+430–437.
+[56] G. Zhong, A. Prakash, Y. Liang, T. Mitra, and S. Niar, “Lin-analyzer: a
+high-level performance analysis tool for FPGA-based accelerators,” in
+Proc. DAC. ACM, 2016, pp. 136:1–136:6.
+[57] X. Zhang, H. Lu, C. Hao, J. Li, B. Cheng, Y. Li, K. Rupnow, J. Xiong,
+T. S. Huang, H. Shi, W. Hwu, and D. Chen, “SkyNet: a Hardware-Efficient
+Method for Object Detection and Tracking on Embedded Systems,” in
+Proc. MLSys. mlsys.org, 2020.
+[58] M. Giordano, K. Prabhu, K. Koul, R. M. Radway, A. Gural, R. Doshi,
+Z. F. Khan, J. W. Kustin, T. Liu, G. B. Lopes, V. Turbiner, W.-S. Khwa,
+Y.-D. Chih, M.-F. Chang, G. Lallement, B. Murmann, S. Mitra, and
+P. Raina, “CHIMERA: A 0.92 TOPS, 2.2 TOPS/W Edge AI Accelerator
+with 2 MByte On-Chip Foundry Resistive RAM for Efficient Training
+and Inference,” in Proc. VLSI. IEEE, 2021, pp. 1–2.
+
+[59] K. Basu, D. Soni, M. Nabeel, and R. Karri, “NIST Post-Quantum
+Cryptography- A Hardware Evaluation Study,” IACR Cryptology ePrint
+Archive, Report 2019/047, 2019, https://eprint.iacr.org/2019/047.
+[60] Y. Hara, H. Tomiyama, S. Honda, H. Takada, and K. Ishii, “Chstone: A
+benchmark program suite for practical c-based high-level synthesis,” in
+Proc. ISCAS. IEEE, 2008, pp. 1192–1195.
+[61] P. N. Whatmough, S. K. Lee, M. Donato, H. Hsueh, S. L. Xi, U. Gupta,
+L. Pentecost, G. G. Ko, D. M. Brooks, and G. Wei, “A 16nm 25mm2
+SoC with a 54.5x Flexibility-Efficiency Range from Dual-Core Arm
+Cortex-A53 to eFPGA and Cache-Coherent Accelerators,” in Proc. VLSI.
+IEEE, 2019, p. 34.
+[62] T. Tambe, E. Yang, G. G. Ko, Y. Chai, C. Hooper, M. Donato, P. N.
+Whatmough, A. M. Rush, D. Brooks, and G. Wei, “A 25mm2 SoC
+for IoT Devices with 18ms Noise-Robust Speech-to-Text Latency via
+Bayesian Speech Denoising and Attention-Based Sequence-to-Sequence
+DNN Speech Recognition in 16nm FinFET,” in Proc. ISSCC. IEEE,
+2021, pp. 158–160.
+[63] Y. Chi, Y. Choi, J. Cong, and J. Wang, “Rapid Cycle-Accurate Simulator
+for High-Level Synthesis,” in Proc. FPGA. ACM, 2019, pp. 178–183.
+[64] Y. Zhou, U. Gupta, S. Dai, R. Zhao, N. K. Srivastava, H. Jin,
+J. Featherston, Y. Lai, G. Liu, G. A. Velasquez, W. Wang, and Z. Zhang,
+“Rosetta: A Realistic High-Level Synthesis Benchmark Suite for Software
+Programmable FPGAs,” in Proc. FPGA. ACM, 2018, pp. 269–278.
+[65] “A-QED2 Software Artifact,” 2021. [Online]. Available: https:
+//github.com/upscale-project/aqed-decomp-FMCAD2021/
+[66] D. Kroening and M. Tautschnig, “CBMC - C bounded model checker
+- (competition contribution),” in Proc. TACAS, ser. LNCS, vol. 8413.
+Springer, 2014, pp. 389–391.
+[67] “Frama-C,” https://frama-c.com/, 2021, [Online]. Accessed: August 2021.
+
+52
+
+

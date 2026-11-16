@@ -1,0 +1,80 @@
+{
+ "updated": "2026-11-10T15:51:38+00:00",
+ "complete": true,
+ "corpus": "/tests/simspect_alloy_20261108/testsets_twostage/Footprint_6_u_core_lpN_fv3",
+ "programs_merged": 26470,
+ "counts": {
+  "programs": 0,
+  "tests": 0,
+  "d_stems": 0,
+  "batches": {}
+ },
+ "stems_published": 26470,
+ "stem_mode_pairs": 52940,
+ "batches": 32,
+ "cpu_s": {
+  "stage1_alloy_cores": "see stage1_cpu_s (wall-clock of each single-threaded Stage-1 JVM partition)",
+  "stage15_alloy_job_wall_s_sum": 57938.0,
+  "stage15_note": "sum of per-job wall seconds of one JVM each (a6RandomModels is single-threaded apart from GC threads), all jobs incl. EXHAUSTED/0",
+  "stage2_parsexml_llc": 16161.2,
+  "rmw_postpass": 11805.4,
+  "jmp_postpass": 7579.5,
+  "stage2_note": "RUSAGE_CHILDREN deltas of the whole subprocess tree (user+sys CPU-s)"
+ },
+ "stage1_cpu_s": {
+  "Footprint_6_u_core_ri__k1": {
+   "wall_s": 3,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k2": {
+   "wall_s": 4,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k3": {
+   "wall_s": 74,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k4": {
+   "wall_s": 85,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k5_Loads": {
+   "wall_s": 605,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k5_rest": {
+   "wall_s": 4,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k6_Loads": {
+   "wall_s": 1928,
+   "verdict": "EXHAUSTED"
+  },
+  "Footprint_6_u_core_ri__k6_rest": {
+   "wall_s": 1197,
+   "verdict": "EXHAUSTED"
+  }
+ },
+ "stage15": [
+  "/tests/simspect_alloy_20261108/nonmin/runs15/Footprint_6_u_lpN"
+ ],
+ "stage15_seeds": {
+  "/tests/simspect_alloy_20261108/nonmin/runs15/Footprint_6_u_lpN": 20261110
+ },
+ "base_testset": "/tests/simspect_alloy_20261108/testsets_twostage/Footprint_6_u_core_lpN_fv3_base",
+ "stage2_config": "/tests/simspect_alloy_20261108/nonmin/cfg/stage2_fv3_stream.jsonc",
+ "code": "/tests/simspect_alloy_20261108/nonmin/code",
+ "recipe_version": "v3 (recipe-v3 2026-11-10: fanout OTB off, jmp placement uniform, RMW --select eligible)",
+ "code_hashes": {
+  "STAGE2_compilation/make_rmw_corpus.py": "213d9a02538617274775b759ab701df2c80007ca3729f0d08f4b2e5b81af7bae",
+  "STAGE2_compilation/make_jmp_corpus.py": "6be3573e468e4b17616c4a5d6524f26f0ff5ab3ff0fd1a32f645e91c48977338",
+  "STAGE2_compilation/parsexml.py": "6e5c5238972fc415abce5f67fe76ec01cb222daa9d2654ea7cee77e82c8454bb",
+  "STAGE2_compilation/batch_generate.py": "3fc8a94fb4114e4068ce18eef51af09cf7c69521c710ebe8bf4677eec6b87d9e",
+  "runconfigs/regen_lp_20261110/stage2_fv3.jsonc": "1c24c5e87f9b1c557b95633a11ea5160e63c2310c537125eee32f60c27334e84"
+ },
+ "stage2_config_sha256": "e002f80714b4112f14763cda003b43c25926b694e0e7b81cc9997f7ddc240030",
+ "stage15_logs_seed_start": {
+  "/tests/simspect_alloy_20261108/nonmin/runs15/Footprint_6_u_lpN": "1"
+ },
+ "recipe": "stage2_fv3 (OTB off) -> make_rmw_corpus --select eligible p0.5 seed 20261109 per batch -> make_jmp_corpus p0.5 seed 20261109 uniform"
+}

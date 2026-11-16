@@ -1,0 +1,42 @@
+// Stage-2 generation config for CleanupSpec_6 (footprint model, 2026-11-10, migration-uv6fix; Anna's ask 2026-11-09).
+// Stage 2 only (llvm + asm). Plain concretization: default instruction table, no interleave, no fanout v2,
+// register naming random (seed 0, the batch_generate default). Each test's choices are seeded by its stem
+// (batch_generate.py crc32), so the three defenses' testsets are byte-identical for the same XML.
+// Run (cafe2 gem5_dev, workspace /tests/footprint_20261110/code):
+//   python3 pipeline.py llvm --model CleanupSpec_6 --config runconfigs/footprint_20261110/gen_CleanupSpec_6.jsonc
+//   python3 pipeline.py asm  --model CleanupSpec_6 --config runconfigs/footprint_20261110/gen_CleanupSpec_6.jsonc
+// gem5 runs need their own run configs (the STL ones need the hooked copies under /work/amulet/hooks_stl_work/).
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/instructions.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "testsets",
+    "results_dir": "results",
+    "results_name": "CleanupSpec_6"
+  },
+  "alloy": {
+    "max_instances": 0,
+    "_note": "XML comes from scripts/footprint_testsets/gen_xml.sh + merge_xml.py (flat runs, 4 solver orders, deduplicated); do not run the xml phase with this config"
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "jobs": 16
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  }
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # Usage: python3 mf_semantics.py <dir-with-inst-*.txt> [--max N] [--json out.json]
 """mf_semantics.py -- independent Python re-implementation of four defense semantics on Alloy instance
-dumps (model-fixes session, 2026-11-08), for the old-vs-new differentials in
+dumps, for the old-vs-new differentials in
 wiki/state/ALLOY_MODEL_CHANGES.md "2026-11-08 — model-fixes".
 
 Semantics (flat models: the perturbations gen_useful_litmus uses are no_p, RR->i, RC+RR->first_uncommitted,

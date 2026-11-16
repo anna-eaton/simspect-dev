@@ -1,25 +1,13 @@
 #!/usr/bin/env python3
 """
-testsetgen.py — SimSpect test-set generator (the PRODUCER half of the pipeline).
+testsetgen.py — SimSpect test-set generator (the producer half of the pipeline).
 
-Pipelines the three generation stages so they run CONCURRENTLY: Alloy keeps
-enumerating XML in the background while the llvm (parsexml) and asm+annotation
-stages consume each instance the moment it lands on disk. Contrast with
-`pipeline.py all`, a strictly sequential for-loop that blocks inside the XML
-phase until all instances exist before llvm even starts — here you see all
-three stages make progress at once.
+Runs the three generation stages concurrently: Alloy enumerates XML in the background while the
+llvm (parsexml) and asm+annotation stages consume each instance as it lands. No gem5; the resulting
+testsets/<model>/<mode>/{asm,ann} are consumed by testrun.py. Reuses pipeline.py's phase functions.
 
-Purely a producer: NO gem5, NO build target. The resulting
-testsets/<model>/<mode>/{asm,ann} are consumed by testrun.py (the executor).
-
-Reuses pipeline.py's phase functions unchanged (imported, not copied), so the
-generation logic is identical to the battle-tested pipeline — this script only
-adds the concurrency + a fuller provenance snapshot.
-
-Resumable: llvm/asm skip any instance whose output already exists (same per-stem
-skip pipeline.py uses), so a killed run resumes cleanly. The XML phase is the
-one exception — Alloy can't resume mid-enumeration; a killed `xml` restarts
-from instance 0.
+Resumable: llvm/asm skip stems whose output exists. The xml phase cannot resume (Alloy restarts
+from instance 0).
 
 Usage:
     python3 testsetgen.py --model SPT_6_oneLP --config run_config_SPT_6_oneLP.jsonc
@@ -71,6 +59,16 @@ def write_provenance(cfg: dict, model: str, testset_base: Path,
             "mtime": alloy_jar.stat().st_mtime if alloy_jar.exists() else None,
         },
     }
+    # Seeded random solver order: recorded only when configured.
+    #     # Per-seed counts land in xml/SOLVER_ORDER.json. counts land in xml/SOLVER_ORDER.json.
+    if (cfg.get("alloy") or {}).get("solver_order") is not None:
+        import hashlib
+        import alloy_solver_order as _aso
+        so = _aso.configured(cfg)
+        if so is not None:
+            manifest["alloy_solver_order"] = so
+            manifest["model_sha256"] = (hashlib.sha256(model_file.read_bytes()).hexdigest()
+                                        if model_file.exists() else None)
 
     sources = [
         (stage2 / "parsexml.py",         "parsexml.py"),

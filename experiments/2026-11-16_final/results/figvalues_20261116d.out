@@ -1,0 +1,63 @@
+check, old A-UV5 tests-ratio interval (K_s=4/50,232, K_a=4/896,000): 3.32-95.8x  (caption 2026-11-11: 3.3-96x)
+
+=== tests per detection, (N+1)/(K+1); 95% Clopper-Pearson as tests per detection ===
+bug  defense             S K/N   S tests                 S 95%  A K   A tests                 A 95%    ratio
+UV1  InvisiSpec   2,002/4,000       2.00 [      1.9,       2.1]  270    3306.3 [   2945.5,    3752.8]   1655.2
+UV3  CleanupSpec  7,288/291,860     40.04 [     39.1,      41.0]  236    3780.6 [   3342.0,    4331.6]     94.4
+UV4  CleanupSpec    919/291,860    317.24 [    297.7,     339.1]    4  179200.2 [  87486.7,  822119.0]    564.9
+UV5  CleanupSpec      5/291,860  48643.50 [  25013.3,  179772.9]    4  179200.2 [  87486.7,  822119.0]      3.7
+UV6  SpecLFB        851/4,000       4.70 [      4.4,       5.0]  150    5933.8 [   5090.5,    7057.5]   1263.6
+jmp  SpecLFB        527/4,000       7.58 [      7.0,       8.2]   47   18666.7 [  14336.1,   25945.4]   2463.4
+
+=== seconds per detection, one core (SimSpect: tests x (fast-path CPU-s per test + 0.93 generation); AMuLeT: test cases x TIME-1 CPU-s per test case) ===
+bug  defense      S s/test      S sec                   S 95% s S exec only    A s/tc    A sec             A 95% s   ratio exec-only ratio
+UV1  InvisiSpec     2.2740        4.5 [       4.4,         4.7]         2.7   0.07304    241.5 [   215.1,   274.1]  53.165          89.954
+UV3  CleanupSpec    2.6680      106.8 [     104.4,       109.3]        69.6   0.02337     88.4 [    78.1,   101.2]   0.827           1.270
+UV4  CleanupSpec    2.6680      846.4 [     794.3,       904.8]       551.4   0.02337   4188.6 [  2044.9, 19216.2]   4.949           7.597
+UV5  CleanupSpec    2.6680   129780.9 [   66735.4,    479634.0]     84542.4   0.02337   4188.6 [  2044.9, 19216.2]   0.032           0.050
+UV6  SpecLFB        2.2256       10.5 [       9.9,        11.1]         6.1   0.01935    114.8 [    98.5,   136.6]  10.988          18.876
+jmp  SpecLFB        2.2256       16.9 [      15.6,        18.3]         9.8   0.01935    361.3 [   277.5,   502.1]  21.422          36.799
+
+A-UV5 (K_s=5 of 291,860, K_a=4 of 896,000): tests ratio 3.68x, 95% 0.8260-19.34x; time factor 0.008761; time ratio 0.0323x, 95% 0.007236-0.1694x  (AMuLeT 31x faster at the point estimate)
+
+=== paste-ready \foreach rows: tests per detection (tikz/firstdet_bars_v5_body.tex) ===
+% index / log10 SimSpect / log10 AMuLeT / SimSpect label / AMuLeT label / ratio / x label / log10 95% low and high (high clipped at the axis top), SimSpect then AMuLeT / clip flag
+  0/0.3005/3.5193/{2.0}/{3.3k}/{1{,}700$\times$}/A-UV1/0.2873/0.3144/3.4692/3.5744/0,
+  1/1.6025/3.5776/{40}/{3.8k}/{94$\times$}/A-UV3/1.5927/1.6125/3.5240/3.6366/0,
+  2/2.5014/5.2533/{317}/{179k}/{560$\times$}/A-UV4/2.4738/2.5304/4.9419/5.9149/0,
+  3/4.6870/5.2533/{49k}/{179k}/{3.7$\times$}/{A-UV5$^{\textstyle\dagger}$}/4.3982/5.2547/4.9419/5.9149/0,
+  4/0.6717/3.7733/{4.7}/{5.9k}/{1{,}300$\times$}/A-UV6/0.6463/0.6986/3.7068/3.8486/0,
+  5/0.8795/4.2711/{7.6}/{19k}/{2{,}500$\times$}/{jmp$^{\textstyle *}$}/0.8458/0.9157/4.1564/4.4141/0} {
+
+=== paste-ready \foreach rows: seconds per detection (tikz/timedet_bars_v4_body.tex) ===
+% index / log10 SimSpect / log10 AMuLeT / SimSpect label / AMuLeT label / ratio / x label / log10 95% low and high (high clipped at the axis top), SimSpect then AMuLeT / clip flag
+  0/0.6573/2.3829/{4.5}/{241}/{53$\times$}/A-UV1/0.6440/0.6712/2.3327/2.4379/0,
+  1/2.0287/1.9463/{107}/{88}/{0.83$\times$}/A-UV3/2.0189/2.0387/1.8927/2.0054/0,
+  2/2.9276/3.6221/{846}/{4.2k}/{4.9$\times$}/A-UV4/2.9000/2.9565/3.3107/4.2837/0,
+  3/5.1132/3.6221/{130k}/{4.2k}/{0.032$\times$}/{A-UV5$^{\textstyle\dagger}$}/4.8244/5.6809/3.3107/4.2837/0,
+  4/1.0192/2.0601/{10}/{115}/{11$\times$}/A-UV6/0.9938/1.0461/1.9935/2.1354/0,
+  5/1.2270/2.5578/{17}/{361}/{21$\times$}/{jmp$^{\textstyle *}$}/1.1932/1.2632/2.4432/2.7008/0} {
+
+=== timing variants: per bug, log10 seconds (execution only / with generation / AMuLeT), 95% CI, ratios ===
+UV1  exec        2.7 [      2.6,       2.8]  gen        4.5 [      4.4,       4.7]  amu    241.5  ratio exec 89.954 gen 53.165
+UV3  exec       69.6 [     68.0,      71.2]  gen      106.8 [    104.4,     109.3]  amu     88.4  ratio exec 1.270 gen 0.827
+UV4  exec      551.4 [    517.5,     589.4]  gen      846.4 [    794.3,     904.8]  amu   4188.6  ratio exec 7.597 gen 4.949
+UV5  exec    84542.4 [  43473.1,  312445.3]  gen   129780.9 [  66735.4,  479634.0]  amu   4188.6  ratio exec 0.050 gen 0.032
+UV6  exec        6.1 [      5.7,       6.5]  gen       10.5 [      9.9,      11.1]  amu    114.8  ratio exec 18.876 gen 10.988
+jmp  exec        9.8 [      9.1,      10.7]  gen       16.9 [     15.6,      18.3]  amu    361.3  ratio exec 36.799 gen 21.422
+
+=== rows: split panel (tikz/timedet_split_v1_body.tex): i / log10 total / log10 AMuLeT / log10 exec / total label / AMuLeT label / ratio (with gen) / x label / total 95% lo hi / AMuLeT 95% lo hi ===
+  0/0.6573/2.3829/0.4289/{4.5}/{241}/{53$\times$}/A-UV1/0.6440/0.6712/2.3327/2.4379,
+  1/2.0287/1.9463/1.8426/{107}/{88}/{0.83$\times$}/A-UV3/2.0189/2.0387/1.8927/2.0054,
+  2/2.9276/3.6221/2.7414/{846}/{4.2k}/{4.9$\times$}/A-UV4/2.9000/2.9565/3.3107/4.2837,
+  3/5.1132/3.6221/4.9271/{130k}/{4.2k}/{0.032$\times$}/{A-UV5$^{\textstyle\dagger}$}/4.8244/5.6809/3.3107/4.2837,
+  4/1.0192/2.0601/0.7842/{10}/{115}/{11$\times$}/A-UV6/0.9938/1.0461/1.9935/2.1354,
+  5/1.2270/2.5578/0.9920/{17}/{361}/{21$\times$}/{jmp$^{\textstyle *}$}/1.1932/1.2632/2.4432/2.7008} {
+
+=== rows: three-bar panel (tikz/timedet_three_v1_body.tex): i / log10 exec / log10 total / log10 AMuLeT / labels exec total AMuLeT / ratio exec / ratio with gen / x label / exec 95% / total 95% / AMuLeT 95% ===
+  0/0.4289/0.6573/2.3829/{2.7}/{4.5}/{241}/{90$\times$}/{53$\times$}/A-UV1/0.4157/0.4428/0.6440/0.6712/2.3327/2.4379,
+  1/1.8426/2.0287/1.9463/{70}/{107}/{88}/{1.3$\times$}/{0.83$\times$}/A-UV3/1.8328/1.8525/2.0189/2.0387/1.8927/2.0054,
+  2/2.7414/2.9276/3.6221/{551}/{846}/{4.2k}/{7.6$\times$}/{4.9$\times$}/A-UV4/2.7139/2.7704/2.9000/2.9565/3.3107/4.2837,
+  3/4.9271/5.1132/3.6221/{85k}/{130k}/{4.2k}/{0.050$\times$}/{0.032$\times$}/{A-UV5$^{\textstyle\dagger}$}/4.6382/5.4948/4.8244/5.6809/3.3107/4.2837,
+  4/0.7842/1.0192/2.0601/{6.1}/{10}/{115}/{19$\times$}/{11$\times$}/A-UV6/0.7588/0.8111/0.9938/1.0461/1.9935/2.1354,
+  5/0.9920/1.2270/2.5578/{9.8}/{17}/{361}/{37$\times$}/{21$\times$}/{jmp$^{\textstyle *}$}/0.9583/1.0282/1.1932/1.2632/2.4432/2.7008} {

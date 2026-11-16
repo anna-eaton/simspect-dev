@@ -1,5 +1,5 @@
 #!/bin/bash
-# Cache-setup experiment (2026-11-08, cache-setup session). Run on cafe2 gem5_dev from the tree root
+# Cache-setup experiment. Run on cafe2 gem5_dev from the tree root
 # /tests/simspect_fixed_20261030. Three campaigns on CleanupSpec (footprint config), same 590 stems as the warm
 # RMW campaign results/STT_6_rmw_cleanupspec_footprint__20261109_002545:
 #   (1) STT_6_rmw cold, (2) plain STT_6 same stems cold, (3) plain STT_6 same stems warm.

@@ -63,7 +63,7 @@ from gem5_common import (_branch_ann_for_se, _func_base_addr, binary_has_resolve
                          parse_simspect_events, parse_ticks_per_cycle)
 
 # binary, se.py, cpu, extra args: copied from each build's campaign run_config.jsonc
-# (cafe2 /tests/simspect/results/*/run_config.jsonc, read 2026-10-30).
+# (cafe2 /tests/simspect/results/*/run_config.jsonc).
 _AM = "/work/amulet/amulet-gem5-"
 BUILDS = {
     "gem5-recon-modded": dict(
@@ -71,7 +71,7 @@ BUILDS = {
         se="/work/gem5-recon-modded/configs/example/se.py", cpu="X86O3CPU", extra=[]),
     "stt": dict(bin="/work/stt/build/X86/gem5.opt",
                 se="/work/stt/configs/example/se.py", cpu="DerivO3CPU", extra=[]),
-    # upstream STT master 5bf4110 + the same hooks as /work/stt (2026-11-08)
+    # upstream STT master 5bf4110 + the same hooks as /work/stt
     "stt-master": dict(bin="/work/stt-master/build/X86/gem5.opt",
                        se="/work/stt-master/configs/example/se.py", cpu="DerivO3CPU", extra=[]),
     "stt-dbg": dict(bin="/work/stt-dbg/build/X86/gem5.opt",
@@ -231,7 +231,7 @@ def _with_stalls(ann: dict, alias: bool, unresolved_s: int, resolved_s: int) -> 
 
 
 def _br_checks(C, V, brs, unres, mis, ann, xmit_addr, tpc, S):
-    """Checks that only exist on binaries with the 2026-10-30 resolve hooks."""
+    """Checks that only exist on binaries with the resolve hooks."""
     # (1) Every stalled branch instance that resolved was held; release fires at
     #     the scheduled tick; visible == the Commit 'ready within ROB' tick.
     bad = []

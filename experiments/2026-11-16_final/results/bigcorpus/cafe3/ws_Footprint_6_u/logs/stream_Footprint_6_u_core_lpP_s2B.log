@@ -1,0 +1,293 @@
+2026-11-15T23:56:24+00:00 START s15=/tests/bigcorpus_20261115/ws_Footprint_6_u/runs15/Footprint_6_u_lpP base=/tests/bigcorpus_20261115/testsets/Footprint_6_u_lp_s2B_base final=/tests/bigcorpus_20261115/testsets/Footprint_6_u_core_lpP_s2B cfg=/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc interval=120 jobs=24 (resume: n=0, published=0)
+2026-11-15T23:56:44+00:00 merge: +62052 (total 62052) from 799 finished jobs
+2026-11-15T23:56:46+00:00 stage2: rc=1 secs=0
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed_twophase/stage2_sharded.py", line 125, in <module>
+    main()
+  File "STAGE1_alloy/models/proposed_twophase/stage2_sharded.py", line 72, in main
+    cfg = pipeline.load_config(Path(a.config))
+  File "/tests/bigcorpus_20261115/code/pipeline.py", line 59, in load_config
+    text = path.read_text(encoding="utf-8")
+  File "/usr/lib/python3.8/pathlib.py", line 1236, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-15T23:58:24+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-15T23:58:26+00:00 stage2: rc=1 secs=0
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed_twophase/stage2_sharded.py", line 125, in <module>
+    main()
+  File "STAGE1_alloy/models/proposed_twophase/stage2_sharded.py", line 72, in main
+    cfg = pipeline.load_config(Path(a.config))
+  File "/tests/bigcorpus_20261115/code/pipeline.py", line 59, in load_config
+    text = path.read_text(encoding="utf-8")
+  File "/usr/lib/python3.8/pathlib.py", line 1236, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:00:24+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:00:27+00:00 stage2: rc=1 secs=0
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed_twophase/stage2_sharded.py", line 125, in <module>
+    main()
+  File "STAGE1_alloy/models/proposed_twophase/stage2_sharded.py", line 72, in main
+    cfg = pipeline.load_config(Path(a.config))
+  File "/tests/bigcorpus_20261115/code/pipeline.py", line 59, in load_config
+    text = path.read_text(encoding="utf-8")
+  File "/usr/lib/python3.8/pathlib.py", line 1236, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:02:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:02:27+00:00 publish b0001: 1500 stems (62052 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:02:29+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:04:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:04:26+00:00 publish b0002: 1500 stems (60552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:04:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:06:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:06:26+00:00 publish b0003: 1500 stems (59052 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:06:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:08:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:08:26+00:00 publish b0004: 1500 stems (57552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:08:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:10:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:10:26+00:00 publish b0005: 1500 stems (56052 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:10:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:12:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:12:26+00:00 publish b0006: 1500 stems (54552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:12:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:14:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:14:26+00:00 publish b0007: 1500 stems (53052 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:14:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:16:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:16:27+00:00 publish b0008: 1500 stems (51552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:16:29+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:18:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:18:27+00:00 publish b0009: 1500 stems (50052 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:18:28+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:20:25+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:20:26+00:00 publish b0010: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:20:27+00:00 EXCEPTION
+Traceback (most recent call last):
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 344, in main
+    publish_all(ready, partial, done15)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 224, in publish_all
+    publish(chunk, partial)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 327, in publish
+    write_prov(final, st, s15s, base, cfg, code, a)
+  File "STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py", line 105, in write_prov
+    "stage2_config_sha256": hashlib.sha256(cfg.read_bytes()).hexdigest(),
+  File "/usr/lib/python3.8/pathlib.py", line 1229, in read_bytes
+    with self.open(mode='rb') as f:
+  File "/usr/lib/python3.8/pathlib.py", line 1222, in open
+    return io.open(self, mode, buffering, encoding, errors, newline,
+  File "/usr/lib/python3.8/pathlib.py", line 1078, in _opener
+    return self._accessor.open(self, flags, mode)
+FileNotFoundError: [Errno 2] No such file or directory: '/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc'
+
+2026-11-16T00:21:41+00:00 START s15=/tests/bigcorpus_20261115/ws_Footprint_6_u/runs15/Footprint_6_u_lpP base=/tests/bigcorpus_20261115/testsets/Footprint_6_u_lp_s2B_base final=/tests/bigcorpus_20261115/testsets/Footprint_6_u_core_lpP_s2B cfg=/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc interval=120 jobs=24 (resume: n=62052, published=13500)
+2026-11-16T00:21:42+00:00 merge: +0 (total 62052) from 799 finished jobs
+2026-11-16T00:21:43+00:00 publish b0010: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:44+00:00 published b0010: total published 15000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:44+00:00 publish b0011: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:45+00:00 published b0011: total published 16500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:45+00:00 publish b0012: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:46+00:00 published b0012: total published 18000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:46+00:00 publish b0013: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:47+00:00 published b0013: total published 19500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:47+00:00 publish b0014: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:48+00:00 published b0014: total published 21000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:48+00:00 publish b0015: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:49+00:00 published b0015: total published 22500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:49+00:00 publish b0016: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:50+00:00 published b0016: total published 24000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:50+00:00 publish b0017: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:51+00:00 published b0017: total published 25500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:51+00:00 publish b0018: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:52+00:00 published b0018: total published 27000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:53+00:00 publish b0019: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:53+00:00 published b0019: total published 28500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:54+00:00 publish b0020: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:55+00:00 published b0020: total published 30000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:55+00:00 publish b0021: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:56+00:00 published b0021: total published 31500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:56+00:00 publish b0022: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:57+00:00 published b0022: total published 33000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:57+00:00 publish b0023: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:58+00:00 published b0023: total published 34500 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:58+00:00 publish b0024: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:21:59+00:00 published b0024: total published 36000 cpu_s={'stage2': 0.3}
+2026-11-16T00:21:59+00:00 publish b0025: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:22:00+00:00 published b0025: total published 37500 cpu_s={'stage2': 0.3}
+2026-11-16T00:22:00+00:00 publish b0026: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:22:01+00:00 published b0026: total published 39000 cpu_s={'stage2': 0.3}
+2026-11-16T00:22:01+00:00 publish b0027: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:22:02+00:00 published b0027: total published 40500 cpu_s={'stage2': 0.3}
+2026-11-16T00:22:03+00:00 publish b0028: 1500 stems (48552 partial) no post-passes (fanout_v2.vocab_rj), rows ok=True
+2026-11-16T00:22:39+00:00 START s15=/tests/bigcorpus_20261115/ws_Footprint_6_u/runs15/Footprint_6_u_lpP base=/tests/bigcorpus_20261115/testsets/Footprint_6_u_lp_s2B_base final=/tests/bigcorpus_20261115/testsets/Footprint_6_u_core_lpP_s2B cfg=/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_B_stream.jsonc interval=120 jobs=24 (resume: n=0, published=0)
+2026-11-16T00:22:58+00:00 merge: +62052 (total 62052) from 799 finished jobs

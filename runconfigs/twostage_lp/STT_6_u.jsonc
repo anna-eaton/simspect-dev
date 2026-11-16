@@ -1,0 +1,48 @@
+// twostage_lp.py config for STT_6_u (regen-lp 2026-11-10): Stage 1 REUSED (cafe2 /tests/simspect_alloy_20261109u/out/STT_6_u_core_ri, made by exactly STT_6_u_core_ri.als, sha256 29368a06cf7017b9; all partitions EXHAUSTED except k6_Branchxs, unfinished with 0 cores)
+// -> Stage 1.5 core-pinned loose-pin lpP (STT_6_u_lpP + per-core path-style seed_core; 100 instances / 600 s per job, 28 slots, target 25,000 distinct, queue shuffle 20261113) -> Stage 2 recipe v3. Run on cafe2 2026-11-10.
+// Run: python3 twostage_lp.py --config runconfigs/twostage_lp/STT_6_u.jsonc --ws <work dir>   (make twostage-lp CONFIG=... WS=...). Docs: wiki/state/COMMANDS.md.
+{
+  "paths": {
+    "testset_dir": "/tests/simspect_alloy_20261108/testsets_twostage"
+  },
+  "twostage_lp": {
+    "family": "STT_6_u",
+    "core_model": "STT_6_u_core_ri",
+    "lp_model": "STT_6_u_lpP",
+    "corpus": "STT_6_u_core_lpP_fv3",
+    "stage2_config": "runconfigs/regen_lp_20261110/stage2_fv3.jsonc",
+    "stage1": {
+      "reuse_cores": [
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k1/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k2/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k3/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k4/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k5_Branchxs/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k5_Loads/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k5_rest/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k6_Branchxs/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k6_Loads/stage1_xml",
+        "/tests/simspect_alloy_20261109u/out/STT_6_u_core_ri/k6_rest/stage1_xml"
+      ],
+      "reuse_sha256": "29368a06cf7017b91ecd1720684baaf7ac2254f9f9ba68d59a13874c210842d5"
+    },
+    "stage15": {
+      "slots": 28,
+      "job_timeout": 600,
+      "budget_s": 4500,
+      "cap": 100,
+      "walk_p": 0.05,
+      "shuffle_seed": 20261113,
+      "spread": 2,
+      "dedup_level": "seed",
+      "xmx": "4g",
+      "target_distinct": 25000
+    },
+    "stream": {
+      "interval": 120,
+      "jobs": 8,
+      "min_batch": 200,
+      "max_batch": 1500
+    }
+  }
+}

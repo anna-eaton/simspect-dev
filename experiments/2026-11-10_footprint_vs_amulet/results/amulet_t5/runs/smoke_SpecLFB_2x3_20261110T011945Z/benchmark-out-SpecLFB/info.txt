@@ -1,0 +1,31 @@
+
+========================================================================================================================
+Config 0: /tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T011945Z/docker_gem5_v1_final_cache_tlb.yaml
+
+Command line: 
+python3 cli.py fuzz -s /tests/simspect_alloy_20261108/timing/amulet_t5/amulet-repo/src/x86/isa_spec/base.json -i 70 -n 4 -c /tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T011945Z/docker_gem5_v1_final_cache_tlb.yaml -p bench_t5SpecLFB_config0_round0 --no-save-stats --result-dir=/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T011945Z/benchmark-out-SpecLFB/config0 --SpecLFB --nonstop
+
+avg_wall_time: 8.22
+total_system_time: 16.43
+total_test_programs: 6
+input_count: 140
+total_test_cases: 840
+total_violations: 2
+avg_violations: 1.00
+
+contract_clause: CT-SEQ
+detected_violation: YES
+avg_detection_time: 4.11
+testing_throughput: 102.22
+campaign_execution_time: 8.22
+
+Detailed Results - Config 0
+===========================
+Round    | Execution Time (s)   | Test Cases   | Violations Found   | First Violation (s)   
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+       0 |                 7.45 |            3 |                  0 |                    N/A
+       1 |                 8.98 |            3 |                  2 |                   4.77
+    Mean |                 8.22 |            - |                1.0 |                      -
+ Std Dev |                 1.08 |            - |               1.41 |                      -
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+========================================================================================================================

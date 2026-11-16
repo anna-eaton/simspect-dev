@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-# COPY (timing-amulet 2026-11-09) of STAGE3_gem5/triage/cleanupspec_skip_evidence.py, unchanged, so classify_hits.py can call it next to itself.
+# Copy of STAGE3_gem5/triage/cleanupspec_skip_evidence.py, so classify_hits.py can call it next to itself.
 """
 cleanupspec_skip_evidence.py: attribute every offending (struct, line) of every
 CleanupSpec footprint hit to ONE trace-proven cause, and write the evidence file
-read by diag/diag_cs1_store_upgrade.py and diag/diag_uv4_split.py
-(unexplained-hits session, 2026-11-09).
+read by diag/diag_cs1_store_upgrade.py and diag/diag_uv4_split.py.
 
 Input: a testrun.py campaign dir whose raw checker records
 (<campaign>/<mode>/_sweep_raw/*.json) carry check_footprint's `offending` list

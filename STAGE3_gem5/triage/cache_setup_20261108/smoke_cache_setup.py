@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Per-build smoke test of run_config gem5.cache_setup (2026-11-08, cache-setup session).
+"""Per-build smoke test of run_config gem5.cache_setup.
 
 For each run config given, runs ONE test (default: the rmw_frame fixture, STT_6_rmw
 inst-000003) warm and cold through gem5_common.process_one with the config's own

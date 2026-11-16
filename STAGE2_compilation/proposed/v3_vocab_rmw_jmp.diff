@@ -1,0 +1,356 @@
+--- a/STAGE2_compilation/parsexml.py	2026-11-10 01:49:16
++++ b/STAGE2_compilation/parsexml.py	2026-11-10 01:54:52
+@@ -401,6 +401,10 @@
+         "outmem": 1,
+     }
+ 
++    # [V3-VOCAB] operands read by some rf edge (Alloy-level consumers), for pass 2's
++    # "requires": "outreg_unconsumed" candidates (e.g. load_rmw_or0).
++    _rf_src = {a for a, _b in inst.fields.get("rf", [])}
++
+     for pc, ins in enumerate(order):
+         kind = _kind_token(ins, kind_of)
+         resolved_bool  = ins in resolved_instrs
+@@ -446,6 +450,7 @@
+                 "kind": kind,
+                 "resolved":  resolved_bool,
+                 "committed": committed_bool,
++                "outreg_consumed": any(o in _rf_src for o in outregs),   # [V3-VOCAB]
+                 "must_uncommitted": (ins in must_uncommitted_instrs) if has_commit_split
+                                     else not committed_bool,
+                 "xm":        xm_bool,
+@@ -553,6 +558,10 @@
+ #   the fewest "uses" entries is preferred (simplest fit wins).
+ _KIND_TO_CATEGORY, INSTRUCTION_TABLE = _load_instruction_tables()
+ BRANCH_FORMS: Dict[str, Any] = {}
++# [V3-VOCAB] concrete names that read memory like `load` (same address slots inaddr/inmem).
++# load_rmw_or0 = `orq $0, <mem>`: x86 read-modify-write (gem5 OR_M_I = limm; ldst; or; st), value
++# neutral, writes no GPR; pass 2 offers it only when no Alloy rf edge reads the outreg ("requires").
++LOAD_LIKE = ("load", "load_rmw_or0")
+ 
+ 
+ def pass2_specify_instructions(
+@@ -595,11 +604,19 @@
+ 
+         # Keep only candidates whose operand set covers every specified slot
+         valid = [c for c in candidates if specified_slots <= c["uses"]]
++        # [V3-VOCAB] a candidate may drop the outreg (it writes no register): it is valid only
++        # when no Alloy rf edge reads this instruction's outreg; its uses then omit outreg, so the
++        # specified-slot rule above is relaxed for exactly that slot.
++        valid += [c for c in candidates if c.get("requires") == "outreg_unconsumed"
++                  and c not in valid and not rec.get("outreg_consumed", True)
++                  and specified_slots - {"outreg"} <= c["uses"]]
++        valid = [c for c in valid if c.get("requires") != "outreg_unconsumed"
++                 or not rec.get("outreg_consumed", True)]
+ 
+         if not valid:
+             # Table/model inconsistency: no candidate covers all specified slots.
+             # Fall back to the full list so the pipeline can continue.
+-            valid = candidates
++            valid = [c for c in candidates if not c.get("requires")]   # [V3-VOCAB] never a gated form
+ 
+         # Pick randomly among valid candidates (all have >= the required operands)
+         chosen = random.choice(valid) if valid else None
+@@ -1156,6 +1173,9 @@
+             space, off, _ = _mem_addr_of(rec, "inmem", vals)
+             check(space, off)
+             out(rec, sum(mem.get((space, off + b), 0) << (8 * b) for b in range(8)))
++        elif c == "load_rmw_or0":   # [V3-VOCAB] or $0: memory unchanged, no register written
++            space, off, _ = _mem_addr_of(rec, "inmem", vals)
++            check(space, off)
+         elif c == "store":
+             if rec["pc"] in store_override:
+                 if store_override[rec["pc"]] is None:
+@@ -2215,7 +2235,7 @@
+         (get_slot(_r, "inaddr") or {}).get("specified") and
+         (get_slot(_r, "inaddr") or {}).get("ssa_name")
+         for _r in instructions
+-        if _r.get("concrete_instruction") in ("load", "store")
++        if _r.get("concrete_instruction") in LOAD_LIKE + ("store",)
+     )
+ 
+     # ---- Opt-in store separation (no-STLF variant; see docstring) ----
+@@ -2237,7 +2257,7 @@
+             # run time: a later PROBE-addressed load of the same Mem_s atom
+             # (a mem_base-slot load never shares an address with a probe store).
+             alias = om is not None and any(
+-                l.get("concrete_instruction") == "load" and _phys_of(l, "inmem") == om
++                l.get("concrete_instruction") in LOAD_LIKE and _phys_of(l, "inmem") == om
+                 and (get_slot(l, "inaddr") or {}).get("specified")
+                 for l in instructions[i_ + 1:])
+             (_stsep_kept.append if alias else _stsep_pcs.add)(r["pc"])
+@@ -2379,7 +2399,7 @@
+         _xm = next((r for r in instructions if r.get("xm")), None)
+         _xm_slot = None
+         if _xm is not None:
+-            _xm_slot = "inaddr" if _xm.get("concrete_instruction") in ("load", "store") else "inreg0"
++            _xm_slot = "inaddr" if _xm.get("concrete_instruction") in LOAD_LIKE + ("store",) else "inreg0"
+         _p_x = float(_sp_cfg.get("p_xmit", 0.75)); _p_o = float(_sp_cfg.get("p_other", 0.25))
+         if _sp_cfg.get("enabled", True):
+             for r in instructions:
+@@ -2556,6 +2576,23 @@
+     _bc_alloy = bool(brcond_cfg and brcond_cfg.get("from_alloy"))
+     _jmp_pcs: List[int] = []
+     _bc_pcs: List[int] = []
++    # [V3-VOCAB] BRANCH_FORMS.jmp_insert {"p": .., "seed": ..}: one direct `jmp` to the next instruction,
++    # before the instruction of a pc drawn uniformly over every emitted pc (whole test body), never
++    # before a mispredict_taken BTB-forced target (the redirect would skip it). Same rule as
++    # make_jmp_corpus.py --placement uniform, done at emission so compile_annotate resolves it natively.
++    _ji_cfg = BRANCH_FORMS.get("jmp_insert") or {}
++    _ji_pc: Optional[int] = None
++    if float(_ji_cfg.get("p", 0) or 0) > 0:
++        import hashlib as _hl
++        _ji_seed = _ji_cfg.get("seed", 20261109)
++        _hh = lambda k: int(_hl.sha256(k.encode()).hexdigest()[:16], 16)  # noqa: E731
++        if _hh(f"jmp:{_ji_seed}:{func_name}") / 2.0 ** 64 < float(_ji_cfg["p"]):
++            _forced = {(r.get("branch_annotations") or {}).get("btb_predicted_pc") for r in instructions
++                       if (r.get("branch_annotations") or {}).get("mode") == "mispredict_taken"}
++            _ji_c = sorted({r["pc"] for r in instructions if not r.get("synthetic")} - _forced)
++            if _ji_c:
++                _ji_pc = _ji_c[_hh(f"jmppos:{_ji_seed}:{func_name}") % len(_ji_c)]
++    _ji_plan = _ji_pc
+     if _jmp_p > 0:
+         import zlib as _zlib2
+         _jrng = random.Random(_zlib2.crc32(f"jmp:{func_name}".encode()))
+@@ -2580,6 +2617,7 @@
+     last_was_terminator = False
+     safe_name = func_name.replace("-", "_").replace(".", "_")
+     _fv2_prev: Optional[Dict[str, Any]] = None
++    _rmw_pcs: List[int] = []   # [V3-VOCAB] pcs emitted as load_rmw_or0
+ 
+     for rec in instructions:
+         pc = rec["pc"]
+@@ -2601,6 +2639,10 @@
+             rec = fv2_before(rec)
+             _fv2_prev = rec
+         cm(f"pc={pc}  {atom}  ({concrete})")
++        if pc == _ji_pc:   # [V3-VOCAB] jmp_insert: own asm block, after the block label, before pc's marker
++            _js = f"__litmus_{safe_name}_jmpins"
++            il(f'call void asm sideeffect ".globl {_js}\\0A{_js}:\\0Ajmp .Lsimspect_jmpins\\0A.Lsimspect_jmpins:", ""()')
++            _ji_pc = None
+         marker = f"__litmus_{safe_name}_pc{pc}"
+         # pc marker prefix shared by all asm blocks below; each instruction
+         # type integrates it into its own single asm sideeffect call so that
+@@ -2658,6 +2700,30 @@
+                     il(f'call void asm sideeffect '
+                        f'"{mkr}movq {offset}($0), %rax", '
+                        f'"{{{_probe_base_phys}}},~{{memory}},~{{rax}}"(ptr %mem_base)')
++
++        elif concrete == "load_rmw_or0":
++            # [V3-VOCAB] read-modify-write form of a load whose output Alloy leaves unused:
++            #   orq $0, (%probe_mem, %idx, 1)   or   orq $0, off(%mem_base)
++            # same address operands and pc marker as `load`; no output register; value neutral.
++            inaddr_sr = get_slot(rec, "inaddr")
++            _ia_specified = inaddr_sr and inaddr_sr.get("specified")
++            inaddr_ssa  = inaddr_sr.get("ssa_name") if _ia_specified else None
++            inaddr_phys = inaddr_sr.get("assigned") if _ia_specified else None
++            if inaddr_ssa and inaddr_phys:
++                il(f'call void asm sideeffect '
++                   f'"{mkr}orq $$0, ($0, $1, 1)", '
++                   f'"{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}},~{{flags}}"'
++                   f'(ptr %probe_mem, i64 %{inaddr_ssa})')
++            else:
++                idx = mem_slot_idx(rec, "inmem")
++                if idx is None or alloca_n == 0:
++                    il(f'call void asm sideeffect ".globl {marker}\\0A{marker}:", ""()')
++                    cm(f"WARNING: load_rmw_or0 {atom} missing inmem offset — skipped")
++                    continue
++                il(f'call void asm sideeffect '
++                   f'"{mkr}orq $$0, {idx * 8}($0)", '
++                   f'"{{{_probe_base_phys}}},~{{memory}},~{{flags}}"(ptr %mem_base)')
++            _rmw_pcs.append(pc)
+ 
+         elif concrete == "store" and pc in stl_retarget:
+             # stl_bypass: same store, addressed so it truly aliases its bypass
+@@ -3083,8 +3149,14 @@
+     lines.append("}")
+     ir = "\n".join(lines)
+ 
+-    if _br_cmp or _jmp_pcs:
++    if _br_cmp or _jmp_pcs or _ji_cfg:
+         pass4_result["branch_forms"] = {"br_cmp": _br_cmp, "jmp_direct_pcs": _jmp_pcs}
++        if _ji_cfg:   # [V3-VOCAB] before_pc None = not selected / no candidate
++            pass4_result["branch_forms"]["jmp_insert"] = {
++                "before_pc": _ji_plan, "p": _ji_cfg.get("p"), "seed": _ji_cfg.get("seed", 20261109),
++                "placement": "uniform"}
++    if _rmw_pcs:
++        pass4_result["rmw_pcs"] = _rmw_pcs
+     if _bc_alloy:
+         pass4_result["branch_cond"] = {"from_alloy": True, "pcs": _bc_pcs}
+     if _fv2_on:
+@@ -3216,6 +3288,8 @@
+             payload["store_separation"] = result["store_separation"]
+         if result.get("branch_forms") is not None:
+             payload["branch_forms"] = result["branch_forms"]
++        if result.get("rmw_pcs") is not None:   # [V3-VOCAB] which ld pcs were emitted as RMW
++            payload["rmw_pcs"] = result["rmw_pcs"]
+         if result.get("branch_cond") is not None:
+             payload["branch_cond"] = result["branch_cond"]
+         # Opt-in register naming (pass3 reg_naming): Alloy Reg_s atom -> x86 name.
+--- a/STAGE2_compilation/compile_annotate.py	2026-11-10 01:49:16
++++ b/STAGE2_compilation/compile_annotate.py	2026-11-10 01:50:19
+@@ -116,6 +116,7 @@
+     targets = {
+         f"__litmus_{safe}_last_committed":    "last_committed",
+         f"__litmus_{safe}_first_noncommitted": "first_noncommitted",
++        f"__litmus_{safe}_jmpins":             "jmpins",   # [V3-VOCAB] branch_forms.jmp_insert
+     }
+     r = subprocess.run(["nm", "--defined-only", str(binary)],
+                        capture_output=True, text=True)
+@@ -309,6 +310,14 @@
+                 entry["addr"]     = func_base + commit_offsets[key]
+                 entry["addr_hex"] = hex(func_base + commit_offsets[key])
+ 
++    # [V3-VOCAB] jmp inserted by parsexml (branch_forms.jmp_insert): absolute address of the jmp,
++    # same field names as make_jmp_corpus.py's ann.jmp_insert, so cache_setup remaps it as before.
++    ji = (ann.get("branch_forms") or {}).get("jmp_insert")
++    if ji and ji.get("before_pc") is not None and commit_offsets and "jmpins" in commit_offsets:
++        ann["jmp_insert"] = dict(before_pc=ji["before_pc"], addr=func_base + commit_offsets["jmpins"],
++                                 addr_hex=hex(func_base + commit_offsets["jmpins"]),
++                                 seed=ji.get("seed"), p=ji.get("p"), placement=ji.get("placement"))
++
+     return ann
+ 
+ 
+--- /dev/null
++++ b/STAGE2_compilation/instruction_tables/proposed/fv3_vocab.jsonc
+@@ -0,0 +1,139 @@
++{
++  "kind_categories": {
++    "ld": "ld",
++    "str": "str",
++    "br_n": "br",
++    "br_x": "br",
++    "other_n": "other_n",
++    "other_x": "other_x",
++    "unknown": "other_n"
++  },
++  "instructions": {
++    "ld": [
++      {
++        "name": "load",
++        "llvm_op": "load volatile i64",
++        "comment": "reads address from inaddr (or inmem as the memory operand), writes loaded value to outreg",
++        "uses": [
++          "inaddr",
++          "inmem",
++          "outreg"
++        ]
++      },
++      {
++        "name": "load_rmw_or0",
++        "llvm_op": "orq $0, mem (inline asm)",
++        "comment": "[V3-VOCAB] x86 read-modify-write form of a load (gem5 OR_M_I = limm; ldst; or; st): same address operands, value neutral, writes no register; offered only for a load whose outreg no Alloy rf edge reads ('requires'), so pass 2's random.choice makes it p 0.5 among those loads (the transmitter or any other)",
++        "requires": "outreg_unconsumed",
++        "uses": [
++          "inaddr",
++          "inmem"
++        ]
++      }
++    ],
++    "str": [
++      {
++        "name": "store",
++        "llvm_op": "store volatile i64",
++        "comment": "reads value from inreg0, address from inaddr, writes to outmem",
++        "uses": [
++          "inreg0",
++          "inaddr",
++          "outmem"
++        ]
++      }
++    ],
++    "br": [
++      {
++        "name": "br_uncond",
++        "llvm_op": "br label",
++        "comment": "unconditional branch \u2014 no register operands",
++        "uses": []
++      },
++      {
++        "name": "br_cond",
++        "llvm_op": "br i1",
++        "comment": "conditional branch \u2014 consumes a condition value in inreg0",
++        "uses": [
++          "inreg0"
++        ]
++      },
++      {
++        "name": "br_bez",
++        "llvm_op": "testq+jz",
++        "comment": "branch-if-equal-to-zero \u2014 used when a branch is the xmit transmitter (xm flag). Reads Alloy's inreg0 slot (which traces back to a load via Alloy's tag_xm fact) so STT sees the load\u2192branch taint chain. Architecturally the inreg's value is 0 \u2192 testq sets ZF=1 \u2192 branch taken; BTB predicts not-taken \u2192 misprediction. A synthetic NOP is injected on the fall-through path so check_br can observe the squash.",
++        "uses": [
++          "inreg0"
++        ]
++      }
++    ],
++    "other_n": [
++      {
++        "name": "bitnot",
++        "llvm_op": "xor i64",
++        "comment": "unary bitwise NOT (emitted as: %dst = xor i64 %src, -1); uses one input register and one output register",
++        "uses": [
++          "inreg0",
++          "outreg"
++        ]
++      },
++      {
++        "name": "add",
++        "llvm_op": "add i64",
++        "comment": "binary integer add \u2014 uses two input registers and one output register",
++        "uses": [
++          "inreg0",
++          "inreg1",
++          "outreg"
++        ]
++      },
++      {
++        "name": "inc",
++        "llvm_op": "incq (inline asm)",
++        "comment": "out = in0 + 1 via incq; gem5 addi reads the CF/OF register (SPT audit A1 needs it next to br_cmp)",
++        "uses": [
++          "inreg0",
++          "outreg"
++        ]
++      },
++      {
++        "name": "cmov_rr",
++        "llvm_op": "cmovne (inline asm)",
++        "comment": "out = in0; cmpq in0,in0 makes cmovne never move, but in1 is still read (SPT audit A2 shape)",
++        "uses": [
++          "inreg0",
++          "inreg1",
++          "outreg"
++        ]
++      }
++    ],
++    "other_x": [
++      {
++        "name": "zsm",
++        "llvm_op": "mul i64",
++        "comment": "zero-skip multiply \u2014 some x86 microarchs (e.g. Sandy Bridge) early-terminate the multiplier when one operand is zero, leaking zero-ness via timing; emitted as: %dst = mul i64 %a, %b",
++        "uses": [
++          "inreg0",
++          "inreg1",
++          "outreg"
++        ]
++      },
++      {
++        "name": "div",
++        "llvm_op": "sdiv i64",
++        "comment": "signed integer division \u2014 variable latency on x86 based on operand magnitude, making the dividend/divisor values observable via timing; emitted as: %dst = sdiv i64 %a, %b",
++        "uses": [
++          "inreg0",
++          "inreg1",
++          "outreg"
++        ]
++      }
++    ]
++  },
++  "_doc": "Fanout v2 vocabulary (FV-5 order, opt-in; 2026-11-08 fpr-fanout): the default instructions.jsonc plus inc and cmov_rr in other_n, and table-level branch_forms: br_cmp (every annotated conditional branch as asm-goto cmpq $1,%c; jb|jae) and jmp_direct (each resolved correctly-not-taken non-transmitter branch becomes a direct jmp with probability 0.5). Branch forms are table-level because pass 2.5 forces branch concretes. Use as paths.instruction_tables in a run config. Partial widths (A3) are not here yet: see wiki/design/VOCAB_TABLES.md.",
++  "branch_forms": {
++    "br_cmp": true,
++    "jmp_direct": 0.5,
++    "jmp_insert": {"p": 0.5, "seed": 20261109}
++  }
++}

@@ -2,7 +2,7 @@
 """
 diag_speclfb_walk_order.py: KNOWN CAUSE, verdict pending (PHASE known_pending): SpecLFB walk-order
 (the ROB sees a load one cycle before the LQ and the sticky PrevNoUnsafe is never cleared, so a rank>=1
-speculative load is marked safe). Whether it is UV6 with a wider scope or a separate bug is Anna's
+speculative load is marked safe). Whether it is UV6 with a wider scope or a separate bug is an open
 DECIDE (AMULET_BUGS_DETECTION_ACCOUNTING.md §2 walk-order row). bucket_hits.py ranks unknown phases
 after real_bug, so these never land in NEW.
 

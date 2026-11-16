@@ -1,0 +1,29 @@
+// UNAPPROVED DRAFT (loosepin, 2026-11-09): Stage-1 config for the loose-pin single-stage draft STT_6_u_lpA.als
+// (STAGE1_alloy/models/proposed/ultimate/loosepin/). Do NOT feed a production testset/campaign until Anna signs off
+// (URGENT_TODO DECIDE LP-1..LP-6). Shows the seeded random solver order: max_instances is the cap PER SEED; the XML
+// phase dedups across seeds (merge_stage15 fingerprint) and writes xml/SOLVER_ORDER.json + _dedup_map.jsonl.
+// Generate (producer only):  python3 testsetgen.py --model STT_6_u_lpA --config runconfigs/loosepin/run_config_STT_6_u_lpA.jsonc
+{
+  "paths": {
+    "alloy_stage":        "STAGE1_alloy",
+    "models_dir":         "STAGE1_alloy/models/proposed/ultimate/loosepin",
+    "stage2_dir":         "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/instructions.jsonc",
+    "stage3_dir":         "STAGE3_gem5",
+    "testset_dir":        "testsets",
+    "results_dir":        "results",
+    "results_name":       "STT_6_u_lpA"
+  },
+
+  "alloy": {
+    "max_instances": 10000,
+    "batch_size":    1000,
+    "solver_order": {"mode": "random", "seeds": [1, 2, 3, 4], "walk_p": 0.05, "parallel": true, "timeout_s": 1800, "xmx": "4g"}
+  },
+
+  "speculation": {
+    "control_flow": true,
+    "data_flow":    false,
+    "branch_modes": ["mispredict_not_taken", "mispredict_taken"]
+  }
+}

@@ -12,7 +12,7 @@ ONE cause. Scope: every footprint campaign on the CleanupSpec build (a build
 behaviour, not a testset artifact). Bug note: diag_cs1_store_upgrade.md next to
 this file; write-up SOURCE_AUDIT_CLEANUPSPEC_SPECLFB.md CS-1 + round 3.
 PHASE is "known_pending": the hit is understood, but whether it counts as a leak
-is Anna's open DECIDE (URGENT_TODO "CS-1 un-charge the victim"); bucket_hits.py
+is an open DECIDE (URGENT_TODO "CS-1 un-charge the victim"); bucket_hits.py
 ranks it after real_bug, so it is never mixed with NEW.
 
 Signature (from diagnostics/cleanupspec_skip_evidence.json, built from the

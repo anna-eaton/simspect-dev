@@ -264,3 +264,38 @@ Already decided by Anna: "transmission mechanism"; "Inspector"; "Kodkod model fi
 **2026-11-03 paper pass (ready, not yet pushed):** the relaxation figure is now one file, paper `tikz/relaxation.tex` (body = `drafts/relaxation_v5_8pt.tex`; the old `relaxation.tex` original and `relaxation_v4*.tex` removed, in git history). Table II (`instrtable_v2_8pt`) Stage 2 column now says each element's (mis)prediction and (not-)taken direction (from `plans/fig_d_instrtable.md` fact rows 1-5). Syntax-table refs fixed in the interleave, instrtable and recon_otb captions. Transmission-criteria table hidden (commented out). Fig. 6 (checker window) cited at its first use. 33 red `\claudenote{}` suggestions (cut / reword / proposed text) in the Concretization and gem5 subsections and one in results; `\renewcommand{\claudenote}[1]{}` in the preamble hides them.
 
 **2026-11-03 later (in the local paper copy, not yet pushed):** Fig. 4 shows *unresolved* on branch i0 in every pane (pane notes moved to header lines; `drafts/relaxation_v5_8pt.tex`). Resolution-timing figure remade from Anna's original in the shared notation (`drafts/resolutiontiming_v3_8pt.tex`; paper `tikz/resolutiontiming.tex`, back in at its citation; `resolutiontiming_v2*` removed). Race and ReCon STLF figures now have an execution graph on top of the pipeline trace (`drafts/squashrace_v3_8pt.tex`, `drafts/reconstl_v3_8pt.tex`, captions in `drafts/captions/`; bodies replace the paper's `squashrace_v2_8pt` / `reconstl_v2_8pt`). The STLF graph draws only the XML's edges: no store-to-load memory edge exists in the model (store i4 has no outmem, xmit i5 no inmem); both address operands name r0. `wiki/findings/bug/recon_SLF_stlf_bypass/NOTE.md` corrected: pc2, not pc1, is the mispredicted branch (XML, ann.json).
+
+## How related papers present their bugs (2026-11-11)
+
+Read from the real PDFs. AMuLeT: `~/Documents/quail/sources/papers/fu-2025-amulet.pdf`. The rest are saved under `paper_figures/reference_papers/<name>/` (revizor, hideandseek, specfault, phantomtrails, cheng, specdoctor_ccs22, introspectre_isca21, dejavuzz_asplos25, specure_dac24, cascade_sec24), plus the local Contract Shadow Logic, Pensieve, TriCheck and CheckMate copies. Page numbers are PDF pages.
+
+| Paper | All-bugs table? | Per-bug visuals | Space per bug | Abstract claim |
+|---|---|---|---|---|
+| AMuLeT (ASPLOS'25) | No. Table 4 (p9) is per defense: contract, detected?, detection time, #violations, throughput | Almost every bug, about 12 small single-column items for 9 bugs: test asm + input pair + trace diff (Fig 4, 6, 8, 9), buggy gem5 code + patch (Listings 1–2, Fig 7), op-sequence tables (Tables 7, 9, 10), violation types before/after patch (Table 8) | §4.5–4.8, one subsection per defense, about 4 of 16 pages. Each bug is a bold run-in "UV1. …" paragraph, then "Root Cause:" and "Fix:" (implementation bug vs design issue) | "3 known and 6 unknown bugs and vulnerabilities, within 3 hours" (p1) |
+| Revizor (ASPLOS'22) | Matrix Table 3 (table*, p9): targets × contracts, ✓/× cells naming the vulnerability, ** marks novel | Short listings for the new variants only (Fig 5, 3 lines) | Known: 2–6 lines per target; new: about half a column (§6.3) | "several previously unknown variants" |
+| Hide and Seek (S&P'23) | Matrix Fig 1 (p2): ISA subset × CPU | Only the 2 new leaks: one full-width cache-line diagram (Fig 2) + 2–4-line listings | Own early section §II, about 1.3 columns, for the 2 new leaks | "two new classes of leaks" + vendor disclosure |
+| Speculation at Fault (Sec'23) | Matrix Table 1 (table*, p12): fault × contract × CPU | 3–6-line inline asm per new leak, no diagrams | 15–25 lines per new leak (bold run-in), 1–3 lines per known one | "three novel transient leaks", CVE |
+| Phantom Trails (Sec'25) | Time-to-exposure Table 1 for the known bugs only | One 9-line listing for the one new bug | Whole §8 (about 1.3 columns) for the one new bug | "all known … as well as a new Spectre variant" |
+| Cheng (Sec'26; bypasses STT/SPT/DOLMA in gem5) | Defense × limitation matrix Table 1 (table*, about 40% of a page; blue = new) + 3-row Table 3 | Listing + pipeline timeline per gadget (Fig 5 figure*, Figs 6–8) | 15–30 lines per limitation/gadget, grouped by violated design assumption | "three limitations"; disclosure in Ethics |
+| SpecDoctor (CCS'22) | Small single-column variants table (Table 5) + tool-comparison table (Table 4) | 2 new bugs: mechanism block diagram + code (about half a column each) | §7 Findings: 1–1.5 columns per new bug; known ones get one sentence | names the 2 new bugs, developer-confirmed, CVE |
+| IntroSpectre (ISCA'21) | Yes, Table IV (table*, about 1/3 page, 16 rows): ID (R1–R8, L1–L3, X1–X2) / leak / gadget | 4 of 16 cases get figures | §VIII case studies: 3–10 lines per case; same-mechanism cases share a paragraph | "13 distinct, not previously documented" |
+| DejaVuzz (ASPLOS'25) | Single-column classification Table 5 (6 rows) | Listings for 2 of 5 bugs | Bold "B3. Name (CVE)" paragraph, 6–12 lines each | "5 previously undiscovered (6 CVEs)" |
+| Cascade (Sec'24) | Yes, but in an appendix (38 rows, ID/description/CWE/CVE) | Aggregate charts only (bugs by class, time-to-reveal per ID) | One paragraph per symptom class citing IDs, no deep dives | "37 new bugs (28 new CVEs)" |
+| CheckMate (MICRO'18) | Single-column Table I (pattern / bound / time / #tests) | One full-page 4-panel µhb-graph figure, transmit path in red | About 1 column per new exploit | new exploits named |
+| TriCheck (ASPLOS'17) | No; aggregate bar Fig 15 | Small litmus figure per bug class (Figs 8–14) | One subsection per bug class + recommended fix | count of forbidden outcomes over N tests |
+| Pensieve, CSL, Specure | No / small tool × target matrix | One counterexample figure (Pensieve) or a 3-line listing (CSL) | One case study (Pensieve §6) or one paragraph | "a new … variant" |
+
+**The common pattern.**
+
+- **Space follows the number of bugs.** Papers with 2–5 new bugs give each its own bold paragraph or subsection and keep no master list. Papers with 13+ use an ID'd table and write one paragraph per group of same-mechanism bugs (IntroSpectre, Cascade).
+- **Known or replicated bugs get one sentence, a table cell, or a time-to-detect comparison.** They never get figures.
+- **Only 1–4 bugs get a visual,** and those are the most novel ones. The visual is usually a 3–9-line listing; a mechanism or timeline diagram goes only to the flagship bug. AMuLeT is the outlier, with a concrete figure for nearly every bug.
+- **The abstract gives an exact "N new" count plus outside validation** (developer-confirmed, CVE, patch), and every paper has a disclosure sentence. Time-to-detect sits in its own table or chart, not in the bug table.
+- **Only bugs the tool found are listed.**
+
+**What this means for SimSpect (Anna decides).**
+
+- **Our bug IDs:** the paper's new-bug labels UV1–UV6 (`results.tex` §Unknown bugs) collide with AMuLeT's UV1–UV6, which the same section uses for the replicated bugs. Use a distinct prefix for ours.
+- **Our table:** the 23-row two-column `bugtable_v4_wide_8pt` is larger than any comparable main-text bug table. It also includes source-audit bugs that our tests do not reach, which no comparable paper does.
+- **Our visuals:** with about 11 new bugs, the norm is one compact single-column table plus a paragraph per bug (or per same-mechanism group), and figures for only 2–4 flagship bugs. We have 3 bug figures in the paper and 7 more proposed (`tikz/prop_*`); using all 10 would be far above the norm.
+- **One option that fits our method:** a single CheckMate-style multi-panel figure of minimal violating execution graphs, one panel per flagship bug, in the same notation as the model section.

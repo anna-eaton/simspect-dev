@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""census.py — shape census of the instances dumped by bench_grid.py (stage15-bound, 2026-11-08).
+"""census.py — shape census of the instances dumped by bench_grid.py.
 
 For each <ws>/bench/dump/<job>/inst-*.txt (Alloy toString dumps): instruction count, operand and
 state atoms used, Reg_s atoms (= Stage-2 pass-3 locked registers), unresolved branches, operand-free

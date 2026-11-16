@@ -1,0 +1,157 @@
+// bigcorpus 2026-11-15 (agent bigcorpus): copy of runconfigs/bigcorpus_20261115/E3_STT_6_u_core_lpP_s2A.jsonc written by scripts/bigcorpus_20261115/make_configs.py.
+// Changed ONLY: gem5.binary/config_script -> /work/stt-master se_exp.py (= se.py + env-driven O3 delay knobs, gem5-hooks/stt/se_exp.py), gem5.sample_fraction 0.1, gem5.jobs 4, race_knobs.commitToIEWDelay 4, results_name
+// Docs: wiki/state/RUNNING.md 'Big corpus 2026-11-15'; results -> wiki/state/EVAL_MANIFEST.md 'Big corpus bug coverage (2026-11-15)'.
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/bigcorpus_20261115/testsets",
+    "results_dir": "/tests/bigcorpus_20261115/results",
+    "results_name": "bc_race_sttmaster_d4_STT_6_u_core_lpP_s2A"
+  },
+  "alloy": {
+    "max_instances": 93041,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/stt-master/build/X86/gem5.opt",
+    "config_script": "/work/stt-master/configs/example/se_exp.py",
+    "branch_ann_enable": true,
+    "cpu_type": "DerivO3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 4,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "cache_setup": "random_all",
+    "cache_setup_fill_bytes": "64kB",
+    "sample_fraction": 0.1
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "vocab_rj": {
+      "rmw": true,
+      "jmp": true
+    },
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    }
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "fpr": {
+    "enabled": true,
+    "loads": "consumed",
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  },
+  "race_knobs": {
+    "commitToIEWDelay": 4,
+    "applied_via": "env SIMSPECT_COMMIT_IEW_DELAY (set from this key by scripts/bigcorpus_20261115/gem5_row.sh) read by se_exp.py; no other knob set (iewToCommitDelay, squashWidth, com sizes stay O3 defaults)"
+  }
+}

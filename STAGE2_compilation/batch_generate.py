@@ -8,10 +8,6 @@ For each matching XML file the script:
   1. Runs passes 1-5 of the parsexml pipeline.
   2. Writes <stem>.ll  (LLVM IR) to the output directory.
   3. Writes <stem>.ann.json (branch annotations) to the output directory.
-
-Bifurcation on branch mode (mispredict_not_taken vs mispredict_taken) is
-structured for easy addition later: see RUN_MODES and the per-mode subdirectory
-logic below.
 """
 
 from __future__ import annotations
@@ -32,8 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import importlib as _importlib
 
 def _load_parser(kind: bool, instruction_tables: str | None = None):
-    # parsexml_kind was merged into parsexml; the --kind flag is now a no-op
-    # but is kept for backward compatibility with existing call sites.
+    # `kind` is a no-op (parsexml_kind merged into parsexml); kept for call-site compatibility
     mod = _importlib.import_module("parsexml")
     if instruction_tables is not None and hasattr(mod, "reload_tables"):
         mod.reload_tables(instruction_tables)
@@ -50,7 +45,6 @@ def _load_parser(kind: bool, instruction_tables: str | None = None):
         mod.emit_branch_annotations,
     )
 
-# defaults (overridden by --kind at runtime)
 from parsexml import (
     parse_alloy_xml,
     pass1_specify_state_a,
@@ -65,12 +59,7 @@ from parsexml import (
 )
 
 
-# ---------------------------------------------------------------------------
-# Branch modes
-# When bifurcation is enabled, add "mispredict_taken" here.
-# Each mode gets its own subdirectory inside the output folder.
-# ---------------------------------------------------------------------------
-# Register naming default (pass3 reg_naming). {"mode": "sorted"} = legacy.
+# pass3 reg_naming default; {"mode": "sorted"} = legacy mapping
 DEFAULT_REG_NAMING: dict = {"mode": "random", "seed": 0}
 
 RUN_MODES: list[str] = [
@@ -109,7 +98,14 @@ def run_pipeline(xml_text: str, stem: str, out_dir: Path, mode: str,
         vseed = zlib.crc32(f"{stem}_v{v}".encode())  # stable across runs (str hash() is salted per process)
         random.seed(vseed)
 
-        r2  = pass2(r1,  write_out=False)
+        if fv2_cfg and fv2_cfg.get("enabled") and fv2_cfg.get("vocab_exclude_tags"):
+            # fv4: drop table forms carrying any of these tags (e.g. spt_bwd_invertible for SPT)
+            r2 = pass2(r1, write_out=False, vocab_rj=fv2_cfg.get("vocab_rj"),
+                       exclude_tags=fv2_cfg["vocab_exclude_tags"])
+        elif fv2_cfg and fv2_cfg.get("enabled") and fv2_cfg.get("vocab_rj"):
+            r2 = pass2(r1, write_out=False, vocab_rj=fv2_cfg["vocab_rj"])
+        else:
+            r2 = pass2(r1, write_out=False)
         r25 = pass2_5(r2, branch_mode=mode, write_out=False)
         if mode == "stl_bypass":
             r25 = pass2_6(r25)   # STL pairs; other modes never call it
@@ -198,7 +194,7 @@ def process_folder(
         xml_text = xml_path.read_text(encoding="utf-8")
 
         for mode in modes:
-            # Each mode gets its own subdirectory; skip subdir if only one mode.
+            # one subdirectory per mode (none when there is only one mode)
             if len(modes) == 1:
                 mode_dir = output_dir
             else:
@@ -321,8 +317,7 @@ def main() -> None:
     fpr_cfg: dict = {}
     if args.fpr_config:
         fpr_cfg = json.loads(args.fpr_config)   # malformed -> fail loudly
-    # Default since 2026-11-08 (Anna): random register naming. Testsets made
-    # before then regenerate byte-identically with '{"mode": "sorted"}'.
+    # default random naming; '{"mode": "sorted"}' reproduces older testsets byte-identically
     reg_naming_cfg: dict = dict(DEFAULT_REG_NAMING)
     if args.reg_naming_config:
         reg_naming_cfg = json.loads(args.reg_naming_config)

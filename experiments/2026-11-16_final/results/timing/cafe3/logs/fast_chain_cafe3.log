@@ -1,0 +1,455 @@
+[2026-11-16 05:46:22] fast_chain: START
+[2026-11-16 05:46:22] fast_chain: node idle of SimSpect work
+=== SNAPSHOT before equiv 2026-11-16 05:46:22 ===
+ 05:46:22 up 135 days,  5:07, 13 users,  load average: 0.06, 0.03, 0.26
+top - 05:46:22 up 135 days,  5:07, 13 users,  load average: 0.06, 0.03, 0.26
+Tasks: 638 total,   1 running,  30 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.0 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 256792.2 free,   4735.1 used, 254053.1 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 507443.3 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:36:13 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:36:13 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:36:13 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+=== END SNAPSHOT ===
+[2026-11-16 05:46:22] fast_chain: host 5a503c1847a2 node=cafe3 cpu=Intel(R) Xeon(R) Gold 6226R CPU @ 2.90GHz nproc=64
+[2026-11-16 05:48:53] fast_chain: idle gate passed (busy 0.4%)
+[2026-11-16 05:48:53] fast_chain: retime_fast start
+=== retime_fast START 2026-11-16 05:48:53 rows=[T1g T2g T3g] parallel=16 code=/tests/timing_20261115/simspect_fast uptime:  05:48:53 up 135 days,  5:09, 13 users,  load average: 0.00, 0.02, 0.21
+=== SNAPSHOT before T1g prod2 2026-11-16 05:48:53 ===
+ 05:48:53 up 135 days,  5:09, 13 users,  load average: 0.00, 0.02, 0.21
+top - 05:48:53 up 135 days,  5:09, 13 users,  load average: 0.00, 0.02, 0.21
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.3 sy,  0.0 ni, 99.6 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 256789.2 free,   4737.2 used, 254054.0 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 507441.3 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:38:44 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:38:44 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:38:44 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       00:00 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       00:00 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+--- T1g prod2 START 2026-11-16 05:48:53 config=/tests/timing_20261115/configs/T1g_time1.jsonc out=/tests/timing_20261115/simspect/T1g_p16_prod2
+--- T1g prod2 END 2026-11-16 05:53:03 rc=0 rows=1000
+=== SNAPSHOT after T1g prod2 2026-11-16 05:53:03 ===
+ 05:53:03 up 135 days,  5:13, 13 users,  load average: 15.56, 8.93, 3.87
+top - 05:53:03 up 135 days,  5:13, 13 users,  load average: 15.56, 8.93, 3.87
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.2 us,  0.2 sy,  0.0 ni, 99.5 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 230891.2 free,  29967.0 used, 254722.2 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 482211.5 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:42:54 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       04:10 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       04:10 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+=== SNAPSHOT before T1g fast 2026-11-16 05:53:03 ===
+ 05:53:03 up 135 days,  5:13, 13 users,  load average: 15.56, 8.93, 3.87
+top - 05:53:03 up 135 days,  5:13, 13 users,  load average: 15.56, 8.93, 3.87
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.2 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 230898.7 free,  29959.5 used, 254722.2 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 482219.0 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:42:54 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:42:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:42:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       04:10 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       04:10 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+--- T1g fast START 2026-11-16 05:53:03 config=/tests/timing_20261115/configs/T1g_time1_fast.jsonc out=/tests/timing_20261115/simspect/T1g_p16_fast
+--- T1g fast END 2026-11-16 05:54:47 rc=0 rows=1000
+=== SNAPSHOT after T1g fast 2026-11-16 05:54:47 ===
+ 05:54:47 up 135 days,  5:15, 13 users,  load average: 15.82, 11.00, 5.16
+top - 05:54:47 up 135 days,  5:15, 13 users,  load average: 15.82, 11.00, 5.16
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.4 sy,  0.0 ni, 99.2 id,  0.3 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 253070.9 free,   7119.9 used, 255389.6 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 505058.5 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:44:38 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       05:54 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       05:54 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+=== SNAPSHOT before T2g prod2 2026-11-16 05:54:47 ===
+ 05:54:47 up 135 days,  5:15, 13 users,  load average: 15.82, 11.00, 5.16
+top - 05:54:47 up 135 days,  5:15, 13 users,  load average: 15.82, 11.00, 5.16
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.3 sy,  0.0 ni, 99.6 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 253072.6 free,   7118.2 used, 255389.6 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 505060.2 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:44:38 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:44:38 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:44:38 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       05:54 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       05:54 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+--- T2g prod2 START 2026-11-16 05:54:47 config=/tests/timing_20261115/configs/T2g_time1.jsonc out=/tests/timing_20261115/simspect/T2g_p16_prod2
+--- T2g prod2 END 2026-11-16 05:58:40 rc=0 rows=1000
+=== SNAPSHOT after T2g prod2 2026-11-16 05:58:40 ===
+ 05:58:40 up 135 days,  5:19, 13 users,  load average: 15.29, 13.66, 7.58
+top - 05:58:41 up 135 days,  5:19, 13 users,  load average: 15.29, 13.66, 7.58
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.2 us,  0.3 sy,  0.0 ni, 99.5 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 229476.0 free,  30682.4 used, 255422.0 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 481496.1 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:48:31 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:48:31 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:48:31 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       09:47 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       09:47 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+=== SNAPSHOT before T2g fast 2026-11-16 05:58:41 ===
+ 05:58:41 up 135 days,  5:19, 13 users,  load average: 15.29, 13.66, 7.58
+top - 05:58:41 up 135 days,  5:19, 13 users,  load average: 15.29, 13.66, 7.58
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 229502.3 free,  30656.0 used, 255422.0 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 481522.4 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:48:32 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:48:32 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:48:32 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       09:48 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       09:48 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+--- T2g fast START 2026-11-16 05:58:41 config=/tests/timing_20261115/configs/T2g_time1_fast.jsonc out=/tests/timing_20261115/simspect/T2g_p16_fast
+--- T2g fast END 2026-11-16 06:00:32 rc=0 rows=1000
+=== SNAPSHOT after T2g fast 2026-11-16 06:00:32 ===
+ 06:00:32 up 135 days,  5:21, 13 users,  load average: 16.00, 14.44, 8.55
+top - 06:00:33 up 135 days,  5:21, 13 users,  load average: 16.00, 14.44, 8.55
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.3 sy,  0.0 ni, 99.6 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 251372.7 free,   8752.8 used, 255455.0 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 503425.7 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:50:23 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:50:23 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:50:23 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       11:39 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       11:39 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+=== SNAPSHOT before T3g prod2 2026-11-16 06:00:33 ===
+ 06:00:33 up 135 days,  5:21, 13 users,  load average: 16.00, 14.44, 8.55
+top - 06:00:33 up 135 days,  5:21, 13 users,  load average: 16.00, 14.44, 8.55
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.2 us,  0.3 sy,  0.0 ni, 99.5 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 251403.9 free,   8721.6 used, 255455.0 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 503456.9 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:50:24 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:50:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:50:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       11:40 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       11:40 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+--- T3g prod2 START 2026-11-16 06:00:33 config=/tests/timing_20261115/configs/T3g_time1.jsonc out=/tests/timing_20261115/simspect/T3g_p16_prod2
+--- T3g prod2 END 2026-11-16 06:03:33 rc=0 rows=1000
+=== SNAPSHOT after T3g prod2 2026-11-16 06:03:33 ===
+ 06:03:33 up 135 days,  5:24, 13 users,  load average: 16.11, 15.21, 9.90
+top - 06:03:33 up 135 days,  5:24, 13 users,  load average: 16.11, 15.21, 9.90
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.2 us,  0.4 sy,  0.0 ni, 99.4 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 239542.0 free,  20336.7 used, 255701.7 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 491841.8 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:53:24 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       14:40 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       14:40 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+=== SNAPSHOT before T3g fast 2026-11-16 06:03:33 ===
+ 06:03:33 up 135 days,  5:24, 13 users,  load average: 16.11, 15.21, 9.90
+top - 06:03:33 up 135 days,  5:24, 13 users,  load average: 16.11, 15.21, 9.90
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 239558.4 free,  20320.3 used, 255701.7 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 491858.2 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:53:24 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:53:24 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:53:24 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       14:40 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       14:40 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+--- T3g fast START 2026-11-16 06:03:33 config=/tests/timing_20261115/configs/T3g_time1_fast.jsonc out=/tests/timing_20261115/simspect/T3g_p16_fast
+--- T3g fast END 2026-11-16 06:05:03 rc=0 rows=1000
+=== SNAPSHOT after T3g fast 2026-11-16 06:05:03 ===
+ 06:05:03 up 135 days,  5:25, 13 users,  load average: 16.15, 15.47, 10.48
+top - 06:05:03 up 135 days,  5:25, 13 users,  load average: 16.15, 15.47, 10.48
+Tasks: 639 total,   1 running,  31 sleeping,   0 stopped, 607 zombie
+%Cpu(s):  0.1 us,  0.2 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total, 253539.3 free,   6092.1 used, 255948.9 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 506086.3 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 618015 Ss    0.0  6-11:54:54 tmux new-session -d -s fv2_gem5 -n ctl
+ 618026 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618029 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E1_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618031 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618033 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618035 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618037 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E3_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618039 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618041 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E4_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618046 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618049 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E8_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618054 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 
+ 618057 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E9_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618061 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618065 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12a_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618071 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv
+ 618074 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E12b_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618079 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618084 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E13_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 618088 Ss+   0.0  6-11:54:54 bash -c cd /tests/simspect_alloy_20261108/code_20261109 && python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2
+ 618092 S+    0.0  6-11:54:54 python3 -u testrun.py --config runconfigs/twostage_fv2_20261109/E14_STT_6_u_fv2_cafe3.jsonc --model STT_6_u_fv2 --resume --interval 120 --max-new 300
+ 640553 S+    0.0       16:10 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+ 640555 S+    0.0       16:10 bash /tests/timing_20261115/simspect_fast/STAGE3_gem5/timing/time1_20261115/retime_fast.sh T1g T2g T3g 16
+=== END SNAPSHOT ===
+| row | TIME-1 CPU-s/test | production rerun | fast path | speedup | rows fast = rerun | raw hit records fast = rerun | fast exec_path |
+|---|---|---|---|---|---|---|---|
+| T1g | 3.6939 | 3.6729 | 1.344 | 2.733x | 1000/1000 (rerun vs TIME-1 differ on 0) | 1000/1000 | {'fast': 1000} |
+| T2g | 3.7365 | 3.6734 | 1.738 | 2.114x | 1000/1000 (rerun vs TIME-1 differ on 0) | 56/56 | {'fast': 1000} |
+| T3g | 2.7839 | 2.7251 | 1.2956 | 2.103x | 1000/1000 (rerun vs TIME-1 differ on 0) | 470/470 | {'fast': 1000} |
+
+CPU-s per test = mean total_cpu_s (whole per-test tree); fast path includes its workers' one-time startup spread over the tests. Per cache setup and gem5-only numbers in summary.json.
+=== retime_fast END 2026-11-16 06:05:23 rc=0 uptime:  06:05:23 up 135 days,  5:26, 13 users,  load average: 11.85, 14.54, 10.28
+[2026-11-16 06:05:23] fast_chain: retime_fast rc=0
+[2026-11-16 06:05:23] fast_chain: END

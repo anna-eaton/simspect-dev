@@ -1,6 +1,6 @@
-"""VENDORED COPY (timing-amulet 2026-11-09) of cafe2 /tests/simspect_fixed_20261030/results/STT_6_speclfb_v2hooks__20261107/helpers/analyze.py, unchanged except that the STAGE3_gem5 path comes from $SIMSPECT_STAGE3 (default: the original path). Used by classify_hits.py for the SpecLFB UV6 / walk-order / jmp-shadow tags.
+"""Vendored copy of cafe2 /tests/simspect_fixed_20261030/results/STT_6_speclfb_v2hooks__20261107/helpers/analyze.py, unchanged except that the STAGE3_gem5 path comes from $SIMSPECT_STAGE3 (default: the original path). Used by classify_hits.py for the SpecLFB UV6 / walk-order / jmp-shadow tags.
 
-Per-test analysis of a SpecLFB v2 trace (session 2026-11-07). Read-only on the trace.
+Per-test analysis of a SpecLFB v2 trace. Read-only on the trace.
 Uses check_footprint.TraceModel for the actor test (same rule as the checker: squashed and younger
 than lc_seq) and the checker record's offending / footprint_outside_window event ids for the window.
 

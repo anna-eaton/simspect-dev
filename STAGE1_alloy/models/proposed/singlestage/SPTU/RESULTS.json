@@ -1,0 +1,54 @@
+{
+ "family": "SPTU",
+ "agent": "singlestage-sptu",
+ "date": "2026-11-09",
+ "base": "STAGE1_alloy/models/proposed/ultimate/SPT_6_u.als",
+ "base_sha256": "76f36f68d4f74bcb25f3b316ad46e2b7c212e2f4e58b8292bcda4e75c315fc96",
+ "cafe2_workspace": "/tests/singlestage_20261109",
+ "models": {
+  "V0 n6_prod (base, unchanged)": {
+   "model_cafe2": "/tests/singlestage_20261109/models/SPTU/base/SPT_6_u.als",
+   "sha256": "76f36f68d4f74bcb25f3b316ad46e2b7c212e2f4e58b8292bcda4e75c315fc96",
+   "out_cafe2": "/tests/singlestage_20261109/out/SPTU/SPT_6_u",
+   "generator_command": "none (base model run unchanged)",
+   "lint": "OK   /tests/singlestage_20261109/models/SPTU/base/SPT_6_u.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "start": "2026-11-10T01:27:57+00:00 START pid=2316430 host=543cef85d966 model=/tests/singlestage_20261109/models/SPTU/base/SPT_6_u.als sha256=76f36f68d4f74bcb25f3b316ad46e2b7c212e2f4e58b8292bcda4e75c315fc96 scope='for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=7200 jobs=4 p=0.05",
+   "ended": false,
+   "runs": []
+  },
+  "V1": {
+   "model_cafe2": "/tests/singlestage_20261109/models/SPTU/SPT_6_u_flat_n8_prod.als",
+   "sha256": "fa0e2081b4a7cd88fe4b4e7e8d7f50b12cd12f5edb4683f9a1bddd5a3c74abfc",
+   "out_cafe2": "/tests/singlestage_20261109/out/SPTU/SPT_6_u_flat_n8_prod",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/SPT_6_u.als --pin none --n 8 --operands 16 --intbits 6  --out STAGE1_alloy/models/proposed/singlestage/SPTU/SPT_6_u_flat_n8_prod.als   (+ this header, by STAGE1_alloy/models/proposed/singlestage/SPTU/build_sptu.sh)",
+   "runs": []
+  },
+  "V2": {
+   "model_cafe2": "/tests/singlestage_20261109/models/SPTU/SPT_6_u_flat_n8_prod_nospacer.als",
+   "sha256": "6251c7732010bc9a99d076f065fca8632982bb8916986cddee2803cad7e2c6f7",
+   "out_cafe2": "/tests/singlestage_20261109/out/SPTU/SPT_6_u_flat_n8_prod_nospacer",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/SPT_6_u.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/SPTU/SPT_6_u_flat_n8_prod_nospacer.als   (+ this header, by STAGE1_alloy/models/proposed/singlestage/SPTU/build_sptu.sh)",
+   "runs": []
+  },
+  "V3": {
+   "model_cafe2": "/tests/singlestage_20261109/models/SPTU/SPT_6_u_flat_n8_leakrs_nospacer.als",
+   "sha256": "9198eb043518ff5ec54056a4c5229458f068d9749a363d1250f56102e41dbeb7",
+   "out_cafe2": "/tests/singlestage_20261109/out/SPTU/SPT_6_u_flat_n8_leakrs_nospacer",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/ultimate/SPT_6_u.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --minimality leak_rs --out STAGE1_alloy/models/proposed/singlestage/SPTU/SPT_6_u_flat_n8_leakrs_nospacer.als   (+ this header, by STAGE1_alloy/models/proposed/singlestage/SPTU/build_sptu.sh)",
+   "runs": []
+  }
+ },
+ "translation_timing": {
+  "n6": [
+   "1794273886.166301159 START /tests/singlestage_20261109/models/SPTU/base/SPT_6_u.als cap=3 timeout=7200"
+  ],
+  "n8": [
+   "1794273886.258387794 START /tests/singlestage_20261109/models/SPTU/SPT_6_u_flat_n8_prod.als cap=3 timeout=7200"
+  ]
+ },
+ "core_sample": {
+  "path": "/tests/singlestage_20261109/out/SPTU/cores_sample300",
+  "how": "random.seed(20261109); random.sample(sorted(glob */stage1_xml/inst-*.txt), 300) from /tests/simspect_alloy_20261109u/out/SPT_6_u_core_ri",
+  "note": "300-core RANDOM SAMPLE of the 58,758 SPT_6_u_core_ri cores (7 of 12 partitions ended DISK_GUARD, so the core set itself is partial); 'contains no core' against it is NOT evidence of a gap"
+ }
+}

@@ -1,23 +1,16 @@
 #!/usr/bin/env python3
 """
-simspect_paths.py — the single source of truth for every canonical filesystem
-location in the SimSpect pipeline.
+simspect_paths.py — canonical filesystem locations for the SimSpect pipeline.
 
-Every script (pipeline.py, testsetgen.py, testrun.py, sweep_monitor.py,
-dashboard.py) imports ROOT and the canonical dirs from here instead of
-hardcoding "/tests/simspect" or scattering literal "testsets"/"results"
-defaults. ROOT self-locates via __file__, so the SAME code works on the dev
-server (where the repo lives at /tests/simspect) and on any other checkout.
-
-Run configs may still override the generated dirs via
-paths.{testset_dir,results_dir,results_name,...}; the constants here are the
-canonical defaults and the locations the dashboard reads from.
+pipeline.py, testsetgen.py, testrun.py, sweep_monitor.py and dashboard.py import ROOT and the canonical dirs from
+here. ROOT self-locates via __file__, so the same code works on any checkout. Run configs may override the
+generated dirs via paths.{testset_dir,results_dir,results_name,...}; these constants are the defaults and the
+locations the dashboard reads.
 """
 from __future__ import annotations
 from pathlib import Path
 
-# Repo root — the directory THIS file lives in. Self-locating: resolves to
-# /tests/simspect on the dev server and to the checkout dir anywhere else.
+# Repo root = the directory this file lives in.
 ROOT = Path(__file__).parent.resolve()
 
 # ── Canonical source dirs (committed) ─────────────────────────────────────────

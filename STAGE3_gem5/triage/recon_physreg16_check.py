@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Evidence for R-SA-12 (physical int reg 16 is never tainted) on ld hits of a gem5-recon* campaign (2026-11-08).
+"""Evidence for R-SA-12 (physical int reg 16 is never tainted) on ld hits of a gem5-recon* campaign.
 
 Bug: gem5-recon*/src/cpu/o3/secure_scheme/taint_tracker.cc:59 `if (regId->flatIndex() == 16) return;`
 in TaintTracker::insertTaint. Every taint insertion (rename.cc:714-720: insertTaintInst for a speculative

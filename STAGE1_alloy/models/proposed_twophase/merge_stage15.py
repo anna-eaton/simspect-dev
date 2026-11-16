@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """merge_stage15.py — merge one family's Stage-1.5 output into a single numbered testset XML dir.
 
-DRAFT TOOLING (2026-11-09, simspect-c8). Input: <ws>/s15/<family>/out/<core>/inst-*.xml
+Input: <ws>/s15/<family>/out/<core>/inst-*.xml
 (launch_stage15.py). Output: <dest>/xml/inst-NNNNNN.xml (renumbered, copies), plus
   <dest>/merge_map.jsonl       one row per kept XML: new name, core, source file, fingerprint id
   <dest>/merge_dups.jsonl      one row per dropped XML: source file, the kept XML it duplicates

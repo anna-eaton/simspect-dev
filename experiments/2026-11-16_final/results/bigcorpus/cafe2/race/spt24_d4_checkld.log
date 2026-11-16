@@ -1,0 +1,30 @@
+Found 24 test(s) in /tests/simspect_alloy_20261108/bugwork/a5/stems
+gem5 scheme=2  jobs=12  check=load transmitter: xmit_complete in (lc_retire, fnc_retire)
+
+  [YES] inst-039949           xmit=0x401c62(ld)  lc_ret=2949000  xmit_cmp=0  fnc_ret=2951500
+  [YES] inst-000178           xmit=0x401c5f(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2951500
+  [YES] inst-039432           xmit=0x401c52(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2950500
+  [NO ] inst-041302           xmit=0x401c6b(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2951000
+  [NO ] inst-041153           xmit=0x401c65(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2949000
+  [YES] inst-041592           xmit=0x401c5f(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2951500
+  [NO ] inst-036299           xmit=0x403880(ld)  lc_ret=19485500  xmit_cmp=0  fnc_ret=19485500
+  [NO ] inst-041836           xmit=0x401c65(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2949000
+  [NO ] inst-042121           xmit=0x401c6f(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2949500
+  [NO ] inst-039955           xmit=0x40387b(ld)  lc_ret=19373500  xmit_cmp=0  fnc_ret=19445000
+  [NO ] inst-040085           xmit=0x403868(ld)  lc_ret=19017500  xmit_cmp=0  fnc_ret=19089000
+  [NO ] inst-039409           xmit=0x403863(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=18921500
+  [YES] inst-043878           xmit=0x401c5c(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=2951000
+  [NO ] inst-060367           xmit=0x401c6c(ld)  lc_ret=2948500  xmit_cmp=0  fnc_ret=2951000
+  [NO ] inst-038517           xmit=0x40387d(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=19368500
+  [NO ] inst-041823           xmit=0x40387f(ld)  lc_ret=19445000  xmit_cmp=0  fnc_ret=19445000
+  [NO ] inst-041499           xmit=0x403873(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=19373500
+  [NO ] inst-000953           xmit=0x40387b(ld)  lc_ret=18993000  xmit_cmp=0  fnc_ret=18993500
+  [NO ] inst-034285           xmit=0x403880(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=19374000
+  [NO ] inst-045593           xmit=0x403883(ld)  lc_ret=19373500  xmit_cmp=0  fnc_ret=19375500
+  [NO ] inst-040235           xmit=0x403878(ld)  lc_ret=19373500  xmit_cmp=0  fnc_ret=19445000
+  [NO ] inst-064809           xmit=0x403886(ld)  lc_ret=19374500  xmit_cmp=0  fnc_ret=19374500
+  [NO ] inst-064173           xmit=0x40387d(ld)  lc_ret=19373500  xmit_cmp=0  fnc_ret=19373500
+  [???] inst-013157           xmit=0x401c8a(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=0  ERROR: gem5 timed out after 120s (runaway/livelock) — killed
+
+Results: 5 in window  |  18 not in window  |  1 error(s)  (total 24)
+Full results written to /tests/bigcorpus_20261115/race/spt24_d4.json

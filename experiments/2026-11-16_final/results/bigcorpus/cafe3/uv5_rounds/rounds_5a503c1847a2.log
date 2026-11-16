@@ -1,0 +1,6 @@
+[2026-11-16 02:16:40] [5a503c1847a2] START loop first=3 step=3 P=40
+[2026-11-16 02:16:40] [5a503c1847a2] ROUND 3 begin: corpus Footprint_6_u_nov10_c3_s2A, disk 1368G
+[2026-11-16 02:19:30] [5a503c1847a2] ROUND 3: 25116 xml linked Mon Nov 16 02:19:30 UTC 2026
+[2026-11-16 04:14:06] [5a503c1847a2] START loop first=5 step=2 P=48 code=/tests/bigcorpus_20261115/code_fp fast_path=1 stopfile=/tests/bigcorpus_20261115/uv5_rounds/STOP_fp
+[2026-11-16 04:14:06] [5a503c1847a2] waiting for pid 3239022 (previous loop)
+[2026-11-16 05:02:57] [5a503c1847a2] KILLED by agent bigcorpus: the loop waited on the T2g stream's pid, which had exited but stayed a zombie (child of this loop shell, never reaped), so the round tail (classification, summary) never ran. Post-processing run separately (uv5_round_post.sh); loop script fixed (zombie-aware wait).

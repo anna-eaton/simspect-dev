@@ -1,0 +1,9 @@
+% Results figure, 8pt (every text \footnotesize): tests to first detection per bug on the unified footprint corpus, SimSpect vs AMuLeT, log scale (v2).
+% Body in tikz/firstdet_bars_v2_body.tex; preview tikz/_standalone_firstdet_bars_v2-1.png. Use with \input{tikz/firstdet_bars_v2_8pt}.
+\begin{figure}[t]
+\centering
+\input{tikz/firstdet_bars_v2_body}
+\caption{\reviewtag{[TODO: preliminary numbers; refresh from the final run]}
+Tests to the first detection of each previously known bug (AMuLeT's A-UV$n$), and of \toolname{}'s new jmp-shadow bug (jmp$^{*}$, UV5 above), on a log scale; labels give each bar's value and the ratio. \toolname{}: expected tests to the first detection on one generated corpus for all three defenses, at AMuLeT's configurations, with the cache state (warm, flushed, or filled) and the stall timing drawn at random per test. AMuLeT: test cases (one program on one input) per detection of that bug, over 32 runs of its own fuzzer with its own settings. $^{\dagger}$A-UV5 was detected once; its value assumes that only tests with its program shape can trigger it.}
+\label{fig:firstdetv2}
+\end{figure}

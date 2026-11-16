@@ -1,0 +1,165 @@
+{
+ "generated_utc": "2026-11-10T11:40:27Z",
+ "corpus_pairs_now": 50232,
+ "seed": 20261109,
+ "gen_cpu_per_test": 3.0216794075489726,
+ "gen_cpu_source": "PROVENANCE.json 2026-11-10T10:48:30+00:00: alloy 117498 CPU-s / (2 x 25116 programs) + stage2+postpasses 34287 CPU-s / 50232 pairs",
+ "defenses": {
+  "invisispec": {
+   "dir": "/tests/simspect_alloy_20261108/firstdet_final/T1g_Footprint_6_u_core_lpP_fv3",
+   "N": 1206,
+   "rows_mode": "prefix",
+   "dropped": {
+    "pending_classification": 83,
+    "outside_seed_prefix": 4
+   },
+   "hits": 1206,
+   "unclassified_hits": 0,
+   "status": {
+    "ok": 1206
+   },
+   "cache_setups": {
+    "warm": 617,
+    "full": 589
+   },
+   "total_cpu_s_per_test": 6.595,
+   "gem5_cpu_s_per_test": 1.355,
+   "all_signatures": {
+    "UV1": 589,
+    "UV1_transient": 589,
+    "other_L1D": 617,
+    "other_DIR": 614,
+    "other_L2": 614,
+    "other_DTLB": 617
+   },
+   "all_corpus_pairs_run": false
+  },
+  "speclfb": {
+   "dir": "/tests/simspect_alloy_20261108/firstdet_final/T3g_Footprint_6_u_core_lpP_fv3",
+   "N": 1721,
+   "rows_mode": "prefix",
+   "dropped": {
+    "pending_classification": 50,
+    "outside_seed_prefix": 63
+   },
+   "hits": 780,
+   "unclassified_hits": 0,
+   "status": {
+    "ok": 1721
+   },
+   "cache_setups": {
+    "warm": 635,
+    "cold": 534,
+    "full": 552
+   },
+   "total_cpu_s_per_test": 4.738,
+   "gem5_cpu_s_per_test": 1.355,
+   "all_signatures": {
+    "UV6": 345,
+    "walk_order": 253,
+    "other:replayed_after_safe(jmp_in_shadow)": 185,
+    "jmp_shadow": 235,
+    "other:unsafe1_filled": 1
+   },
+   "all_corpus_pairs_run": false
+  }
+ },
+ "bugs": {
+  "UV1": {
+   "defense": "invisispec",
+   "known_amulet_bug": true,
+   "K": 589,
+   "N": 1206,
+   "expected_tests": 2.05,
+   "censored": false,
+   "first_seed_order": 1,
+   "first_seed_stem": "mispredict_taken/inst-013156",
+   "first_stream_order": 1,
+   "det_setups": {
+    "full": 589
+   },
+   "amulet_pooled_programs": 23.7,
+   "amulet_pooled_test_cases": 3318.0,
+   "multiple_tests": 1621.9,
+   "simspect_cpu_s_per_test": 9.617,
+   "simspect_expected_cpu_s": 19.7,
+   "simspect_expected_cpu_s_exec_only": 13.5,
+   "amulet_pooled_cpu_s": 270,
+   "multiple_cpu": 13.72
+  },
+  "UV6": {
+   "defense": "speclfb",
+   "known_amulet_bug": true,
+   "K": 345,
+   "N": 1721,
+   "expected_tests": 4.98,
+   "censored": false,
+   "first_seed_order": 1,
+   "first_seed_stem": "mispredict_taken/inst-013156",
+   "first_stream_order": 1,
+   "det_setups": {
+    "full": 169,
+    "cold": 170,
+    "warm": 6
+   },
+   "amulet_pooled_programs": 42.7,
+   "amulet_pooled_test_cases": 5978.0,
+   "multiple_tests": 1201.2,
+   "simspect_cpu_s_per_test": 7.759,
+   "simspect_expected_cpu_s": 38.6,
+   "simspect_expected_cpu_s_exec_only": 23.6,
+   "amulet_pooled_cpu_s": 115,
+   "multiple_cpu": 2.98
+  },
+  "jmp_shadow": {
+   "defense": "speclfb",
+   "known_amulet_bug": false,
+   "K": 235,
+   "N": 1721,
+   "expected_tests": 7.3,
+   "censored": false,
+   "first_seed_order": 19,
+   "first_seed_stem": "mispredict_not_taken/inst-019733",
+   "first_stream_order": 19,
+   "det_setups": {
+    "cold": 193,
+    "full": 42
+   },
+   "amulet_pooled_programs": 136,
+   "amulet_pooled_test_cases": 19040,
+   "multiple_tests": 2609.4,
+   "simspect_cpu_s_per_test": 7.759,
+   "simspect_expected_cpu_s": 56.6,
+   "simspect_expected_cpu_s_exec_only": 34.6,
+   "amulet_pooled_cpu_s": 366,
+   "multiple_cpu": 6.46
+  }
+ },
+ "minimum": {
+  "bugs_present": [
+   "UV1",
+   "UV6"
+  ],
+  "all_5": false,
+  "tests": {
+   "bug": "UV6",
+   "multiple": 1201.2,
+   "upper_bound": false
+  },
+  "cpu": {
+   "bug": "UV6",
+   "multiple": 2.98,
+   "upper_bound": false
+  }
+ }
+}
+**Rows: seed-20261109 order prefix of the full corpus (final semantics), longest fully run and classified prefix per defense.** Report 2026-11-10T11:40:27Z; N per defense: invisispec 1206, speclfb 1721
+
+| bug | defense | K/N | expected tests (N+1)/(K+1) | first (seed order / stream) | setups of detecting tests | AMuLeT pooled test cases | multiple (tests) | SimSpect exp. CPU-s (incl. gen) | AMuLeT pooled CPU-s | multiple (CPU) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| UV1 | invisispec | 589/1206 | 2.05 | 1 / 1 | {'full': 589} | 3,318.0 | 1621.9x | 19.7 | 270 | 13.72x |
+| UV6 | speclfb | 345/1721 | 4.98 | 1 / 1 | {'full': 169, 'cold': 170, 'warm': 6} | 5,978.0 | 1201.2x | 38.6 | 115 | 2.98x |
+| jmp_shadow | speclfb | 235/1721 | 7.3 | 19 / 19 | {'cold': 193, 'full': 42} | 19,040 | 2609.4x | 56.6 | 366 | 6.46x |
+
+Minimum over known bugs present (UV1, UV6): tests 1201.2x (UV6); CPU 2.98x (UV6).
+rc=0

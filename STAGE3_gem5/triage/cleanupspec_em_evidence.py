@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-cleanupspec_em_evidence.py (bug-investigate-em, 2026-11-09): attribute CleanupSpec footprint hits
+cleanupspec_em_evidence.py: attribute CleanupSpec footprint hits
 to the E->M squashed-RMW cleanup skip and write the evidence file read by
 diag/diag_cleanupspec_em.py. Read-only on the campaign unless --out-dir is omitted.
 

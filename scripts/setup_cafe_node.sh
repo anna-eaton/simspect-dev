@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # setup_cafe_node.sh — clone cafe2's gem5_dev container setup onto another cafe node (cafe1, cafe3).
 #
-# 2026-11-09, simspect-c8 (Anna: "try the other two, but set up docker the same as cafe2").
+# Sets up docker on the node the same way as on cafe2.
 # Run from the Mac. Needs: a Slurm holder job on the target node (pam_slurm_adopt), the Mac's ssh
 # agent (keys loaded; we use `ssh -A cafe2` so cafe2 can reach the node with the forwarded key, no
 # key is stored on the cluster), and the snapshot image already committed on cafe2:

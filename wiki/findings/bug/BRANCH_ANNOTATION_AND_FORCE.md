@@ -171,3 +171,7 @@ Campaigns are cafe2 `results/*_fixed_latest__20261108_012818` (2% of `testsets_l
 | SPT_6_oneLP / spt, br_x | 51 / 51 | 73 constant, 29 declassified; gem5 never delayed the branch (102/102 reproduced) |
 
 Every SPT hit's transmitter operand is public under SPT's rules. The causes are in the model (missing `rf_from_most_recent_writer`, one-step propagation lag) and in concretization (unfed reads). Plan: `wiki/state/ALLOY_MODEL_CHANGES.md` (2026-11-08). Round-4 `diagnostics/` folders are not deployed yet: the June SPT XML diagnostics are testset-specific, and ld/str need slicer-based diagnostics.
+
+### 7.7 Follow-up (2026-11-09)
+
+The SPT v2 consolidation, its audit and lost checks, the checker criteria for resolved and committed, gem5-spt's taint rules, the tools and the gotchas are written up in [`../audits/2026-11-08/SPT_V2_AND_HIT_TRIAGE.md`](../audits/2026-11-08/SPT_V2_AND_HIT_TRIAGE.md). Open items: `wiki/state/OPEN.md` "2026-11-09 — resolve-hooks".

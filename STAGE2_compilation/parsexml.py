@@ -212,8 +212,14 @@ def _build_chain(
     fr_mem_atoms: List[str],
     step_kinds: List[str],
     rng: random.Random,
+    ilv_chain: Optional[List[Dict[str, Any]]] = None,
 ) -> List[Dict[str, Any]]:
     """Build a linear chain of `length` steps.
+
+    ilv_chain (opt-in interleave.interleave_only): when given, every other_n step
+    is drawn uniformly from these interleave-only entries (concrete
+    "ilv:<name>", one or two inputs as the template reads $1 or $1,$2) instead
+    of bitnot/add. None = unchanged.
 
     Every consecutive pair shares a forced data dependency: step N's output
     feeds at least one input slot of step N+1.
@@ -297,7 +303,8 @@ def _build_chain(
                 slots["inmem"][0] = _fr_slot("inmem", last_atom)
 
         if kind == "other_n":
-            two_inputs = rng.random() < 0.7
+            ent = rng.choice(ilv_chain) if ilv_chain else None
+            two_inputs = _ilv_refs(ent["asm"], 2) if ent is not None else rng.random() < 0.7
             if not two_inputs:
                 # bitnot: only inreg0 participates; inreg1 stays unspecified-and-unused.
                 # If the bridge landed on inreg1, swap it down so inreg0 holds it.
@@ -307,6 +314,8 @@ def _build_chain(
                 concrete, llvm_op = "bitnot", "notq"
             else:
                 concrete, llvm_op = "add", "leaq"
+            if ent is not None:
+                concrete, llvm_op = ILV_PREFIX + ent["name"], "inline asm (interleave_only)"
             out = alloc_outreg()
             slots["outreg"][0] = _fr_slot("outreg", out)
             last_kind, last_atom = "reg", out
@@ -336,14 +345,9 @@ def _build_chain(
     return steps
 
 
-# -----------------------------
-# PHASE 1: specify mem and reg from alloy
-#   - save them to a reserved list
-#   - make sure that the code is specified
-#   - save this incomplete program to an xml or asm?? file
-#     - to have the ability to find duplicates from alloy
-# PHASE 2: 
-# -----------------------------
+# =============================================================================
+# Pass 1: program order + register/memory state from the Alloy instance
+# =============================================================================
 def pass1_specify_state_a(
     inst: AlloyInstance,
     out_path: Optional[str] = "alloy-out/spo_program.ir",
@@ -401,6 +405,9 @@ def pass1_specify_state_a(
         "outmem": 1,
     }
 
+    # operands some rf edge reads from (a load whose outreg is never read may become the RMW form)
+    _rf_src = {t[0] for t in inst.fields.get("rf", []) if t}
+
     for pc, ins in enumerate(order):
         kind = _kind_token(ins, kind_of)
         resolved_bool  = ins in resolved_instrs
@@ -446,6 +453,7 @@ def pass1_specify_state_a(
                 "kind": kind,
                 "resolved":  resolved_bool,
                 "committed": committed_bool,
+                "outreg_consumed": any(o in _rf_src for o in outregs),
                 "must_uncommitted": (ins in must_uncommitted_instrs) if has_commit_split
                                     else not committed_bool,
                 "xm":        xm_bool,
@@ -511,11 +519,7 @@ def _load_instruction_tables(
 
 
 def reload_tables(path: Optional[str] = None) -> None:
-    """
-    Reload _KIND_TO_CATEGORY and INSTRUCTION_TABLE from an alternate JSON path.
-    Called by the top-level pipeline.py (via batch_generate --instruction-tables)
-    to point at a non-default instruction table without touching source code.
-    """
+    """Reload _KIND_TO_CATEGORY, INSTRUCTION_TABLE and BRANCH_FORMS from an alternate table."""
     global _KIND_TO_CATEGORY, INSTRUCTION_TABLE, BRANCH_FORMS
     _KIND_TO_CATEGORY, INSTRUCTION_TABLE = _load_instruction_tables(
         Path(path) if path else None
@@ -524,9 +528,8 @@ def reload_tables(path: Optional[str] = None) -> None:
 
 
 def _load_branch_forms(path: Optional[Path] = None) -> Dict[str, Any]:
-    """Optional top-level "branch_forms" of an instruction table (fanout v2,
-    2026-11-08). Branch concretes are forced by pass 2.5, so branch forms are
-    a table-level switch read by pass 5, not candidates in the "br" category:
+    """Optional top-level "branch_forms" of an instruction table. Branch concretes are
+    forced by pass 2.5, so branch forms are a table-level switch read by pass 5:
       "br_cmp": true          every annotated conditional branch becomes an
                               inline asm-goto `cmpq $1,%c ; jb|jae` (the jcc
                               reads the flags the cmp set) instead of LLVM's
@@ -535,7 +538,7 @@ def _load_branch_forms(path: Optional[Path] = None) -> Dict[str, Any]:
                               branch becomes a direct `jmp` to its fall-through
                               with probability p (no BTB annotation is emitted
                               for it: it has nothing to force)
-    Absent (the default table) = today's output."""
+    Absent (the default table) = off."""
     if path is None:
         path = Path(__file__).parent / "instruction_tables" / "instructions.jsonc"
     text = Path(path).read_text(encoding="utf-8")
@@ -544,13 +547,8 @@ def _load_branch_forms(path: Optional[Path] = None) -> Dict[str, Any]:
     return dict(json.loads(text).get("branch_forms", {}))
 
 
-# _KIND_TO_CATEGORY: maps kind tokens (ld, str, br_n, br_x, other_n, other_x)
-#   to instruction-table category keys.  br_n / br_x both map to "br".
-# INSTRUCTION_TABLE: maps category -> list of concrete instruction dicts.
-#   Each dict has "name", "llvm_op", and "uses" (set of required slot names).
-#   Filtering rule: every specified slot on an abstract instruction must appear
-#   in the chosen candidate's "uses" set; among valid candidates the one with
-#   the fewest "uses" entries is preferred (simplest fit wins).
+# _KIND_TO_CATEGORY: kind token -> table category (br_n/br_x -> "br").
+# INSTRUCTION_TABLE: category -> [{"name", "llvm_op", "uses": set of slot names}].
 _KIND_TO_CATEGORY, INSTRUCTION_TABLE = _load_instruction_tables()
 BRANCH_FORMS: Dict[str, Any] = {}
 
@@ -560,24 +558,27 @@ def pass2_specify_instructions(
     instruction_table: Optional[Dict[str, List[Dict[str, Any]]]] = None,
     out_path: Optional[str] = None,
     write_out: bool = False,
+    vocab_rj: Optional[Dict[str, Any]] = None,
+    exclude_tags: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Pass 2: choose a concrete LLVM instruction for each abstract instruction.
 
-    For each record from pass1:
-      - Map its kind to a category (br_n/br_x -> br, other_n/other_x -> other).
-      - Collect the set of slot names that are marked specified (e.g. {"inreg0"}).
-      - Filter the category's candidates to those whose "uses" set is a superset
-        of the specified slots — i.e. every specified operand must be consumed
-        by the chosen instruction.
-      - Among valid candidates, prefer the one with the fewest "uses" entries
-        (simplest instruction that still satisfies all constraints).
-      - Add concrete_instruction, llvm_op, and candidates to the record.
+    Valid candidates are the category's entries whose "uses" cover every specified
+    slot; one is drawn uniformly. Operand slots are left unchanged.
 
-    Operand slots are left unchanged; most remain nonspecified.
+    vocab_rj (opt-in): {"rmw": true} adds VOCAB_RJ_RMW as a candidate for every "ld"
+    whose outreg no Alloy rf edge reads. exclude_tags (opt-in): drop entries with
+    any of these tags.
     """
     if instruction_table is None:
         instruction_table = INSTRUCTION_TABLE
+    _rmw_on = bool(vocab_rj and vocab_rj.get("rmw"))
+    # drop tagged entries (e.g. spt_bwd_invertible for SPT corpora)
+    _excl = set(exclude_tags or [])
+    if _excl:
+        instruction_table = {k: [c for c in v if not _excl & set(c.get("tags", []))]
+                             for k, v in instruction_table.items()}
 
     output_instructions: List[Dict[str, Any]] = []
 
@@ -595,16 +596,22 @@ def pass2_specify_instructions(
 
         # Keep only candidates whose operand set covers every specified slot
         valid = [c for c in candidates if specified_slots <= c["uses"]]
+        if (_rmw_on and category == "ld" and not rec.get("outreg_consumed", True)
+                and specified_slots - {"outreg"} <= VOCAB_RJ_RMW["uses"]):
+            valid = valid + [VOCAB_RJ_RMW]
 
         if not valid:
-            # Table/model inconsistency: no candidate covers all specified slots.
-            # Fall back to the full list so the pipeline can continue.
-            valid = candidates
+            # table/model inconsistency: fall back to the full list (minus alternate
+            # encodings, e.g. store_imm would drop a specified inreg0)
+            valid = [c for c in candidates if not c.get("base")] or candidates
 
-        # Pick randomly among valid candidates (all have >= the required operands)
         chosen = random.choice(valid) if valid else None
 
         out_rec = dict(rec)
+        # entries with "base" are another encoding of that concrete: keep the base name, record the form
+        if chosen and chosen.get("base"):
+            out_rec["vocab_form"] = chosen["name"]
+            chosen = dict(chosen, name=chosen["base"])
         out_rec["concrete_instruction"] = chosen["name"] if chosen else None
         out_rec["llvm_op"] = chosen["llvm_op"] if chosen else None
         out_rec["candidates"] = [c["name"] for c in valid]
@@ -671,36 +678,15 @@ def pass2_5_specify_branches(
 
     branch_mode values
     ------------------
-    "mispredict_not_taken"  (default, currently active)
-        Branch IS architecturally taken (condition_value=True) so it jumps to
-        taken_target="end_block" (a block appended past all instructions).
-        The BTB predicts fall-through (not taken), so the CPU speculatively
-        executes the instructions that follow the branch in program order
-        (fallthrough_target="bb_<pc+1>"), then squashes on resolution.
-
-        btb_prediction   = "fall_through"
-        btb_predicted_pc = pc + 1   ← override this in the simulator to change
-                                       what the BTB actually predicts
+    "mispredict_not_taken"  (default)
+        Architecturally taken to end_block; the BTB is forced to predict
+        fall-through, so bb_<pc+1> runs speculatively and is squashed.
 
     "mispredict_taken"
-        Branch is architecturally NOT taken (condition_value=False). The BTB
-        predicts taken, so the CPU speculatively fetches taken_target=
-        "bb_<pc+1>" (everything after the branch, the "critical" section),
-        then squashes on resolution.
-
-        fallthrough_target stays "end_block", but the IR emitter does NOT
-        wire the not-taken edge straight to end_block. It inserts an explicit
-        fall-through trampoline block ("ftbypass_<pc>") between the branch and
-        the critical section whose only body is `br label %end_block`. This
-        guarantees the architecturally-correct not-taken path BYPASSES the
-        Alloy critical section (it can never fall into bb_<pc+1>) regardless
-        of LLVM block layout — the critical section is reachable only via the
-        BTB-forced taken misprediction. (not_taken needs no trampoline: its
-        architectural edge is the taken edge to end_block by construction.)
-
-        btb_prediction   = "taken"
-        btb_predicted_pc = pc + 1   ← override this in the simulator to change
-                                       what the BTB actually predicts
+        Architecturally not taken; the BTB is forced to predict taken
+        (bb_<pc+1>, the critical section). The not-taken edge goes through an
+        "ftbypass_<pc>" trampoline to end_block, so the architectural path
+        never falls into the critical section regardless of block layout.
 
     Output dict additions
     ---------------------
@@ -714,8 +700,7 @@ def pass2_5_specify_branches(
         taken_target       str   label name for the taken edge
         fallthrough_target str   label name for the fall-through edge
         btb_prediction     str   "fall_through" | "taken"
-        btb_predicted_pc   int   PC the BTB thinks comes next
-                                 ← this is the simulator override point
+        btb_predicted_pc   int   PC the BTB is forced to predict
 
     If the concrete_instruction was "br_uncond" it is upgraded to "br_cond"
     because misprediction scenarios require a resolvable condition.
@@ -758,22 +743,9 @@ def pass2_5_specify_branches(
         next_pc = pc + 1
         is_xm = rec.get("xm", False)
 
-        # ── xm OVERRIDE ──────────────────────────────────────────────────────
-        # The xmit branch is the test's transmitter and follows its own dedicated
-        # shape, independent of Alloy's isresolved flag, the run's branch_mode,
-        # and the resolved / non-xm rewrites below:
-        #   • Always br_bez. Condition is read from the Alloy inreg slot via a
-        #     phys-pinned passthrough (see br_bez codegen) so STT sees the
-        #     load→branch taint chain. Architectural inreg = 0 → ZF = 1 →
-        #     branch architecturally TAKEN (to end_block).
-        #   • BTB is forced to predict fall-through, creating a misprediction
-        #     on every run regardless of what Alloy's isresolved says.
-        #   • If a downstream instruction doesn't already exist on the
-        #     fall-through path, inject a NOP so fetch has something to
-        #     speculate on (and then squash).
-        # The pipeline-side resolve-stall sweep skips this branch entirely
-        # (stall = 0) — the xm shouldn't have its own resolution held back;
-        # the speculation window comes from upstream unresolved branches.
+        # xm override (independent of isresolved and branch_mode): always br_bez on the
+        # Alloy inreg (arch value 0 -> taken to end_block), BTB forced to fall-through,
+        # NOP appended if nothing follows. The resolve-stall sweep gives it stall 0.
         if is_xm:
             rec["concrete_instruction"] = "br_bez"
             rec["llvm_op"]              = "testq+jz"
@@ -781,13 +753,7 @@ def pass2_5_specify_branches(
             if "br_bez" not in cands:
                 rec["candidates"] = cands + ["br_bez"]
             needs_end_block = True
-            # Only inject the fall-through NOP when nothing follows the branch
-            # at all. If another instruction already exists at pc+1 (e.g. the
-            # next branch), the fall-through target is bb_{pc+1} — fetch already
-            # has real content to speculate on, and a NOP would be inserted at
-            # nop_pc == pc+1, colliding with that instruction's PC (duplicate
-            # bb_/__litmus label → assembler "already defined"). See the NOTE at
-            # the insertion site below.
+            # NOP only when the branch is last: a NOP at an occupied pc+1 duplicates labels
             if idx == len(instructions) - 1:
                 xm_nop_inserts.append((idx, pc))
             fallthrough = "end_block" if next_pc >= n else f"bb_{next_pc}"
@@ -802,13 +768,8 @@ def pass2_5_specify_branches(
             continue
         # ─────────────────────────────────────────────────────────────────────
 
-        # Pass2 picks a random concrete_instruction from the candidate pool,
-        # which includes br_bez. For non-xmit branches, br_bez breaks the
-        # mispredict_taken architectural path: br_bez's IR emission uses
-        # `icmp eq` (inverted relative to br_cond's `icmp ne`) AND skips the
-        # ftbypass trampoline, so the architectural fall-through ends up in
-        # the critical block instead of end_block. Force br_cond for any
-        # non-xmit branch so pass5 takes the trampoline-aware path.
+        # non-xmit branches must be br_cond: br_bez inverts the icmp and skips the
+        # ftbypass trampoline, breaking the mispredict_taken architectural path
         if rec.get("concrete_instruction") in ("br_uncond", "br_bez"):
             rec["concrete_instruction"] = "br_cond"
             rec["llvm_op"]              = "br i1"
@@ -817,13 +778,8 @@ def pass2_5_specify_branches(
                 rec["candidates"] = cands + ["br_cond"]
 
         if rec.get("resolved", False):
-            # Resolved branch: emit a real conditional branch whose architectural
-            # outcome is "fall through" and whose BTB-forced prediction is also
-            # "fall through" — i.e. correctly predicted. The branch's
-            # post-execute resolution broadcast (squash, BPred update, commit
-            # eligibility, scheme taps) is held back by `resolve_stall_cycles`
-            # in --branch-ann-file (see gem5-recon-modded). The static target is
-            # end_block; it is never reached architecturally.
+            # resolved: correctly predicted fall-through; its resolution is held by
+            # resolve_stall_cycles (--branch-ann-file). end_block is never reached.
             if rec.get("concrete_instruction") == "br_uncond":
                 rec["concrete_instruction"] = "br_cond"
                 rec["llvm_op"] = "br i1"
@@ -850,10 +806,7 @@ def pass2_5_specify_branches(
             if "br_cond" not in cands:
                 rec["candidates"] = cands + ["br_cond"]
 
-        # If the branch is the xmit transmitter, use BEZ (testq+jz) instead of
-        # the generic br_cond.  All registers are zero-initialised, so
-        # testq %reg,%reg sets ZF=1 and jz is taken — but the BTB predicts
-        # not-taken (fall-through), creating the misprediction.
+        # xmit branch: BEZ (testq+jz) on a zero register is taken; the BTB predicts fall-through
         if is_xm:
             rec["concrete_instruction"] = "br_bez"
             rec["llvm_op"] = "testq+jz"
@@ -861,9 +814,7 @@ def pass2_5_specify_branches(
         if branch_mode == "mispredict_not_taken":
             needs_end_block = True
 
-            # If this is an xm branch and there is no real instruction after it
-            # on the fall-through path, we must inject a NOP so the fall-through
-            # has something for the processor to fetch (and then squash).
+            # xm branch with nothing on the fall-through path: inject a NOP to fetch
             if is_xm and (idx == len(instructions) - 1
                           or instructions[idx + 1].get("kind") in _BRANCH_KINDS):
                 xm_nop_inserts.append((idx, pc))
@@ -881,9 +832,7 @@ def pass2_5_specify_branches(
         elif branch_mode == "mispredict_taken":
             needs_end_block = True
 
-            # xm branch with no real instruction on the speculative (taken)
-            # path → inject a NOP so the processor has something to fetch
-            # and then squash.
+            # xm branch with nothing on the speculative (taken) path: inject a NOP
             if is_xm and (idx == len(instructions) - 1
                           or instructions[idx + 1].get("kind") in _BRANCH_KINDS):
                 xm_nop_inserts.append((idx, pc))
@@ -898,8 +847,7 @@ def pass2_5_specify_branches(
                 "btb_predicted_pc":   next_pc,        # simulator override point
             }
 
-    # Insert synthetic NOP instructions after xm branches that need them.
-    # Process in reverse order so earlier indices stay valid.
+    # insert the queued NOPs (reverse order keeps indices valid)
     for insert_idx, br_pc in reversed(xm_nop_inserts):
         nop_pc = br_pc + 1
         nop_rec: Dict[str, Any] = {
@@ -916,9 +864,7 @@ def pass2_5_specify_branches(
             "synthetic":             True,
         }
         instructions.insert(insert_idx + 1, nop_rec)
-        # Update the speculative-path target to point at the NOP's block.
-        # In not-taken mode that's fallthrough_target; in taken mode it's
-        # taken_target.
+        # point the speculative-path target at the NOP's block
         ba = instructions[insert_idx].get("branch_annotations")
         if ba:
             if ba.get("mode") == "mispredict_not_taken" and ba["fallthrough_target"] == "end_block":
@@ -926,19 +872,9 @@ def pass2_5_specify_branches(
             elif ba.get("mode") == "mispredict_taken" and ba["taken_target"] == "end_block":
                 ba["taken_target"] = f"bb_{nop_pc}"
 
-    # NOTE: this code does NOT renumber PCs after inserting a NOP, so the
-    # NOP's pc (br_pc + 1) must not already belong to another instruction.
-    # That is now guaranteed at the queue sites: a NOP is queued only when the
-    # branch is the LAST instruction (br_pc + 1 == n, past the end), so no
-    # existing record owns that PC. Do NOT re-add an "or next is a branch"
-    # clause here — when another instruction already follows at pc+1 the
-    # fall-through target is bb_{pc+1} (real fetchable content, no NOP needed),
-    # and inserting a NOP at pc+1 would duplicate that PC, emitting two
-    # `bb_<pc>:` labels and two `.globl __litmus_..._pc<pc>` symbols → the
-    # assembler aborts with "symbol already defined" and the test is dropped.
-    # (Pre-rework this path was thought unreachable because every xm Branchx
-    # was resolved; the branch-xmit override above handles all xm branches, so
-    # the queue condition is the real guard. See DESIGN.md.)
+    # PCs are not renumbered here: a NOP is queued only for a branch that is the last
+    # instruction, so pc+1 is free. Queuing one at an occupied pc+1 would emit duplicate
+    # bb_/__litmus labels ("symbol already defined"). See DESIGN.md.
 
     result: Dict[str, Any] = {
         "instructions": instructions,
@@ -1156,6 +1092,9 @@ def _stl_arch_values(instructions: List[Dict[str, Any]], until_pc: int,
             space, off, _ = _mem_addr_of(rec, "inmem", vals)
             check(space, off)
             out(rec, sum(mem.get((space, off + b), 0) << (8 * b) for b in range(8)))
+        elif c == VOCAB_RJ_RMW["name"]:   # or $0: memory unchanged, no register written
+            space, off, _ = _mem_addr_of(rec, "inmem", vals)
+            check(space, off)
         elif c == "store":
             if rec["pc"] in store_override:
                 if store_override[rec["pc"]] is None:
@@ -1164,7 +1103,7 @@ def _stl_arch_values(instructions: List[Dict[str, Any]], until_pc: int,
             else:
                 space, off, _ = _mem_addr_of(rec, "outmem", vals)
             check(space, off)
-            v = val(rec, "inreg0") & _MASK64
+            v = 0 if _fv4_store_imm(rec) else val(rec, "inreg0") & _MASK64
             for b in range(8):
                 mem[(space, off + b)] = (v >> (8 * b)) & 0xFF
         elif c == "bitnot":
@@ -1173,6 +1112,8 @@ def _stl_arch_values(instructions: List[Dict[str, Any]], until_pc: int,
             out(rec, val(rec, "inreg0") + val(rec, "inreg1"))
         elif c == "zsm":
             out(rec, val(rec, "inreg0") * val(rec, "inreg1"))
+        elif c in FV4_ALU_UNARY or c in FV4_ALU_BINARY:
+            out(rec, _fv4_alu_eval(_fv4_alu_effective(rec), val(rec, "inreg0"), val(rec, "inreg1")))
         elif c == "div":
             a, d = _to_signed64(val(rec, "inreg0")), _to_signed64(val(rec, "inreg1"))
             if not rec.get("xm", False):
@@ -1300,6 +1241,8 @@ def pass_interleave(
       chain.min_length     int    min steps per chain (default 2)
       chain.max_length     int    max steps per chain (default 4)
       chain.step_kinds     list   subset of {"other_n","ld","str"} allowed per step
+      interleave_only      dict   {"enabled", "table", "exclude_tags"}: other_n steps drawn
+                                  uniformly from the interleave-only category (opt-in)
       num_chains           int    1 or 2 (default 1)
     """
     cfg = interleave_cfg or {}
@@ -1320,6 +1263,11 @@ def pass_interleave(
     max_length = int(chain_cfg.get("max_length", 4))
     step_kinds: List[str] = list(chain_cfg.get("step_kinds", _STEP_KINDS_DEFAULT))
     num_chains = min(max(int(cfg.get("num_chains", 1)), 0), 2)
+    # opt-in interleave_only: other_n chain steps drawn from the interleave-only category
+    _ilv_icfg = cfg.get("interleave_only") or {}
+    ilv_chain = _ilv_chain_entries(_ilv_select(_ilv_icfg)) if _ilv_icfg.get("enabled") else None
+    if _ilv_icfg.get("enabled") and not ilv_chain:
+        raise ValueError("interleave.interleave_only: no usable chain entries after exclude_tags")
     if num_chains == 0:
         # No chains for this variant — return baseline pass25 with empty pools.
         result = dict(pass25_result)
@@ -1352,7 +1300,8 @@ def pass_interleave(
         lo = max(min_length, 1)
         hi = max(max_length, lo)
         length = rng.randint(lo, hi)
-        all_steps.extend(_build_chain(cid, length, fr_reg_atoms, fr_mem_atoms, step_kinds, rng))
+        all_steps.extend(_build_chain(cid, length, fr_reg_atoms, fr_mem_atoms, step_kinds, rng,
+                                      ilv_chain=ilv_chain))
 
     L = len(all_steps)
     uncommitted_count = N - first_uncommitted_idx
@@ -1384,16 +1333,9 @@ def pass_interleave(
     for new_pc, rec in enumerate(new_instructions):
         rec["pc"] = new_pc
 
-    # Update branch annotations to reflect shifted PCs.  pass2_5 only ever
-    # emits bb-targets of the form bb_<pc+1>, so the remap is just
-    # bb_<rec.pc+1> — which lands on the chain step (or original next instr)
-    # in the new sequence, so the branch's "br ... label %bb_X" targets a
-    # real labelled block.
-    #
-    # If a chain step was inserted *after* a branch whose speculative target
-    # was end_block (because the branch was originally last), re-route the
-    # speculative target to the next pc so the chain step lives on the spec
-    # path and isn't dead code.
+    # Remap branch targets to the new PCs (pass2_5 only emits bb_<pc+1>). A branch whose
+    # speculative target was end_block now targets the next pc, so an appended chain
+    # step sits on the speculative path instead of being dead code.
     for i, rec in enumerate(new_instructions):
         ba = rec.get("branch_annotations")
         if not ba:
@@ -1430,21 +1372,14 @@ def pass_interleave(
 # Additional         : %rax (return value), %r10, %r11
 X86_64_CALLER_SAVED: List[str] = [
     "rax", "rcx", "rdx", "rsi", "rdi", "r8", "r9", "r10", "r11",
-    # Callee-saved appended so unspecified slots sample from a bigger pool
-    # (chain-step outregs are far less likely to be clobbered by an
-    # intervening Alloy unspec outreg).  LLVM emits the necessary
-    # save/restore prologue for any of these used by an inline-asm reg
-    # constraint, so they're safe to draw from.
+    # callee-saved too, for a bigger unspecified pool (LLVM saves/restores any used by inline asm)
     "r12", "r13", "r14", "r15",
 ]
 
-# Indices into the virtual register pool (X86_64_CALLER_SAVED[n_locked_regs:]).
-# These slots are reserved for code-generation infrastructure and must never be
-# assigned to any Alloy instruction operand slot.  That separation keeps the
-# locked (Alloy-tracked, potentially tainted) registers from being aliased by
-# compiler-generated pointer materializations, which would create spurious
-# taint via gem5's Lea-merge (Data = merge(Data, ea, dataSize)) micro-op.
-_VPOOL_IDX_SCRATCH    = 0   # reserved scratch (formerly clflush base pointer); kept reserved to preserve register-layout stability across the cond_reg/probe_base slots
+# Virtual-pool indices reserved for codegen infrastructure, never given to an Alloy
+# operand slot: a locked (possibly tainted) register reused for a pointer
+# materialization would pick up spurious taint via gem5's Lea-merge micro-op.
+_VPOOL_IDX_SCRATCH    = 0   # reserved scratch (kept so the register layout stays stable)
 _VPOOL_IDX_COND_REG   = 1   # branch: condition-load destination register
 _VPOOL_IDX_PROBE_BASE = 2   # load/store: base pointer for probe_mem or mem_base
 _VPOOL_FREE_START     = 3   # first index freely assignable to instruction slots
@@ -1475,6 +1410,111 @@ FV2_FILLER_OPS: Dict[str, str] = {
     "shl":  "movq $1, $0\\0Ashlq $$3, $0",
 }
 
+# RMW form (opt-in fanout_v2.vocab_rj) of a load whose outreg no Alloy rf edge reads:
+# `orq $0, <mem>` (gem5 OR_M_I): same address operands and pc marker as `load`,
+# value neutral, writes no register.
+VOCAB_RJ_RMW: Dict[str, Any] = {
+    "name": "load_rmw_or0",
+    "llvm_op": "orq $0, mem (inline asm)",
+    "uses": {"inaddr", "inmem"},
+    "requires": "outreg_unconsumed",
+}
+# jmp filler: a direct jmp to the next instruction (`eb 00`), value neutral
+FV2_FILLER_JMP = "jmp"
+LOAD_LIKE = ("load", VOCAB_RJ_RMW["name"])
+
+# Interleave-only category (opt-in fanout_v2.interleave_only / interleave.interleave_only):
+# instructions outside the abstract model, drawn uniformly by the filler draw and the
+# chain other_n step draw. Table + safety rules: instruction_tables/proposed/interleave_only.jsonc.
+ILV_TABLE_DEFAULT = "STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc"
+ILV_PREFIX = "ilv:"   # concrete_instruction of a chain step drawn from the category
+_ILV_CACHE: Dict[str, Dict[str, Dict[str, Any]]] = {}
+_ILV_USES: Dict[str, Set[str]] = {}
+
+
+def _ilv_refs(asm: str, n: int) -> bool:
+    """Does an inline-asm template reference operand n ($n or ${n:mod}, not the $$ escape)?"""
+    t = asm.replace("$$", "")
+    return f"${n}" in t or ("${%d:" % n) in t
+
+
+def load_interleave_only(path: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
+    """name -> entry of the interleave-only table, usable entries only, table order.
+    A relative path is tried from the cwd, then from the repo root."""
+    p = Path(path or ILV_TABLE_DEFAULT)
+    if not p.is_absolute() and not p.exists():
+        p = Path(__file__).resolve().parent.parent / p
+    key = str(p.resolve())
+    if key not in _ILV_CACHE:
+        text = p.read_text(encoding="utf-8")
+        text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
+        text = re.sub(r'//[^\n]*', '', text)
+        ents: Dict[str, Dict[str, Any]] = {}
+        for e in json.loads(text)["entries"]:
+            if e.get("status", "ok") != "ok" or int(e.get("weight", 1)) != 1:
+                continue
+            if e.get("form", "rr") not in ("rr", "none"):
+                raise ValueError(f"interleave_only entry {e['name']!r}: unknown form {e.get('form')!r}")
+            ents[e["name"]] = e
+            _ILV_USES[ILV_PREFIX + e["name"]] = (
+                {"inreg0", "outreg"} | ({"inreg1"} if _ilv_refs(e["asm"], 2) else set()))
+        _ILV_CACHE[key] = ents
+    return _ILV_CACHE[key]
+
+
+def _ilv_entry(name: str) -> Dict[str, Any]:
+    """The loaded interleave-only entry `name` (pass_interleave loaded its table)."""
+    for ents in _ILV_CACHE.values():
+        if name in ents:
+            return ents[name]
+    raise ValueError(f"interleave_only entry {name!r} not loaded")
+
+
+def _ilv_select(icfg: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """Entries of the table named by an interleave_only config block, minus exclude_tags."""
+    ents = load_interleave_only(icfg.get("table"))
+    tags = list(icfg.get("exclude_tags") or [])
+    return {n: e for n, e in ents.items() if not any(e.get(t) for t in tags)}
+
+
+def _ilv_chain_entries(ents: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Entries usable as a chain step: operand form whose output reads $1 (a chain
+    step must carry its input to its output; constants, nops and jmp cannot)."""
+    return [e for e in ents.values() if e.get("form", "rr") == "rr" and _ilv_refs(e["asm"], 1)]
+
+# fv4 other_n ALU forms (fv4_vocab.jsonc only): unary out = f(in0), binary out = f(in0, in1). Each emits
+# `movq in0,out ; <op>` (or the op in place when out shares a register).
+FV4_ALU_UNARY: Dict[str, Optional[str]] = {"mov_rr": None, "neg": "negq", "shl3": "shlq $$3,"}
+FV4_ALU_BINARY: Dict[str, str] = {"addq_rr": "addq", "sub_rr": "subq", "xor_rr": "xorq",
+                                  "and_rr": "andq", "or_rr": "orq", "lea_s8": "lea"}
+_FV4_COMMUTATIVE = {"addq_rr", "xor_rr", "and_rr", "or_rr"}
+
+
+def _fv4_store_imm(rec: Dict[str, Any]) -> bool:
+    """fv4 store_imm form (stores $0) — only when Alloy left inreg0 unspecified."""
+    if rec.get("vocab_form") != "store_imm":
+        return False
+    return not any(sr.get("specified") for sr in rec["slots"].get("inreg", [])
+                   if sr["slot"] == "inreg0")
+
+
+def _fv4_alu_effective(rec: Dict[str, Any]) -> str:
+    """sub_rr / xor_rr whose two inputs are the same physical register would be a
+    zero idiom (not in the vocabulary): emitted as or_rr instead."""
+    c = rec.get("concrete_instruction")
+    if c in ("sub_rr", "xor_rr"):
+        ph = [sr.get("assigned") for sr in rec["slots"].get("inreg", [])
+              if sr["slot"] in ("inreg0", "inreg1")]
+        if len(ph) == 2 and ph[0] is not None and ph[0] == ph[1]:
+            return "or_rr"
+    return c
+
+
+def _fv4_alu_eval(c: str, a: int, b: int) -> int:
+    """Architectural value of an fv4 other_n form (mirrors pass5's asm)."""
+    return {"mov_rr": a, "neg": -a, "shl3": a << 3, "addq_rr": a + b, "sub_rr": a - b,
+            "xor_rr": a ^ b, "and_rr": a & b, "or_rr": a | b, "lea_s8": a + 8 * b}[c]
+
 _REG_SLOT_ROLES = {"inreg", "outreg", "inaddr"}
 _MEM_SLOT_ROLES = {"inmem", "outmem"}
 
@@ -1483,6 +1523,10 @@ def _uses_for(concrete_instruction: Optional[str]) -> Set[str]:
     """Return the 'uses' set for a concrete instruction name from INSTRUCTION_TABLE."""
     if concrete_instruction is None:
         return set()
+    if concrete_instruction == VOCAB_RJ_RMW["name"]:
+        return VOCAB_RJ_RMW["uses"]
+    if concrete_instruction.startswith(ILV_PREFIX):
+        return _ILV_USES[concrete_instruction]
     for candidates in INSTRUCTION_TABLE.values():
         for c in candidates:
             if c["name"] == concrete_instruction:
@@ -1499,8 +1543,7 @@ def pass3_assign_operands(
     """
     Pass 3: assign concrete register names and memory offsets to all slots.
 
-    reg_naming (None or {"mode": "sorted"} = legacy, byte-identical to before
-    2026-11-08; batch_generate.py defaults to random since 2026-11-08)
+    reg_naming (None or {"mode": "sorted"} = legacy; batch_generate defaults to random)
     ----------------------------------------------------------------
     {"mode": "sorted"}  legacy register order (X86_64_CALLER_SAVED order;
                         locked Reg_s$* atoms in sorted order take the front);
@@ -1519,10 +1562,8 @@ def pass3_assign_operands(
         These will be forced via inline-asm output constraints in the IR.
 
     Unspecified, slot IS used by the concrete instruction:
-        Randomly sampled from the remaining entries of X86_64_CALLER_SAVED
-        after locked registers are assigned.  These are real physical register
-        names, so every outreg write can be forced via "={phys},r" inline asm
-        without any LLVM backend reservation pass.
+        Randomly sampled from the remaining physical registers (beyond the
+        reserved infrastructure slots), so outreg writes can be forced via "={phys},r".
 
     Unspecified, slot NOT used by the concrete instruction:
         assigned = None  (IR emitter skips these).
@@ -1581,13 +1622,10 @@ def pass3_assign_operands(
         atom: reg_order[i] for i, atom in enumerate(locked_reg_atoms)
     }
 
-    # Pool of physical registers available for unspecified slots —
-    # the tail of reg_order after locked regs have claimed the front.
+    # unspecified-slot pool: the tail of reg_order after the locked regs
     n_free_regs = len(X86_64_CALLER_SAVED) - n_locked_regs
     virtual_pool: List[str] = reg_order[n_locked_regs:]
-    # The first _VPOOL_FREE_START entries of virtual_pool are reserved for
-    # code-generation infrastructure (scratch, cond_reg, probe_base).
-    # Instruction operand slots must only draw from the remainder.
+    # first _VPOOL_FREE_START entries reserved for infrastructure (scratch, cond_reg, probe_base)
     free_pool: List[str] = virtual_pool[_VPOOL_FREE_START:]
 
     # locked memory map: Mem_s$* atom -> byte offset
@@ -1599,12 +1637,9 @@ def pass3_assign_operands(
     fr_reg_pool: List[str] = pass25_result.get("fr_reg_pool", [])
     fr_mem_pool: List[str] = pass25_result.get("fr_mem_pool", [])
 
-    # Reg_s$fr* atoms occupy the first len(fr_reg_pool) entries of free_pool
-    # (one phys reg per atom; wraps only when the config asks for more atoms
-    # than physical regs available).  Alloy-unspec OUTREGs avoid these regs
-    # so chain-step outputs aren't clobbered between the combiner and the
-    # xmit — inputs still sample the full pool so xmit address slots can
-    # land on a chain output by collision, which is what surfaces OTB shape.
+    # Reg_s$fr* atoms take the front of free_pool. Alloy-unspec outregs avoid them (so chain
+    # outputs aren't clobbered before the xmit); inputs sample the full pool, so collisions
+    # with chain outputs can still build the OTB shape.
     fr_reg_map: Dict[str, str] = {}
     if fr_reg_pool and free_pool:
         for i, atom in enumerate(fr_reg_pool):
@@ -1612,8 +1647,7 @@ def pass3_assign_operands(
     chain_region: Set[str] = set(fr_reg_map.values())
     alloy_outreg_pool: List[str] = [r for r in free_pool if r not in chain_region]
     if not alloy_outreg_pool:
-        # Pool fully claimed by chain atoms — fall back to full pool so
-        # Alloy unspec outregs have somewhere to land.
+        # pool fully claimed by chain atoms: fall back to the full pool
         alloy_outreg_pool = list(free_pool)
 
     # Mem_s$fr* atoms occupy fixed slots immediately after the locked memory slots
@@ -1649,11 +1683,7 @@ def pass3_assign_operands(
                         else:
                             new_sr["assigned"] = random.choice(free_pool) if free_pool else None
                     elif slot_name in uses:
-                        # Alloy (non-synthetic) outregs avoid the chain region
-                        # so they can't clobber a chain output between the
-                        # combiner and the xmit.  Inputs still sample the
-                        # full pool so collisions with chain outputs (the
-                        # mechanism that surfaces OTB) still happen.
+                        # Alloy outregs avoid the chain region (see above)
                         if role == "outreg" and not is_synthetic:
                             pool = alloy_outreg_pool
                         else:
@@ -1704,7 +1734,7 @@ def pass3_assign_operands(
         "alloca_total_slots": alloca_total_slots,
         "fr_reg_pool": fr_reg_pool,
         "fr_mem_pool": fr_mem_pool,
-        # recorded only for random naming; sorted = legacy output, byte-identical
+        # recorded only for random naming
         **({"reg_naming": {"mode": "random", "seed": reg_naming["seed"]}}
            if _rn_mode == "random" else {}),
     }
@@ -1796,9 +1826,7 @@ def pass4_ssa(
       2. Then create a fresh SSA name for the WRITE slot (outreg) and advance
          the current version for that register.
 
-    Reads are resolved before writes so an instruction like  add %x, %x  that
-    reads and writes the same virtual register gets the OLD value on both
-    inputs and defines a new version on output — correct SSA semantics.
+    Reads are resolved before writes, so `add %x, %x` reads the old version.
 
     Memory slots (inmem, outmem) carry byte offsets, not values; they are
     left unchanged (no ssa_name added).
@@ -1832,10 +1860,7 @@ def pass4_ssa(
     -----------------
     For any instruction with condition_assigned, the following is added:
         instruction["condition_ssa_forced"] : "i1 true" | "i1 false"
-    The IR emitter should use this constant directly in the  br i1  operand
-    so the condition is not folded away by the compiler before reaching the
-    microarchitectural simulator.  The inreg0 ssa_name is still computed for
-    bookkeeping (it represents the register the model placed the condition in).
+    The inreg0 ssa_name is still computed for bookkeeping.
     """
     current: Dict[str, str] = {}   # reg_name -> current SSA name
     counter: Dict[str, int] = {}   # reg_name -> next version number
@@ -1987,12 +2012,9 @@ def commit_boundary(
     Both are pinned to instructions that come from the Alloy instance: records
     tagged ``synthetic`` (pass_interleave chain steps, the xm fall-through NOP)
     are skipped. fnc is the first instruction of the must-be-uncommitted
-    suffix U; for models without a commit split, U = every uncommitted
-    instruction, so fnc is simply the first uncommitted one. Interleaving inserts chain steps right after the committed
-    prefix, so picking by position alone would make a chain step the fnc in
-    ~39% of interleaved variants. Both pass5_emit_llvm (the litmus labels)
-    and emit_branch_annotations (ann["commit_boundary"]) call this, so the
-    label and the annotation can never disagree.
+    suffix U (without a commit split, U = every uncommitted instruction).
+    Both pass5_emit_llvm (litmus labels) and emit_branch_annotations
+    (ann["commit_boundary"]) call this, so they cannot disagree.
     Design rule: wiki/design/COMMIT_BOUNDARY.md.
     """
     alloy = [rec for rec in instructions if not rec.get("synthetic")]
@@ -2023,8 +2045,7 @@ def pass5_emit_llvm(
     """
     Pass 5: emit LLVM IR from the SSA-annotated program.
 
-    fv2_cfg (opt-in fanout v2: edge splices + read-only fillers; None or
-    {"enabled": false} = output unchanged). Design and safety rules:
+    fv2_cfg (opt-in fanout v2: edge splices + read-only fillers). Design and safety rules:
     wiki/design/VOCAB_TABLES.md "Fanout v2" and
     wiki/findings/audits/2026-11-08/MODEL_AUDIT_SPT_RECON.md "Question 3".
       splice   On a register rf edge Alloy producer.outreg -> Alloy consumer
@@ -2033,7 +2054,7 @@ def pass5_emit_llvm(
                consumer read its result. Rule 1 allows writing a locked
                register only with the same value, hence value-preserving ops.
                Edge choice: the transmitter's leak edge with p_xmit, every
-               other edge with p_other (FV-2: random, biased to the xmit).
+               other edge with p_other.
       fillers  ALU ops that READ registers holding current values (Alloy or
                not) and WRITE only registers the program never uses (never a
                locked, infrastructure or free-pool register; no memory, no
@@ -2045,8 +2066,7 @@ def pass5_emit_llvm(
                skipped.
     Inserted ops are recorded in pass4_result["fv2"] for the .ann.json.
 
-    stsep_cfg (opt-in "no-STLF" store separation; None or {"enabled": false} =
-    output unchanged). Probe-addressed stores (movq src,(probe,%idx)) write a
+    stsep_cfg (opt-in "no-STLF" store separation). Probe-addressed stores (movq src,(probe,%idx)) write a
     separate 256-slot array %probe_st instead of %probe_mem, so they can never
     alias a probe-addressed load; only the Alloy model's own aliasing remains
     (a store whose outmem Mem_s atom is the inmem atom of a later
@@ -2054,8 +2074,7 @@ def pass5_emit_llvm(
     (unspecified slots are fresh, locked slots alias by Alloy design).
     Recorded in pass4_result["store_separation"].
 
-    brcond_cfg (opt-in; None or {"from_alloy": false} = output unchanged):
-    {"from_alloy": true} makes every NON-transmitter annotated br_cond whose
+    brcond_cfg (opt-in): {"from_alloy": true} makes every NON-transmitter annotated br_cond whose
     Alloy inreg0 is specified read that register through a pinned pass-through
     (`movq %in,%t ; andq $0,%t ; orq $C,%t`, C = the architectural condition),
     so the branch predicate depends on the Alloy value (taint) while the
@@ -2063,7 +2082,7 @@ def pass5_emit_llvm(
 
     BRANCH_FORMS (table-level, see _load_branch_forms): br_cmp / jmp_direct.
 
-    fpr_cfg (opt-in FPR routing; None or {"enabled": false} = output unchanged)
+    fpr_cfg (opt-in FPR routing)
     --------------------------------------------------------------------------
     When enabled, a load's result is copied through an xmm register inside the
     load's own asm block (after the load, so the load micro-op, its pc marker
@@ -2093,32 +2112,9 @@ def pass5_emit_llvm(
 
     Produces a single-function LLVM IR module  @{func_name}() -> i64.
 
-    Memory
-    ------
-    A single  [N x i64]  alloca covers all memory slots.  Each slot is
-    zero-initialised with a volatile store.  Load and store instructions
-    address slots via getelementptr; the slot index is
-    inmem/outmem "assigned_offset" divided by 8.
-
-    Registers
-    ---------
-    Registers in ssa_init (read before first write) are zero-initialised
-    in the entry block:
-      locked (physical x86): inline asm  "movq $1, $0"  with  "={phys},r"
-      virtual (rx*):         %name = add i64 0, 0
-
-    Write slots (outreg) on locked physical registers are forced via inline
-    asm  "movq $1, $0"  with  "={phys},r"  after computing the result into
-    a temporary SSA value.
-
-    Basic blocks
-    ------------
-    Mispredicted branches emit  br i1 {condition_ssa_forced}, ...
-    and create a new bb_{pc} label for the fallthrough successor.
-    All branches that target end_block cause  end_block: ret i64 0  to be
-    appended at the end of the function.
-
-    Resolved branches are emitted as a comment (no-op in the linear flow).
+    Memory: one zero-initialised [N x i64] alloca; slot index = assigned_offset / 8.
+    Registers in ssa_init are zero-initialised in the entry block; writes to locked
+    registers are forced via inline asm with "={phys},r".
     """
     instructions = pass4_result["instructions"]
     locked_registers: Dict[str, str] = pass4_result["locked_registers"]
@@ -2191,9 +2187,7 @@ def pass5_emit_llvm(
         il(f'%{ssa_name} = call i64 asm sideeffect "movq $1, $0", "={{{phys}}},r"(i64 {val})')
 
     # ---- Reserved virtual-pool registers for pointer materialization ----
-    # Using explicit physical registers instead of the "r" wildcard prevents
-    # LLVM from choosing a locked (Alloy-tracked) register for compiler-generated
-    # leaq instructions, which would create spurious taint via gem5 Lea-merge.
+    # explicit registers, not "r": LLVM must not pick a locked register for a leaq (Lea-merge taint)
     _vpool = pass4_result.get("virtual_reg_pool", [])
     _probe_base_phys = (
         _vpool[_VPOOL_IDX_PROBE_BASE]
@@ -2206,16 +2200,12 @@ def pass5_emit_llvm(
     lbl("entry")
 
     # ---- Detect inaddr uses: need a probe array as base ----
-    # When inaddr is specified, the secret value is used as an OFFSET into probe_mem
-    # (not the raw base address). This is the canonical Spectre pattern:
-    #   movq (%probe_base, %secret, 1), %dst
-    # Different secret values hit different cache lines → observable side channel.
-    # probe_mem is always valid; secret=0 just reads probe_mem[0].
+    # a specified inaddr is used as an offset into probe_mem: movq (%probe_base, %secret, 1), %dst
     _has_inaddr_load_or_store = any(
         (get_slot(_r, "inaddr") or {}).get("specified") and
         (get_slot(_r, "inaddr") or {}).get("ssa_name")
         for _r in instructions
-        if _r.get("concrete_instruction") in ("load", "store")
+        if _r.get("concrete_instruction") in LOAD_LIKE + ("store",)
     )
 
     # ---- Opt-in store separation (no-STLF variant; see docstring) ----
@@ -2237,7 +2227,7 @@ def pass5_emit_llvm(
             # run time: a later PROBE-addressed load of the same Mem_s atom
             # (a mem_base-slot load never shares an address with a probe store).
             alias = om is not None and any(
-                l.get("concrete_instruction") == "load" and _phys_of(l, "inmem") == om
+                l.get("concrete_instruction") in LOAD_LIKE and _phys_of(l, "inmem") == om
                 and (get_slot(l, "inaddr") or {}).get("specified")
                 for l in instructions[i_ + 1:])
             (_stsep_kept.append if alias else _stsep_pcs.add)(r["pc"])
@@ -2272,10 +2262,7 @@ def pass5_emit_llvm(
         asm_force(ssa_name, reg, "0")
 
     # ---- Prologue → test region barrier ----
-    # Drain in-flight stores from the prologue (probe_mem zero-init, mem_base
-    # zero-init) so the test region begins with a quiesced pipeline. Formerly
-    # provided implicitly by the clflush+slow-load sequences at branch sites;
-    # those are gone, so we drain explicitly here.
+    # drain the prologue's zero-init stores so the test region starts quiesced
     il(f'call void asm sideeffect "mfence", "~{{memory}}"()')
 
     # ---- stl_bypass: stores re-targeted to their bypass load's address ----
@@ -2347,10 +2334,13 @@ def pass5_emit_llvm(
     # ---- Opt-in fanout v2: edge splices + read-only fillers (see docstring) ----
     _fv2_on = bool(fv2_cfg and fv2_cfg.get("enabled"))
     _fv2_rec: Dict[str, Any] = {"splices": [], "fillers": [], "notes": []}
+    _ilv_fents: Optional[Dict[str, Dict[str, Any]]] = None
     _fv2_plan_splice: Dict[int, List[Tuple[str, str, str, Dict[str, Any]]]] = {}
     _fv2_plan_fill: Dict[int, int] = {}
     _fv2_cur: Dict[str, str] = dict((reg, ssa) for reg, ssa in ssa_init.items())
     _fv2_dead: List[str] = []
+    _vrj: Dict[str, Any] = dict((fv2_cfg or {}).get("vocab_rj") or {}) if _fv2_on else {}
+    _rmw_pcs: List[int] = []
     if _fv2_on:
         import zlib as _zlib
         _fv2_rng = random.Random(_zlib.crc32(f"fv2:{func_name}".encode()))
@@ -2358,10 +2348,22 @@ def pass5_emit_llvm(
         _fl_cfg = fv2_cfg.get("fillers", {})
         _sp_ops = list(_sp_cfg.get("ops", list(FV2_SPLICE_OPS)))
         _fl_ops = list(_fl_cfg.get("ops", list(FV2_FILLER_OPS)))
+        _ilv_fcfg = fv2_cfg.get("interleave_only") or {}
+        if _ilv_fcfg.get("enabled"):
+            # interleave-only: uniform over every usable entry; fillers.ops is not used
+            _ilv_fents = _ilv_select(_ilv_fcfg)
+            if not _ilv_fents:
+                raise ValueError("fanout_v2.interleave_only: no usable entries after exclude_tags")
+            _fl_ops = list(_ilv_fents)
+            _fv2_rec["interleave_only"] = {"table": _ilv_fcfg.get("table") or ILV_TABLE_DEFAULT,
+                                           "exclude_tags": list(_ilv_fcfg.get("exclude_tags") or []),
+                                           "n_ops": len(_fl_ops)}
         for o in _sp_ops:
             if o not in FV2_SPLICE_OPS: raise ValueError(f"fv2 splice op {o!r} not in FV2_SPLICE_OPS")
-        for o in _fl_ops:
+        for o in ([] if _ilv_fents else _fl_ops):
             if o not in FV2_FILLER_OPS: raise ValueError(f"fv2 filler op {o!r} not in FV2_FILLER_OPS")
+        if _vrj.get("jmp") and FV2_FILLER_JMP not in _fl_ops:
+            _fl_ops.append(FV2_FILLER_JMP)
         _pre_ok = bool(fv2_cfg.get("pre_window_reads", False))
         _unres = [r["pc"] for r in instructions
                   if (r.get("branch_annotations") or {}).get("mode", "").startswith("mispredict")]
@@ -2379,7 +2381,7 @@ def pass5_emit_llvm(
         _xm = next((r for r in instructions if r.get("xm")), None)
         _xm_slot = None
         if _xm is not None:
-            _xm_slot = "inaddr" if _xm.get("concrete_instruction") in ("load", "store") else "inreg0"
+            _xm_slot = "inaddr" if _xm.get("concrete_instruction") in LOAD_LIKE + ("store",) else "inreg0"
         _p_x = float(_sp_cfg.get("p_xmit", 0.75)); _p_o = float(_sp_cfg.get("p_other", 0.25))
         if _sp_cfg.get("enabled", True):
             for r in instructions:
@@ -2412,15 +2414,10 @@ def pass5_emit_llvm(
                     if sr.get("assigned"):
                         _used.add(sr["assigned"])
         _fv2_dead = [x for x in X86_64_CALLER_SAVED if x not in _used and x not in ("rax", "rcx", "rdx")]
-        # ---- OTB merge (opt-in fv2_cfg.otb): a second, OLDER load L2 under an
-        # earlier-resolving Alloy branch br_r, merged into the transmitter's
-        # address register right before the transmitter by the value-preserving
-        # `xor L2,R; xor L2,R` (both read R and L2). R then carries two taints of
-        # differing speculation status, the getOldestTaint gadget
-        # (wiki/findings/mdsToRead/OTB_GENERATION_GAP.md). L2 reads a private
-        # zeroed array %otb_mem (never Alloy memory, rule 2), writes a register
-        # the program never uses, and reads no Alloy register (rule 9 holds
-        # although it sits before the unresolved branch).
+        # ---- OTB merge (opt-in fv2_cfg.otb): an older load L2 under an earlier-resolving
+        # branch, merged into the transmitter's address register R by the value-preserving
+        # `xor L2,R; xor L2,R`, so R carries two taints of differing speculation status.
+        # L2 reads a private zeroed %otb_mem, writes an unused register, reads no Alloy register.
         _otb_cfg = fv2_cfg.get("otb", {})
         if _otb_cfg.get("enabled") and _xm is not None and _fv2_rng.random() < float(_otb_cfg.get("p", 1.0)):
             xs = get_slot(_xm, _xm_slot) if _xm_slot else None
@@ -2484,6 +2481,28 @@ def pass5_emit_llvm(
             if not live:
                 break
             op = _fv2_rng.choice(_fl_ops)
+            if _ilv_fents is not None:
+                ie = _ilv_fents[op]
+                if ie.get("form", "rr") == "none":
+                    # operand-less entry (jmp, nops): its own asm block, no dataflow
+                    il(f'call void asm sideeffect "{ie["asm"]}", ""()')
+                    _fv2_rec["fillers"].append({"before_pc": pc_, "op": op})
+                    continue
+                srcs = [_fv2_rng.choice(live) for _ in range(2)]
+                d = _fv2_rng.choice(_fv2_dead)
+                _fv2_n[0] += 1
+                xclob = "".join(f",~{{{x}}}" for x in ie.get("clobbers", []))
+                il(f'%__fill_{_fv2_n[0]} = call i64 asm sideeffect "{ie["asm"]}", '
+                   f'"=&{{{d}}},{{{srcs[0][0]}}},{{{srcs[1][0]}}},~{{flags}}{xclob}"'
+                   f'(i64 %{srcs[0][1]}, i64 %{srcs[1][1]})')
+                _fv2_rec["fillers"].append({"before_pc": pc_, "op": op, "dst": d,
+                                            "srcs": [srcs[0][0], srcs[1][0]]})
+                continue
+            if op == FV2_FILLER_JMP:
+                # jmp filler: direct jmp to the next instruction, own asm block
+                il(f'call void asm sideeffect "jmp .Lsimspect_jf${{:uid}}\\0A.Lsimspect_jf${{:uid}}:", ""()')
+                _fv2_rec["fillers"].append({"before_pc": pc_, "op": op})
+                continue
             srcs = [_fv2_rng.choice(live) for _ in range(2)]
             d = _fv2_rng.choice(_fv2_dead)
             _fv2_n[0] += 1
@@ -2546,6 +2565,8 @@ def pass5_emit_llvm(
     def fv2_after(rec: Dict[str, Any]) -> None:
         if not _fv2_on:
             return
+        if rec.get("concrete_instruction") == VOCAB_RJ_RMW["name"]:
+            return   # the RMW writes no register: the old value stays current
         o = get_slot(rec, "outreg")
         if o and o.get("ssa_name") and o.get("assigned"):
             _fv2_cur[o["assigned"]] = o["ssa_name"]
@@ -2565,11 +2586,35 @@ def pass5_emit_llvm(
                     and r.get("concrete_instruction") in ("br_cond", "br_uncond")
                     and _jrng.random() < _jmp_p):
                 _jmp_pcs.append(r["pc"])
+    # fv4 BRANCH_FORMS.uniform: one form per annotated branch, uniform over the
+    # eligible forms in the list ("jmp" only where jmp_direct would be allowed).
+    _br_uni = list(BRANCH_FORMS.get("uniform") or [])
+    _cmp_pcs: Set[int] = set()
+    if _br_uni:
+        import zlib as _zlib3
+        _brng = random.Random(_zlib3.crc32(f"brf:{func_name}".encode()))
+        for r in instructions:
+            ba_ = r.get("branch_annotations")
+            c_ = r.get("concrete_instruction")
+            if not ba_ or c_ not in ("br_cond", "br_uncond", "br_bez"):
+                continue
+            jmp_ok = (ba_.get("mode") == "correctly_not_taken" and not r.get("xm")
+                      and c_ in ("br_cond", "br_uncond"))
+            elig = [f for f in _br_uni if f in ("test", "cmp") or (f == "jmp" and jmp_ok)]
+            if not elig:
+                continue
+            f_ = _brng.choice(elig)
+            if f_ == "jmp":
+                _jmp_pcs.append(r["pc"])
+            elif f_ == "cmp":
+                _cmp_pcs.add(r["pc"])
+
+    _fv4_forms: Dict[str, str] = {}
 
     def br_on(cond_raw: str, cond_i1: str, taken_lbl: str, ft_lbl: str, taken_if_zero: bool) -> None:
         """Conditional branch on cond_raw: today's `br i1` (LLVM picks test/jcc),
         or with br_cmp an asm-goto `cmpq $1,%c ; jb|jae` (taken iff c==0 / c!=0)."""
-        if not _br_cmp:
+        if not (_br_cmp or pc in _cmp_pcs):
             il(f"br i1 {cond_i1}, label %{taken_lbl}, label %{ft_lbl}")
             return
         jcc = "jb" if taken_if_zero else "jae"
@@ -2601,11 +2646,12 @@ def pass5_emit_llvm(
             rec = fv2_before(rec)
             _fv2_prev = rec
         cm(f"pc={pc}  {atom}  ({concrete})")
+        if rec.get("vocab_form"):
+            cm(f"fv4 form: {rec['vocab_form']}")
+            _fv4_forms[str(pc)] = rec["vocab_form"]
         marker = f"__litmus_{safe_name}_pc{pc}"
-        # pc marker prefix shared by all asm blocks below; each instruction
-        # type integrates it into its own single asm sideeffect call so that
-        # nothing (GEP, icmp, etc.) can appear between the label and the
-        # actual instruction in the compiled output.
+        # pc marker prefix: each instruction puts it in its own single asm sideeffect,
+        # so nothing (GEP, icmp, ...) can land between the label and the instruction
         mkr = f".globl {marker}\\0A{marker}:\\0A"
         if pc == last_committed_pc:
             cb = f"__litmus_{safe_name}_last_committed"
@@ -2617,6 +2663,7 @@ def pass5_emit_llvm(
         last_was_terminator = False
 
         if concrete == "load":
+            _swp = rec.get("vocab_form") == "load_swapidx"   # base/index swapped
             inaddr_sr = get_slot(rec, "inaddr")
             # Only use the rf-specified inaddr — virtual-pool assignments are noise
             _ia_specified = inaddr_sr and inaddr_sr.get("specified")
@@ -2624,20 +2671,18 @@ def pass5_emit_llvm(
             inaddr_phys = inaddr_sr.get("assigned") if _ia_specified else None
             outreg_sr = get_slot(rec, "outreg")
             if inaddr_ssa and inaddr_phys:
-                # Secret value used as byte offset into probe_mem — canonical Spectre pattern:
-                #   movq (%probe_mem, %secret, 1), %dst
-                # probe_mem is always valid; different secret values hit different cache lines.
+                # secret as byte offset into probe_mem: movq (%probe_mem, %secret, 1), %dst
                 if outreg_sr and outreg_sr.get("ssa_name"):
                     out_name = outreg_sr["ssa_name"]
                     phys = outreg_sr.get("assigned")
                     fdst, fsx, fcl = fpr_route(rec, out_name, phys)
                     il(f'%{out_name} = call i64 asm sideeffect '
-                       f'"{mkr}movq ($1, $2, 1), {fdst}{fsx}", '
+                       f'"{mkr}movq {"($2, $1, 1)" if _swp else "($1, $2, 1)"}, {fdst}{fsx}", '
                        f'"=&{{{phys}}},{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}}{fcl}"'
                        f'(ptr %probe_mem, i64 %{inaddr_ssa})')
                 else:
                     il(f'call void asm sideeffect '
-                       f'"{mkr}movq ($0, $1, 1), %%rax", '
+                       f'"{mkr}movq {"($1, $0, 1)" if _swp else "($0, $1, 1)"}, %%rax", '
                        f'"{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}},~{{rax}}"'
                        f'(ptr %probe_mem, i64 %{inaddr_ssa})')
             else:
@@ -2652,12 +2697,36 @@ def pass5_emit_llvm(
                     phys = outreg_sr.get("assigned")
                     fdst, fsx, fcl = fpr_route(rec, out_name, phys)
                     il(f'%{out_name} = call i64 asm sideeffect '
-                       f'"{mkr}movq {offset}($1), {fdst}{fsx}", '
+                       f'"{mkr}movq {offset}({",$1,1" if _swp else "$1"}), {fdst}{fsx}", '
                        f'"=&{{{phys}}},{{{_probe_base_phys}}},~{{memory}}{fcl}"(ptr %mem_base)')
                 else:
                     il(f'call void asm sideeffect '
-                       f'"{mkr}movq {offset}($0), %rax", '
+                       f'"{mkr}movq {offset}({",$0,1" if _swp else "$0"}), %rax", '
                        f'"{{{_probe_base_phys}}},~{{memory}},~{{rax}}"(ptr %mem_base)')
+
+        elif concrete == VOCAB_RJ_RMW["name"]:
+            # RMW form of a load whose outreg no Alloy rf edge reads:
+            #   orq $0, (%probe_mem, %idx, 1)   or   orq $0, off(%mem_base)
+            # same address operands and pc marker as `load`; writes no register.
+            inaddr_sr = get_slot(rec, "inaddr")
+            _ia_specified = inaddr_sr and inaddr_sr.get("specified")
+            inaddr_ssa  = inaddr_sr.get("ssa_name") if _ia_specified else None
+            inaddr_phys = inaddr_sr.get("assigned") if _ia_specified else None
+            if inaddr_ssa and inaddr_phys:
+                il(f'call void asm sideeffect '
+                   f'"{mkr}orq $$0, ($0, $1, 1)", '
+                   f'"{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}},~{{flags}}"'
+                   f'(ptr %probe_mem, i64 %{inaddr_ssa})')
+            else:
+                idx = mem_slot_idx(rec, "inmem")
+                if idx is None or alloca_n == 0:
+                    il(f'call void asm sideeffect ".globl {marker}\\0A{marker}:", ""()')
+                    cm(f"WARNING: load_rmw_or0 {atom} missing inmem offset — skipped")
+                    continue
+                il(f'call void asm sideeffect '
+                   f'"{mkr}orq $$0, {idx * 8}($0)", '
+                   f'"{{{_probe_base_phys}}},~{{memory}},~{{flags}}"(ptr %mem_base)')
+            _rmw_pcs.append(pc)
 
         elif concrete == "store" and pc in stl_retarget:
             # stl_bypass: same store, addressed so it truly aliases its bypass
@@ -2671,7 +2740,8 @@ def pass5_emit_llvm(
             inaddr_sr = get_slot(rec, "inaddr")
             inaddr_phys = inaddr_sr.get("assigned") if inaddr_sr else None
             inreg0_sr = get_slot(rec, "inreg0")
-            has_src = bool(inreg0_sr and inreg0_sr.get("ssa_name"))
+            has_src = bool(inreg0_sr and inreg0_sr.get("ssa_name")) and not _fv4_store_imm(rec)
+            _swp = rec.get("vocab_form") == "store_swapidx"   # base/index swapped
             ops: List[str] = []
             cons: List[str] = []
             if has_src:
@@ -2687,6 +2757,8 @@ def pass5_emit_llvm(
             src_txt = "$0" if has_src else "$$0"
             b = n - (2 if rt["index_ssa"] else 1)
             addr_txt = (f"{disp}(${b}, ${b + 1}, 1)" if rt["index_ssa"] else f"{disp}(${b})")
+            if _swp:
+                addr_txt = (f"{disp}(${b + 1}, ${b}, 1)" if rt["index_ssa"] else f"{disp}(,${b},1)")
             il(f'call void asm sideeffect '
                f'"{mkr}movq {src_txt}, {addr_txt}", '
                f'"{",".join(cons)},~{{memory}}"({", ".join(ops)})')
@@ -2697,6 +2769,9 @@ def pass5_emit_llvm(
             inaddr_ssa  = inaddr_sr.get("ssa_name") if _ia_specified else None
             inaddr_phys = inaddr_sr.get("assigned") if _ia_specified else None
             inreg0_sr = get_slot(rec, "inreg0")
+            if _fv4_store_imm(rec):
+                inreg0_sr = None   # store_imm: store $0 (Alloy left inreg0 unspecified)
+            _swp = rec.get("vocab_form") == "store_swapidx"   # base/index swapped
             _st_base = "%probe_st" if pc in _stsep_pcs else "%probe_mem"
             if inaddr_ssa and inaddr_phys:
                 # Address comes from register via rf edge — use it directly
@@ -2706,12 +2781,12 @@ def pass5_emit_llvm(
                     phys_src = inreg0_sr.get("assigned")
                     in_con = f'{{{phys_src}}}' if phys_src else 'r'
                     il(f'call void asm sideeffect '
-                       f'"{mkr}movq $0, ($1, $2, 1)", '
+                       f'"{mkr}movq $0, {"($2, $1, 1)" if _swp else "($1, $2, 1)"}", '
                        f'"{in_con},{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}}"'
                        f'(i64 {src_ssa}, ptr {_st_base}, i64 %{inaddr_ssa})')
                 else:
                     il(f'call void asm sideeffect '
-                       f'"{mkr}movq $$0, ($0, $1, 1)", '
+                       f'"{mkr}movq $$0, {"($1, $0, 1)" if _swp else "($0, $1, 1)"}", '
                        f'"{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}}"'
                        f'(ptr {_st_base}, i64 %{inaddr_ssa})')
             else:
@@ -2726,12 +2801,34 @@ def pass5_emit_llvm(
                     phys_src = inreg0_sr.get("assigned")
                     in_con = f'{{{phys_src}}}' if phys_src else 'r'
                     il(f'call void asm sideeffect '
-                       f'"{mkr}movq $0, {offset}($1)", '
+                       f'"{mkr}movq $0, {offset}({",$1,1" if _swp else "$1"})", '
                        f'"{in_con},{{{_probe_base_phys}}},~{{memory}}"(i64 {src_ssa}, ptr %mem_base)')
                 else:
                     il(f'call void asm sideeffect '
-                       f'"{mkr}movq $$0, {offset}($0)", '
+                       f'"{mkr}movq $$0, {offset}({",$0,1" if _swp else "$0"})", '
                        f'"{{{_probe_base_phys}}},~{{memory}}"(ptr %mem_base)')
+
+        elif concrete.startswith(ILV_PREFIX):
+            # interleave-only chain step (opt-in interleave.interleave_only): the
+            # entry's template with $0 = the step's outreg, $1/$2 = inreg0/inreg1.
+            ie = _ilv_entry(concrete[len(ILV_PREFIX):])
+            cons, ins, phys = [], [], []
+            for sn in (("inreg0", "inreg1") if _ilv_refs(ie["asm"], 2) else ("inreg0",)):
+                sr_ = get_slot(rec, sn)
+                ph_ = sr_.get("assigned") if sr_ else None
+                ins.append(f"i64 {ssa_ref(rec, sn) or '0'}")
+                cons.append(f'{{{ph_}}}' if ph_ else 'r')
+                phys.append(ph_)
+            xclob = "".join(f",~{{{x}}}" for x in ie.get("clobbers", []))
+            outreg_sr = get_slot(rec, "outreg")
+            phys_out = outreg_sr.get("assigned") if outreg_sr else None
+            # early-clobber unless the output shares a register with an input
+            # (LLVM rejects =&{r} with {r}); then the template computes in place
+            ec = "=" if (phys_out and phys_out in phys) else "=&"
+            out_con = f'{ec}{{{phys_out}}}' if phys_out else f'{ec}r'
+            out_name = (outreg_sr.get("ssa_name") if outreg_sr else None) or f"__ilv_dead_{pc}"
+            il(f'%{out_name} = call i64 asm sideeffect "{mkr}{ie["asm"]}", '
+               f'"{out_con},{",".join(cons)},~{{flags}}{xclob}"({", ".join(ins)})')
 
         elif concrete == "bitnot":
             inreg0 = ssa_ref(rec, "inreg0") or "0"
@@ -2781,12 +2878,9 @@ def pass5_emit_llvm(
                    f'"{in0_con},{in1_con},~{{rax}}"(i64 {inreg0}, i64 {inreg1})')
 
         elif concrete in ("inc", "cmov_rr"):
-            # Fanout v2 vocabulary (FV-5, opt-in via
-            # instruction_tables/proposed/fv2_vocab.jsonc; never in the default
-            # table). inc: out = in0 + 1 via `incq`, which in gem5 is
-            # `addi reg, reg, 1` reading the CF/OF flag register (SPT audit A1).
-            # cmov_rr: out = in0 always; `cmpq in0,in0` sets ZF so `cmovne in1`
-            # is never taken but still reads in1 (SPT audit A2 shape).
+            # fv2_vocab.jsonc forms. inc: out = in0 + 1 via `incq` (gem5 addi also reads
+            # the CF/OF flag register). cmov_rr: out = in0; `cmpq in0,in0` sets ZF so
+            # `cmovne in1` is never taken but still reads in1.
             inreg0 = ssa_ref(rec, "inreg0") or "0"
             inreg0_sr = get_slot(rec, "inreg0")
             phys_in0 = inreg0_sr.get("assigned") if inreg0_sr else None
@@ -2812,6 +2906,70 @@ def pass5_emit_llvm(
             else:
                 il(f'call void asm sideeffect "{mkr}{body}", '
                    f'"{",".join(cons)},~{{rax}},~{{flags}}"({", ".join(ins)})')
+
+        elif concrete in FV4_ALU_UNARY or concrete in FV4_ALU_BINARY:
+            # fv4 other_n ALU forms
+            eff = _fv4_alu_effective(rec)
+            if eff != concrete:
+                cm(f"fv4 {concrete}: same-register inputs, emitted as {eff} (no zero idiom)")
+            binary = eff in FV4_ALU_BINARY
+            ops_in, phys_in, cons_in = [], [], []
+            for sn in (("inreg0", "inreg1") if binary else ("inreg0",)):
+                sr_ = get_slot(rec, sn)
+                ph_ = sr_.get("assigned") if sr_ else None
+                ops_in.append(ssa_ref(rec, sn) or "0")
+                phys_in.append(ph_)
+                cons_in.append(f'{{{ph_}}}' if ph_ else 'r')
+            outreg_sr = get_slot(rec, "outreg")
+            has_out = bool(outreg_sr and outreg_sr.get("ssa_name"))
+            phys_out = outreg_sr.get("assigned") if has_out else None
+
+            def _alu(dst: str, a: str, b: Optional[str]) -> str:
+                # asm computing dst = eff(a, b); dst may equal a (in place)
+                if not binary:
+                    op = FV4_ALU_UNARY[eff]
+                    cp = "" if a == dst else f"movq {a}, {dst}"
+                    if op is None:
+                        return cp or f"movq {a}, {dst}"
+                    return (cp + "\\0A" if cp else "") + f"{op} {dst}"
+                if eff == "lea_s8":
+                    return f"leaq ({a}, {b}, 8), {dst}"
+                cp = "" if a == dst else f"movq {a}, {dst}\\0A"
+                return cp + f"{FV4_ALU_BINARY[eff]} {b}, {dst}"
+
+            if has_out:
+                out_name = outreg_sr["ssa_name"]
+                p0 = phys_in[0]
+                p1 = phys_in[1] if binary else None
+                if binary and p0 and p0 == p1:
+                    # both inputs in one register: read it once
+                    if p0 == phys_out:
+                        body, cons, ins = _alu("$0", "$0", "$0"), f"={{{phys_out}}},0", [ops_in[0]]
+                    else:
+                        body, cons, ins = _alu("$0", "$1", "$1"), f"=&{{{phys_out}}},{cons_in[0]}", [ops_in[0]]
+                elif p0 and p0 == phys_out:
+                    body = _alu("$0", "$0", "$2" if binary else None)
+                    cons = f"={{{phys_out}}},0" + (f",{cons_in[1]}" if binary else "")
+                    ins = ops_in
+                elif binary and p1 and p1 == phys_out:
+                    if eff == "lea_s8":
+                        body = "leaq ($1, $0, 8), $0"
+                    elif eff in _FV4_COMMUTATIVE:
+                        body = f"{FV4_ALU_BINARY[eff]} $1, $0"
+                    else:   # sub_rr: out = -in1 + in0
+                        body = "negq $0\\0Aaddq $1, $0"
+                    cons, ins = f"={{{phys_out}}},{cons_in[0]},0", ops_in   # in1 tied to out
+                else:
+                    body = _alu("$0", "$1", "$2" if binary else None)
+                    cons, ins = f"=&{{{phys_out}}}," + ",".join(cons_in), ops_in
+                args = ", ".join(f"i64 {x}" for x in ins)
+                il(f'%{out_name} = call i64 asm sideeffect "{mkr}{body}", '
+                   f'"{cons},~{{flags}}"({args})')
+            else:
+                body = _alu("%rax", "$0", "$1" if binary else None)
+                args = ", ".join(f"i64 {x}" for x in ops_in)
+                il(f'call void asm sideeffect "{mkr}{body}", '
+                   f'"{",".join(cons_in)},~{{rax}},~{{flags}}"({args})')
 
         elif concrete == "zsm":
             # zero-skip multiply: 64-bit signed/unsigned mul (low half). Emit
@@ -2843,20 +3001,10 @@ def pass5_emit_llvm(
                    f'(i64 {inreg0}, i64 {inreg1})')
 
         elif concrete == "div":
-            # signed integer division: idivq divides RDX:RAX by the operand,
-            # quotient → RAX, remainder → RDX. Move in0→RAX, sign-extend via
-            # CQO, idivq in1, then copy RAX→phys_out.
-            #
-            # The divisor itself is a transmitter: a div by 0 faults
-            # observably, so the "did the fault happen?" bit leaks the
-            # divisor value. When this instruction is the xm (the test's
-            # transmitter), we leave the divisor as-is and let the fault
-            # fire if it's 0 — gem5_common.process_one reclassifies the
-            # panic as a hit when the faulting PC is the xm. When this
-            # instruction is NOT the xm, we route the divisor through %rcx
-            # with `orq $$1, %rcx` to force a non-zero value, so unrelated
-            # noise instructions don't crash the test before the real
-            # transmitter runs.
+            # signed division: in0 -> RAX, cqo, idivq in1, RAX -> out.
+            # The divisor is a transmitter (div by 0 faults). As the xm it is left as-is
+            # (gem5_common.process_one counts the fault at the xm pc as a hit); otherwise
+            # it is forced non-zero via `orq $$1, %rcx` so noise never faults.
             is_xm      = rec.get("xm", False)
             inreg0     = ssa_ref(rec, "inreg0") or "0"
             inreg1     = ssa_ref(rec, "inreg1") or "0"
@@ -2896,21 +3044,10 @@ def pass5_emit_llvm(
                    f'(i64 {inreg0}, i64 {inreg1})')
 
         elif concrete == "br_bez":
-            # BEZ: branch-if-equal-to-zero (xmit transmitter branch).
-            #
-            # Condition is read from the Alloy-specified inreg slot via a
-            # phys-pinned passthrough so STT sees the load→branch taint chain
-            # that Alloy modeled (TBranchx's inreg always traces back to a
-            # load; that's the Alloy-side invariant for "xm"). Architecturally
-            # the inreg's value is 0 (gem5 SE-mode memory init is zero and the
-            # entry prologue pre-zeroes stack slots), so testq sets ZF=1 and
-            # the branch is architecturally taken — the BTB-forced fall-through
-            # prediction creates the misprediction. The branch's resolution
-            # broadcast is held by `resolve_stall_cycles` in the gem5 mod,
-            # which widens the speculation window.
-            #
-            # If Alloy did not specify an inreg slot (non-xm fallback), use a
-            # self-xor on a vpool reg for a guaranteed ZF=1 with no taint.
+            # BEZ (xmit branch): condition read from the Alloy inreg via a phys-pinned
+            # passthrough (keeps the load->branch taint). Its arch value is 0, so the
+            # branch is taken; the BTB-forced fall-through makes the misprediction.
+            # No specified inreg: self-xor on a vpool reg (ZF=1, no taint).
             ba = rec.get("branch_annotations")
             if ba:
                 taken = ba["taken_target"]
@@ -2921,9 +3058,7 @@ def pass5_emit_llvm(
                 phys_in0  = inreg0_sr.get("assigned") if inreg0_sr else None
                 cond_raw  = tmp("bez_raw")
                 if inreg0 is not None and phys_in0 is not None:
-                    # movq %{phys_in0}, %tmp — propagates phys_in0's taint
-                    # bit into tmp at rename. The icmp+br below compiles to
-                    # testq+jcc reading tmp, preserving the dep chain.
+                    # movq %{phys_in0}, %tmp carries the taint; icmp+br becomes testq+jcc on tmp
                     il(f'{cond_raw} = call i64 asm sideeffect '
                        f'"{mkr}movq $1, $0", '
                        f'"=&r,{{{phys_in0}}}"(i64 {inreg0})')
@@ -2965,20 +3100,9 @@ def pass5_emit_llvm(
                 mode  = ba.get("mode")
                 cm(f"BTB predicts={ba['btb_prediction']}  btb_predicted_pc={ba['btb_predicted_pc']}  mode={mode}")
                 if mode in ("mispredict_not_taken", "mispredict_taken", "correctly_not_taken"):
-                    # Register-only condition: init a vpool register to the
-                    # value that produces the architectural condition_value
-                    # (init=1 → testq sets ZF=0 → jne taken; init=0 → ZF=1 →
-                    # jne not taken). The BTB-forced direction lives in
-                    # branch_annotations.btb_prediction and is applied by the
-                    # gem5 mod via --branch-ann-file. The resolution broadcast
-                    # is delayed by `resolve_stall_cycles` in that file.
-                    #
-                    # When this branch is an xm (transmitter), pull the
-                    # condition from the Alloy-specified inreg slot so STT
-                    # sees the load→branch taint chain. This only fires for
-                    # resolved-xm cases here (cond=False); unresolved-xm uses
-                    # br_bez and mispredict_taken-xm also routes through
-                    # br_bez via pass2_5.
+                    # vpool register initialised to give condition_value (1 -> jne taken,
+                    # 0 -> not taken); the BTB direction comes from --branch-ann-file.
+                    # A resolved xm reads its Alloy inreg instead (keeps the taint).
                     is_xm = rec.get("xm", False)
                     inreg0    = ssa_ref(rec, "inreg0") if is_xm else None
                     inreg0_sr = get_slot(rec, "inreg0") if is_xm else None
@@ -2987,12 +3111,7 @@ def pass5_emit_llvm(
                     cond_i1  = tmp("cond_i1")
                     if (is_xm and inreg0 is not None and phys_in0 is not None
                             and not ba["condition_value"]):
-                        # Phys-pinned passthrough: movq %{phys_in0}, %tmp
-                        # propagates phys_in0's taint into tmp at rename.
-                        # Architectural value of phys_in0 is 0 (gem5 SE-mode
-                        # memory init is zero; stack pre-zeroed in prologue),
-                        # so testq sets ZF=1, jne NOT taken — matches the
-                        # cond=False (correctly_not_taken) architectural path.
+                        # phys-pinned passthrough; phys_in0 is 0, so jne is not taken (cond=False)
                         il(f'{cond_raw} = call i64 asm sideeffect '
                            f'"{mkr}movq $1, $0", '
                            f'"=&r,{{{phys_in0}}}"(i64 {inreg0})')
@@ -3017,21 +3136,10 @@ def pass5_emit_llvm(
                            f'"=&{{{cond_reg}}}"()')
                     il(f"{cond_i1} = icmp ne i64 {cond_raw}, 0")
                     if mode == "mispredict_taken":
-                        # The architecturally-correct (not-taken) path must
-                        # BYPASS the Alloy critical section, never fall into
-                        # it. Emit an explicit fall-through trampoline between
-                        # the branch and the critical section whose only body
-                        # is an unconditional jump to end_block. Then:
-                        #   • correctly-predicted not-taken → trampoline → end
-                        #     (Alloy critical section skipped, never commits)
-                        #   • BTB-forced taken misprediction → taken_target =
-                        #     bb_{pc+1} = next Alloy pc (critical section runs
-                        #     speculatively, squashed on resolve)
-                        # The asm sideeffect with a unique global label keeps
-                        # the trampoline non-trivial — without it LLVM
-                        # SimplifyCFG folds the lone `br label` back into the
-                        # predecessor and the explicit bypass disappears from
-                        # the emitted .s.
+                        # ftbypass trampoline: the architectural not-taken path jumps to
+                        # end_block, so the critical section runs only under the forced
+                        # taken misprediction. Its labelled asm sideeffect stops SimplifyCFG
+                        # from folding the trampoline away.
                         ftb = f"ftbypass_{pc}"
                         ftb_lbl = f"__litmus_{safe_name}_ftbypass{pc}"
                         br_on(cond_raw, cond_i1, taken, ftb, False)
@@ -3040,10 +3148,7 @@ def pass5_emit_llvm(
                            f'".globl {ftb_lbl}\\0A{ftb_lbl}:", ""()')
                         il(f"br label %{ft}")
                     elif taken == ft:
-                        # Both edges collapse to end_block (resolved branch on
-                        # the last Alloy pc). LLVM SimplifyCFG would fold the
-                        # cond-br to `br label %L`, erasing the testq+jne so
-                        # the xmit annotation lands on the xorq prelude.
+                        # both edges are end_block: keep SimplifyCFG from erasing the testq+jne
                         ftb = f"ftbypass_{pc}"
                         ftb_lbl = f"__litmus_{safe_name}_ftbypass{pc}"
                         br_on(cond_raw, cond_i1, taken, ftb, False)
@@ -3059,10 +3164,7 @@ def pass5_emit_llvm(
                     il(f"br {cond}, label %{taken}, label %{ft}")
                 last_was_terminator = True
             else:
-                # Branches without branch_annotations should not reach pass 5
-                # any more (resolved branches are now annotated in pass 2.5).
-                # Keep a defensive fallback so an unexpected case fails loudly
-                # downstream rather than silently emitting a missing branch.
+                # unannotated branch (should not happen): defensive fallback
                 il(f'call void asm sideeffect "{mkr}", ""()')
                 cm(f"branch {atom} has no branch_annotations — skipped")
 
@@ -3083,16 +3185,26 @@ def pass5_emit_llvm(
     lines.append("}")
     ir = "\n".join(lines)
 
-    if _br_cmp or _jmp_pcs:
+    if _br_cmp or _jmp_pcs or _br_uni:
         pass4_result["branch_forms"] = {"br_cmp": _br_cmp, "jmp_direct_pcs": _jmp_pcs}
+        if _br_uni:
+            pass4_result["branch_forms"].update(uniform=_br_uni, br_cmp_pcs=sorted(_cmp_pcs))
     if _bc_alloy:
         pass4_result["branch_cond"] = {"from_alloy": True, "pcs": _bc_pcs}
+    if _fv4_forms:
+        pass4_result["vocab_forms"] = _fv4_forms   # ld/str encodings, by Alloy pc
     if _fv2_on:
         _fv2_rec["window_pc"] = _win_pc
         _fv2_rec["pre_window_reads"] = _pre_ok
         _fv2_rec["dead_registers"] = _fv2_dead
         pass4_result["fv2"] = _fv2_rec
 
+    if _vrj:
+        # Read by emit_branch_annotations -> .ann.json "vocab_rj" (absent when off).
+        pass4_result["vocab_rj"] = {"rmw": bool(_vrj.get("rmw")), "jmp": bool(_vrj.get("jmp")),
+                                    "rmw_pcs": _rmw_pcs,
+                                    "jmp_filler_before_pcs": [f["before_pc"] for f in _fv2_rec["fillers"]
+                                                              if f.get("op") == FV2_FILLER_JMP]}
     if _fpr_on:
         # Read by emit_branch_annotations -> .ann.json "fpr" (absent when off).
         pass4_result["fpr_routes"] = {
@@ -3128,17 +3240,9 @@ def emit_branch_annotations(
                                    execution proceeds from this PC.
       mode                : str  — misprediction mode (e.g. "mispredict_not_taken")
 
-    Returns a list of annotation dicts (one per unresolved branch, in PC order).
-
-    If write_out=True, writes a JSON file to out_path with the structure:
-      {
-        "branch_mode": str,
-        "annotations": [ { branch_pc, branch_atom, btb_forced_target_pc, mode }, ... ]
-      }
-
-    The btb_forced_target_pc is a PC index into the instruction sequence (0-based).
-    The simulator is responsible for resolving this to an actual memory address at
-    load time (e.g. by looking up the address of the instruction at that index).
+    Returns the annotation list (PC order); with write_out=True also writes the
+    .ann.json to out_path. PCs are Alloy indices; compile_annotate.py resolves them
+    to addresses.
     """
     import json
 
@@ -3216,6 +3320,10 @@ def emit_branch_annotations(
             payload["store_separation"] = result["store_separation"]
         if result.get("branch_forms") is not None:
             payload["branch_forms"] = result["branch_forms"]
+        if result.get("vocab_rj") is not None:
+            payload["vocab_rj"] = result["vocab_rj"]
+        if result.get("vocab_forms") is not None:
+            payload["vocab_forms"] = result["vocab_forms"]
         if result.get("branch_cond") is not None:
             payload["branch_cond"] = result["branch_cond"]
         # Opt-in register naming (pass3 reg_naming): Alloy Reg_s atom -> x86 name.

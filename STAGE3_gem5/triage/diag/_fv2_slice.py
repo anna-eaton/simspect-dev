@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-_fv2_slice.py: shared static helpers for the fanout-v2 FP diagnostics (bucket-fv2, 2026-11-09).
+_fv2_slice.py: shared static helpers for the fanout-v2 FP diagnostics.
 Not a diagnostic itself (bucket_hits.py only discovers diag_*.py).
 
 transmitter_slice(stem, mode_dir) = backward register slice from the transmitter over the
-linear litmus body of <mode_dir>/asm/<stem>.s, exactly the rule of the bug agent's
-/tests/simspect_alloy_20261108/bugwork/fp_hits/bucket_fp.py (bug-investigate-fp, which produced
+linear litmus body of <mode_dir>/asm/<stem>.s, exactly the rule of
+/tests/simspect_alloy_20261108/bugwork/fp_hits/bucket_fp.py (which produced
 the S1-on-E3/E4 and R-SA-13 verdicts): ld = the registers of the transmitter's memory operand;
 br_x = the source of the `movq %src,%rcx` that feeds the compare. The walk follows register
 defs backwards, stops at a load (that load is a "producer"; SSE if its destination is an xmm),

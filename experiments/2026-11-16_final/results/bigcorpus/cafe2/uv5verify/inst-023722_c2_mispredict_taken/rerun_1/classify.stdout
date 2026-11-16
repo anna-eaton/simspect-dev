@@ -1,0 +1,42 @@
+{
+ "defense": "cleanupspec",
+ "N_prefix": 1,
+ "n_rows": 1,
+ "status": {
+  "ok": 1
+ },
+ "hits": 1,
+ "gem5_cpu_s_total": 1.24,
+ "total_cpu_s_total": 3.87,
+ "gem5_cpu_s_per_test": 1.243,
+ "total_cpu_s_per_test": 3.874,
+ "signatures": {
+  "UV3": {
+   "K": 0,
+   "N": 1,
+   "expected_tests_to_first": 2.0,
+   "expected_gem5_cpu_s_to_first": 2.49,
+   "expected_total_cpu_s_to_first": 7.75
+  },
+  "UV4": {
+   "K": 0,
+   "N": 1,
+   "expected_tests_to_first": 2.0,
+   "expected_gem5_cpu_s_to_first": 2.49,
+   "expected_total_cpu_s_to_first": 7.75
+  },
+  "UV5": {
+   "first_idx": 0,
+   "tests_to_first": 1,
+   "stem": "inst-023722_c2",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 1.24,
+   "cum_total_cpu_s": 3.87,
+   "K": 1,
+   "N": 1,
+   "expected_tests_to_first": 1.0,
+   "expected_gem5_cpu_s_to_first": 1.24,
+   "expected_total_cpu_s_to_first": 3.87
+  }
+ }
+}

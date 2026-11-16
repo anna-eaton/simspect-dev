@@ -1,0 +1,39 @@
+// overnight-exp 2026-11-11: overnight Stage 1b (Alloy) for STT_6_u, node cafe3. Copy of runconfigs/twostage_lp/STT_6_u.jsonc with: node-local paths (cores copied from cafe2, testsets under /tests/overnight_20261111), corpus name *_fv4, stage2_config = the final Stage-2 config (fv4 + the ilv-vocab and abs-vocab keys, written when both are DONE), stage2_postpasses false, Stage 1.5 target_distinct 60000 (regen-lp: 25000) and budget_s 9000 (regen-lp: 4500), new queue shuffle seed 20261115.
+// X2a (Alloy only, Anna 2026-11-12): python3 twostage_lp.py --config <this> --ws /tests/overnight_20261111/ws_STT_6_u --alloy-only   (scripts/overnight_20261111/launch_alloy.sh). X2b later: scripts/overnight_20261111/launch_stage2.sh. Docs: wiki/state/RUNNING.md 'Overnight autopilot 2026-11-11'.
+{
+  "paths": {
+    "testset_dir": "/tests/overnight_20261111/testsets"
+  },
+  "twostage_lp": {
+    "family": "STT_6_u",
+    "core_model": "STT_6_u_core_ri",
+    "lp_model": "STT_6_u_lpP",
+    "corpus": "STT_6_u_core_lpP_fv4",
+    "stage2_config": "runconfigs/overnight_20261111/stage2_final_A.jsonc",
+    "stage2_postpasses": false,
+    "stage1": {
+      "reuse_cores": [
+        "/tests/overnight_20261111/cores/STT_6_u_core_ri/k3/stage1_xml"
+      ],
+      "reuse_sha256": "29368a06cf7017b91ecd1720684baaf7ac2254f9f9ba68d59a13874c210842d5"
+    },
+    "stage15": {
+      "slots": 28,
+      "job_timeout": 600,
+      "budget_s": 9000,
+      "cap": 100,
+      "walk_p": 0.05,
+      "shuffle_seed": 20261115,
+      "spread": 2,
+      "dedup_level": "seed",
+      "xmx": "4g",
+      "target_distinct": 60000
+    },
+    "stream": {
+      "interval": 120,
+      "jobs": 24,
+      "min_batch": 200,
+      "max_batch": 1500
+    }
+  }
+}

@@ -10,10 +10,10 @@ bucket note: diag_stt_xmm4_skip.md next to this file.
 
 Signature (static, NEEDS_GEM5=False), all must hold:
   * the transmitter's backward register slice (ld: address registers; br_x: compare source) reads
-    or writes %xmm4 (_fv2_slice.transmitter_slice, the bug agent's bucket_fp.py rule);
+    or writes %xmm4 (_fv2_slice.transmitter_slice);
   * the GPR-only twin (same stem + mode in STT_6_fv2 on the same build) ran ok and did NOT hit
     (diagnostics/twin_fv2/<mode>/<kind>/window-results.json). So the xmm routing is the only
-    difference, and the bug agent's controlled rerun (xmm4 -> xmm3 rename kills 3/3 hits on E3 and E4)
+    difference, and a controlled rerun (xmm4 -> xmm3 rename kills 3/3 hits on E3 and E4)
     shows xmm4 is what matters.
 Verdict: real gem5 defense bug (STT implementation), known, found by our pipeline.
 """

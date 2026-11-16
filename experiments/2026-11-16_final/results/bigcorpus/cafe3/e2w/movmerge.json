@@ -1,0 +1,352 @@
+{
+ "mispredict_not_taken/inst-000366": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c69 mov %rdi,%rax",
+    "old_dest_def": "0x401c57 or $0x1,%rax",
+    "merged_load": "0x401c4c mov (%rdi,%r9,1),%rdi"
+   }
+  ],
+  "chain": [
+   "0x401c6c test %rax,%rax",
+   "0x401c69 mov %rdi,%rax",
+   "0x401c65 mov (%r9,%rdi,1),%rdi"
+  ]
+ },
+ "mispredict_not_taken/inst-000685": {
+  "movmerge": false,
+  "merges": [],
+  "chain": [
+   "0x401c43 cmp $0x1,%rax",
+   "0x401c40 mov %r12,%rax",
+   "0x401c3c and $0xffffffffffffffff,%r12",
+   "0x401c38 mov (%r12,%rdx,1),%r12"
+  ]
+ },
+ "mispredict_not_taken/inst-001710": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c9c mov %rax,%rcx",
+    "old_dest_def": "0x401c7e or $0x1,%rcx",
+    "merged_load": "0x401c43 mov (%rsi),%rax"
+   }
+  ],
+  "chain": [
+   "0x401c9f test %rcx,%rcx",
+   "0x401c9c mov %rax,%rcx",
+   "0x401c98 xor $0x55,%rax",
+   "0x401c94 xor $0x55,%rax",
+   "0x401c8c mov 0x0(,%rsi,1),%rax"
+  ]
+ },
+ "mispredict_not_taken/inst-003901": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401077 mov %r12,%rax",
+    "old_dest_def": "0x401058 or $0x1,%rax",
+    "merged_load": "0x401045 mov 0x0(,%rdi,1),%r12"
+   }
+  ],
+  "chain": [
+   "0x40107a cmp $0x1,%rax",
+   "0x401077 mov %r12,%rax",
+   "0x401070 sub $0x1001,%r12",
+   "0x401069 add $0x1001,%r12",
+   "0x401066 mov (%rdi),%r12"
+  ]
+ },
+ "mispredict_not_taken/inst-003908": {
+  "movmerge": false,
+  "merges": [],
+  "chain": [
+   "0x401cfc cmp $0x1,%rax",
+   "0x401cf9 mov %rsi,%rax",
+   "0x401cf6 lea (%rsi),%rsi"
+  ]
+ },
+ "mispredict_not_taken/inst-004774": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c97 mov %r15,%rax",
+    "old_dest_def": "0x401c7c or $0x1,%rax",
+    "merged_load": "0x401c47 mov (%r15,%r9,1),%r15"
+   }
+  ],
+  "chain": [
+   "0x401c9a test %rax,%rax",
+   "0x401c97 mov %r15,%rax",
+   "0x401c93 add $0x0,%r15",
+   "0x401c8b mov (%r15,%r9,1),%r15"
+  ]
+ },
+ "mispredict_not_taken/inst-005443": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c75 mov %rsi,%rax",
+    "old_dest_def": "0x401c5d or $0x1,%rax",
+    "merged_load": "0x401c52 mov (%rcx,%rsi,1),%rsi"
+   }
+  ],
+  "chain": [
+   "0x401c78 test %rax,%rax",
+   "0x401c75 mov %rsi,%rax",
+   "0x401c6e mov (%rcx,%rsi,1),%rsi"
+  ]
+ },
+ "mispredict_not_taken/inst-007681": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401070 mov %rax,%rcx",
+    "old_dest_def": "0x40105f or $0x1,%rcx",
+    "merged_load": "0x401055 mov (%rdx),%rax"
+   }
+  ],
+  "chain": [
+   "0x401073 cmp $0x1,%rcx",
+   "0x401070 mov %rax,%rcx",
+   "0x40106d mov (%rdx),%rax"
+  ]
+ },
+ "mispredict_not_taken/inst-008487": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c7e mov %r13,%rax",
+    "old_dest_def": "0x401c64 or $0x1,%rax",
+    "merged_load": "0x401c55 mov (%r15,%r13,1),%r13"
+   }
+  ],
+  "chain": [
+   "0x401c81 cmp $0x1,%rax",
+   "0x401c7e mov %r13,%rax",
+   "0x401c7a and $0xffffffffffffffff,%r13",
+   "0x401c76 mov (%r15,%r13,1),%r13"
+  ]
+ },
+ "mispredict_not_taken/inst-011455": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c9a mov %rax,%rcx",
+    "old_dest_def": "0x401c83 or $0x1,%rcx",
+    "merged_load": "0x401c65 mov (%r15),%rax"
+   }
+  ],
+  "chain": [
+   "0x401c9d cmp $0x1,%rcx",
+   "0x401c9a mov %rax,%rcx",
+   "0x401c96 add $0x0,%rax",
+   "0x401c92 mov (%r15,%rax,1),%rax"
+  ]
+ },
+ "mispredict_not_taken/inst-013804": {
+  "movmerge": false,
+  "merges": [],
+  "chain": [
+   "0x40107d test %rax,%rax",
+   "0x40107a mov %r13,%rax",
+   "0x40106f mov (%rcx),%r13"
+  ]
+ },
+ "mispredict_not_taken/inst-014667": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x4010a6 mov %rdi,%rax",
+    "old_dest_def": "0x401094 or $0x0,%rax",
+    "merged_load": "0x401071 mov 0x0(,%r10,1),%rdi"
+   }
+  ],
+  "chain": [
+   "0x4010a9 cmp $0x1,%rax",
+   "0x4010a6 mov %rdi,%rax",
+   "0x4010a3 mov (%r10),%rdi"
+  ]
+ },
+ "mispredict_not_taken/inst-015158": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c8c mov %r9,%rax",
+    "old_dest_def": "0x401c73 or $0x1,%rax",
+    "merged_load": "0x401c44 mov 0x0(,%r12,1),%r9"
+   }
+  ],
+  "chain": [
+   "0x401c8f test %rax,%rax",
+   "0x401c8c mov %r9,%rax",
+   "0x401c89 not %r9",
+   "0x401c86 not %r9",
+   "0x401c82 mov (%r9,%r12,1),%r9"
+  ]
+ },
+ "mispredict_taken/inst-000366": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c69 mov %rdi,%rax",
+    "old_dest_def": "0x401c57 or $0x0,%rax",
+    "merged_load": "0x401c4c mov (%rdi,%r9,1),%rdi"
+   }
+  ],
+  "chain": [
+   "0x401c6c test %rax,%rax",
+   "0x401c69 mov %rdi,%rax",
+   "0x401c65 mov (%r9,%rdi,1),%rdi"
+  ]
+ },
+ "mispredict_taken/inst-000685": {
+  "movmerge": false,
+  "merges": [],
+  "chain": [
+   "0x401c3f cmp $0x1,%rax",
+   "0x401c3c mov %r12,%rax",
+   "0x401c38 and $0xffffffffffffffff,%r12",
+   "0x401c34 mov (%r12,%rdx,1),%r12"
+  ]
+ },
+ "mispredict_taken/inst-001710": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c9c mov %rax,%rcx",
+    "old_dest_def": "0x401c7e or $0x0,%rcx",
+    "merged_load": "0x401c43 mov (%rsi),%rax"
+   }
+  ],
+  "chain": [
+   "0x401c9f test %rcx,%rcx",
+   "0x401c9c mov %rax,%rcx",
+   "0x401c98 xor $0x55,%rax",
+   "0x401c94 xor $0x55,%rax",
+   "0x401c8c mov 0x0(,%rsi,1),%rax"
+  ]
+ },
+ "mispredict_taken/inst-003901": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401077 mov %r12,%rax",
+    "old_dest_def": "0x401058 or $0x0,%rax",
+    "merged_load": "0x401045 mov 0x0(,%rdi,1),%r12"
+   }
+  ],
+  "chain": [
+   "0x40107a cmp $0x1,%rax",
+   "0x401077 mov %r12,%rax",
+   "0x401070 sub $0x1001,%r12",
+   "0x401069 add $0x1001,%r12",
+   "0x401066 mov (%rdi),%r12"
+  ]
+ },
+ "mispredict_taken/inst-003908": {
+  "movmerge": false,
+  "merges": [],
+  "chain": [
+   "0x401cfc cmp $0x1,%rax",
+   "0x401cf9 mov %rsi,%rax",
+   "0x401cf6 lea (%rsi),%rsi"
+  ]
+ },
+ "mispredict_taken/inst-004774": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401ca1 mov %r15,%rax",
+    "old_dest_def": "0x401c86 xor %eax,%eax",
+    "merged_load": "0x401c47 mov (%r15,%r9,1),%r15"
+   }
+  ],
+  "chain": [
+   "0x401ca4 test %rax,%rax",
+   "0x401ca1 mov %r15,%rax",
+   "0x401c9d add $0x0,%r15",
+   "0x401c95 mov (%r15,%r9,1),%r15"
+  ]
+ },
+ "mispredict_taken/inst-007681": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401070 mov %rax,%rcx",
+    "old_dest_def": "0x40105f or $0x0,%rcx",
+    "merged_load": "0x401055 mov (%rdx),%rax"
+   }
+  ],
+  "chain": [
+   "0x401073 cmp $0x1,%rcx",
+   "0x401070 mov %rax,%rcx",
+   "0x40106d mov (%rdx),%rax"
+  ]
+ },
+ "mispredict_taken/inst-008487": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c7e mov %r13,%rax",
+    "old_dest_def": "0x401c64 or $0x0,%rax",
+    "merged_load": "0x401c55 mov (%r15,%r13,1),%r13"
+   }
+  ],
+  "chain": [
+   "0x401c81 cmp $0x1,%rax",
+   "0x401c7e mov %r13,%rax",
+   "0x401c7a and $0xffffffffffffffff,%r13",
+   "0x401c76 mov (%r15,%r13,1),%r13"
+  ]
+ },
+ "mispredict_taken/inst-011455": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401ca6 mov %rax,%rcx",
+    "old_dest_def": "0x401c83 or $0x0,%rcx",
+    "merged_load": "0x401c65 mov (%r15),%rax"
+   }
+  ],
+  "chain": [
+   "0x401ca9 cmp $0x1,%rcx",
+   "0x401ca6 mov %rax,%rcx",
+   "0x401ca2 add $0x0,%rax",
+   "0x401c9e mov (%r15,%rax,1),%rax"
+  ]
+ },
+ "mispredict_taken/inst-014667": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x4010a6 mov %rdi,%rax",
+    "old_dest_def": "0x401094 or $0x0,%rax",
+    "merged_load": "0x401071 mov 0x0(,%r10,1),%rdi"
+   }
+  ],
+  "chain": [
+   "0x4010a9 cmp $0x1,%rax",
+   "0x4010a6 mov %rdi,%rax",
+   "0x4010a3 mov (%r10),%rdi"
+  ]
+ },
+ "mispredict_taken/inst-015158": {
+  "movmerge": true,
+  "merges": [
+   {
+    "mov": "0x401c98 mov %r9,%rax",
+    "old_dest_def": "0x401c7d xor %eax,%eax",
+    "merged_load": "0x401c44 mov 0x0(,%r12,1),%r9"
+   }
+  ],
+  "chain": [
+   "0x401c9b test %rax,%rax",
+   "0x401c98 mov %r9,%rax",
+   "0x401c95 not %r9",
+   "0x401c92 not %r9",
+   "0x401c8e mov (%r9,%r12,1),%r9"
+  ]
+ }
+}

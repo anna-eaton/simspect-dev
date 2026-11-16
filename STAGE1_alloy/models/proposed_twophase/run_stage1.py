@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """run_stage1.py — unattended Stage-1 (core) enumeration of ONE draft two-phase model.
 
-DRAFT TOOLING (2026-11-03). Output is for review only: it must not feed any
+Draft tooling. Output is for review only: it must not feed any
 production testset until Anna signs off (wiki/design/TWO_PHASE_MODELS.md).
 
 Runs the repo's own driver exactly as pipeline.py:phase_xml does
@@ -30,8 +30,8 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 STAGE1 = HERE.parent.parent            # STAGE1_alloy/
-# Portable paths (2026-11-08): the Mac defaults are kept when they exist, so local runs are
-# unchanged; on cafe2's gem5_dev container (Java 17 at /usr/bin/java) they fall back to
+# Portable paths: the Mac defaults are used when they exist;
+# on cafe2's gem5_dev container (Java 17 at /usr/bin/java) they fall back to
 # `java` on PATH and the disk holding STAGE1_alloy. Override with SIMSPECT_JAVA / SIMSPECT_DISK.
 _MAC_JAVA = "/opt/homebrew/opt/openjdk@17/bin/java"
 _MAC_DISK = "/System/Volumes/Data"

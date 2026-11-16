@@ -1,0 +1,237 @@
+{
+ "key": "mispredict_taken/inst-023088_c1",
+ "campaign_row": {
+  "hit": true,
+  "terms_fired": [
+   "over_clean"
+  ],
+  "cache_setup": "cold",
+  "timing_point": [
+   5000,
+   0
+  ],
+  "stall_points": [
+   {
+    "6": 5000
+   }
+  ],
+  "exec_path": null
+ },
+ "trace": {
+  "branches": [
+   {
+    "tick": 17347500,
+    "ev": "predict_force",
+    "seq": "3162",
+    "pc": "0x404427",
+    "rest": "victim=-:cause=-:sq=-:id=-:taken=0:target=0x404429"
+   },
+   {
+    "tick": 17516500,
+    "ev": "resolve_hold",
+    "seq": "3162",
+    "pc": "0x404427",
+    "rest": "victim=-:cause=-:sq=-:id=-:stall=5000:fire=20016500:mispred=1"
+   }
+  ],
+  "cleanups": [
+   {
+    "line": "0x7e00",
+    "S": {
+     "seq": 3175,
+     "pc": "0x404440",
+     "retire": 0,
+     "insn": "POP_R : ldis   t1, SS:[rsp]"
+    },
+    "cleanup_inv_tick": 20018000,
+    "S_fill": {
+     "tick": 17456000,
+     "rest": "victim=-:cause=-:sq=-:id=4599:req=ld:msg=DATA_EXCLUSIVE:set=56:way=0:ev=AllocateLine_OnInstall:st=NP:nst=IS"
+    },
+    "U_hits_retired": [],
+    "U_hits_all": 0,
+    "after": [
+     {
+      "tick": 20022000,
+      "unit": "L2",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4687:req=cleanup:msg=PUTX:ev=L1_PUTX:st=MT:nst=M:pst=MT"
+     },
+     {
+      "tick": 20032000,
+      "unit": "L2",
+      "ev": "cleanup_inv",
+      "rest": "victim=-:cause=-:sq=4:id=4697:req=cleanup:msg=PUTINV:set=2117:way=0:ev=Cleanup_Invalidate_clean:st=M:nst=M_I"
+     },
+     {
+      "tick": 20036000,
+      "unit": "DIR",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4702:req=cleanup:msg=ACK:ev=CleanReplacement:st=M:nst=I:pst=M"
+     }
+    ]
+   },
+   {
+    "line": "0x7dc0",
+    "S": {
+     "seq": 3172,
+     "pc": "0x40443e",
+     "retire": 0,
+     "insn": "POP_R : ldis   t1, SS:[rsp]"
+    },
+    "cleanup_inv_tick": 20018000,
+    "S_fill": {
+     "tick": 17430000,
+     "rest": "victim=-:cause=-:sq=-:id=4552:req=ld:msg=DATA_EXCLUSIVE:set=55:way=0:ev=AllocateLine_OnInstall:st=NP:nst=IS"
+    },
+    "U_hits_retired": [],
+    "U_hits_all": 0,
+    "after": [
+     {
+      "tick": 20022000,
+      "unit": "L2",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4688:req=cleanup:msg=PUTX:ev=L1_PUTX:st=MT:nst=M:pst=MT"
+     },
+     {
+      "tick": 20032000,
+      "unit": "L2",
+      "ev": "cleanup_inv",
+      "rest": "victim=-:cause=-:sq=4:id=4699:req=cleanup:msg=PUTINV:set=3907:way=0:ev=Cleanup_Invalidate_clean:st=M:nst=M_I"
+     },
+     {
+      "tick": 20036500,
+      "unit": "DIR",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4704:req=cleanup:msg=ACK:ev=CleanReplacement:st=M:nst=I:pst=M"
+     }
+    ]
+   },
+   {
+    "line": "0x7580",
+    "S": {
+     "seq": 3166,
+     "pc": "0x404432",
+     "retire": 0,
+     "insn": "MOV_R_M : ld   rdx, DS:[rsi + r14]"
+    },
+    "cleanup_inv_tick": 20018000,
+    "S_fill": {
+     "tick": 17436000,
+     "rest": "victim=-:cause=-:sq=-:id=4576:req=ld:msg=DATA_EXCLUSIVE:set=22:way=0:ev=AllocateLine_OnInstall:st=NP:nst=IS"
+    },
+    "U_hits_retired": [
+     {
+      "seq": 3153,
+      "pc": "0x404414",
+      "tick": 17437000,
+      "retire": 17515000,
+      "insn": "MOV_R_M : ld   rax, DS:[rsi + r13]",
+      "rest": "victim=-:cause=-:sq=-:id=4589:req=ld:msg=LD:addr=0x7580:size=8:ev=Load:st=E:nst=E:lvl=L1"
+     }
+    ],
+    "U_hits_all": 1,
+    "after": [
+     {
+      "tick": 20022500,
+      "unit": "L2",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4689:req=cleanup:msg=PUTX:ev=L1_PUTX:st=MT:nst=M:pst=MT"
+     },
+     {
+      "tick": 20032500,
+      "unit": "L2",
+      "ev": "cleanup_inv",
+      "rest": "victim=-:cause=-:sq=4:id=4701:req=cleanup:msg=PUTINV:set=1634:way=0:ev=Cleanup_Invalidate_clean:st=M:nst=M_I"
+     },
+     {
+      "tick": 20037000,
+      "unit": "DIR",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4706:req=cleanup:msg=ACK:ev=CleanReplacement:st=M:nst=I:pst=M"
+     }
+    ]
+   }
+  ],
+  "over_clean_chains": [
+   {
+    "line": "0x7580",
+    "S": {
+     "seq": 3166,
+     "pc": "0x404432",
+     "retire": 0,
+     "insn": "MOV_R_M : ld   rdx, DS:[rsi + r14]"
+    },
+    "cleanup_inv_tick": 20018000,
+    "S_fill": {
+     "tick": 17436000,
+     "rest": "victim=-:cause=-:sq=-:id=4576:req=ld:msg=DATA_EXCLUSIVE:set=22:way=0:ev=AllocateLine_OnInstall:st=NP:nst=IS"
+    },
+    "U_hits_retired": [
+     {
+      "seq": 3153,
+      "pc": "0x404414",
+      "tick": 17437000,
+      "retire": 17515000,
+      "insn": "MOV_R_M : ld   rax, DS:[rsi + r13]",
+      "rest": "victim=-:cause=-:sq=-:id=4589:req=ld:msg=LD:addr=0x7580:size=8:ev=Load:st=E:nst=E:lvl=L1"
+     }
+    ],
+    "U_hits_all": 1,
+    "after": [
+     {
+      "tick": 20022500,
+      "unit": "L2",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4689:req=cleanup:msg=PUTX:ev=L1_PUTX:st=MT:nst=M:pst=MT"
+     },
+     {
+      "tick": 20032500,
+      "unit": "L2",
+      "ev": "cleanup_inv",
+      "rest": "victim=-:cause=-:sq=4:id=4701:req=cleanup:msg=PUTINV:set=1634:way=0:ev=Cleanup_Invalidate_clean:st=M:nst=M_I"
+     },
+     {
+      "tick": 20037000,
+      "unit": "DIR",
+      "ev": "coh",
+      "rest": "victim=-:cause=-:sq=-:id=4706:req=cleanup:msg=ACK:ev=CleanReplacement:st=M:nst=I:pst=M"
+     }
+    ]
+   }
+  ]
+ },
+ "reruns": [
+  {
+   "dir": "/tests/bigcorpus_20261115/uv5verify/inst-023088_c1_mispredict_taken/rerun_1",
+   "hit": true,
+   "terms": [
+    "over_clean"
+   ],
+   "cache_setup": "cold",
+   "timing_point": [
+    5000,
+    0
+   ],
+   "sigs": [
+    "UV5"
+   ]
+  },
+  {
+   "dir": "/tests/bigcorpus_20261115/uv5verify/inst-023088_c1_mispredict_taken/rerun_2",
+   "hit": true,
+   "terms": [
+    "over_clean"
+   ],
+   "cache_setup": "cold",
+   "timing_point": [
+    5000,
+    0
+   ],
+   "sigs": [
+    "UV5"
+   ]
+  }
+ ],
+ "reproduced": true
+}

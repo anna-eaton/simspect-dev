@@ -1,64 +1,886 @@
 {
   "_doc": "CENTRAL REGISTRY of known hit categories — the source of truth for sorting/bucketing gem5 hits and viewing them in the dashboard. As we triage hits (writing a diag_*.py + bug .md in a run's diagnostics/), we REGISTER the category here. Each category links to the testsets/builds it SCOPES to (per CLAUDE.md propagation rules: a model/concretization artifact scopes to its testset only; a build behavior scopes to all runs on that build). The per-run diagnostics/buckets/summary.json gives the COUNTS; the dashboard joins those to this registry for labels, verdicts, and colors. Anything not matching a category stays NEW_candidate_pure_bug = the research signal.",
   "verdicts": {
-    "checker":  {"label": "checker false positive", "color": "yellow", "real_leak": false, "note": "the checker over-counted; not a real gem5 leak"},
-    "artifact": {"label": "model/concretization artifact", "color": "grey", "real_leak": false, "note": "Alloy over-approximation or codegen artifact; not a real leak"},
-    "real_bug": {"label": "confirmed real bug", "color": "red", "real_leak": true, "note": "a genuine gem5/defense leak, confirmed"},
-    "new":      {"label": "NEW — unexplained", "color": "bright-red", "real_leak": null, "note": "cleared all disqualifiers, not yet explained — THE research signal"}
+    "checker": {
+      "label": "checker false positive",
+      "color": "yellow",
+      "real_leak": false,
+      "note": "the checker over-counted; not a real gem5 leak"
+    },
+    "artifact": {
+      "label": "model/concretization artifact",
+      "color": "grey",
+      "real_leak": false,
+      "note": "Alloy over-approximation or codegen artifact; not a real leak"
+    },
+    "real_bug": {
+      "label": "confirmed real bug",
+      "color": "red",
+      "real_leak": true,
+      "note": "a genuine gem5/defense leak, confirmed"
+    },
+    "new": {
+      "label": "NEW — unexplained",
+      "color": "bright-red",
+      "real_leak": null,
+      "note": "cleared all disqualifiers, not yet explained — THE research signal"
+    },
+    "known_pending": {
+      "label": "known cause, verdict pending",
+      "color": "orange",
+      "real_leak": null,
+      "note": "a trace-proven known cause whose count-as-bug verdict is an open DECIDE (e.g. CS-1, CleanupSpec E->M); reported separately, never a target"
+    }
   },
-  "phases": {"disqualifier": "run first; if matched, the hit is NOT a real leak", "real_bug": "run after disqualifiers; confirmed-bug signatures", "new": "leftover = pure research signal"},
+  "phases": {
+    "disqualifier": "run first; if matched, the hit is NOT a real leak",
+    "real_bug": "run after disqualifiers; confirmed-bug signatures",
+    "new": "leftover = pure research signal"
+  },
   "categories": {
     "check_ld_no_completion": {
-      "label": "check_ld no-completion (over-count)", "verdict": "checker", "phase": "disqualifier",
-      "scope": {"testsets": ["Recon_6", "STT_6", "STT_all"], "builds": []},
-      "diag": "diag_check_ld_no_completion.py", "bug_md": "check_ld_no_completion.md",
+      "label": "check_ld no-completion (over-count)",
+      "verdict": "checker",
+      "phase": "disqualifier",
+      "scope": {
+        "testsets": [
+          "Recon_6",
+          "STT_6",
+          "STT_all"
+        ],
+        "builds": []
+      },
+      "diag": "diag_check_ld_no_completion.py",
+      "bug_md": "check_ld_no_completion.md",
       "description": "check_ld flagged an in-window load that never actually completed/obtained data → not a leak."
     },
     "recon_slf": {
-      "label": "Recon STL/SLF store-forward bypass", "verdict": "real_bug", "phase": "real_bug",
-      "scope": {"testsets": ["Recon_6"], "builds": ["gem5-recon-modded"]},
-      "diag": "diag_recon_slf.py", "bug_md": "wiki/findings/bug/recon_SLF_stlf_bypass/NOTE.md",
-      "description": "Store-to-load forwarding bypasses Recon's taint check — a real recon bug (double-gated signature)."
+      "label": "Recon STL/SLF store-forward bypass",
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "scope": {
+        "testsets": [
+          "Recon_6"
+        ],
+        "builds": [
+          "gem5-recon-modded"
+        ]
+      },
+      "diag": "diag_recon_slf.py",
+      "bug_md": "wiki/findings/bug/recon_SLF_stlf_bypass/NOTE.md",
+      "description": "Store-to-load forwarding bypasses Recon's taint check — a real recon bug (double-gated signature).",
+      "superseded_by": "uv2_recon_stlf"
     },
     "recon_load_hits": {
-      "label": "Recon load-hit attribution", "verdict": "artifact", "phase": "disqualifier",
-      "scope": {"testsets": ["Recon_6"], "builds": ["gem5-recon-modded"]},
-      "diag": "diag_recon_load_hits.py", "bug_md": null, "description": "Recon-specific load-hit bucketing."
+      "label": "Recon load-hit attribution",
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "scope": {
+        "testsets": [
+          "Recon_6"
+        ],
+        "builds": [
+          "gem5-recon-modded"
+        ]
+      },
+      "diag": "diag_recon_load_hits.py",
+      "bug_md": null,
+      "description": "Recon-specific load-hit bucketing."
     },
     "constaddr_load": {
-      "label": "constant-address load", "verdict": "artifact", "phase": "disqualifier",
-      "scope": {"testsets": ["SPT_6_oneLP"], "builds": []},
-      "diag": "diag_constaddr_load.py", "bug_md": "wiki/findings/mdsToRead/POTENTIAL_MODEL_FIX_constaddr_taint.md",
+      "label": "constant-address load",
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "scope": {
+        "testsets": [
+          "SPT_6_oneLP"
+        ],
+        "builds": []
+      },
+      "diag": "diag_constaddr_load.py",
+      "bug_md": "wiki/findings/mdsToRead/POTENTIAL_MODEL_FIX_constaddr_taint.md",
       "description": "Load address is a constant operand (zero-index) → data-taint over-approximation; not an STT/SpecLFB disqualifier."
     },
     "nonspec_cotransmit": {
-      "label": "SPT non-spec co-transmit (pre-fix model artifact)", "verdict": "artifact", "phase": "disqualifier",
-      "scope": {"testsets": ["SPT_6_oneLP"], "builds": []},
-      "diag": "diag_nonspec_cotransmit.py", "bug_md": null,
+      "label": "SPT non-spec co-transmit (pre-fix model artifact)",
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "scope": {
+        "testsets": [
+          "SPT_6_oneLP"
+        ],
+        "builds": []
+      },
+      "diag": "diag_nonspec_cotransmit.py",
+      "bug_md": null,
       "description": "SPT model-generation artifact (fixed by the inaddr-cleanup regen); disqualifier, not a real leak."
     },
     "rf_clobber": {
-      "label": "rf-clobber (stale reaching-def)", "verdict": "artifact", "phase": "disqualifier",
-      "scope": {"testsets": ["SPT_6_oneLP"], "builds": []},
-      "diag": "diag_rf_clobber.py", "bug_md": null,
+      "label": "rf-clobber (stale reaching-def)",
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "scope": {
+        "testsets": [
+          "SPT_6_oneLP"
+        ],
+        "builds": []
+      },
+      "diag": "diag_rf_clobber.py",
+      "bug_md": null,
       "description": "A later writer clobbers the rf source between producer and use → not a genuine speculative dependency."
     },
     "branch_wrongpath_respec": {
-      "label": "branch wrong-path re-speculation (RAS artifact)", "verdict": "artifact", "phase": "disqualifier",
-      "scope": {"testsets": ["SPT_6_oneLP"], "builds": ["gem5-spt"]},
-      "diag": "diag_branch_wrongpath_respec.py", "bug_md": "branch_wrongpath_respec.md",
+      "label": "branch wrong-path re-speculation (RAS artifact)",
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "scope": {
+        "testsets": [
+          "SPT_6_oneLP"
+        ],
+        "builds": [
+          "gem5-spt"
+        ]
+      },
+      "diag": "diag_branch_wrongpath_respec.py",
+      "bug_md": "branch_wrongpath_respec.md",
       "description": "gadget retq/loop re-speculation (gem5-spt delays tainted branches to VP) — control-flow/RAS artifact."
     },
     "vp_squash_race": {
-      "label": "STT/SPT VP↔squash race", "verdict": "real_bug", "phase": "real_bug",
-      "scope": {"testsets": ["STT_6", "SPT_6_oneLP"], "builds": ["gem5-recon-modded", "stt", "gem5-spt"]},
-      "diag": "diag_stt_vp_squash_race.py", "bug_md": "wiki/findings/bug/stt_slowcomm_vp_squash_race/BUG_EXPLAINER.md",
-      "description": "Untaint on resolved-not-committed vs the squash — the one known STT/SPT speculative-window race."
+      "label": "STT/SPT VP↔squash race",
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "scope": {
+        "testsets": [
+          "STT_6",
+          "SPT_6_oneLP"
+        ],
+        "builds": [
+          "gem5-recon-modded",
+          "stt",
+          "gem5-spt"
+        ]
+      },
+      "diag": "diag_stt_vp_squash_race.py",
+      "bug_md": "wiki/findings/bug/stt_slowcomm_vp_squash_race/BUG_EXPLAINER.md",
+      "description": "Untaint on resolved-not-committed vs the squash — the one known STT/SPT speculative-window race.",
+      "superseded_by": "uv6_vp_squash_race"
     },
     "NEW_candidate_pure_bug": {
-      "label": "NEW — unexplained (research signal)", "verdict": "new", "phase": "new",
-      "scope": {"testsets": ["*"], "builds": ["*"]}, "diag": null, "bug_md": null,
+      "label": "NEW — unexplained (research signal)",
+      "verdict": "new",
+      "phase": "new",
+      "scope": {
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": null,
+      "bug_md": null,
       "description": "Hits that cleared ALL disqualifiers and match no known real-bug signature. The set to root-cause."
+    },
+    "disq_data_obtained": {
+      "label": "disq_not_obtained",
+      "paper_label": null,
+      "aliases": [
+        "data-obtained gate",
+        "check_ld cache-reach FP"
+      ],
+      "verdict": "checker",
+      "phase": "disqualifier",
+      "order": 1,
+      "needs_gem5": false,
+      "family": "stt_record",
+      "scope": {
+        "defenses": [
+          "stt",
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/disq_data_obtained.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "check_ld data-obtained gate: an in-window ld transmitter that never obtained its data is not a leak."
+    },
+    "disq_setup_block": {
+      "label": "excluded_SETUP",
+      "paper_label": null,
+      "aliases": [
+        "SETUP",
+        "cache-full setup block"
+      ],
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "order": 10,
+      "needs_gem5": true,
+      "family": "footprint_event",
+      "scope": {
+        "defenses": [
+          "invisispec",
+          "cleanupspec",
+          "speclfb"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/disq_setup_block.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "SETUP exclusion: an offending event that belongs to the harness's own cache-setup block, not to the test."
+    },
+    "disq_hpad_text_end": {
+      "label": "excluded_HPAD",
+      "paper_label": null,
+      "aliases": [
+        "H-PAD"
+      ],
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "order": 20,
+      "needs_gem5": true,
+      "family": "footprint_event",
+      "scope": {
+        "defenses": [
+          "invisispec",
+          "speclfb"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/disq_hpad_text_end.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "H-PAD (text end): an offending event executed by the harness zero padding past the end of .text."
+    },
+    "disq_hpad_rmw_padding": {
+      "label": "UV3_padding|EM_padding",
+      "paper_label": null,
+      "aliases": [
+        "H-PAD",
+        "UV3_padding",
+        "EM_padding"
+      ],
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "order": 21,
+      "needs_gem5": true,
+      "family": "cleanupspec_rmw_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/disq_hpad_rmw_padding.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "H-PAD (RMW padding actor): a CleanupSpec UV3 / E->M chain whose actor is the harness padding RMW, not the test's RMW."
+    },
+    "disq_speclfb_nonload": {
+      "label": "other:disq_non_load_footprint",
+      "paper_label": null,
+      "aliases": [
+        "speclfb_nonload_footprint"
+      ],
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "order": 30,
+      "needs_gem5": true,
+      "family": "speclfb_tags",
+      "scope": {
+        "defenses": [
+          "speclfb"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/disq_speclfb_nonload.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "SpecLFB non-load footprint: an in-window footprint event whose request is not a load is not a SpecLFB leak."
+    },
+    "disq_check_ld_rmw_limm": {
+      "label": "check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)",
+      "paper_label": null,
+      "aliases": [
+        "RL-10",
+        "rmw_limm_artifact"
+      ],
+      "verdict": "checker",
+      "phase": "disqualifier",
+      "order": 40,
+      "needs_gem5": true,
+      "family": "recon_bucket",
+      "scope": {
+        "defenses": [
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/disq_check_ld_rmw_limm.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "check_ld RMW artifact (RL-10): check_ld scores the RMW's leading limm micro-op; ReCon's delay unit holds the load."
+    },
+    "recon_reveal_artifact": {
+      "label": "R-SA-13 main / reveal artifact in twin (E2LT-3)",
+      "paper_label": null,
+      "aliases": [
+        "E2LT-3"
+      ],
+      "verdict": "artifact",
+      "phase": "disqualifier",
+      "order": 45,
+      "needs_gem5": true,
+      "family": "recon_bucket",
+      "scope": {
+        "defenses": [
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/recon_reveal_artifact.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "Reveal artifact in the GPR twin (E2LT-3): a ReCon reveal untaint enabled by a Stage-2 committed load pair / alias on"
+    },
+    "a_uv1_invisispec": {
+      "label": "UV1",
+      "paper_label": "A-UV1",
+      "aliases": [
+        "UV1",
+        "invisispec_uv1"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 10,
+      "needs_gem5": true,
+      "family": "footprint_event",
+      "scope": {
+        "defenses": [
+          "invisispec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/a_uv1_invisispec.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "A-UV1 (InvisiSpec): a speculative load evicts a live L1D line. Internal label `UV1`."
+    },
+    "a_uv1_transient": {
+      "label": "UV1_transient",
+      "paper_label": null,
+      "aliases": [
+        "UV1 transient"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 11,
+      "needs_gem5": true,
+      "family": "footprint_event",
+      "scope": {
+        "defenses": [
+          "invisispec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/a_uv1_transient.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV1_transient (InvisiSpec): an A-UV1 eviction whose evicting load never became visible (a squashed load)."
+    },
+    "a_uv4_cleanupspec_split": {
+      "label": "UV4",
+      "paper_label": "A-UV4",
+      "aliases": [
+        "UV4_split",
+        "uv4_split"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 20,
+      "needs_gem5": true,
+      "family": "cleanupspec_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/a_uv4_cleanupspec_split.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "A-UV4 (CleanupSpec): a line-crossing (split) squashed access is not cleaned. Internal labels `UV4_split` / `UV4`."
+    },
+    "cs1_older_store_upgrade": {
+      "label": "CS1",
+      "paper_label": null,
+      "aliases": [
+        "CS1_older_store_upgrade",
+        "CS-1"
+      ],
+      "verdict": "known_pending",
+      "phase": "real_bug",
+      "order": 30,
+      "needs_gem5": true,
+      "family": "cleanupspec_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/cs1_older_store_upgrade.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "CS1 (CleanupSpec): an older committed store upgrades a squashed load's E line to M, so its cleanup is skipped."
+    },
+    "cs_em_upgrade": {
+      "label": "EM_upgrade",
+      "paper_label": null,
+      "aliases": [
+        "EM_upgrade_squashed",
+        "CS-EM"
+      ],
+      "verdict": "known_pending",
+      "phase": "real_bug",
+      "order": 31,
+      "needs_gem5": true,
+      "family": "cleanupspec_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/cs_em_upgrade.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "EM_upgrade (CleanupSpec): a squashed store / RMW upgrades a squashed load's E line to M, so its cleanup is skipped."
+    },
+    "a_uv5_cleanupspec_overclean": {
+      "label": "UV5",
+      "paper_label": "A-UV5",
+      "aliases": [
+        "UV5_older_load"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 40,
+      "needs_gem5": true,
+      "family": "cleanupspec_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/a_uv5_cleanupspec_overclean.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "A-UV5 (CleanupSpec): cleanup invalidates a line that an older committed access used. Internal `UV5_older_load` / `UV5`."
+    },
+    "a_uv3_cleanupspec_rmw": {
+      "label": "UV3",
+      "paper_label": "A-UV3",
+      "aliases": [
+        "uv3_rmw"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 50,
+      "needs_gem5": true,
+      "family": "cleanupspec_rmw_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/a_uv3_cleanupspec_rmw.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "A-UV3 (CleanupSpec): a speculative read-modify-write's line is not cleaned. Internal label `UV3`."
+    },
+    "cs_uv3_other_actor": {
+      "label": "UV3_other_actor",
+      "paper_label": null,
+      "aliases": [],
+      "verdict": "known_pending",
+      "phase": "real_bug",
+      "order": 52,
+      "needs_gem5": true,
+      "family": "cleanupspec_rmw_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/cs_uv3_other_actor.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV3_other_actor (CleanupSpec): the A-UV3 event chain, but by an actor that is neither the test's RMW transmitter nor"
+    },
+    "cs_em_rmw": {
+      "label": "EM_rmw",
+      "paper_label": null,
+      "aliases": [
+        "CS-EM",
+        "EM_rmw"
+      ],
+      "verdict": "known_pending",
+      "phase": "real_bug",
+      "order": 60,
+      "needs_gem5": true,
+      "family": "cleanupspec_rmw_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/cs_em_rmw.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "EM_rmw / CS-EM (CleanupSpec): the E->M skip (cs_em_upgrade) caused by the test's OWN RMW transmitter."
+    },
+    "cs_em_other": {
+      "label": "EM_other",
+      "paper_label": null,
+      "aliases": [],
+      "verdict": "known_pending",
+      "phase": "real_bug",
+      "order": 62,
+      "needs_gem5": true,
+      "family": "cleanupspec_rmw_item",
+      "scope": {
+        "defenses": [
+          "cleanupspec"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/cs_em_other.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "EM_other (CleanupSpec): the E->M skip (cs_em_upgrade) by an upgrader that is neither the test's RMW nor the padding."
+    },
+    "a_uv6_speclfb_first_load": {
+      "label": "UV6",
+      "paper_label": "A-UV6",
+      "aliases": [
+        "uv6_first"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 70,
+      "needs_gem5": true,
+      "family": "speclfb_load",
+      "scope": {
+        "defenses": [
+          "speclfb"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/a_uv6_speclfb_first_load.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "A-UV6 (SpecLFB): the first speculative load of a window is left unprotected. Internal tag `uv6_first`, label `UV6`."
+    },
+    "uv5_speclfb_jmp_shadow": {
+      "label": "jmp_shadow",
+      "paper_label": "UV5",
+      "aliases": [
+        "jmp_shadow",
+        "speclfb_jmp_shadow"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 72,
+      "needs_gem5": true,
+      "family": "speclfb_load",
+      "scope": {
+        "defenses": [
+          "speclfb"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/uv5_speclfb_jmp_shadow.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV5 (SpecLFB): the shadow of a direct jmp / call erases an older branch's shadow. Internal tag `jmp_shadow`."
+    },
+    "uv4_speclfb_walk_order": {
+      "label": "walk_order",
+      "paper_label": "UV4",
+      "aliases": [
+        "walk_order",
+        "speclfb_walk_order"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 74,
+      "needs_gem5": true,
+      "family": "speclfb_load",
+      "scope": {
+        "defenses": [
+          "speclfb"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/uv4_speclfb_walk_order.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV4 (SpecLFB): ROB walk order unprotects later loads. Internal tag `walk_order`."
+    },
+    "uv1_stt_xmm4": {
+      "label": "S1_xmm4",
+      "paper_label": "UV1",
+      "aliases": [
+        "S1",
+        "S1_xmm4",
+        "stt_xmm4_skip"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 80,
+      "needs_gem5": false,
+      "family": "stt_record",
+      "scope": {
+        "defenses": [
+          "stt"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/uv1_stt_xmm4.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV1 (STT): STT fails to taint one register (FP index 16 = low half of xmm4). Internal label `S1_xmm4`."
+    },
+    "uv2_recon_stlf": {
+      "label": "A2 STLF bypass",
+      "paper_label": "UV2",
+      "aliases": [
+        "A2",
+        "recon_SLF_stlf_bypass",
+        "recon_slf"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 85,
+      "needs_gem5": true,
+      "family": "recon_bucket",
+      "scope": {
+        "defenses": [
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/uv2_recon_stlf.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV2 (ReCon): store-to-load forwarding skips the taint check. Internal label A2, `recon_SLF_stlf_bypass`."
+    },
+    "uv3_recon_oldest_taint": {
+      "label": "R-SA-8 candidate (br_x twin hit; E2LT-2)",
+      "paper_label": "UV3",
+      "aliases": [
+        "R-SA-8",
+        "OTB",
+        "getOldestTaint",
+        "recon_oldest_taint"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 87,
+      "needs_gem5": true,
+      "family": "recon_bucket",
+      "scope": {
+        "defenses": [
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV3 (ReCon): only the oldest taint source is kept. Internal label R-SA-8 (candidate), OTB / getOldestTaint."
+    },
+    "r_sa13_recon_sse_load": {
+      "label": "R-SA-13",
+      "paper_label": null,
+      "aliases": [
+        "R-SA-13",
+        "recon_sse_load_producer",
+        "e2-losttaint"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 90,
+      "needs_gem5": false,
+      "family": "recon_bucket",
+      "scope": {
+        "defenses": [
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "R-SA-13 (ReCon): the transmitter's taint is lost through an SSE load producer (FP routing). Labels below."
+    },
+    "r_sa9_recon_twin_untaint": {
+      "label": "R-SA-13 main / R-SA-9 twin (E2LT-1)",
+      "paper_label": null,
+      "aliases": [
+        "R-SA-9",
+        "E2LT-1"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 92,
+      "needs_gem5": true,
+      "family": "recon_bucket",
+      "scope": {
+        "defenses": [
+          "recon"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/r_sa9_recon_twin_untaint.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "R-SA-9 (ReCon, in the GPR twin): a twin-hit ld whose main-run transmitter was untainted, and the twin rerun shows no"
+    },
+    "uv6_vp_squash_race": {
+      "label": "stt_vp_squash_race",
+      "paper_label": "UV6",
+      "aliases": [
+        "vp_squash_race",
+        "race"
+      ],
+      "verdict": "real_bug",
+      "phase": "real_bug",
+      "order": 95,
+      "needs_gem5": true,
+      "family": "race_record",
+      "scope": {
+        "defenses": [
+          "stt",
+          "spt"
+        ],
+        "testsets": [
+          "*"
+        ],
+        "builds": [
+          "*"
+        ]
+      },
+      "diag": "STAGE3_gem5/bugs/uv6_vp_squash_race.py",
+      "bug_md": "wiki/findings/bug/BUGS.md#bug-scripts-stage3_gem5bugs",
+      "description": "UV6 (STT, SPT-Fence): the visibility-point / squash race. Internal `stt_vp_squash_race`, `vp_squash_race`."
     }
-  }
+  },
+  "_doc_bug_scripts": "2026-11-15 (agent bugscripts): every category whose `diag` starts with STAGE3_gem5/bugs/ is one cause module of the bug-script package (one Python module per known cause; orchestrator STAGE3_gem5/bugs/classify.py, docs wiki/findings/bug/BUGS.md 'Bug scripts'). Entries are generated from each module's metadata (LABEL, PAPER_LABEL, ALIASES, DEFENSES, PHASE, VERDICT, ORDER, NEEDS_GEM5, FAMILY) and its docstring's first line. `label` is the exact label classify.py writes. The older per-run entries above (diag_*.py in results/<run>/diagnostics/) stay for the dashboard's per-run buckets; where one names the same cause, it carries `superseded_by`."
 }

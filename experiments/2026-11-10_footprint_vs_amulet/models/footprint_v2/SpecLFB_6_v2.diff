@@ -1,0 +1,35 @@
+5,17c5,15
+< SpecLFB_6 -- footprint model for SpecLFB (Cheng et al., USENIX Security 2024), branch (control-flow) speculation.
+< Copy of STT_6.als (2026-11-09, new file requested by Anna). Differences are confined
+< to the "Specific defense model" block at the bottom: two clause lines change (the
+< leakage function and the protection-set propagation); everything else is
+< byte-identical to STT_6.als.
+<   - protection set = ALL memory, never untainted (STT_6 untaints a location once a
+<     load with no older unresolved branch reads it). A test exists when a speculative
+<     load's address derives from a memory value, wherever that value was read.
+<   - transmitters = load addresses only (STT_6 also has branch conditions).
+<   - speculation contract = STT_6's (after an unresolved branch).
+< The defense block is the same in InvisiSpec_6, CleanupSpec_6 and SpecLFB_6: the three
+< papers make the same promise about a speculative load. Store-bypass speculation is
+< in SpecLFB_6_stl.als. See wiki/design/MODELS_AND_BUILDS.md PART 8.
+---
+> SpecLFB_6_v2 -- DRAFT (footprint-check, 2026-11-10; NOT approved, not used by any config).
+> Copy of STAGE1_alloy/models/SpecLFB_6.als (Cheng et al., USENIX Security 2024). Only the protection-set clause in the
+> "Specific defense model" block changes, plus this header; everything else is byte-identical
+> to SpecLFB_6.als (and therefore to STT_6.als outside the defense block).
+>   - protection set = all memory AND every register the test never writes (its initial value),
+>     never untainted. Values computed from either are protected through rf/ddi as before.
+>     SpecLFB_6 protects memory only, so a speculative load whose address comes from an initial
+>     register, or from ALU work on initial registers, with no load in the chain (AMuLeT's UV6
+>     shape) cannot be generated there.
+>   - speculation contract (after an unresolved branch) and leakage (load addresses) unchanged.
+> See wiki/design/MODELS_AND_BUILDS.md PART 8, '2026-11-10 -- Paper check of the footprint models'.
+349c347,352
+< fun hardware_protection_policy: State {Mem_s}
+---
+> // footprint-check 2026-11-10 (draft): registers the test never writes hold their initial value, which is a secret
+> //     too. SpecLFB delays every MUSL whatever its address depends on (Sec. 5-6, PDF p7-9); AMuLeT tests it against CT-SEQ,
+> //     "the most intuitive contract based on the security guarantees described in the SpecLFB paper", and its UV6
+> //     tests have "the secret ... in a register" (AMuLeT p12, Fig. 8b: address R14 + RBX, both initial registers).
+> // SpecLFB_6: fun hardware_protection_policy: State {Mem_s}
+> fun hardware_protection_policy: State {Mem_s + (Reg_s - Instruction.outreg.opstate)}

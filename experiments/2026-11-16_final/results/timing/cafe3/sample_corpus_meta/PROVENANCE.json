@@ -1,0 +1,48 @@
+{
+ "updated": "2026-11-15T22:24:11+00:00",
+ "complete": false,
+ "corpus": "/tests/bigcorpus_20261115/testsets/Footprint_6_u_core_lpP_s2A",
+ "programs_merged": 14277,
+ "counts": {
+  "programs": 0,
+  "tests": 0,
+  "d_stems": 0,
+  "batches": {}
+ },
+ "stems_published": 13275,
+ "stem_mode_pairs": 26550,
+ "batches": 18,
+ "cpu_s": {
+  "stage1_alloy_cores": "see stage1_cpu_s (wall-clock of each single-threaded Stage-1 JVM partition)",
+  "stage15_alloy_job_wall_s_sum": 59498.9,
+  "stage15_note": "sum of per-job wall seconds of one JVM each (a6RandomModels is single-threaded apart from GC threads), all jobs incl. EXHAUSTED/0",
+  "stage2_parsexml_llc": 9717.3,
+  "rmw_postpass": null,
+  "jmp_postpass": null,
+  "stage2_note": "RUSAGE_CHILDREN deltas of the whole subprocess tree (user+sys CPU-s)"
+ },
+ "stage1_cpu_s": {},
+ "stage15": [
+  "/tests/bigcorpus_20261115/ws_Footprint_6_u/runs15/Footprint_6_u_lpP"
+ ],
+ "stage15_seeds": {
+  "/tests/bigcorpus_20261115/ws_Footprint_6_u/runs15/Footprint_6_u_lpP": 20261115
+ },
+ "base_testset": "/tests/bigcorpus_20261115/testsets/Footprint_6_u_lp_s2A_base",
+ "stage2_config": "/tests/bigcorpus_20261115/ws_Footprint_6_u/cfg/stage2_final_A_stream.jsonc",
+ "code": "/tests/bigcorpus_20261115/code",
+ "recipe_version": "fv4 (overnight 2026-11-11: stage2_fv4 = stage2_fv3 + fanout_v2.vocab_rj; RMW and jmp drawn uniformly in Stage 2, no post-passes)",
+ "code_hashes": {
+  "STAGE2_compilation/make_rmw_corpus.py": "bae8216e57df10c76b9aed596f55acf476188ba5f9426370ebf6611384d7d3dc",
+  "STAGE2_compilation/make_jmp_corpus.py": "1166499ad33ada8c5a7ad9b42f8d82dc97340f700cced7f11b1ac3b71925b410",
+  "STAGE2_compilation/parsexml.py": "7611a4bc145235f6f2185fbfee54513e9cc6e367ab5306042357933aaa100aff",
+  "STAGE2_compilation/batch_generate.py": "00a7d93dd76723d8e107bcc07e0f7060574dec138b0cc17ca5d19f43baf03717",
+  "runconfigs/regen_lp_20261110/stage2_fv3.jsonc": "1c24c5e87f9b1c557b95633a11ea5160e63c2310c537125eee32f60c27334e84",
+  "runconfigs/overnight_20261111/stage2_fv4.jsonc": "19f63c2f93892a05d2ec7da869451ae10156401c99686d8039c7513e819d4a40"
+ },
+ "stage2_config_sha256": "254e4237e043991c28929c3af0ac5d1bf82374fe4f758141a12bfb9909a9a03a",
+ "stage15_logs_seed_start": {
+  "/tests/bigcorpus_20261115/ws_Footprint_6_u/runs15/Footprint_6_u_lpP": "1"
+ },
+ "recipe": "stage2_fv4 (stage2_fv3 + fanout_v2.vocab_rj rmw+jmp, uniform draws) only, no post-passes"
+}

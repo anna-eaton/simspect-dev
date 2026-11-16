@@ -5,8 +5,7 @@ def-use trace of the CONCRETIZED program (real x86 registers + memory offsets, a
 Reports: ALU op on the xm leak operand's backward cone (and whether a load feeds it); synthetic
 (interleave) instruction on the cone; synthetic transmitters placed BEFORE the first unresolved
 Alloy branch (non-speculative) whose address register was last written by an Alloy instruction
-(a declassification hazard under SPT). Read-only use of STAGE2_compilation/parsexml.py.
-model-audit 2026-11-08."""
+(a declassification hazard under SPT). Read-only use of STAGE2_compilation/parsexml.py."""
 import sys, json, random, zlib, glob, os, collections
 sys.path.insert(0, '/Users/annaeaton/trippel/simspect/STAGE2_compilation')
 import parsexml as P

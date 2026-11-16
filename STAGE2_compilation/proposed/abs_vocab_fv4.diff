@@ -1,0 +1,397 @@
+--- a/STAGE2_compilation/parsexml.py
++++ b/STAGE2_compilation/parsexml.py
+@@ -566,6 +566,7 @@
+     out_path: Optional[str] = None,
+     write_out: bool = False,
+     vocab_rj: Optional[Dict[str, Any]] = None,
++    exclude_tags: Optional[List[str]] = None,
+ ) -> Dict[str, Any]:
+     """
+     Pass 2: choose a concrete LLVM instruction for each abstract instruction.
+@@ -591,6 +592,12 @@
+     if instruction_table is None:
+         instruction_table = INSTRUCTION_TABLE
+     _rmw_on = bool(vocab_rj and vocab_rj.get("rmw"))
++    # fv4 (fanout_v2.vocab_exclude_tags; absent = unchanged): drop table entries
++    # whose "tags" intersect, e.g. spt_bwd_invertible for SPT corpora.
++    _excl = set(exclude_tags or [])
++    if _excl:
++        instruction_table = {k: [c for c in v if not _excl & set(c.get("tags", []))]
++                             for k, v in instruction_table.items()}
+ 
+     output_instructions: List[Dict[str, Any]] = []
+ 
+@@ -615,15 +622,22 @@
+         if not valid:
+             # Table/model inconsistency: no candidate covers all specified slots.
+             # Fall back to the full list so the pipeline can continue.
+-            valid = candidates
++            # (fv4: without the alternate encodings, e.g. store_imm would drop a
++            # specified inreg0.)
++            valid = [c for c in candidates if not c.get("base")] or candidates
+ 
+         # Pick randomly among valid candidates (all have >= the required operands)
+         chosen = random.choice(valid) if valid else None
+ 
+         out_rec = dict(rec)
++        # fv4 table entries with "base" are another encoding of that concrete
++        # (proposed/fv4_vocab.jsonc): keep the base name, record the form.
++        if chosen and chosen.get("base"):
++            out_rec["vocab_form"] = chosen["name"]
++            chosen = dict(chosen, name=chosen["base"])
+         out_rec["concrete_instruction"] = chosen["name"] if chosen else None
+         out_rec["llvm_op"] = chosen["llvm_op"] if chosen else None
+-        out_rec["candidates"] = [c["name"] for c in valid]
++        out_rec["candidates"] = [c["name"] for c in valid]   # fv4: form names
+         output_instructions.append(out_rec)
+ 
+     result: Dict[str, Any] = {
+@@ -1183,7 +1197,7 @@
+             else:
+                 space, off, _ = _mem_addr_of(rec, "outmem", vals)
+             check(space, off)
+-            v = val(rec, "inreg0") & _MASK64
++            v = 0 if _fv4_store_imm(rec) else val(rec, "inreg0") & _MASK64
+             for b in range(8):
+                 mem[(space, off + b)] = (v >> (8 * b)) & 0xFF
+         elif c == "bitnot":
+@@ -1192,6 +1206,8 @@
+             out(rec, val(rec, "inreg0") + val(rec, "inreg1"))
+         elif c == "zsm":
+             out(rec, val(rec, "inreg0") * val(rec, "inreg1"))
++        elif c in FV4_ALU_UNARY or c in FV4_ALU_BINARY:
++            out(rec, _fv4_alu_eval(_fv4_alu_effective(rec), val(rec, "inreg0"), val(rec, "inreg1")))
+         elif c == "div":
+             a, d = _to_signed64(val(rec, "inreg0")), _to_signed64(val(rec, "inreg1"))
+             if not rec.get("xm", False):
+@@ -1509,7 +1525,42 @@
+ # xor, ...): a direct jmp to the next instruction (`eb 00`), value neutral.
+ FV2_FILLER_JMP = "jmp"
+ LOAD_LIKE = ("load", VOCAB_RJ_RMW["name"])
++
++# [fv4 abstract-category forms, abs-vocab 2026-11-12; only reachable from
++# instruction_tables/proposed/fv4_vocab.jsonc, absent = output unchanged]
++# other_n ALU forms: unary out = f(in0), binary out = f(in0, in1). Each emits
++# `movq in0,out ; <op>` (or the op in place when out shares a register).
++FV4_ALU_UNARY: Dict[str, Optional[str]] = {"mov_rr": None, "neg": "negq", "shl3": "shlq $$3,"}
++FV4_ALU_BINARY: Dict[str, str] = {"addq_rr": "addq", "sub_rr": "subq", "xor_rr": "xorq",
++                                  "and_rr": "andq", "or_rr": "orq", "lea_s8": "lea"}
++_FV4_COMMUTATIVE = {"addq_rr", "xor_rr", "and_rr", "or_rr"}
+ 
++
++def _fv4_store_imm(rec: Dict[str, Any]) -> bool:
++    """fv4 store_imm form (stores $0) — only when Alloy left inreg0 unspecified."""
++    if rec.get("vocab_form") != "store_imm":
++        return False
++    return not any(sr.get("specified") for sr in rec["slots"].get("inreg", [])
++                   if sr["slot"] == "inreg0")
++
++
++def _fv4_alu_effective(rec: Dict[str, Any]) -> str:
++    """sub_rr / xor_rr whose two inputs are the same physical register would be a
++    zero idiom (DECIDE V6, not in the vocabulary): emitted as or_rr instead."""
++    c = rec.get("concrete_instruction")
++    if c in ("sub_rr", "xor_rr"):
++        ph = [sr.get("assigned") for sr in rec["slots"].get("inreg", [])
++              if sr["slot"] in ("inreg0", "inreg1")]
++        if len(ph) == 2 and ph[0] is not None and ph[0] == ph[1]:
++            return "or_rr"
++    return c
++
++
++def _fv4_alu_eval(c: str, a: int, b: int) -> int:
++    """Architectural value of an fv4 other_n form (mirrors pass5's asm)."""
++    return {"mov_rr": a, "neg": -a, "shl3": a << 3, "addq_rr": a + b, "sub_rr": a - b,
++            "xor_rr": a ^ b, "and_rr": a & b, "or_rr": a | b, "lea_s8": a + 8 * b}[c]
++
+ _REG_SLOT_ROLES = {"inreg", "outreg", "inaddr"}
+ _MEM_SLOT_ROLES = {"inmem", "outmem"}
+ 
+@@ -2612,12 +2663,36 @@
+             if (ba_ and ba_.get("mode") == "correctly_not_taken" and not r.get("xm")
+                     and r.get("concrete_instruction") in ("br_cond", "br_uncond")
+                     and _jrng.random() < _jmp_p):
++                _jmp_pcs.append(r["pc"])
++    # fv4 BRANCH_FORMS.uniform: one form per annotated branch, uniform over the
++    # eligible forms in the list ("jmp" only where jmp_direct would be allowed).
++    _br_uni = list(BRANCH_FORMS.get("uniform") or [])
++    _cmp_pcs: Set[int] = set()
++    if _br_uni:
++        import zlib as _zlib3
++        _brng = random.Random(_zlib3.crc32(f"brf:{func_name}".encode()))
++        for r in instructions:
++            ba_ = r.get("branch_annotations")
++            c_ = r.get("concrete_instruction")
++            if not ba_ or c_ not in ("br_cond", "br_uncond", "br_bez"):
++                continue
++            jmp_ok = (ba_.get("mode") == "correctly_not_taken" and not r.get("xm")
++                      and c_ in ("br_cond", "br_uncond"))
++            elig = [f for f in _br_uni if f in ("test", "cmp") or (f == "jmp" and jmp_ok)]
++            if not elig:
++                continue
++            f_ = _brng.choice(elig)
++            if f_ == "jmp":
+                 _jmp_pcs.append(r["pc"])
++            elif f_ == "cmp":
++                _cmp_pcs.add(r["pc"])
+ 
++    _fv4_forms: Dict[str, str] = {}
++
+     def br_on(cond_raw: str, cond_i1: str, taken_lbl: str, ft_lbl: str, taken_if_zero: bool) -> None:
+         """Conditional branch on cond_raw: today's `br i1` (LLVM picks test/jcc),
+         or with br_cmp an asm-goto `cmpq $1,%c ; jb|jae` (taken iff c==0 / c!=0)."""
+-        if not _br_cmp:
++        if not (_br_cmp or pc in _cmp_pcs):
+             il(f"br i1 {cond_i1}, label %{taken_lbl}, label %{ft_lbl}")
+             return
+         jcc = "jb" if taken_if_zero else "jae"
+@@ -2649,6 +2724,9 @@
+             rec = fv2_before(rec)
+             _fv2_prev = rec
+         cm(f"pc={pc}  {atom}  ({concrete})")
++        if rec.get("vocab_form"):
++            cm(f"fv4 form: {rec['vocab_form']}")
++            _fv4_forms[str(pc)] = rec["vocab_form"]
+         marker = f"__litmus_{safe_name}_pc{pc}"
+         # pc marker prefix shared by all asm blocks below; each instruction
+         # type integrates it into its own single asm sideeffect call so that
+@@ -2665,6 +2743,7 @@
+         last_was_terminator = False
+ 
+         if concrete == "load":
++            _swp = rec.get("vocab_form") == "load_swapidx"   # fv4: base/index swapped
+             inaddr_sr = get_slot(rec, "inaddr")
+             # Only use the rf-specified inaddr — virtual-pool assignments are noise
+             _ia_specified = inaddr_sr and inaddr_sr.get("specified")
+@@ -2680,12 +2759,12 @@
+                     phys = outreg_sr.get("assigned")
+                     fdst, fsx, fcl = fpr_route(rec, out_name, phys)
+                     il(f'%{out_name} = call i64 asm sideeffect '
+-                       f'"{mkr}movq ($1, $2, 1), {fdst}{fsx}", '
++                       f'"{mkr}movq {"($2, $1, 1)" if _swp else "($1, $2, 1)"}, {fdst}{fsx}", '
+                        f'"=&{{{phys}}},{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}}{fcl}"'
+                        f'(ptr %probe_mem, i64 %{inaddr_ssa})')
+                 else:
+                     il(f'call void asm sideeffect '
+-                       f'"{mkr}movq ($0, $1, 1), %%rax", '
++                       f'"{mkr}movq {"($1, $0, 1)" if _swp else "($0, $1, 1)"}, %%rax", '
+                        f'"{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}},~{{rax}}"'
+                        f'(ptr %probe_mem, i64 %{inaddr_ssa})')
+             else:
+@@ -2700,11 +2779,11 @@
+                     phys = outreg_sr.get("assigned")
+                     fdst, fsx, fcl = fpr_route(rec, out_name, phys)
+                     il(f'%{out_name} = call i64 asm sideeffect '
+-                       f'"{mkr}movq {offset}($1), {fdst}{fsx}", '
++                       f'"{mkr}movq {offset}({",$1,1" if _swp else "$1"}), {fdst}{fsx}", '
+                        f'"=&{{{phys}}},{{{_probe_base_phys}}},~{{memory}}{fcl}"(ptr %mem_base)')
+                 else:
+                     il(f'call void asm sideeffect '
+-                       f'"{mkr}movq {offset}($0), %rax", '
++                       f'"{mkr}movq {offset}({",$0,1" if _swp else "$0"}), %rax", '
+                        f'"{{{_probe_base_phys}}},~{{memory}},~{{rax}}"(ptr %mem_base)')
+ 
+         elif concrete == VOCAB_RJ_RMW["name"]:
+@@ -2743,7 +2822,8 @@
+             inaddr_sr = get_slot(rec, "inaddr")
+             inaddr_phys = inaddr_sr.get("assigned") if inaddr_sr else None
+             inreg0_sr = get_slot(rec, "inreg0")
+-            has_src = bool(inreg0_sr and inreg0_sr.get("ssa_name"))
++            has_src = bool(inreg0_sr and inreg0_sr.get("ssa_name")) and not _fv4_store_imm(rec)
++            _swp = rec.get("vocab_form") == "store_swapidx"   # fv4: base/index swapped
+             ops: List[str] = []
+             cons: List[str] = []
+             if has_src:
+@@ -2759,6 +2839,8 @@
+             src_txt = "$0" if has_src else "$$0"
+             b = n - (2 if rt["index_ssa"] else 1)
+             addr_txt = (f"{disp}(${b}, ${b + 1}, 1)" if rt["index_ssa"] else f"{disp}(${b})")
++            if _swp:
++                addr_txt = (f"{disp}(${b + 1}, ${b}, 1)" if rt["index_ssa"] else f"{disp}(,${b},1)")
+             il(f'call void asm sideeffect '
+                f'"{mkr}movq {src_txt}, {addr_txt}", '
+                f'"{",".join(cons)},~{{memory}}"({", ".join(ops)})')
+@@ -2769,6 +2851,9 @@
+             inaddr_ssa  = inaddr_sr.get("ssa_name") if _ia_specified else None
+             inaddr_phys = inaddr_sr.get("assigned") if _ia_specified else None
+             inreg0_sr = get_slot(rec, "inreg0")
++            if _fv4_store_imm(rec):
++                inreg0_sr = None   # fv4 store_imm: store $0 (Alloy left inreg0 unspecified)
++            _swp = rec.get("vocab_form") == "store_swapidx"   # fv4: base/index swapped
+             _st_base = "%probe_st" if pc in _stsep_pcs else "%probe_mem"
+             if inaddr_ssa and inaddr_phys:
+                 # Address comes from register via rf edge — use it directly
+@@ -2778,12 +2863,12 @@
+                     phys_src = inreg0_sr.get("assigned")
+                     in_con = f'{{{phys_src}}}' if phys_src else 'r'
+                     il(f'call void asm sideeffect '
+-                       f'"{mkr}movq $0, ($1, $2, 1)", '
++                       f'"{mkr}movq $0, {"($2, $1, 1)" if _swp else "($1, $2, 1)"}", '
+                        f'"{in_con},{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}}"'
+                        f'(i64 {src_ssa}, ptr {_st_base}, i64 %{inaddr_ssa})')
+                 else:
+                     il(f'call void asm sideeffect '
+-                       f'"{mkr}movq $$0, ($0, $1, 1)", '
++                       f'"{mkr}movq $$0, {"($1, $0, 1)" if _swp else "($0, $1, 1)"}", '
+                        f'"{{{_probe_base_phys}}},{{{inaddr_phys}}},~{{memory}}"'
+                        f'(ptr {_st_base}, i64 %{inaddr_ssa})')
+             else:
+@@ -2798,11 +2883,11 @@
+                     phys_src = inreg0_sr.get("assigned")
+                     in_con = f'{{{phys_src}}}' if phys_src else 'r'
+                     il(f'call void asm sideeffect '
+-                       f'"{mkr}movq $0, {offset}($1)", '
++                       f'"{mkr}movq $0, {offset}({",$1,1" if _swp else "$1"})", '
+                        f'"{in_con},{{{_probe_base_phys}}},~{{memory}}"(i64 {src_ssa}, ptr %mem_base)')
+                 else:
+                     il(f'call void asm sideeffect '
+-                       f'"{mkr}movq $$0, {offset}($0)", '
++                       f'"{mkr}movq $$0, {offset}({",$0,1" if _swp else "$0"})", '
+                        f'"{{{_probe_base_phys}}},~{{memory}}"(ptr %mem_base)')
+ 
+         elif concrete == "bitnot":
+@@ -2884,7 +2969,71 @@
+             else:
+                 il(f'call void asm sideeffect "{mkr}{body}", '
+                    f'"{",".join(cons)},~{{rax}},~{{flags}}"({", ".join(ins)})')
++
++        elif concrete in FV4_ALU_UNARY or concrete in FV4_ALU_BINARY:
++            # fv4 other_n ALU forms (proposed/fv4_vocab.jsonc only).
++            eff = _fv4_alu_effective(rec)
++            if eff != concrete:
++                cm(f"fv4 {concrete}: same-register inputs, emitted as {eff} (no zero idiom)")
++            binary = eff in FV4_ALU_BINARY
++            ops_in, phys_in, cons_in = [], [], []
++            for sn in (("inreg0", "inreg1") if binary else ("inreg0",)):
++                sr_ = get_slot(rec, sn)
++                ph_ = sr_.get("assigned") if sr_ else None
++                ops_in.append(ssa_ref(rec, sn) or "0")
++                phys_in.append(ph_)
++                cons_in.append(f'{{{ph_}}}' if ph_ else 'r')
++            outreg_sr = get_slot(rec, "outreg")
++            has_out = bool(outreg_sr and outreg_sr.get("ssa_name"))
++            phys_out = outreg_sr.get("assigned") if has_out else None
++
++            def _alu(dst: str, a: str, b: Optional[str]) -> str:
++                # asm computing dst = eff(a, b); dst may equal a (in place)
++                if not binary:
++                    op = FV4_ALU_UNARY[eff]
++                    cp = "" if a == dst else f"movq {a}, {dst}"
++                    if op is None:
++                        return cp or f"movq {a}, {dst}"
++                    return (cp + "\\0A" if cp else "") + f"{op} {dst}"
++                if eff == "lea_s8":
++                    return f"leaq ({a}, {b}, 8), {dst}"
++                cp = "" if a == dst else f"movq {a}, {dst}\\0A"
++                return cp + f"{FV4_ALU_BINARY[eff]} {b}, {dst}"
+ 
++            if has_out:
++                out_name = outreg_sr["ssa_name"]
++                p0 = phys_in[0]
++                p1 = phys_in[1] if binary else None
++                if binary and p0 and p0 == p1:
++                    # both inputs in one register: read it once
++                    if p0 == phys_out:
++                        body, cons, ins = _alu("$0", "$0", "$0"), f"={{{phys_out}}},0", [ops_in[0]]
++                    else:
++                        body, cons, ins = _alu("$0", "$1", "$1"), f"=&{{{phys_out}}},{cons_in[0]}", [ops_in[0]]
++                elif p0 and p0 == phys_out:
++                    body = _alu("$0", "$0", "$2" if binary else None)
++                    cons = f"={{{phys_out}}},0" + (f",{cons_in[1]}" if binary else "")
++                    ins = ops_in
++                elif binary and p1 and p1 == phys_out:
++                    if eff == "lea_s8":
++                        body = "leaq ($1, $0, 8), $0"
++                    elif eff in _FV4_COMMUTATIVE:
++                        body = f"{FV4_ALU_BINARY[eff]} $1, $0"
++                    else:   # sub_rr: out = -in1 + in0
++                        body = "negq $0\\0Aaddq $1, $0"
++                    cons, ins = f"={{{phys_out}}},{cons_in[0]},0", ops_in   # in1 tied to out
++                else:
++                    body = _alu("$0", "$1", "$2" if binary else None)
++                    cons, ins = f"=&{{{phys_out}}}," + ",".join(cons_in), ops_in
++                args = ", ".join(f"i64 {x}" for x in ins)
++                il(f'%{out_name} = call i64 asm sideeffect "{mkr}{body}", '
++                   f'"{cons},~{{flags}}"({args})')
++            else:
++                body = _alu("%rax", "$0", "$1" if binary else None)
++                args = ", ".join(f"i64 {x}" for x in ops_in)
++                il(f'call void asm sideeffect "{mkr}{body}", '
++                   f'"{",".join(cons_in)},~{{rax}},~{{flags}}"({args})')
++
+         elif concrete == "zsm":
+             # zero-skip multiply: 64-bit signed/unsigned mul (low half). Emit
+             # `movq in0 → out; imulq in1, out` so out = in0 * in1.
+@@ -3155,10 +3304,14 @@
+     lines.append("}")
+     ir = "\n".join(lines)
+ 
+-    if _br_cmp or _jmp_pcs:
++    if _br_cmp or _jmp_pcs or _br_uni:
+         pass4_result["branch_forms"] = {"br_cmp": _br_cmp, "jmp_direct_pcs": _jmp_pcs}
++        if _br_uni:
++            pass4_result["branch_forms"].update(uniform=_br_uni, br_cmp_pcs=sorted(_cmp_pcs))
+     if _bc_alloy:
+         pass4_result["branch_cond"] = {"from_alloy": True, "pcs": _bc_pcs}
++    if _fv4_forms:
++        pass4_result["vocab_forms"] = _fv4_forms   # fv4 ld/str encodings, by Alloy pc
+     if _fv2_on:
+         _fv2_rec["window_pc"] = _win_pc
+         _fv2_rec["pre_window_reads"] = _pre_ok
+@@ -3296,6 +3449,8 @@
+             payload["branch_forms"] = result["branch_forms"]
+         if result.get("vocab_rj") is not None:
+             payload["vocab_rj"] = result["vocab_rj"]
++        if result.get("vocab_forms") is not None:
++            payload["vocab_forms"] = result["vocab_forms"]
+         if result.get("branch_cond") is not None:
+             payload["branch_cond"] = result["branch_cond"]
+         # Opt-in register naming (pass3 reg_naming): Alloy Reg_s atom -> x86 name.
+--- a/STAGE2_compilation/batch_generate.py
++++ b/STAGE2_compilation/batch_generate.py
+@@ -109,7 +109,11 @@
+         vseed = zlib.crc32(f"{stem}_v{v}".encode())  # stable across runs (str hash() is salted per process)
+         random.seed(vseed)
+ 
+-        if fv2_cfg and fv2_cfg.get("enabled") and fv2_cfg.get("vocab_rj"):
++        if fv2_cfg and fv2_cfg.get("enabled") and fv2_cfg.get("vocab_exclude_tags"):
++            # fv4: drop table forms carrying any of these tags (e.g. spt_bwd_invertible for SPT)
++            r2 = pass2(r1, write_out=False, vocab_rj=fv2_cfg.get("vocab_rj"),
++                       exclude_tags=fv2_cfg["vocab_exclude_tags"])
++        elif fv2_cfg and fv2_cfg.get("enabled") and fv2_cfg.get("vocab_rj"):
+             r2 = pass2(r1, write_out=False, vocab_rj=fv2_cfg["vocab_rj"])   # VOCAB-RJ (opt-in)
+         else:
+             r2 = pass2(r1, write_out=False)
+--- a/STAGE2_compilation/proposed/verify_vocab_fv4.py
++++ b/STAGE2_compilation/proposed/verify_vocab_fv4.py
+@@ -28,11 +28,11 @@
+ RMW = P.VOCAB_RJ_RMW["name"]
+ 
+ 
+-def r4_for(xml, stem, mode, rn, vrj):
++def r4_for(xml, stem, mode, rn, vrj, excl=None):
+     r1 = P.pass1_specify_state_a(P.parse_alloy_xml(xml), write_out=False)
+     vseed = zlib.crc32(f"{stem}_v0".encode())
+     random.seed(vseed)
+-    r2 = P.pass2_specify_instructions(r1, write_out=False, vocab_rj=vrj)
++    r2 = P.pass2_specify_instructions(r1, write_out=False, vocab_rj=vrj, exclude_tags=excl)
+     r25 = P.pass2_5_specify_branches(r2, branch_mode=mode, write_out=False)
+     ril = P.pass_interleave(r25, None, random.Random(vseed ^ 0xABCD_1234))
+     r3 = P.pass3_assign_operands(ril, write_out=False, reg_naming=rn)
+@@ -43,6 +43,7 @@
+     ap = argparse.ArgumentParser(); ap.add_argument("xml_dir"); ap.add_argument("mode_dir")
+     ap.add_argument("--mode", required=True); ap.add_argument("--tables", default=None)
+     ap.add_argument("--json", default=None, help="write the census + problems here")
++    ap.add_argument("--exclude-tags", nargs="*", default=None, help="fanout_v2.vocab_exclude_tags of the run (abs-vocab fv4)")
+     a = ap.parse_args()
+     if a.tables:
+         P.reload_tables(a.tables)
+@@ -55,7 +56,7 @@
+         vrj = {"rmw": vr["rmw"], "jmp": vr["jmp"]} if vr else None
+         rnr = ann.get("reg_naming")
+         rn = {"mode": "random", "seed": rnr["seed"]} if rnr else {"mode": "sorted"}
+-        r2, r4 = r4_for((Path(a.xml_dir) / f"{stem}.xml").read_text(), stem, a.mode, rn, vrj)
++        r2, r4 = r4_for((Path(a.xml_dir) / f"{stem}.xml").read_text(), stem, a.mode, rn, vrj, a.exclude_tags)
+         tot["tests"] += 1
+         ll = (md / "llvm" / f"{stem}.ll").read_text()
+         emitted = {int(m.group(1)): m.group(2) for m in re.finditer(r"; pc=(\d+)\s+\S+\s+\((\S+)\)", ll)}

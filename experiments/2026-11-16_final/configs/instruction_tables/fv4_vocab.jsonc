@@ -1,0 +1,129 @@
+// fv4 vocabulary (abs-vocab, agent of overnight-1111, 2026-11-12). Opt-in: used only when a run's
+// paths.instruction_tables points here. Review doc: wiki/design/VOCAB_TABLES.md
+// "Abstract-category expansion fv4 (2026-11-12)".
+//
+// = fv2_vocab.jsonc (every fv2 entry kept verbatim, same order) + more concrete forms per Alloy kind.
+// Pass 2 draws ONE candidate per Alloy instruction with random.choice over the candidates whose "uses"
+// cover every Alloy-specified slot (parsexml.py:609-621), so every form below has equal weight with the
+// others of its kind. RMW (load_rmw_or0) joins the "ld" draw at the same weight when the run config sets
+// fanout_v2.vocab_rj.rmw (X1, overnight-exp; parsexml.py:611-613); jmp joins the branch draw below.
+//
+// Two ways a new entry is wired (field "base"):
+//   base = "load" / "store": a different ENCODING of the same Alloy operation. Pass 2 keeps
+//     concrete_instruction = base (so every name-keyed path: STL pairing, store separation, LOAD_LIKE,
+//     _uses_for, the transmitter-slot lookup, keeps working unchanged) and records the form in
+//     rec["vocab_form"]; pass 5 only changes the asm text. Same address, same 64-bit value, same pc marker
+//     directly on the memory instruction (compile_annotate.py:269-281 uses the marker as xmit.addr).
+//   no base (other_n): a new concrete name with its own pass-5 branch and a _stl_arch_values case
+//     (parsexml.py:1130-1211) so stl_bypass evaluates it exactly instead of skipping the test.
+//
+// Every new asm encoding was decoded and executed on each gem5 build on cafe3 by a hand micro-test
+// (bugwork/abs_vocab/, VOCAB_TABLES.md section above). Forms refused as semantics decisions are listed
+// under "_refused" (each is a DECIDE in URGENT_TODO.md).
+//
+// "tags": ["spt_bwd_invertible"] = the emitted asm contains a gem5 micro-op that gem5-spt untaints
+// BACKWARDS (an untainted output untaints the one tainted input): micro-op name in
+// "add,addi,adc,adci,sub,subi,sbb,sbbi" (strstr match) or == "mov", gem5-spt
+// src/cpu/o3/rob_impl.hh:850-880 (cafe2 /work/gem5-spt). Micro-ops from gem5-spt
+// src/arch/x86/isa/insts/general_purpose: MOV_R_R = mov (move.py:54), CMOVNZ_R_R = mov,mov
+// (conditional_move.py:60), NEG_R = sub (add_and_subtract.py:423), ADD_R_R = add (:39), SUB_R_R = sub
+// (:135), INC_R = addi (increment_and_decrement.py:39). NOT tagged because gem5-spt does not untaint
+// backwards through them: NOT_R = limm+xor (logical.py:327), XOR/AND/OR_R_R (logical.py:135/231/39),
+// LEA_R_M = lea (load_effective_address.py:39; also today's add), SHL = slli. The SPT model does not
+// express backward untaint, so tagged forms give expected (non-bug) SPT hits. An SPT corpus drops them
+// with run-config fanout_v2.vocab_exclude_tags: ["spt_bwd_invertible"] (absent = nothing dropped).
+// The fanout_v2 splices add0/add_sub (and inc) are the same issue for the splice draw: drop them from
+// fanout_v2.splice.ops in an SPT config.
+{
+  "kind_categories": {
+    "ld": "ld",
+    "str": "str",
+    "br_n": "br",
+    "br_x": "br",
+    "other_n": "other_n",
+    "other_x": "other_x",
+    "unknown": "other_n"
+  },
+  "instructions": {
+    "ld": [
+      { "name": "load", "llvm_op": "load volatile i64",
+        "comment": "reads address from inaddr (or inmem as the memory operand), writes loaded value to outreg",
+        "uses": ["inaddr", "inmem", "outreg"] },
+      { "name": "load_swapidx", "base": "load", "llvm_op": "movq (inline asm, base/index swapped)",
+        "comment": "same load, same address, other SIB encoding: movq (%idx,%probe,1),%dst when inaddr is rf-specified, movq off(,%mem_base,1),%dst otherwise. One ld micro-op at the marker; the address still depends on both registers.",
+        "emitter": "asm-text variant inside the existing 'load' branch (incl. fpr_route)",
+        "uses": ["inaddr", "inmem", "outreg"] }
+    ],
+    "str": [
+      { "name": "store", "llvm_op": "store volatile i64",
+        "comment": "reads value from inreg0, address from inaddr, writes to outmem",
+        "uses": ["inreg0", "inaddr", "outmem"] },
+      { "name": "store_swapidx", "base": "store", "llvm_op": "movq (inline asm, base/index swapped)",
+        "comment": "same store, same address, other SIB encoding: movq %src,(%idx,%probe,1) / movq %src,off(,%mem_base,1); also in the stl_bypass re-target path",
+        "emitter": "asm-text variant inside both existing 'store' branches",
+        "uses": ["inreg0", "inaddr", "outmem"] },
+      { "name": "store_imm", "base": "store", "llvm_op": "movq $0 (inline asm)",
+        "comment": "store of the immediate 0: offered ONLY when Alloy left inreg0 unspecified (uses omit inreg0), so no Alloy data edge is dropped. Writes the same address; gem5 MOV_M_I = limm + st.",
+        "emitter": "existing immediate path of the 'store' branches (taken when the form is store_imm); _stl_arch_values stores 0",
+        "uses": ["inaddr", "outmem"] }
+    ],
+    "br": [
+      { "name": "br_uncond", "llvm_op": "br label", "comment": "unconditional branch — no register operands", "uses": [] },
+      { "name": "br_cond", "llvm_op": "br i1", "comment": "conditional branch — consumes a condition value in inreg0", "uses": ["inreg0"] },
+      { "name": "br_bez", "llvm_op": "testq+jz",
+        "comment": "branch-if-equal-to-zero — used when a branch is the xmit transmitter (xm flag). Reads Alloy's inreg0 slot (which traces back to a load via Alloy's tag_xm fact) so STT sees the load→branch taint chain. Architecturally the inreg's value is 0 → testq sets ZF=1 → branch taken; BTB predicts not-taken → misprediction. A synthetic NOP is injected on the fall-through path so check_br can observe the squash.",
+        "uses": ["inreg0"] }
+    ],
+    "other_n": [
+      { "name": "bitnot", "llvm_op": "xor i64", "comment": "unary bitwise NOT (emitted as: %dst = xor i64 %src, -1); uses one input register and one output register", "uses": ["inreg0", "outreg"] },
+      { "name": "add", "llvm_op": "add i64", "comment": "binary integer add — uses two input registers and one output register (emitted as leaq)", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "inc", "tags": ["spt_bwd_invertible"],  "llvm_op": "incq (inline asm)", "comment": "out = in0 + 1 via incq; gem5 addi reads the CF/OF register (SPT audit A1 needs it next to br_cmp)", "uses": ["inreg0", "outreg"] },
+      { "name": "cmov_rr", "tags": ["spt_bwd_invertible"],  "llvm_op": "cmovne (inline asm)", "comment": "out = in0; cmpq in0,in0 makes cmovne never move, but in1 is still read (SPT audit A2 shape)", "uses": ["inreg0", "inreg1", "outreg"] },
+
+      { "name": "mov_rr", "tags": ["spt_bwd_invertible"],  "llvm_op": "movq (inline asm)", "comment": "out = in0 (register MOV; SPT backward-untaint rule 1 applies to it, SPT p7)", "emitter": "new branch (unary ALU family)", "uses": ["inreg0", "outreg"] },
+      { "name": "neg", "tags": ["spt_bwd_invertible"],  "llvm_op": "negq (inline asm)", "comment": "out = -in0 (movq; negq). Invertible unary.", "emitter": "new branch (unary ALU family)", "uses": ["inreg0", "outreg"] },
+      { "name": "shl3", "llvm_op": "shlq $3 (inline asm)", "comment": "out = in0 << 3 (movq; shlq $3); NDA p8 Fig.6 preprocess shape (there shl 9; 3 keeps probe offsets small)", "emitter": "new branch (unary ALU family)", "uses": ["inreg0", "outreg"] },
+      { "name": "addq_rr", "tags": ["spt_bwd_invertible"],  "llvm_op": "addq (inline asm)", "comment": "out = in0 + in1 with a flag-setting ADD (today's 'add' is leaq, which sets no flags)", "emitter": "new branch (binary ALU family)", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "sub_rr", "tags": ["spt_bwd_invertible"],  "llvm_op": "subq (inline asm)", "comment": "out = in0 - in1. If both inputs are the same physical register the form falls back to or_rr (a zero idiom is DECIDE V6, not added)", "emitter": "new branch (binary ALU family)", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "xor_rr", "llvm_op": "xorq (inline asm)", "comment": "out = in0 ^ in1. Same-register inputs fall back to or_rr (zero idiom, DECIDE V6)", "emitter": "new branch (binary ALU family)", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "and_rr", "llvm_op": "andq (inline asm)", "comment": "out = in0 & in1 (not invertible: SPT p7 has no backward untaint through AND)", "emitter": "new branch (binary ALU family)", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "or_rr", "llvm_op": "orq (inline asm)", "comment": "out = in0 | in1 (not invertible)", "emitter": "new branch (binary ALU family)", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "lea_s8", "llvm_op": "leaq (a,b,8) (inline asm)", "comment": "out = in0 + 8*in1 (scaled-index LEA; NDA p8 Fig.6 address-calculation shape). One lea micro-op in gem5", "emitter": "new branch (binary ALU family)", "uses": ["inreg0", "inreg1", "outreg"] }
+    ],
+    "other_x": [
+      { "name": "zsm", "llvm_op": "mul i64", "comment": "zero-skip multiply — some x86 microarchs (e.g. Sandy Bridge) early-terminate the multiplier when one operand is zero, leaking zero-ness via timing; emitted as: %dst = mul i64 %a, %b", "uses": ["inreg0", "inreg1", "outreg"] },
+      { "name": "div", "llvm_op": "sdiv i64", "comment": "signed integer division — variable latency on x86 based on operand magnitude, making the dividend/divisor values observable via timing; emitted as: %dst = sdiv i64 %a, %b", "uses": ["inreg0", "inreg1", "outreg"] }
+    ]
+  },
+  "branch_forms": {
+    // fv4: per annotated conditional branch, ONE form drawn uniformly from this list among the forms
+    // eligible for that branch: "test" = LLVM br i1 (testq+jcc), "cmp" = asm-goto cmpq $1,%c ; jb|jae
+    // (fv2 br_cmp), "jmp" = direct jmp to the fall-through (fv2 jmp_direct; eligible only for a resolved,
+    // correctly-not-taken, non-transmitter branch). Replaces fv2's br_cmp=true (every branch cmp) and
+    // jmp_direct=0.5, which are absent here. Own RNG seeded by crc32("brf:<func>").
+    "uniform": ["test", "cmp", "jmp"]
+  },
+  "_refused": {
+    "_doc": "Not added: each changes what the Alloy kind means for at least one defense. DECIDE items in URGENT_TODO.md (abs-vocab, 2026-11-12).",
+    "ld": {
+      "load_zx8/load_zx16/load_32/load_sx32": "width change: outreg is not the full 64-bit memory value, and SPT tracks taint per byte (SPT p8 7.2), ReCon reveals per word (RECON 4.4); SOURCE_AUDIT_SPT.md A3",
+      "load_disp/load_idx8": "change the runtime address, so the Alloy memory alias (same Mem_s atom) between a store and a load is no longer realised; an address-preserving displacement needs a compensated base register (extra instruction before the marker)",
+      "load_op_add/load_cmov": "two-step forms: dst also depends on its old value or on flags (DECIDE V5 already open)",
+      "load_lea_then_load": "the transmitter's address register becomes a fresh LEA output, so SPT declassifies a different register than the model's inaddr",
+      "prefetch": "no outreg and no consumer; check_ld's data-obtained gate is not defined for it (needs checker work)"
+    },
+    "str": {
+      "store8/store16/store32": "width change plus partial store-to-load forwarding (SOURCE_AUDIT_SPT.md A3)",
+      "xchg/lock forms": "implicitly locked / serializing (excluded by the request)"
+    },
+    "other_n": {
+      "imul / div as other_n": "variable-latency ops are other_x (transmitters) in the default table; offering them as never-transmitting other_n is a per-defense semantics choice (today_superset.jsonc does it for cache-only defenses)",
+      "adc/sbb/setcc/cmovcc-on-flags": "read the flags register, an input Alloy did not model",
+      "zero idioms (xor r,r / sub r,r)": "constant output, model-conservatism false positives (DECIDE V6)",
+      "popcnt/lzcnt/tzcnt/bswap": "not verified as implemented in every build here, and popcnt-like ops are data-dependent on some cores"
+    },
+    "other_x": {
+      "div32 / udiv / any new transmitter": "a new transmitting op is a model semantics decision (and no model's leakage_function contains Otherxs today)"
+    }
+  }
+}

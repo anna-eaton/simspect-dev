@@ -1,0 +1,82 @@
+{
+ "defense": "cleanupspec",
+ "N_prefix": 41240,
+ "n_rows": 41254,
+ "status": {
+  "ok": 41240
+ },
+ "hits": 1651,
+ "gem5_cpu_s_total": 82073.58,
+ "total_cpu_s_total": 227351.98,
+ "gem5_cpu_s_per_test": 1.99,
+ "total_cpu_s_per_test": 5.513,
+ "signatures": {
+  "CS1": {
+   "first_idx": 7849,
+   "tests_to_first": 7850,
+   "stem": "inst-019720",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 16847.6,
+   "cum_total_cpu_s": 44508.2,
+   "K": 4,
+   "N": 41240,
+   "expected_tests_to_first": 8248.2,
+   "expected_gem5_cpu_s_to_first": 16415.11,
+   "expected_total_cpu_s_to_first": 45471.5
+  },
+  "EM_upgrade": {
+   "first_idx": 22,
+   "tests_to_first": 23,
+   "stem": "inst-000303",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 68.69,
+   "cum_total_cpu_s": 165.97,
+   "K": 452,
+   "N": 41240,
+   "expected_tests_to_first": 91.04,
+   "expected_gem5_cpu_s_to_first": 181.18,
+   "expected_total_cpu_s_to_first": 501.89
+  },
+  "UV3": {
+   "K": 0,
+   "N": 41240,
+   "expected_tests_to_first": 41241.0,
+   "expected_gem5_cpu_s_to_first": 82075.57,
+   "expected_total_cpu_s_to_first": 227357.5
+  },
+  "UV4": {
+   "first_idx": 332,
+   "tests_to_first": 333,
+   "stem": "inst-003385",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 774.4,
+   "cum_total_cpu_s": 1942.86,
+   "K": 95,
+   "N": 41240,
+   "expected_tests_to_first": 429.59,
+   "expected_gem5_cpu_s_to_first": 854.95,
+   "expected_total_cpu_s_to_first": 2368.31
+  },
+  "UV5": {
+   "K": 0,
+   "N": 41240,
+   "expected_tests_to_first": 41241.0,
+   "expected_gem5_cpu_s_to_first": 82075.57,
+   "expected_total_cpu_s_to_first": 227357.5
+  },
+  "unattributed": {
+   "first_idx": 1,
+   "tests_to_first": 2,
+   "stem": "inst-000347",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 5.45,
+   "cum_total_cpu_s": 13.48,
+   "K": 1105,
+   "N": 41240,
+   "expected_tests_to_first": 37.29,
+   "expected_gem5_cpu_s_to_first": 74.21,
+   "expected_total_cpu_s_to_first": 205.57
+  }
+ }
+}
+rc=0

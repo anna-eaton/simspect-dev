@@ -1,0 +1,267 @@
+% (leakage-prompting knobs: written up as a subsection in the Test Generation Pipeline section, sections/pipeline.tex)
+% Reorganized 2026-11-10 (Anna's request): each bug is described once, under Known Bugs Replicated or Unknown bugs found.
+% The later detail sections ("Bugs found in the gem5 defenses" and its three subsubsections, "vs. AMuLeT: scope") are
+% commented out below, unchanged; their content is merged into one PROPOSED TEXT note per bug, and their figures and
+% \label{}s moved up to UV2, UV3 and UV6. Redundant older notes were merged into those notes.
+\section{Results}
+\labbr
+\labnote{results are not finalized.}
+\notebr
+\iffalse % LAB-REVIEW CUT (2026-11-03): placeholder to-do list ([N] numbers)
+{\color{cfigtodo}\footnotesize\noindent[fig todo: results to write up (numbers are placeholders)]
+\begin{itemize}
+\item Re-run every number on the fixed harness (2026-10-30); every number below is a placeholder [N].
+\item \textbf{STT}: visibility-point/squash race (Fig.~\ref{fig:race}): the transmitter's cache packet lands [N] cycles after its branch resolves and [N] before the squash; [N] instances; 0 at stock \texttt{commitToIEWDelay}=1. Open: whether this counts under the window (R1); option: report post-resolution, pre-squash transmission as its own category.
+\item \textbf{SPT-Fence}: same race (re-run with branch forces); [N] untriaged branch-transmitter hits (post-fix sample: [N] not-taken / [N] taken) are a possible new finding: triage.
+\item \textbf{Recon} (STT scheme): getOldestTaint/OTB (Fig.~\ref{fig:otb}) confirmed by a hand-built test; show the cache access with LSQ tracing; Stage~1.5 and interleaving should reach it. Store-to-load forwarding bypass (Fig.~\ref{fig:reconstl}): confirmed (Anna, 2026-11-03); 1 of [N] load hits.
+% STAGE NAMES (2026-11-11): in the item above, Stage~1.5 is now Stage~1b (Fig.~pipeline renamed).
+\item \textbf{SpecLFB}: UV6 (first speculative load left unprotected): \toolname{} first detects it at test [N] vs.\ AMuLeT's [N]; hit density [N]\% vs.\ [N]\%; footprint criterion in Table~\ref{tab:xmitcriteria}.
+\item \textbf{InvisiSpec}: footprint criterion (L1D, L2, directory, D-TLB events of squashed loads; Table~\ref{tab:xmitcriteria}); UV1 L1D eviction on a real trace (Fig.~\ref{fig:checkerwindow}); [N] hits; collateral channels sit outside the defense's own guarantee.
+\item \textbf{CleanupSpec}: per-line undo-balance criterion; post-squash residue (UV3--UV5) and unXpec timing; [N] hits; out of scope of the defense's guarantee.
+\item \textbf{Targeting}: 100\% of \toolname{} tests carry a protected transmitter vs.\ [N]\% of AMuLeT's random tests (Fig.~\ref{fig:target}); independent of the harness.
+\item \textbf{Cost}: per-test gem5 time [N]\,s vs.\ [N]\,s; total simulation to first detection [N]$\times$ less.
+\item \textbf{Coverage}: per defense, [N] Stage-1 graphs, [N] Stage-1.5 graphs, [N] programs, [N] runs.
+% STAGE NAMES (2026-11-11): Stage-1 graphs -> Stage-1a graphs, Stage-1.5 graphs -> Stage-1b graphs (Fig.~pipeline renamed).
+\item Timing sweeps (Fig.~\ref{fig:timing}) predate the fix: re-run or drop.
+\end{itemize}}
+\fi
+
+We run \toolname{} end-to-end on the gem5 implementations of STT, SPT and ReCon, and on the
+AMuLeT artifact builds of InvisiSpec, CleanupSpec, and SpecLFB.
+\urgentbr
+\urgentnote{\textbf{PROPOSED TEXT} (replaces the sentence just before this note): We run \toolname{} end-to-end on the gem5 implementations of STT and SPT, on ReCon's implementation of STT, and on the AMuLeT artifact builds of InvisiSpec~\cite{yan2018invisispec}, CleanupSpec~\cite{saileshwar2019cleanupspec}, and SpecLFB~\cite{cheng2024speclfb}, which we drive with tests from our STT model. Why: the three AMuLeT defenses are not cited at first mention; our ReCon runs never exercise ReCon's reveal (classic caches, or the authors' Ruby setup with tests that cannot reach the reveal), so they test ReCon's implementation of STT; and the footprint checker counts a footprint left by any squashed load, not only the targeted transmitter (counts in the note under Known Bugs Replicated). \textit{Source:} simspect wiki/state/EVAL\_MANIFEST.md (E6 deviation paragraph; rows E12--E14).}
+\iffalse The result is the set of bugs in the simulated defenses seen in Table~\ref{tab:bugs}.\fi% LAB-REVIEW CUT: bug table hidden
+\urgentbr
+
+We refer to vulnerabilities discussed in the AMuLeT paper as A-KVn and A-UVn for known and unknown vulnerabilities respectively, and denote unknown vulnerabilities found by SimSpect as UVn.
+
+\subsection{Known Bugs Replicated}
+We check each defense only against the leakage its own paper claims to prevent (see the Discussion). AMuLeT~\cite{amulet} reports nine bugs in these defenses; five fall in that scope, and \toolname{} replicates all five. On InvisiSpec~\cite{yan2018invisispec}, a speculative load evicts a live L1D line (A-UV1) in 2{,}995 of 3{,}000 sampled tests. On CleanupSpec~\cite{saileshwar2019cleanupspec}, a speculative read-modify-write's line is not cleaned (A-UV3, next paragraph), a line-crossing access is not cleaned (A-UV4, 38 tests), and the cleanup invalidates a line that an older committed access had used (A-UV5, [1] test). On SpecLFB~\cite{cheng2024speclfb}, the first speculative load is left unprotected (A-UV6) in 1{,}143 and 1{,}142 of 1{,}500 tests per branch direction. The other four lie outside the guarantees we check: InvisiSpec excludes MSHR contention (A-UV2,~\cite[\S VII]{yan2018invisispec}) and the instruction cache (A-KV1, its footnote~2) from its threat model, CleanupSpec's unXpec (A-KV2) is a timing channel, which we do not check, and STT's speculative store that fills the TLB (KV3) needs a store transmitter, which we scope out.
+\urgentbr
+\urgentnote{\textbf{PROPOSED TEXT (Known Bugs Replicated; merges the earlier notes here).} (1) A-UV3: ``(A-UV3, next paragraph)'' points to the read-modify-write paragraph below, which is commented out. Either restore it, or replace the clause with: ``a speculative read-modify-write's line is not cleaned (A-UV3): when the test's memory is flushed after setup, CleanupSpec leaves the RMW's line installed in 407 of 590 sampled RMW tests, against 0 of 590 without the flush''. Optional, pending your decision: the same RMWs also upgrade lines that older squashed loads brought in to the modified state, and CleanupSpec then skips those loads' cleanup (73 of 590 tests with the flush); add it as A-UV3 reaching further once its dependence on the secret is checked. (2) A-UV6: add after its sentence, ``SpecLFB's ROB walk also unprotects later loads, a separate bug (UV4 below).'' (3) If the commented details paragraph below is restored, fix its A-UV6 cause: the LSQ walk's start one entry after the head never decides the outcome; the ROB walk marks loads as having no older unsafe load up to and including the first unsafe load itself (AMuLeT calls it ``an undocumented optimization in SpecLFB's implementation'',~\cite{amulet} p12 and Fig.~8). Its last sentence becomes: ``On SpecLFB (A-UV6), the walk that marks loads with no older unsafe load includes the first unsafe load itself, so that load is never held (AMuLeT's Fig.~8); this happens in 76\% of our tests.'' (4) Footprint counts include footprints left by any squashed load, not only the transmitter: on an earlier InvisiSpec sample only other squashed loads (mostly the wrong-path function epilogue) leave a footprint in 802 of 2{,}883 hits, and on SpecLFB the transmitter is among the offending loads in 911 of 1{,}300 hits (not-taken) and 937 of 1{,}452 (taken); decide whether to report all squashed-load footprints, as now, or only the transmitter's. Counts refresh from the final run. \textit{Source:} simspect URGENT\_TODO.md (PAPER FIX ``the UV6 cause sentence''); wiki/state/EVAL\_MANIFEST.md (row C1).}
+% \subsubsection{Read-modify-write instructions} UV3 needs a read-modify-write (RMW) instruction rather than a plain store. CleanupSpec assumes that a store requests its cache line only when it commits~\cite[\S 4]{saileshwar2019cleanupspec}, so a speculative store never changes the cache, and, as in our other specifications, we do not model speculative stores as transmitters. An x86 RMW such as \texttt{or \$0, (mem)} is different: its load half issues speculatively and requests the line with write permission, and CleanupSpec keeps no record with which to undo that request. Every RMW transmitter our model admits is a load transmitter with the load relabelled (an Alloy check finds all 150 minimal RMW cores of up to four instructions to be relabelled load cores), so we derive an RMW corpus from the load corpus by replacing each transmitter load with an RMW to the same address (124{,}198 tests). One more condition matters: our tests zero their memory before the speculative window, so the RMW's line is already cached and there is nothing to undo. When the test's memory is flushed after that setup, CleanupSpec leaves the RMW's line installed in 407 of 590 sampled tests, against 0 of 590 without the flush. The other defenses protect an RMW's load half like a plain load.
+\anna{following paragraph has more details on known vuln probs not necessary commenting out rn}
+% Each known bug appears in \toolname{}'s traces with a signature that names its cause. On InvisiSpec (A-UV1), a speculative load evicts a live L1D line, and the victim is written back to the L2; with AMuLeT's fix for this bug enabled (\texttt{--apply-spec-eviction-patch}), the eviction disappears, which confirms the cause. It appears under both of InvisiSpec's threat models (Spectre and Futuristic). On CleanupSpec, A-UV4 appears as a cleanup that is skipped because the squashed access crossed a cache-line boundary. Such accesses arise naturally from stack operations in our tests, so no special stimulus is needed, but the runs only complete with enough L1 miss entries: with the 2 that AMuLeT uses, 62\% of our runs deadlock, so we use 8, the smallest setting without deadlocks. A-UV5 appears once: an older, committed line-crossing load hits a line that a squashed load installed, and CleanupSpec still invalidates that line and restores the evicted one. CleanupSpec's paper requires lines used by older accesses to be kept~\cite[\S 3.4]{saileshwar2019cleanupspec}, but the implementation decides only from the squashed load's own state (\texttt{Sequencer.cc:1300--1346}). On SpecLFB (A-UV6), the first speculative load sits at the head of the load queue, and the walk that flags unsafe loads starts one entry after the head (\texttt{lsq\_unit.cc:877}), so that load is never held; this happens in 76\% of our tests.
+
+\subsection{Unknown bugs found by \toolname{}}
+\urgentbr\urgentnote{\textbf{HOW THIS SECTION IS ORGANIZED NOW.} Each bug keeps its current text and gets one PROPOSED TEXT note that merges in the detail from the commented-out ``Bugs found in the gem5 defenses'' section further down (mechanism with file:line, the test shape that reaches it, the count and its control, what we do not claim) plus the items still open. Paste a note over the paragraph above it to accept it. The three trace figures moved here (Fig.~\ref{fig:reconstl} to UV2, Fig.~\ref{fig:otb} to UV3, Fig.~\ref{fig:race} to UV6), and so did the labels sec:bug-stlf, sec:bug-otb and sec:bug-race. Numbering stays UV1--UV6: the walk order counts as a new bug (your decision, 2026-11-09).}
+\subsubsection{UV1: STT fails to taint one register}
+STT's taint propagation skips any source register with index 16 (\texttt{rob\_impl.hh:229}), a check meant for the zero register that ignores the register class~\cite{yu2019stt}. Floating-point index 16 is the low half of \texttt{xmm4}, so a speculatively loaded secret copied through \texttt{xmm4} and back loses its taint, and the dependent transmitter accesses the cache inside the speculative window. \toolname{} exposes it once its test generator routes values through floating-point registers: of 100 load-to-load tests that STT blocks in their integer form, 98 leak when the accessing load's value passes through \texttt{xmm4}, against 0 through \texttt{xmm3} and 0 in the integer form. The check is still present in the latest upstream STT.
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (UV1):} only one change: ``inside the speculative window'' $\to$ ``inside the violation window'' (the paper's term for the window; same change in UV2 and in Every reported leak below).}
+\subsubsection{UV2: ReCon: store-to-load forwarding skips the taint check}\label{sec:bug-stlf}
+% [lead for Sec.~\ref{sec:bug-stlf}] (2026-11-10: the detail subsubsection is commented out below; its label moved here)
+In ReCon's implementation of STT, a load that receives its value from an older store through store-to-load forwarding returns the data (\texttt{lsq\_unit.cc:2019}) before the STT taint check runs (\texttt{:2079}). A load with a tainted address therefore completes inside the speculative window without touching the cache. \toolname{} catches it because its checker asks whether the transmitter obtained its data, not whether it sent a cache request, and it appears in tests generated from the base model.
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (UV2; merges this lead with the commented-out sec:bug-stlf):} In ReCon's implementation of STT~\cite{recon}, a load's taint is checked only on its cache path. When an older store in the store queue covers the load's address, \texttt{LSQUnit::read()} forwards the store's data (\texttt{lsq\_unit.cc:2019}) and schedules the load's writeback before it reaches the STT taint check (\texttt{:2079}), and the writeback handler checks only the Delay scheme. A speculative load with a tainted address therefore completes with the forwarded value inside the violation window, without touching the cache. STT treats forwarding as an implicit branch whose predicate, that the load aliases no older in-flight store, depends on the load's address, and delays its resolution until that predicate is untainted~\cite[Sec.~6.4.2]{yu2019stt}; it also writes the load's output only after the memory access would have completed~\cite[Sec.~6.5]{yu2019stt}. Under ReCon, the load's completion time instead reveals whether its secret-derived address matches the older store's address, which the attacker can choose. Fig.~\ref{fig:reconstl} shows test inst-014912: load i3 runs under a mispredicted branch, so every address built from its result is tainted; the store i4 and the transmitter load i5 use that address. ReCon's own check reports i5 as tainted and speculative at cycle~5, yet i5 completes at cycle~7, two cycles before its squash; by ReCon's \texttt{LSQUnit::read()}, it took i4's value from the store queue. \toolname{} catches it because its checker asks whether the transmitter obtained its data, not whether it sent a cache request. It appears in tests generated from the base model, and giving each store its own address removes all 80 such hits in 200 generated load tests. \textit{Why the wording:} the trace excerpt is grep-filtered and has no forwarding line, so the text says which part comes from the code. \textit{Source:} simspect project log 2026-11-08 21:30 ``fpr-fanout''; wiki/findings/bug/recon\_cache\_reach\_gate/README.md.}
+\input{tikz/reconstl_v2_8pt}
+\urgentbr\urgentnote{\textbf{FIGURE (Fig.~\ref{fig:reconstl}), merged from three notes.} (1) Its bar ``Tainted and speculative until the squash'' is the violation window: relabel it ``Violation window (until the squash)'', or add ``(the violation window)'' to the caption. (2) The store i4 is drawn as `? \textless{}- [r0]', the same form as a load: draw it as `[r0] \textless{}- ?' and add to the caption ``the store's address shares r0 by state assignment; the model has no store-to-load edge, so forwarding appears only in the trace''. (3) The trace figures use different letters (Fig.~\ref{fig:race} F/D/E, this one N/E, Fig.~\ref{fig:otb} N/E/C) and window styles; use one letter set (F fetch, D dispatch, I issue, C complete) and one window style (tan fill and frame) in all three. (4) The caption's ``took i4's value'' needs the same code-vs-trace wording as UV2's proposed text.}
+\subsubsection{UV3: ReCon: only the oldest taint source}\label{sec:bug-otb}
+% [lead for Sec.~\ref{sec:bug-otb}] (2026-11-10: the detail subsubsection is commented out below; its label moved here)
+When an instruction merges two tainted operands, ReCon's implementation of STT keeps only the oldest taint source (\texttt{getOldestTaint}) rather than all of them. Once the branch guarding that older source resolves, the merged value counts as untainted although it still depends on a younger speculative load, and a transmitter that uses it accesses the cache. \toolname{} produces it when its test generator adds an older load under an already-resolved branch and merges it into the transmitter's address: 100 of 100 such tests leak, against 0 of 100 without the merge.
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (UV3; merges this lead with the commented-out sec:bug-otb):} ReCon's taint tracker keeps a single taint source per register. When an instruction has several tainted operands, \texttt{propagateTaints} gives its destination the taint of only the oldest one (\texttt{getOldestTaint} picks the lowest sequence number), and \texttt{freeTaints} drops that taint as soon as its source is no longer speculative. A value computed from an older and a younger speculative load therefore counts as untainted once the older load's branch resolves, although the younger load is still speculative. STT instead untaints an instruction's operands only when their youngest root of taint reaches the visibility point~\cite[Sec.~7.1]{yu2019stt}. Fig.~\ref{fig:otb} shows the case: the ALU op i4 adds $r0$, loaded by i1 under branch i0, and $r1$, loaded by i3 under the mispredicted branch i2, and its result is the address of transmitter i5. Branch i0 resolves at cycle~0 and i5 issues at cycle~8, the same cycle as with no defense, while i2 stays unresolved until cycle~92. We found the bug with this hand-built test. \toolname{}'s Stage~2 reproduces it by merging an older load, under an already-resolved branch, into a transmitter's address: 100 of 100 such tests leak, against 0 of 100 without the merge, and in those tests the transmitter completes while the younger branch is still unresolved. In the main evaluation corpus, 11 of the 24 tests per branch direction whose transmitter takes such a merge leak (2\% sample). \textit{Still open:} the last sentence of the Fig.~\ref{fig:otb} caption (``built by hand; our bounded enumeration does not reach this shape'') is out of date, and the hand-built trace shows i5 only issuing (this build never logs a sent cache packet), so cite the generated tests for ``completes''. Fig.~\ref{fig:interleave}'s caption says interleaving builds this shape, but interleaving is off in every evaluation configuration and the OTB merge builds it (pending decision: redraw that figure around the merge, drop its OTB claim, or cut it). \textit{Source:} simspect wiki/design/VOCAB\_TABLES.md ``OTB merge''; URGENT\_TODO.md DECIDE ``OTB on two-stage tests'' (E2 update); SOURCE\_AUDIT\_RECON.md R-SA-8 ``gem5 check''.}
+\input{tikz/recon_otb_v2_8pt}
+\subsubsection{UV4: SpecLFB: ROB walk order} SpecLFB decides whether a speculative load is unsafe in two walks: the ROB walk marks a load that has no older unsafe load, and the LSQ walk flags loads in a branch's shadow. A load is held only if it is flagged and was not marked. A load reaches the ROB one cycle before it reaches the load queue (\texttt{renameToROBDelay}=1, \texttt{renameToIEWDelay}=2), so the ROB walk can mark a younger load before the LSQ walk has flagged the older one, and the mark is never cleared. Loads after the first speculative load can therefore go unprotected too, so the leak AMuLeT reports for the first load (A-UV6) reaches further than reported: in [157 and 162] of 1{,}500 tests per branch direction, only a later load leaks.
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (UV4; the walk order counts as a new bug, your decision 2026-11-09).} Replace the last sentence with: ``Loads after the first speculative load can therefore go unprotected as well. This is a separate bug from A-UV6, which leaves only the first speculative load unprotected: in 157 and 162 of 1{,}500 tests per branch direction, only a later load leaks, which A-UV6 does not explain.'' Before claiming it is separate, check that AMuLeT's fix for the first-load exemption does not also close it. Keep ``six new ones'' in the abstract and intro. \textit{Source:} simspect URGENT\_TODO.md ``walk-order''; wiki/findings/audits/2026-11-08/SOURCE\_AUDIT\_CLEANUPSPEC\_SPECLFB.md.}
+\subsubsection{UV5: SpecLFB: the shadow of a jmp}
+% [new subsubsection]. (2026-11-10: marker moved to a comment)
+SpecLFB's ROB walk keeps a single flag for whether all older branches have resolved. An unresolved branch clears it, but a younger direct \texttt{jmp} or \texttt{call} sets it again (\texttt{rob.cc:501} in the original artifact and in AMuLeT's copy), erasing the older branch's shadow, so loads after the jump count as safe and fill the L1D speculatively. The logic was ported from DOLMA~\cite{loughlin2021dolma}, which keeps a flag that stays set for the rest of the walk and does not have this bug. We confirm it on an unmodified build with a natural misprediction: the fill depends on the secret, and a one-line change that leaves the flag alone at direct jumps removes it without affecting UV6. It appears in 148 of 1{,}500 tests with the taken branch direction.
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (UV5).} Replace the last sentence with: ``It appears in 148 of 1{,}500 taken-direction tests through the test's closing jump, and in both branch directions once our generator emits direct jumps (134 of 3{,}744 sampled tests). AMuLeT's own SpecLFB campaigns also trigger it, in 47 of their 248 violations, but attribute every one to A-UV6.'' Also: the 148 are tests whose jump is the harness's closing \texttt{jmp}; traced reruns tie a further 274 hits (loads re-sent after the ROB walk cleared them, with a jump in the shadow) to the same reset, and whether to count those is a pending decision. ``Without affecting UV6'' means AMuLeT's A-UV6; say ``A-UV6''. Check the line number against an unmodified copy (the copy we run, which has our hooks, has it at \texttt{rob.cc:538}). \textit{Source:} simspect project log 2026-11-09 20:10 ``bug-investigate-e14new''; wiki/state/EVAL\_MANIFEST.md (row E14; row T3; Footprint model experiment).}
+\subsubsection{UV6: the visibility-point/squash race}\label{sec:bug-race}
+% [Sec.~\ref{sec:bug-race}, moved last]. (2026-11-10: the detail subsubsection is commented out below; its label moved here)
+STT clears a transmitter's protection when its branch resolves, without excluding instructions on the wrong path that is about to be squashed. When squashes take longer to reach issue (\texttt{commitToIEWDelay} $\geq$ [2--3]), the wrong-path transmitter accesses the cache in the gap between resolution and squash ([N] tests; none at stock timing). SPT-Fence shows the same race [pending a re-run on the fixed harness].
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (UV6; merges this lead with the commented-out sec:bug-race):} STT roots a load's taint in \texttt{isAccess() \&\& !isUnsquashable()} and marks an instruction unsquashable once every older branch has resolved (\texttt{isPrevBrsResolved()}). While the mispredicted branch is unresolved, the wrong-path load is squashable, its result is tainted, and the transmitter that uses it is held. When the branch resolves, the younger wrong-path instructions become unsquashable at once, the load's taint drops, and the transmitter issues; but the squash caused by the same resolution reaches the issue stage only \texttt{commitToIEWDelay} cycles later, and in that gap the wrong-path transmitter accesses the cache. STT never requires the squash to land before it releases a transmitter. Fig.~\ref{fig:race} shows test inst-047231 on STT with slowed squash propagation (\texttt{commitToIEWDelay}~$=4$, \texttt{iewToCommitDelay}~$=30$, \texttt{squashWidth}~$=1$; \texttt{commitToIEWDelay}~$=3$ alone also triggers it). The transmitter i5 is ready at cycle~49 but held, because its address comes from the speculative load i3. At cycle~77 the mispredicted branch i2 resolves, i5 issues at cycle~78 and sends a cache packet at cycle~79, and the squash reaches the load queue only at cycle~81. At stock timing (\texttt{commitToIEWDelay}~$=1$) the squash arrives first and no packet is sent. SPT-Fence lifts its fence on the same resolution signal and races the same way: in 24 sampled race tests it leaks in none at stock timing, and in 3, 14 and 15 with \texttt{commitToIEWDelay} of 2, 3 and 4. \textit{Still open:} (1) the STT count: the only one, 23{,}966, predates the 2026-10-30 harness fix and includes 4{,}122 hits never re-checked; run a slowed-timing configuration as its own row, or describe inst-047231 without a count. (2) The window rule (decided 2026-11-08: a branch that has executed but whose squash has not landed is still unresolved) is not yet in the Pipeline section's window definition, and our checker still ends the window at resolution (simspect STAGE3\_gem5/gem5\_common.py, \texttt{resolve\_visible}), so the race is not yet re-scored. (3) The SPT numbers come from the old SPT\_6\_oneLP testset; re-run on the evaluation corpus before reporting them as a rate. \textit{Source:} simspect wiki/findings/bug/stt\_slowcomm\_vp\_squash\_race/ (provenance.json, example\_inst-047231.md); wiki/findings/audits/2026-11-08/SOURCE\_AUDIT\_SPT.md ``A5 gem5 check''; URGENT\_TODO.md DECIDED 2026-11-08.}
+\input{tikz/squashrace_v2_8pt}
+\urgentbr\urgentnote{\textbf{FIGURE (Fig.~\ref{fig:race}).} Fig.~\ref{fig:race} and Fig.~\ref{fig:checkerwindow} must draw the same violation window: from lc's retirement until fnc retires or a guarding branch's squash lands, whichever comes first. Here it runs to the squash at cycle~81: rename ``Committed window (lc retires to fnc retires)'' to ``Violation window'' and drop ``the committed window closes when fnc retires'' from the caption; Fig.~\ref{fig:checkerwindow} ends its window at the branch's resolution, so extend it to the squash. Also: fnc (i1) is not drawn although the caption ends the window at its retirement; E (issue) is marked at cycle~49 where i5 is held until cycle~78 (label 49 ``ready (held)''); and the caption is missing the slowed-timing settings in UV6's proposed text.}
+
+\subsection{Comparison with prior work} Compared to AMuLeT, \toolname{} needs [N]$\times$ fewer tests on average to find the known bugs ([N] per bug, on the fixed harness). Part of the difference is targeting: every \toolname{} test contains a protected transmitter, against 17\% of AMuLeT's randomly synthesized tests.
+\input{tikz/firstdet_bars_v2_8pt}
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (Comparison with prior work; preliminary, numbers refresh from the final run; replaces the paragraph above).} We compare the number of tests each tool needs to find each previously known bug. The two tools look for different leaks: AMuLeT fuzzes for collateral channels by comparing executions on different inputs, while \toolname{} checks the transmitter's own transmission inside the violation window. For \toolname{}, a test is one generated program run once: we generate one corpus from the footprint model and run it on all three AMuLeT builds at AMuLeT's own configurations, drawing the cache state (warm, flushed or filled) and the branch-stall timing at random for each test, and report the expected number of tests to the first detection, $(N{+}1)/(K{+}1)$ for $K$ detections in $N$ tests. For AMuLeT we run its own fuzzer with its own settings (32 instances of 200 programs with 140 inputs each) and count test cases, one program on one input, per detection of that bug over all instances. \toolname{} needs at least $18\times$ fewer tests for every previously known bug, and $140\times$ to $2{,}100\times$ fewer for all but A-UV5, the rarest for both tools: \toolname{} detects it four times in all 50{,}232 tests of its corpus and AMuLeT four times in 896{,}000 test cases (95\% interval for the ratio, with both sides' uncertainty, $3.3\times$ to $96\times$; both counts use the same estimator, $(N{+}1)/(K{+}1)$) (Fig.~\ref{fig:firstdetv2}). Part of the difference is targeting: every \toolname{} test contains a transmitter in the protection set by construction, while 17\% of AMuLeT's randomly synthesized tests contain a speculative gadget inside the window. \textit{Notes:} (1) ``by construction'' matters: these are different criteria, and a test with a protected transmitter need not leak (STT gives 0 hits on our default tests); apply one criterion to both, or keep ``by construction''. (2) Do not use the June SpecLFB comparison (test \#6 vs.\ \#39, ``6.5$\times$''): it predates the harness fix and compared our checker's hits with AMuLeT's contract violations. (3) The jmp-shadow count for AMuLeT's own runs belongs in UV5. \textit{Source:} simspect wiki/state/EVAL\_MANIFEST.md, Footprint model experiment and rows T1--T5.}
+
+\subsection{Timing and CPU usage}\label{sec:timing}
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (timing; new paragraph, preliminary numbers).} We measure cost in CPU time, running one gem5 simulation per test at AMuLeT's microarchitectural configuration for each defense on a dedicated 64-core machine. A \toolname{} test takes 0.45 to 1.17 CPU-seconds of simulation and 1.6 to 3.7 CPU-seconds in total, including assembling, linking and checking the test, so one core runs about 1{,}000 to 2{,}200 tests per hour; the range comes from the defense and from the cache state each test starts with. Because every test targets a forbidden execution, a first detection comes quickly: on SpecLFB, \toolname{} first detects A-UV6 at test 47 when tests start with a warm cache (77 CPU-seconds in total) and at test 1 when they start with a flushed cache (3 CPU-seconds); on CleanupSpec it first detects A-UV4 at test 47 (130 CPU-seconds). Measured as total CPU time per detection, \toolname{} is [19--37]$\times$ cheaper than AMuLeT for A-UV1, A-UV4, A-UV6 and the jmp shadow, while AMuLeT finds A-UV3 [1.6--2.8]$\times$ faster, because only some of our tests contain a read-modify-write. \textit{Notes:} the per-detection multiples come from runs on a shared machine, so \toolname{}'s CPU times there are upper bounds; AMuLeT's paper reports a rate (campaign time divided by all violations, Table~4 p9), not a time to first detection, so compare with our measured AMuLeT runs, not with the paper. Refresh every number from the final unified footprint corpus. \textit{Source:} simspect wiki/state/EVAL\_MANIFEST.md, ``Timing results: SimSpect at AMuLeT parity'' (rows T2, T2c, T3, T3c) and ``SimSpect vs AMuLeT, CPU time per detection, per bug''.}
+\paragraph{CPU usage}
+\labbr\labnote{To be filled: CPU-hours for the whole evaluation per defense, split by stage (Stage~1a Alloy enumeration, Stage~1b flesh-out, Stage~2 concretization, Stage~3 gem5 and checking), peak memory per job, and wall time on the machines used. Where the numbers will come from: the per-test CPU records written by the timing driver (\texttt{results.jsonl}) and the evaluation rows in simspect wiki/state/EVAL\_MANIFEST.md.}
+
+% Bug table: tikz/bugtable_v3_8pt (working table); refresh its rows before showing it (row updates as of 2026-11-09 are in the comments at the top of that file).
+% The older table below, under \iffalse, is superseded by bugtable_v3_8pt.
+% \input{tikz/bugtable_v3_8pt}% every confirmed and candidate bug, one spot (2026-11-03); uncomment to show
+\iffalse
+\begin{table*}[t]\centering\small
+\setlength{\tabcolsep}{5pt}\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{}p{2.3cm}p{4.7cm}p{3.0cm}p{3.1cm}cl@{}}
+\toprule
+\textbf{Defense} & \textbf{Bug} & \textbf{First known from} & \textbf{Found by} & \textbf{In scope?} & \textbf{Verdict}\\
+\midrule
+\multicolumn{6}{@{}l}{\textbf{STT}}\\
+& Visibility-point\,$\leftrightarrow$\,squash race (load channel) & This work & \textcolor{cclean}{\toolname{}} & $\checkmark$ & \textcolor{ctarget}{real}\\
+& Pending-squash race --- secret-dependent squash signal & N.~Mosier (\texttt{cwfletcher/stt}\,@18e304f) & \textcolor{gray}{\textbf{neither} tool} & $\sim$ & \textcolor{ctarget}{real (fixed)}\\
+& Tainted spec \emph{store} $\to$ D-TLB entry (KV3) & DOLMA; via AMuLeT & \textcolor{camulet}{AMuLeT} & $\times$ store/TLB & \textcolor{copen}{not a bug${}^{1}$}\\
+\addlinespace[2pt]
+\multicolumn{6}{@{}l}{\textbf{SPT-Fence}}\\
+& Same visibility-point\,$\leftrightarrow$\,squash race (= STT) & This work & \textcolor{cclean}{\toolname{}} & $\checkmark$ & \textcolor{ctarget}{real}\\
+\addlinespace[2pt]
+\multicolumn{6}{@{}l}{\textcolor{gray}{\textbf{InvisiSpec \& CleanupSpec} \,{\footnotesize\itshape collateral transmitter-side channels --- not comprehensive-defense logic bugs, all out of \toolname{}'s scope}}}\\
+& \textcolor{gray}{UV1, UV2, KV1 --- L1D eviction / MSHR contention / L1I spec-fetch} & \textcolor{gray}{AMuLeT, known} & \textcolor{camulet}{AMuLeT} & \textcolor{gray}{$\times$} & \textcolor{gray}{real}\\
+& \textcolor{gray}{UV3--UV5 --- post-squash L1D residue / over-clean evicts non-spec line} & \textcolor{gray}{AMuLeT} & \textcolor{camulet}{AMuLeT} & \textcolor{gray}{$\times$} & \textcolor{gray}{real}\\
+\addlinespace[2pt]
+\multicolumn{6}{@{}l}{\textbf{SpecLFB}}\\
+& First speculative load left unprotected (UV6) & AMuLeT & \textbf{Both} (\textcolor{camulet}{AMuLeT}@t39; \textcolor{cclean}{\toolname{}}@t6) & $\checkmark$ & \textcolor{ctarget}{real}\\
+\bottomrule
+\end{tabular}
+\caption{Speculative-execution defense bugs, grouped by defense: where each was first
+known, which tool exhibits it (\textcolor{cclean}{\toolname{}} / \textcolor{camulet}{AMuLeT}
+/ Both / neither), whether it falls in \toolname{}'s leakage model, and the verdict. The
+pending-squash race (a secret-dependent squash signal, fixed upstream by Mosier) is a real STT bug
+that \emph{neither} automated tool found. $^{1}$not a bug: a tainted-store$\to$TLB leak is consistent behavior with STT's
+specification, which does not recognize store transmitters, so it is outside the property STT claims to
+enforce. The visibility-point\,$\leftrightarrow$\,squash race is a genuine logic bug: STT and SPT
+release the transmitter's protection on the branch-resolution signal but do \emph{not} wait for the
+squash to \emph{complete}, so the wrong-path transmitter reaches the cache in the gap before it is
+killed.}
+\label{tab:bugs}
+\end{table*}
+\fi
+
+% ===== COMMENTED OUT 2026-11-10 (Anna): "Bugs found in the gem5 defenses" and its three subsubsections. =====
+% Their content is merged into the PROPOSED TEXT notes under UV2, UV3 and UV6 above; the three \input{} figures
+% and the labels sec:bug-race, sec:bug-stlf, sec:bug-otb moved up there. The text is kept here unchanged.
+% \subsection{Bugs found in the gem5 defenses}
+% The confirmed bugs fall into three mechanism classes: a
+% \emph{visibility-point\,$\leftrightarrow$\,squash timing race}, shared by STT and SPT-Fence; a \emph{taint-check bypass through store-to-load forwarding} in ReCon; and the
+% \emph{unprotected-first-load} exemption in SpecLFB (UV6).
+%  In the STT race, the defense clears a
+% transmitter's protection at branch \emph{resolution} with no guard excluding the instruction on the
+% to-be-squashed wrong path, so the wrong-path transmitter touches the cache in the gap before the
+% squash drains; we observe \textbf{23{,}966} race instances and \textbf{0 at stock timing}, where the
+% defense holds.
+% SPT-Fence exhibits the \emph{same} race --- one shared logic flaw across two defenses ---  we find no independent SPT bug.
+% SpecLFB's UV6 leaves the
+% first speculative load in the LSQ unprotected so that it performs its in-window cache access,
+% demonstrated on \textbf{68/300} tests. We \emph{do not} find STT's tainted-store\,$\to$\,TLB bug, by
+% design: \toolname{}'s leakage contract contains no store transmitter, matching STT's own contract of
+% load and branch transmitters.
+%
+% On ReCon's gem5 implementation of STT~\cite{recon}, \toolname{} also exposes a bug in its taint tracking: a load whose address is tainted completes through store-to-load forwarding (Sec.~\ref{sec:bug-stlf}). A hand-built test in our notation shows a second: an instruction that merges two tainted operands keeps only the older operand's taint, so its result is untainted while it still depends on a speculative load (Sec.~\ref{sec:bug-otb}). We describe each bug's mechanism below.
+%
+% \subsubsection{The visibility-point\,$\leftrightarrow$\,squash race}% \label{sec:bug-race} moved to UV6
+% \reviewtag{[TODO: Made this a subsubsection under Bugs found]}
+% STT roots a load's taint in \texttt{isAccess() \&\& !isUnsquashable()} and sets
+% \texttt{isUnsquashable} $\Leftrightarrow$ \texttt{isPrevBrsResolved()}. While the controlling
+% mispredict is unresolved, the wrong-path producer load is squashable, so its result is tainted and
+% the transmitter is held, and the defense works. The instant the branch \emph{resolves},
+% \texttt{isPrevBrsResolved} propagates to the younger wrong-path instructions: the producer becomes
+% unsquashable, its taint drops, the transmitter's address reads as ``clean,'' and the transmitter
+% re-issues and touches the cache. But that same resolution is what \emph{squashes} the wrong-path
+% load, and the squash is not instantaneous --- it propagates commit$\to$IEW over
+% \texttt{commitToIEWDelay} cycles. In the gap between resolution (taint cleared) and squash (load
+% killed), the transmitter performs a real cache access (\iffalse Fig.~\ref{fig:trace}, \fi Fig.~\ref{fig:race});% LAB-REVIEW CUT: old trace figure is in the hidden pending section
+%
+% STT never enforces squash-before-expose.
+%
+% \reviewtag{[TODO: Proposed this example paragraph, from the figure; check it]}
+% Fig.~\ref{fig:race} shows the race on test inst-047231, on an STT build with \texttt{commitToIEWDelay}~$=4$.
+% The transmitter i5 is ready to issue at cycle~49 but is held, because its address comes from the speculative load i3. At cycle~77 the mispredicted branch i2 resolves; STT immediately stops treating i3's result as tainted, so i5 issues at cycle~78 and sends a cache packet at cycle~79.
+% The squash caused by the same resolution reaches the load queue only at cycle~81, two cycles too late. At stock timing (\texttt{commitToIEWDelay}~$=1$) the squash arrives first and no packet is sent.
+%
+% % figure fig:trace moved to sections/pendingfigures.tex (not yet redesigned), 2026-11-02
+% (\input{tikz/squashrace_v2_8pt} moved to UV6)
+%
+% \subsubsection{ReCon: store-to-load forwarding skips the taint check}% \label{sec:bug-stlf} moved to UV2
+% \reviewtag{[TODO: Proposed this subsubsection; check it]}
+% ReCon's STT implementation checks a load's taint only on the load's cache path. When an older store in the store queue covers a load's address, \texttt{LSQUnit::read()} takes the store-to-load forwarding path instead: it copies the store's data, schedules the load's writeback, and returns before it reaches the taint check that would delay a tainted load, and the writeback handler checks only the Delay scheme, not STT. A speculative load whose address is tainted therefore completes with the forwarded value whenever an older in-flight store has the same address. Fig.~\ref{fig:reconstl} shows this on test inst-014912. Load i3 runs speculatively under a mispredicted branch, so its result, and every address built from it, is tainted; the store i4 and the transmitter load i5 use the same tainted address. ReCon's own check reports i5 as tainted and speculative at cycle~5, yet i5 takes i4's value from the store queue and completes at cycle~7, two cycles before its squash.
+% STT treats store-to-load forwarding as an implicit branch whose predicate, that the load aliases no older in-flight store, depends on the load's address, and it delays the branch's resolution until that predicate is untainted~\cite[Sec.~6.4.2]{yu2019stt}. With STT's optimization the load issues only once its address is untainted, and its output is written only after the memory access completes, so that younger instructions see the same timing as without forwarding~\cite[Sec.~6.5]{yu2019stt}. Under ReCon, the load's completion time instead reveals whether its secret-derived address matches the older store's address, which the attacker can choose.
+% (\input{tikz/reconstl_v2_8pt} moved to UV2)
+%
+% \subsubsection{ReCon: \texttt{getOldestTaint} drops a younger taint}% \label{sec:bug-otb} moved to UV3
+% \reviewtag{[TODO: Proposed this subsubsection; check it]}
+% ReCon's taint tracker records a single taint source per register. When an instruction has several tainted source operands, \texttt{propagateTaints} gives its destination the taint of only the oldest one (\texttt{getOldestTaint} picks the lowest sequence number), and \texttt{freeTaints} drops a register's taint as soon as that source is no longer speculative. A value computed from an older and a younger speculative load is therefore untainted when the older load's branch resolves, even though the younger load is still speculative. STT instead untaints an instruction's operands only when its youngest root of taint, the youngest access instruction its operands depend on, reaches the visibility point~\cite[Sec.~7.1]{yu2019stt}. Fig.~\ref{fig:otb} shows the case: the ALU op i4 adds $r0$, loaded by i1 under branch i0, and $r1$, loaded by i3 under the mispredicted branch i2, and its result is the address of transmitter i5. Branch i0 resolves at cycle~0, and i5 issues at cycle~8, the same cycle as with no defense, while i2 stays unresolved until cycle~92. We confirmed this with a hand-built two-branch test: our bounded Alloy enumeration does not reach this shape within its instance cap, and Stage~2 interleaving is meant to build it (Fig.~\ref{fig:interleave}).
+% (\input{tikz/recon_otb_v2_8pt} moved to UV3)
+% ===== end of commented-out "Bugs found in the gem5 defenses" =====
+
+\labbr
+\labnote{InvisiSpec, SpecLFB and CleanupSpec results still to be inserted here.}
+\notebr
+
+\iffalse % LAB-REVIEW CUT (2026-11-03): placeholder subsubsection, not written yet
+\subsubsection{Defenses with their own load transmission mechanisms}\label{sec:bug-loadmech}
+\reviewtag{[TODO placeholder: InvisiSpec, SpecLFB (UV6) and CleanupSpec hide or undo a speculative load's effect instead of delaying the load, so \toolname{} checks each with a defense-specific load transmission criterion. Describe each bug's mechanism here, with its criterion and its figure (the checker-window figure, Fig.~\ref{fig:checkerwindow}, is the InvisiSpec UV1 example).]}
+\fi
+
+% ===== COMMENTED OUT 2026-11-10 (Anna): "vs. AMuLeT: scope" contradicts Known Bugs Replicated (eight vs nine bugs; "exactly one" in scope).
+% Its one-line contrast between the two tools' leakage models is folded into the Comparison with prior work note above. Text kept unchanged:
+% \subsection{\toolname{} vs.\ AMuLeT: scope}
+% The two tools use different leakage models. AMuLeT detects \emph{collateral shared-resource} leaks
+% --- cache eviction, MSHR, L1I, TLB --- by input-differential fuzzing, whereas \toolname{} detects the
+% \emph{transmitter's own transmission inside the speculative window
+% } by targeted enumeration. Of the eight
+% bugs AMuLeT reports on defenses, exactly one (SpecLFB UV6) falls in \toolname{}'s leakage model\iffalse (the ``in scope'' column of Table~\ref{tab:bugs})\fi; % LAB-REVIEW CUT: bug table hidden
+% the rest are collateral shared-resource channels
+% --- eviction, MSHR, I-cache, TLB, and post-squash residue --- outside the pipeline trace \toolname{}
+% observes and outside its dataflow stimulus.
+%
+% Conversely, AMuLeT's random search does not target the
+% transmitter-in-window timing races (the STT/SPT VP\,$\leftrightarrow$\,squash race) that \toolname{}
+% reproduces deterministically.
+% ===== end of commented-out "vs. AMuLeT: scope" =====
+
+\iffalse % LAB-REVIEW CUT (2026-11-03): Anna: fixing this still; its figure is in the hidden pending section
+\subsection{Test targeting} \anna{fixing this still}
+Of AMuLeT's 500 random STT tests, only \textbf{17\%} contain a window-valid speculative transmitter
+gadget; broken down by transmitter type, just \textbf{14\%} carry a leaky load and \textbf{5\%} a
+leaky branch, and the rest cannot leak by construction (Fig.~\ref{fig:target}). By contrast,
+\textbf{100\%} of \toolname{}'s tests carry a transmitter provably in the protection set, because
+each test is enumerated \emph{to} place one there.
+\fi
+
+
+% figure fig:target moved to sections/pendingfigures.tex (not yet redesigned), 2026-11-02
+
+\iffalse % LAB-REVIEW CUT (2026-11-03): sweeps predate the 2026-10-30 harness fix (re-run or drop); figure hidden
+\subsection{Timing-window and fragility sweeps}
+The VP\,$\leftrightarrow$\,squash race is \emph{timing-regime}: STT holds at stock squash latency
+(\texttt{commitToIEWDelay}$=1$, 0 leaks) and leaks from $\geq 2$ (Fig.~\ref{fig:timing}a).
+These are
+micro-architectural \emph{implementation} parameters, not part of any defense's security argument, so
+sweeping them tests whether the defense's \emph{logic} survives the legal timing space --- and it does
+not. Three micro-architectural \emph{stall} knobs separately probe the speculative window; of these
+only the unresolved-branch stall changes the verdict,
+and it \emph{masks} the leak (never manufactures
+one), while the resolved-branch stall is a flat plateau and the leak survives with the fnc stall off
+(Fig.~\ref{fig:timing}b).
+\urgentbr
+\urgentnote{These stall-knob conclusions come from pre-fix sweeps: the old resolve-stall hook froze runs when the CPU slept, and the old BTB force was wrong on every build. So "masks the leak, never manufactures one" and "flat plateau" are known-unreliable results stated as fact. The 27-to-0 drop at s\_U $\geq$ 50 may be that freeze rather than masking, and s\_R (27 to 22) and the fnc stall (16 to 27) also change the hit count. \newline \textbf{PROPOSED TEXT} (edits the sentence just before this note): Drop the stall-knob sentence, or re-run it on the fixed harness first. \newline \textit{Source:} STATUS.md:28-30; project log:51-58; wiki/findings/bug/BRANCH\_ANNOTATION\_AND\_FORCE.md}
+\notebr
+\fi
+
+
+% figure fig:timing moved to sections/pendingfigures.tex (not yet redesigned), 2026-11-02
+
+% Superseded by "Timing and CPU usage" above (2026-11-10); kept hidden.
+\iffalse % LAB-REVIEW CUT (2026-11-03): numbers predate the harness fix; figure hidden
+\subsection{Detection efficiency vs.\ AMuLeT}
+On the SpecLFB build --- the one bug both tools find (UV6) --- \toolname{} flags it at test
+\textbf{\#6} versus AMuLeT's first contract violation at \textbf{\#39}: $6.5\times$ fewer tests, at
+$\sim$7$\times$ the hit density (23\% vs.\ 3.3\%).
+Isolating just the gem5 simulation
+(excluding \toolname{}'s build and its measurement trace), the per-test cost is comparable (0.092
+vs.\ 0.057\,s), so the per-test gem5 work is the same and \toolname{}'s targeting is what yields
+$\sim$6.5$\times$ less total simulation to reach the bug (Fig.~\ref{fig:eff}).
+\fi
+
+
+% figure fig:eff moved to sections/pendingfigures.tex (not yet redesigned), 2026-11-02
+
+\subsection{Every reported leak is gem5-validated}
+\notebr
+Every count in this section is a \emph{confirmed} real leak:
+a transmitter that obtained its data
+inside the speculative window
+on the running defense build, decided by the per-transmitter checker
+--- a real cache packet, or a store-forward that completes --- never a static or model-only signal,
+and squash timing never disqualifies a load that already obtained its data.
+% (2026-11-10: the closing list below is commented out; it repeated the bug subsections with pre-fix numbers, 23,966 and 68/300, and left out most bugs)
+% On that bar, the
+% leaks are
+% the STT/SPT visibility-point\,$\leftrightarrow$\,squash race
+% (\textbf{23{,}966} race instances; \textbf{0} at stock timing) and SpecLFB UV6 (\textbf{68/300}), and ReCon's taint-check bypass through store-to-load forwarding (inst-014912).
+% \reviewtag{[TODO: Added ReCon here]}
+\urgentbr\urgentnote{\textbf{PROPOSED TEXT (Every reported leak; merges three notes).} This bar does not hold yet, so reword it: ``Every load count in this section comes from the per-transmitter checker on the running defense build, and every footprint count from the defense's footprint criterion; counts marked $^\dagger$ come from earlier runs and are being repeated.'' Also change ``inside the speculative window'' to ``inside the violation window''. Why: (i) the A-UV1, A-UV3--A-UV6 and jmp-shadow counts come from the footprint checker, which counts a footprint left by any squashed load; (ii) the data-obtained gate asks whether any instance at the transmitter's PC sent a packet or completed, not whether this instance did inside the window (only the load's execute tick is tested against the window); (iii) on ReCon's builds the checker cannot see a sent packet at all (they never log one), so only loads that complete count there. The closing list is commented out: end the subsection here and point to the two bug subsections. \textit{Source:} simspect URGENT\_TODO.md DECIDE ``check\_ld's data-obtained gate is not tied to the window''; wiki/findings/bug/recon\_cache\_reach\_gate/README.md.}

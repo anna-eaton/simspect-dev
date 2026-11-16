@@ -1,0 +1,87 @@
+// bigcorpus 2026-11-15 (agent bigcorpus): copy of runconfigs/firstdet_final_20261110/T1g_Footprint_6_u_core_lpP_fv3.jsonc written by scripts/bigcorpus_20261115/make_configs.py.
+// Changed ONLY: paths.testset_dir/results_dir/results_name (corpus Footprint_6_u_core_lpP_s2B)
+// Docs: wiki/state/RUNNING.md 'Big corpus 2026-11-15'; results -> wiki/state/EVAL_MANIFEST.md 'Big corpus bug coverage (2026-11-15)'.
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/bigcorpus_20261115/testsets",
+    "results_dir": "/tests/bigcorpus_20261115/results",
+    "results_name": "bc_T1g_Footprint_6_u_core_lpP_s2B",
+    "model": "Footprint_6_u"
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "filter": {
+    "xmit_kind": "ld"
+  },
+  "gem5": {
+    "binary": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt",
+    "config_script": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type": "DerivO3CPU",
+    "scheme": 2,
+    "jobs": 6,
+    "debug_flags": [
+      "O3PipeView"
+    ],
+    "debug_file": "pipeview.txt",
+    "checker": "check_footprint.py",
+    "criterion": "specs/leakage/invisispec.json",
+    "fnc_commit_stall_cycles": 0,
+    "cache_setup": "random_all",
+    "extra_args": [
+      "--num-cpu=1",
+      "--cpu-clock=2GHz",
+      "--sys-clock=2GHz",
+      "--ruby",
+      "--L1_TBEs=256",
+      "--L2_TBEs=256",
+      "--DC_TBEs=256",
+      "--l1d_size=32kB",
+      "--l1d_assoc=8",
+      "--l1i_size=32kB",
+      "--l1i_assoc=8",
+      "--cacheline_size=64",
+      "--l2_size=2MB",
+      "--l2_assoc=8",
+      "--DTB_entries=64",
+      "--needsTSO=0",
+      "--scheme=FuturisticSafeInvisibleSpec",
+      "--access-backing-store"
+    ]
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  }
+}

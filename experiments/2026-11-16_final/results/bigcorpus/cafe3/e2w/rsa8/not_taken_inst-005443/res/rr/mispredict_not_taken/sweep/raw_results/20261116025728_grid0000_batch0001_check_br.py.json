@@ -1,0 +1,141 @@
+[
+  {
+    "name": "inst-005443",
+    "status": "ok",
+    "xmit_pc": "0x401c7b",
+    "last_committed_pc": "0x401c52",
+    "first_noncommitted_pc": "0x401c65",
+    "xmit_kind": "br_x",
+    "issued_in_window": true,
+    "xmit_issue": null,
+    "xmit_complete": 2680500,
+    "lc_retire": 2678500,
+    "fnc_retire": 5181000,
+    "fnc_complete": 2680000,
+    "error": null,
+    "cache_setup": "warm",
+    "retire_from_commit_trace": [],
+    "force_plan": [
+      {
+        "branch_pc": 3,
+        "addr": 4201573,
+        "mode": "mispredict_not_taken",
+        "arch_taken": null,
+        "fallthrough": 4201575,
+        "static_target": 4201604,
+        "dest": 4201578,
+        "force": "not_taken"
+      },
+      {
+        "branch_pc": 6,
+        "addr": 4201595,
+        "mode": "mispredict_not_taken",
+        "arch_taken": null,
+        "fallthrough": 4201597,
+        "static_target": 4201604,
+        "dest": 4201600,
+        "force": "not_taken"
+      }
+    ],
+    "br_resolve_source": "observed",
+    "br_events": {
+      "0x401000": {
+        "5": {
+          "resolve_visible": 81500,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 4
+        }
+      },
+      "0x401c65": {
+        "565": {
+          "predict_force": 2671000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4201575,
+          "resolve_hold": 2680000,
+          "resolve_hold_stall": 5000,
+          "resolve_hold_fire": 5180000,
+          "resolve_hold_mispred": 1,
+          "resolve_release": 5180000,
+          "resolve_release_mispred": 1,
+          "resolve_bcast": 5180000,
+          "resolve_visible": 5180500,
+          "resolve_visible_stall": 5000,
+          "resolve_visible_mispred": 1,
+          "resolve_visible_upc": 2
+        }
+      },
+      "0x401c7b": {
+        "574": {
+          "predict_force": 2671500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4201597,
+          "resolve_visible": 2681000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 1,
+          "resolve_visible_upc": 2
+        }
+      },
+      "0x401c8d": {
+        "586": {
+          "resolve_visible": 2729000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        },
+        "901": {
+          "resolve_visible": 5188000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        }
+      }
+    },
+    "criteria": {
+      "lc_retired": true,
+      "signal_seen": true,
+      "branch_redirected": true,
+      "after_lc": true,
+      "before_fnc": true,
+      "branches_unresolved": true,
+      "resolved_correct": null,
+      "window_opened": true,
+      "stall_applied": true,
+      "force_applied": true
+    },
+    "xmit_signal": 2681000,
+    "xmit_redirect": 2681000,
+    "xmit_last_alive": 2680500,
+    "ft_last_alive": 2675500,
+    "ft_pc": "0x401c7d",
+    "lc_unretired_but_specified": false,
+    "branches_unresolved": true,
+    "branch_resolutions": [
+      {
+        "pc": "0x401c65",
+        "stall": 5000,
+        "source": "observed",
+        "complete": 2680000,
+        "seq": 565,
+        "hold_tick": 2680000,
+        "release_tick": 5180000,
+        "visible_tick": 5180500,
+        "dropped": false,
+        "stall_applied": true,
+        "estimate_tick": 5180000,
+        "resolve_tick": 5180500,
+        "ok": true
+      }
+    ],
+    "validity": {
+      "resolved_correct": null,
+      "window_opened": true,
+      "stall_applied": true,
+      "force_applied": true,
+      "notes": []
+    },
+    "resolved_branches": [],
+    "resolved_before_signal": null,
+    "workdir": "/tmp/r8_not_taken_inst-005443/gem5_inst-005443_5huzbjij"
+  }
+]

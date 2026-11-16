@@ -3,7 +3,7 @@
 cardinality facts (limited_inregs <=2, limited_inaddrs <=1, limited_inmems <=1, limited_ins <=2,
 limited_outs <=1). With Alloy's default 4-bit Int (-8..7) and overflow allowed, '#(i.inaddr) <= 1'
 is TRUE when the count is 8 (wraps to -8), so these facts stop binding once >= 8 operands can sit on
-one instruction. stage15-bound 2026-11-08. Usage: overflow_scan.py <dir-with-inst-*.txt> [...]"""
+one instruction. Usage: overflow_scan.py <dir-with-inst-*.txt> [...]"""
 import sys, glob, collections
 sys.path.insert(0, __file__.rsplit('/', 5)[0])
 import stage_seed

@@ -1,0 +1,2781 @@
+CounterPoint: Using Hardware Event Counters to
+Refute and Refine Microarchitectural Assumptions
+
+arXiv:2601.01265v3 [cs.AR] 26 Feb 2026
+
+Extended Version
+Nick Lindsay
+
+Caroline Trippel
+
+Yale University, USA
+
+Stanford University, USA
+
+Anurag Khandelwal
+
+Abhishek Bhattacharjee
+
+Yale University, USA
+
+Yale University, USA
+
+Abstract
+
+software simulators [58, 95], build analytical models of hardware [4, 8, 63], correlate microarchitectural activity with
+power and thermal behavior [27, 56, 59, 62, 97, 118], and
+more [1, 2, 9, 36, 86, 111, 119]. As their utility has grown, so
+has their prevalence: modern x86-64 processors now expose
+thousands of HECs —more than a 10× increase since 2009
+(Figure 1a).
+The promise of a broad set of HECs. In principle, a rich
+set of HECs should allow experts to gain deeper insight into
+their mental model of the hardware, even without access to
+proprietary RTL or internal documentation. These insights
+are crucial for building accurate performance models and
+calibrating architectural simulators for future hardware [4,
+12, 15, 20, 21, 23, 24, 93], and go beyond traditional HEC uses
+that measure only broad performance metrics like CPU and
+memory utilization [43, 68, 81, 98, 100, 101, 115].
+Address translation provides a prime example. Modern
+processors devote many HECs to this function—for instance,
+IBM’s Power9 includes 96 HECs dedicated solely to address
+translation [55]. Researchers often attempt to leverage these
+counters to reverse-engineer address translation hardware,
+enabling accurate integration into software simulators and
+analytical models of system performance [4, 12, 15, 20, 21, 23,
+24, 93]. These models commonly assume specific behavior
+for the Paging Directory Entry (PDE) cache, which eliminates memory accesses to non-leaf page table levels during
+a walk. It is assumed that the PDE cache is accessed exactly once per page-table walk, implying that the number
+of PDE cache misses (load.pde$_miss) should not exceed
+page walks (load.causes_walk):
+
+Hardware event counters offer the potential to reveal not
+only performance bottlenecks but also detailed microarchitectural behavior. In practice, this promise is undermined by
+their vague specifications, opaque designs, and multiplexing
+noise, making event counter data hard to interpret.
+We introduce CounterPoint, a framework that tests userspecified microarchitectural models—expressed as 𝜇path Decision Diagrams—for consistency with performance counter
+data. When mismatches occur, CounterPoint pinpoints plausible microarchitectural features that could explain them, using multi-dimensional counter confidence regions to mitigate
+multiplexing noise. We apply CounterPoint to the Haswell
+Memory Management Unit as a case study, shedding light
+on multiple undocumented and underdocumented microarchitectural behaviors. These include a load–store queue-side
+TLB prefetcher, merging page table walkers, abortable page
+table walks, and more.
+Overall, CounterPoint helps experts reconcile noisy hardware performance counter measurements with their mental
+model of the microarchitecture— uncovering subtle, previously hidden hardware features along the way.
+
+1
+
+Introduction
+
+Hardware event counters (HECs) are specialized registers embedded in CPUs and hardware accelerators that provide lowoverhead, fine-grained insights into microarchitectural behavior during execution. First introduced in the 1980s—most
+notably in the DEC VAX and early RISC machines—HECs
+were originally designed to support performance tuning and
+system-level debugging.
+Since then, their role has expanded. While HECs remain
+essential for identifying performance bottlenecks [40, 42, 63,
+117], they are now also used to calibrate microarchitectural
+
+load.pde$_miss ≤ load.causes_walk
+Surprisingly, our measurements on Intel Haswell show
+that this expected relationship—a sanity check of the expert’s
+mental model, which we term a model constraint—does not
+always hold. This challenges a widely held assumption in
+address translation research and casts doubt on the validity of
+much simulation-based work that relies on it. This example
+also illustrates two benefits of having a diverse set of HECs.
+First, a diverse set of HECs helps detect violations of the
+model constraints associated with an expert’s mental model
+of the hardware. Here, we can spot the violation only because
+
+© Nick Lindsay, Caroline Trippel, Anurag Khandelwal and Abhishek
+Bhattacharjee; 2026. This is the extended version of the authors’ version
+of The Work. It is posted here for your personal use. Not for redistribution. The definitive version is to be published in Proceedings of the
+31st ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 2 (ASPLOS ’26),
+https://doi.org/10.1145/3779212.3790145.
+1
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+104
+
+WSM-EX | 10
+
+NHM-EX | 8
+
+KNL | 72
+IVT | 15
+
+103
+2010 2012 2014 2016 2018
+Year
+
+2.0
+
+50
+
+CLX | 56
+HSX | 18
+
+Noise Scaling
+
+Constraint Scaling
+
+40
+30
+20
+
+projected
+(+MMU$)
+
+10
+0
+
+Ret | 4 L2TLB | 10 Walk | 22 Refs | 23 MMU$ | 29
+
+Counter Groups | Total Counters
+
+Normalized Noise
+
+105
+
+60
+
+Addressable
+(System-wide)
+
+# Constraints
+
+Estimated Event Count
+
+Counter Scaling
+Named
+(1 Core)
+
+1.8
+
+Effective
+page_walker
+causes_walk
+pde$_miss
+
+1.6
+1.4
+1.2
+1.0
+
+constraint
+violation
+not detected
+12 14 16 18 20 22 24 26
+Counters
+
+(a) The estimated number of HECs events in (b) The number of model constraints implied (c) HEC measurement noise increases with acx86-64 systems increased over 10× between by a model scales with the number of HECs tive HECs; beyond a point, model constraint
+2009 and 2019. (Y-axis plotted on a log-scale.) used to understand hardware behavior.
+violations can no longer be reliably detected.
+
+Figure 1. The rapid growth of HECs has increased manual effort to construct and compose model constraints, and amplified
+multiplexing noise that obscures constraint violations. (a) The blue line shows the number of documented HEC ‘names’,
+assuming a single core. The red line shows the number of ‘addressable’ events after accounting for per-core replication and
+the conservative removal of events that, while still documented (and potentially informative), have been deprecated by the
+vendor. Each red data point represents a microarchitecture paired with its typical core count in a server system. This graph
+shows only documented events and does not include the thousands of additional undocumented HECs identified in recent
+work [116]0 . (b) The number of model constraints grows superlinearly with the number of HECs (our x-axis shows increasing
+HEC count for an Intel Haswell MMU, in steps associated with all the HECs in a logical group; e.g., 10 HECs for L2 TLB events)
+and worsens significantly when including hypothetical HECs across all MMU caches (shown in green). (c) For a representative
+model constraint on the Intel Haswell MMU ((1) in Table 1), we show that as measurement noise increases—both overall and
+for individual HECs —it becomes impossible to determine whether the model constraint is violated with 99% confidence once
+19 HECs are active. Here, noise is defined as the standard deviation in the observed HEC values.
+Haswell exposes the load.causes_walk HEC —which many
+other processors lack. Without it, researchers rely on generic
+TLB miss HECs that miss such nuances.
+Second, a diverse set of HECs helps explain why a model
+constraint is violated, enabling refinement toward a more
+accurate representation of the hardware. For example, comparing counters for retired TLB misses, PDE cache misses,
+and page table walks uncovers two likely undocumented
+behaviors: (i) merged walks to the same virtual address occurring after PDE cache lookup, and (ii) aborted translation
+requests that terminate after PDE cache lookup but before a
+page table walk begins. Without the full set of HECs, these
+effects would remain hidden.
+The reality of a broad set of HECs. The PDE cache example is an ideal case where a diverse set of HECs helps reveal
+that there is a flaw in the expert’s original mental model
+of the microarchitecture. In practice, however, experts are
+rarely able to leverage the full introspective power of HECs
+because they rely on manual and ad hoc approaches to doing
+so. In particular, they face two challenges:
+0We counted the total number of HEC names in the Linux perf counter
+
+First, understanding microarchitectural behavior requires
+identifying how HECs relate to one another—that is, determining all the model constraints that observed HEC data
+must satisfy to align with an expert’s mental model (i.e.,
+their set of assumptions about the microarchitectural implementation). Our PDE cache model constraint illustrates how
+surprisingly difficult it can be to reason about even simple relationships involving just two HECs. As more HECs are used
+to check whether observed behavior matches expert expectations, the number of model constraints grows super-linearly
+(Figure 1b). These model constraints become increasingly
+complex, often involving dozens of HECs in intricate relationships that are hard to reason about (Section 2). Manual
+approaches to identifying and evaluating model constraints
+quickly become intractable. The challenge worsens when observed HEC values violate model constraints, forcing experts
+to revise their mental models—and then deduce entirely new,
+complex sets of associated model constraints.
+Second, modern architectures allow recording thousands
+of logical HECs, but these are multiplexed onto a much
+smaller number of physical HECs —typically just 4 to 8 at a
+time. This means that HEC measurements are approximate
+
+database [53, 103] to determine the set of ‘Named’ events per microarchitecture. We estimated the number of ‘Addressable’ events by (i) conservatively
+removing deprecated HECs, (ii) distinguishing between core and uncore
+HECs, and (iii) accounting for per-core replication. We account for per-core
+
+replication by summing together the uncore counters with the number of
+core counters multiplied by the typical core count of server systems of that
+microarchitecture. We will further explore these trends in future work.
+2
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+rather than exact, leading to measurement noise that makes
+it even more difficult to evaluate model constraints. Multiplexing noise typically grows rapidly with the number of
+HECs being measured. Beyond a point, the growing number
+of HECs makes it nearly impossible to determine whether a
+representative model constraint is truly violated (Figure 1c).
+Extracting the promise of HECs with CounterPoint.
+To bridge the gap between the promise and reality of HECs,
+we invent CounterPoint1 —a framework that helps experts
+reconcile HEC data with their mental models of the microarchitecture. CounterPoint automates the demanding task of
+generating all model constraints associated with a model
+and checking them against noisy HEC data, enabling exploration of the accuracy of a wider range of microarchitectural
+models. CounterPoint is centered around three key insights.
+First, experts can more naturally express their envisioned
+hardware as a directed acyclic graph (DAG) linking hardware
+components to HEC activity, rather than directly constructing model constraints. DAGs are well-suited to formal tools
+that can automatically derive these constraints. We introduce the 𝜇path Decision Diagram (𝜇DD)—a specialized DAG
+for capturing an expert’s mental model of microarchitectural structures and how interactions among these structures increment HECs. A 𝜇DD concisely describes a set of
+microarchitectural execution paths (𝜇paths) that micro-ops
+(𝜇ops) may follow. Each 𝜇path is associated with specific
+microarchitectural events, including those that increment
+performance counters, enabling natural and complete generation of all constraints implied by the model.
+Second, experts can refine microarchitectural models more
+effectively when model constraints are as tightly upper- and
+lower-bounded as possible (e.g., constraint (3) in Table 1 is
+most useful when its left-hand side tightly lower-bounds the
+number of memory references in a page table walk). Tight
+constraints increase sensitivity to even minor deviations
+from the expert’s mental model. Such tightness is more likely
+when HEC relationships are expressed at the granularity of
+micro-ops, enabling precise attribution of events to specific
+hardware behaviors. 𝜇DDs naturally exploit this by modeling
+micro-op flows through execution paths, yielding model
+constraints with inherently tight bounds.
+Third, while more HECs increase multiplexing noise, they
+also increase intrinsic correlations (e.g., page table walks often correlate with TLB misses). These correlations allow statistical methods to build tight counter confidence regions—ranges of HEC values likely to occur with a given probability
+from noisy data. Compared to traditional methods that treat
+counter noise independently [8, 68], this approach substantially reduces the impact of noise, enabling CounterPoint’s
+
+automated analysis to scale well beyond the number of physically available HECs.
+The CounterPoint approach. Experts begin by expressing
+their mental model of the microarchitecture in a domainspecific language, which CounterPoint translates into a 𝜇DD
+(Figure 2). Experts also run workloads on the target hardware,
+collecting as many active HECs as needed for analysis.
+Given a 𝜇DD, CounterPoint applies convex geometry techniques to derive the model cone—all HEC value combinations
+producible by micro-ops traversing the 𝜇DD. The model cone
+represents the values that simultaneously satisfy all model
+constraints, and eliminates the need for manual derivation.
+CounterPoint then processes noisy HEC measurements from
+real hardware, extracting intrinsic correlations to define tight
+counter confidence regions: ranges of HEC values inferred
+with high confidence despite multiplexing noise.
+Finally, with feasibility testing, CounterPoint compares
+the counter confidence region against the model cone. If they
+do not intersect, the expert’s model is inconsistent with the
+HEC observations, implying that some model constraints
+are violated. CounterPoint reports these violations, guiding
+how the 𝜇DD may be revised for consistency. This enables
+iterative exploration: the expert proposes new 𝜇DDs, and
+CounterPoint tests them until a consistent model is found.
+Evaluating CounterPoint via a case study. We demonstrate CounterPoint’s capabilities by applying it to the Intel Haswell Memory Management Unit (MMU), where we
+uncover several previously undocumented and underdocumented features. These include a load–store queue-side
+TLB prefetcher (as well as its trigger conditions and interaction with page hotness tracking), hardware mechanisms that
+merge and abort page table walks, and a cache for the root
+level of the page table. The Haswell MMU serves as a compelling case study: it embodies complex hardware–software
+interactions, and has been foundational for a decade of address translation research [4, 7, 41, 63, 71, 75, 85, 102, 107,
+114, 120]. Yet, it is poorly modeled in state-of-the-art software simulators [38, 39, 64, 113], motivating recent efforts
+to use HECs to reverse-engineer accurate models [4, 12, 15,
+20, 21, 23, 24, 93]. As a rigorous test of CounterPoint’s analysis of sophisticated microarchitectural behavior, the Haswell
+MMU case study provides a foundation for extension to other
+components and more modern microarchitectures.
+Technical contributions. Overall, this work:
+- Defines HEC model constraints and demonstrates their
+ability to expose hidden microarchitectural behavior.
+- Introduces the 𝜇DD, a compact representation that encodes
+both microarchitectural assumptions and HEC semantics.
+- Defines the model cone, shows how it can be naturally
+derived from the 𝜇DD, and proves its equivalence to the
+model constraints of the 𝜇DD.
+
+1 CounterPoint enables using hardware event counters to point out gaps
+
+in an expert’s understanding of microarchitectures and makes it easier to
+explore improvements or counterpoints to their assumptions.
+3
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+Model Specif ication
+i nc r
+l oad. c aus es _wal k;
+do Look upPde$;
+s wi t c h Pde$St at us {
+Hi t => pas s ;
+Mi s s => i nc r
+l oad. pde$_mi s s
+};
+done;
+
+?path Decision Diagram
+
+Feasibilit y Testing
+
+Lookup
+Pde$
+
+load.
+causes_walk
+Hit
+
+START
+
+Model Cone
+
+Conf idence Regions
+
+Program B
+
+Program A
+
+Program A
+
+l oad. A
+l oad.
+Time Program
+(s) c aus es _wal k pde$_mi s s
+l oad.
+l oad.
+Time
+ss
+11k pde$_mi 40
+(s) 10 c aus es _wal
+
+Pde$
+Status
+Miss
+
+END
+
+load.
+pde$_miss
+
+Data Collection
+
+l oad. c aus es _wal k
+
+Program B
+
+Program B
+
+l oad. c aus es _wal k
+
+l oad. c aus es _wal k
+
+10 20
+
+11 5
+
+40 29
+
+20 30
+
+5 12
+
+29 47
+
+30
+
+12
+
+47
+
+Figure 2. CounterPoint automatically determines the feasibility of a microarchitectural model against HEC data. Models are
+described using a DSL and transformed into a 𝜇path Decision Diagram (𝜇DD), which is analyzed to determine the model cone
+(the set of model constraints). Counter confidence regions are constructed for each observation to handle multiplexing noise.
+Observations are tested against all model constraints simultaneously. CounterPoint’s counter confidence region bounds are
+sharper than other approaches, enabling more violations to be identified, and thereby enabling more opportunities to refine
+the expert’s microarchitectural assumptions. CounterPoint effortlessly supports dozens of HECs and constraints.
+99
+
+- Applies counter confidence regions to mitigate measurement noise, enabling reliable inference even when the number of counters exceeds hardware limits.
+- Develops 𝜇DD feasibility testing to automatically validate
+measured HEC data against a 𝜇DD’s implied constraints.
+- Reveals several likely undocumented and underdocumented
+features in a commercial Intel CPU—including TLB prefetching, early paging-structure cache lookups, and merged page
+table walks—using CounterPoint’s automated analysis.
+In sum, CounterPoint uses HECs to refine expert understanding of hardware—challenging incorrect assumptions
+and uncovering subtle, otherwise hidden effects. Such insights are essential for building trustworthy models as computer systems grow increasingly complex and opaque. Because such insights are essential for building trustworthy
+models amid increasingly complex and opaque computer
+systems, we will publicly release CounterPoint2 .
+
+CR
+
+99
+
+%
+
+CR
+
+walk_ref ≤ 4· (load.causes_walk+store.causes_walk)
+
+Y
+
+?
+
+X
+
+This is correct but not tight, since it ignores page size and
+MMU cache hits (unlike Constraint 2 in Table 1).
+Alternatively, one could try to exploit the fact that larger
+pages shorten page table walks:
+walk_ref ≤
+4 · load.walk_done_4k + 4 · store.walk_done_4k+
+2 · load.walk_done_1g + 2 · store.walk_done_1g+
+But this version is too strong: it rejects valid cases where
+walks inject memory accesses but do not terminate (e.g.,
+invalid translations). As Constraint 2 shows, the tightest
+correct bound is actually a far more nuanced relationship.
+Even simpler constraints require tightness. For instance,
+Figure 3a shows an infeasible observation of HEC values
+detectable only with enough relevant constraints. With fewer
+or irrelevant counters (Figures 3b and 3c), the violation slips
+through. When scaling to dozens of model constraints, many
+of which include complex relationships among dozens of
+HECs each, all these problems compound.
+The geometry underlying model constraints. Model constraints are powerful for validating hardware assumptions
+but are unscalable as they are derived in an ad hoc manner.
+The challenge is not in their use, but their derivation.
+We observe that model constraints naturally arise because
+microarchitectural events occur in predefined groups rather
+than in isolation—for example, each completed walk for a
+4KB page (load.walk_done_4k) involves 1 to 4 page table
+walker memory accesses (walk_ref). Our insight is that instead of manually deriving constraints, experts can more
+easily enumerate all valid groupings, letting CounterPoint
+automatically determine whether an observed set of events
+
+CounterPoint: A Bird’s-Eye Overview
+
+The pros and cons of model constraints. Model constraints are valuable because they let experts identify exactly
+when and how their assumptions about the microarchitecture break down. The HECs involved in a violated model
+constraint highlight which parts of the model may be incorrect. However, to be fully effective, all (often dozens of)
+model constraints must be enumerated, and each must be
+correct and tight. By tight, we mean the bounds leave minimal slack: loose constraints can miss infeasible observations,
+whereas tight constraints clearly delineate what is possible
+versus impossible, making violations easier to detect.
+Manually deriving all the constraints is onerous, even for
+an expert. Table 1 shows just a subset of constraints for a
+simple Intel Haswell MMU model. Each may involve many
+HECs and depend on the intersection of multiple microarchitectural assumptions.
+2 CounterPoint will be maintained at:
+
+https://github.com/NicholasLindsay/counterpoint-public
+4
+
+l oad. pde$_mi s s
+
+3 · load.walk_done_2m + 3 · store.walk_done_2m+
+
+l oad. pde$_mi s s
+
+2
+
+%
+
+Worse, constraints are easy to formulate either too loosely
+or incorrectly. For example, one might bound the number of
+page walker loads on Haswell, with its four-level page table:
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+Table 1. The Haswell MMU requires reasoning about dozens of model constraints; we show three representative examples.
+Deriving the exact constraints for a given model is challenging because they stem from subtle microarchitectural assumptions.
+For example, Constraint 1 relies on expert knowledge that no retired TLB miss suffered a prior page fault. Constraint 2 relies
+on even more subtle knowledge that an upper bound on the number of memory references injected by a page table walker is
+determined by (i) PDE cache hit/miss status; (ii) the page size of the translation and (iii) the fact that every walk makes at least
+one memory reference. For brevity, we define: walk_ref ≜ walk_ref.l1 + walk_ref.l2 + walk_ref.l3 + walk_ref.mem.
+(1) load.ret_stlb_miss ≤ load.walk_done
+2 HECs
+Every TLB-miss micro-op that retires must have obtained a valid translation from a page-table walk.
+walk_ref ≤ load.causes_walk + store.causes_walk + 3 · load.pde$_miss + 3 · store.pde$_miss
+12 HECs
+(2)
+− load.walk_done_2m − store.walk_done_2m − 2 · load.walk_done_1g − 2 · store.walk_done_1g
+The number of memory accesses made by the page table walker is upper bounded by the distribution of combinations of
+page sizes and PDE cache interactions.
+(3) load.causes_walk + store.causes_walk + load.walk_done_1g + store.walk_done_1g ≤ walk_ref
+8 HECs
+Every page table walk must result in one or more page table walker memory accesses. Walks that complete with 1GB page
+emit two memory references when the MMU cache for the root page table level is absent.
+
+1
+
+2
+
+3
+
+4
+
+load.causes_walk
+
+5
+
+4
+
+ss
+
+0
+
+load.ret_stlb_miss
+
+3
+
+mi
+
+0
+
+2
+
+$_
+
+lo
+
+1
+
+de
+
+s
+5 0 1 ad.cause
+
+1
+
+.p
+
+ne
+
+do
+
+k_
+
+4
+
+4 5
+2 3 _walk
+
+2
+
+ad
+
+3
+
+3
+
+lo
+
+2
+
+al
+
+.w
+
+ad
+
+lo
+
+1
+
+4
+
+5
+
+5
+4
+3
+2
+1
+0
+0
+
+4 5
+2 3 _walk
+
+s
+5 0 1 ad.cause
+lo
+
+load.pde$_miss
+
+load.ret_stlb_miss
+
+load.ret_stlb_miss
+
+5
+
+5
+4
+3
+2
+1
+0
+0
+
+4
+3
+2
+Noise Handling
+Independent
+Correlated
+
+1
+0
+
+0
+
+1
+
+2
+
+3
+
+4
+
+load.causes_walk
+
+5
+
+(a) Candidate model cone (yellow) (b) Ignoring an HEC loosens the (c) HECs with subtly different se- (d) Counter confidence regions
+from three HECs shows a viola- model cone and misses the vio- mantics loosen the cone, missing are tighter with HEC correlations
+tion of a model constraint.
+lated constraint in Figure 3a.
+Figure 3a’s violated constraint.
+(red) than without (green).
+
+Figure 3. The ability of HECs to test assumptions depends on their number and semantics, shown here pictorially. The
+orange regions represent points which satisfy all model constraints; the blue dot represents an observation; the red and green
+boxes represent two alternative constructions of counter confidence regions. Model constraints correspond to edges in 2D
+or faces in 3D. (a) Consider a model cone constructed from the three HECs shown. These counters imply three constraints:
+load.ret_stlb_miss ≤ load.walk_done because each retired STLB miss must correspond to a unique, successfully completed
+page table walk; load.ret_stlb_miss ≤ load.causes_walk because each retired STLB miss must trigger exactly one page
+table walk; and load.walk_done ≤ load.causes_walk because only a subset of initiated page table walks ultimately complete.
+The first two inequalities rely on the assumption that STLB misses are never merged. Using all three HECs clearly exposes
+a violation of these constraints, indicating a flaw in the expert’s mental model. (b) All three HECs were required to detect
+this flaw; removing load.walk_done eliminates the second and third constraints, making the model violation undetectable.
+(c) Simply substituting load.walk_done with load.pde$_miss (or any other counter) is insufficient, because the semantics
+of each counter matter. Using this alternative counter adds the constraint load.pde$_miss ≤ load.causes_walk, but this
+constraint still fails to reveal the model violation. (d) Counter confidence regions replace point observations with value ranges;
+exploiting correlations yields tighter bounds than assuming independence.
+
+could result from some combination of groups. This approach
+enables scalable feasibility checking of the model constraints.
+We enable experts to specify how 𝜇ops interact with the
+microarchitecture—including their effect on HECs —using
+
+𝜇DDs. A 𝜇DD is a specialized DAG where each path represents a single HEC group, enabling automated testing of observed HEC values against feasibility constraints. 𝜇DDs are
+centered on 𝜇ops because they form a natural unit for grouping microarchitectural events: they are familiar to experts,
+
+5
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+fine-grained enough to capture low-level hardware interactions, and directly responsible for incrementing HECs. The
+DAG representation is concise; a few nodes can efficiently
+describe an exponential number of 𝜇paths.
+The group-matching problem naturally induced by the
+𝜇DD is fundamentally a counting problem that can be framed
+in terms of convex geometry. The resulting geometric object—i.e., the model cone—represents all valid combinations
+of HEC values. The Minkowski–Weyl theorem from computational geometry states that every model cone has two
+equivalent representations: one as the set of points generated
+by a 𝜇DD, and the other as the set of points bounded by model
+constraints [44]. We leverage these dual representations by
+allowing the expert to express their microarchitectural assumptions in the form most natural to them—by encoding
+their hardware assumptions in a 𝜇DD—while enabling CounterPoint to automatically deduce model constraints as required for user feedback. CounterPoint derives the model
+constraints using a custom algorithm which calls into an
+off-the-shelf convex hull solver, as described in Section 6.
+Generating tight confidence regions of HEC observations. Identifying flaws in the expert’s mental model requires
+not only a tight model cone but also computing the narrowest possible range of values that can be confidently inferred
+from the observed HEC values, despite multiplexing noise.
+Standard measurement tools (e.g., perf) report the mean
+and standard deviation of the samples for each HEC, which
+can be used to construct counter confidence regions. Naive
+methods assume each HEC is independent, resulting in overly
+loose counter confidence regions (Figure 3d, green box) that
+reduce the ability to detect violations of model constraints.
+Instead, we discover that HEC values are often correlated,
+a finding we extract from time-series measurements. These
+correlations mean that the data typically have far fewer degrees of freedom than the number of counters, allowing us
+to construct much tighter counter confidence regions—even
+when dozens of counters are measured (Figure 3d, red box).
+Tighter counter confidence regions uncover more accurate
+microarchitectural models.
+Feasibility testing for guided model exploration. Highquality models demand detail, with 𝜇DDs describing hundreds of unique execution paths. This produces tight model
+constraints, but also drives rapid growth in complexity. CounterPoint uses linear programming to efficiently determine
+model feasibility, and a conic hull algorithm (Section 6) to
+derive model constraints when infeasible observations occur.
+Violated model constraints are reported to the expert, who
+uses this information to formulate refined 𝜇DDs that resolve
+these discrepancies and represent more accurate models of
+the hardware. Naturally, the precision which CounterPoint
+can infer details about the microarchitectural features depends on having a dataset of HEC observations from a rich
+and diverse set of programs that stress all relevant corners
+
+of the microarchitecture. Consequently, to uncover details
+of the Haswell MMU in our case study, we evaluated about
+20 million HEC samples across a diverse range of workloads
+with dozens of models, each exhibiting a unique combination of bespoke microarchitectural features. As we use CounterPoint to refine our understanding of the hardware, we
+continue to expand this set of models.
+
+3
+
+From Diagrams to Model Cones
+
+𝜇path decision diagrams. A 𝜇DD encodes a set of microarchitectural execution paths that individual 𝜇ops may take
+through part of the microarchitecture (Figure 4a is an example encompassing a subset of address translation hardware).
+At the core of CounterPoint is the concept of a microarchitectural execution path, or 𝜇path: a happens-before ordered
+set of hardware events induced by a 𝜇op [52].
+Micro-paths are derived from a 𝜇DD by performing a
+graph search along causality edges, with nodes and causality edges added to the 𝜇path as they are encountered. When
+a decision node is encountered, there are two possibilities.
+If the property has been assigned a value (determined by the
+labels on outgoing edges) earlier in the traversal, then the corresponding outgoing causality edge is followed. Otherwise,
+a concrete property value from the outgoing causality edge
+labels is selected and the corresponding edge is followed.
+This process continues until all nodes and causality edges
+have been added. happens-before edges between node pairs
+are instantiated in the 𝜇path if there exists a happens-before
+edge between the corresponding 𝜇DD nodes.
+When exhibiting a 𝜇path during its execution, a 𝜇op generates events in a time order that respects both causality
+and happens-before edges. Events come in two forms: standard event nodes (green boxes), which represent standard
+microarchitectural events, and counter nodes (blue pills),
+which correspond to events directly recorded by HECs.
+𝜇path counter signatures. Each 𝜇path has an associated
+counter signature—a vector that records how many times
+each HEC appears within a 𝜇path. This signature captures
+how a 𝜇op following that 𝜇path increments the HECs.
+Counter flow equation. Our first goal is to precisely define when an observed set of HEC values is “feasible” with
+respect to a 𝜇DD. We do so via the counter flow equation,
+which links HEC values to the number of 𝜇ops traversing
+microarchitectural execution paths.
+The key insight behind the counter flow equation is that
+𝜇ops increment HECs as they traverse a 𝜇path, creating a
+direct relationship between the microarchitectural flow of
+𝜇ops and the resulting HEC values.
+Let D be a micro flow diagram and P (𝐷) the set of 𝜇paths
+it encodes. A microarchitectural flow 𝑓 (·) assigns each 𝜇path
+𝑝 ∈ P (𝐷) a non-negative number of 𝜇ops traversing it. Each
+𝜇op on 𝜇path 𝑝 increments the HECs according to the 𝜇path
+’s counter signature 𝑆®(𝑝)—the vector of counter occurrences
+6
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+2+ level
+walk
+
+Initialize
+PTW
+
+START
+
+END
+
+START
+
+START
+
+Lookup
+PDE$
+
+1 level
+walk
+
+END
+
+l oad.
+causes_wal k
+
+Initialize
+PTW
+
+END
+
+Miss
+Miss
+
+STLB
+Status
+
+PDE$
+Status
+
+Lookup
+PDE$
+
+l oad.
+pde$_mi ss
+
+Hit
+
+Hit
+
+1 level
+walk
+
+l oad.
+causes_wal k
+
+END
+
+END
+
+START
+
+Lookup
+PDE$
+
+2+ level
+walk
+
+l oad.
+causes_wal k
+
+Initialize
+PTW
+
+l oad.
+pde$_mi ss
+
+END
+
+Value
+
+Key
+
+START
+
+Start
+
+END
+
+End
+
+Property
+Decision
+
+count er
+Counter
+
+event
+Event
+
+Causality
+
+HappensBefore
+
+(a) Example 𝜇DD that describes how a 𝜇op interacts with the (b) This 𝜇DD describes three unique 𝜇paths, each corresponding to
+STLB and PDE cache, in the presence of load.causes_walk and different assignments to microarchitectural properties (e.g., STLB Status
+load.pde$_miss HECs. This 𝜇DD encodes three 𝜇paths.
+and PDE$ Status). Edges represent happens-before order.
+
+Figure 4. A 𝜇DD encodes a set of microarchitectural execution paths (𝜇paths). Each 𝜇path describes a set of events per 𝜇op.
+along 𝑝. Thus, the contribution of 𝜇path 𝑝 is 𝑓 (𝑝) · 𝑆®(𝑝), and
+the total HEC value vector 𝑣® is the sum over all 𝜇paths:
+∑︁
+𝑣® =
+𝑆®(𝑝) · 𝑓 (𝑝)
+(Counter Flow Equation)
+
+side-channel security [52, 104], and functional correctness
+[52, 65]. Because these approaches cover many aspects of
+CPU pipelines, they suggest that CounterPoint is well positioned to extend to other microarchitectural components.
+
+𝑝 ∈ P (𝐷 )
+
+This counter flow equation links observed HEC values to the
+flow of 𝜇ops through the 𝜇DD, and is only valid when 𝑓 (𝑝) ≥
+0 for all 𝜇paths, as negative flows of 𝜇ops are impossible.
+Intuitively, the final counter values are given by the total
+number of HEC increments across all dynamic 𝜇op instances.
+Deriving the model cone. The model cone is the set of
+all HEC value combinations generated by valid microarchitectural executions (i.e., those with non-negative flows). We
+determine observation feasibility by testing if it lies within
+the model cone, a task accomplished using linear programming. This means that feasibility can be determined even
+without knowing 𝑓 (·) exactly.
+Mathematically, we define a model cone 𝐾 D for a 𝜇DD D
+as the set of HEC values that are generated by microarchitectural executions with non-negative flow:
+
+
+
+
+ ∑︁
+
+
+
+®
+𝐾D ≜
+𝑆 (𝑝) · 𝑓 (𝑝) 𝑓 (𝑝) ≥ 0
+(Model Cone)
+
+
+𝑝 ∈ P (𝐷 )
+
+
+
+Geometrically, 𝐾 D is a convex3 polyhedral4 cone5 defined
+purely by the 𝜇path counter signatures in the 𝜇DD (Figure
+5a). Intuitively, the model cone represents the space of all
+allowed HEC combinations.
+Generalizability. Our decision to design CounterPoint so
+that it links fine-grained microarchitectural events and interactions—represented as 𝜇paths of 𝜇ops—with HEC updates
+is intentional. 𝜇op-centered execution paths have been used
+extensively in prior work to model low-level hardware, including formal verification of memory consistency and its interactions with coherence and virtual memory [51, 65, 67, 70],
+
+4
+
+An observation is feasible if it resides within the model cone;
+a problem solvable with linear programming. Unfortunately,
+observations are subject to multiplexing noise which must
+be accounted for to prevent false violations (e.g., Figure 5b).
+Handling noise with counter confidence regions. Counter
+confidence regions handle noise by treating each observation
+not as a single value, but instead as a point drawn from a set
+of values within which the true value is likely to occur, given
+the presence of noise in the measurement. The likelihood of
+the region capturing the true value is given by the confidence
+level, fixed to 99% for our analyses. The size and shape of
+the counter confidence region depends on parameters of the
+underlying distribution, which can be inferred from the HEC
+measurements themselves. CounterPoint computes covariances (in addition to means and variances computable by
+perf), producing tight counter confidence regions that are
+more likely to catch violated constraints.
+𝑀 recorCounterPoint requires HEC vector samples {𝑌𝑖 }𝑖=1
+ded at regular time intervals (e.g., every 10 seconds) over
+the course of a program’s execution. Such functionality is
+provided by standard tools (e.g., perf). CounterPoint computes the sample mean 𝑌¯ as a HEC vector representative of
+the entire execution. Statistically, the sample mean is drawn
+from a Gaussian distribution per the Central Limit Theorem.
+With Gaussian distributions, the confidence region is fully
+determined by the sample mean and sample mean covariance
+[106]. We calculate the HEC covariance matrix Σ𝑌 . We estimate the sample mean covariance with the plugin estimator
+Σ𝑌¯ = 𝑀1 Σ𝑌 . This defines the confidence region:
+
+𝑣® (®
+𝑣 − 𝑌¯ )𝑇 Σ𝑌¯ (®
+𝑣 − 𝑌¯ ) ≤ 𝜒 2
+(Confidence Ellipsoid)
+
+3 Convex: If 𝑥, 𝑦 ∈ 𝐾 then 𝛼𝑥 + (1 − 𝛼 ) 𝑦 ∈ 𝐾 for 0 ≤ 𝛼 ≤ 1.
+D
+D
+4 Polyhedral: Defined by a finite number of equalities and inequalities.
+5 Cone: If 𝑥 ∈ 𝐾
+
+Feasibility Testing with Noise
+
+D then 𝛼𝑥 ∈ 𝐾D for 𝛼 > 0.
+
+𝑁 ,𝛼
+
+7
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+1
+
+load.causes_walk
+
+2
+
+500
+500 600 700 800 900 1000
+load.causes_walk
+
+9
+2 2
+2,
+0.9
+
+2
+
+e2
+
+load.pde$_miss
+
+Ground Truth
+
+600
+
+800
+
+9
+
+0
+
+B
+
+700
+
+900
+
+e1
+
+A
+
+model
+cone
+
+800 Observed
+
+2 2, 0.9
+
+0
+
+C
+
+1000
+
+900
+
+1
+
+1
+
+load.pde$_miss
+
+1000
+
+2
+
+load.pde$_miss
+
+2
+
+700
+600
+600
+
+800
+
+load.causes_walk
+
+(a) The model cone (valid HEC combinations) (b) Noise introduced by multiplexing can (c) Confidence region construction oriented
+is determined by 𝜇path counter signatures. make valid combinations appear infeasible. along eigenvectors of covariance matrix.
+
+Figure 5. The model cone is determined purely by the 𝜇path counter signatures (Figure a). Testing observations for inclusion in
+the model cone is complicated by noise, which can cause observations to spuriously appear infeasible (Figure b). CounterPoint
+handles noise by constructing confidence regions at the 99% confidence level (Figure c). The counter confidence region is an
+ellipsoid which CounterPoint approximates by its bounding box, enabling a linear programming formulation. The scale and
+orientation of the confidence region is determined by (i) the confidence level and (ii) correlations in the observed data. 𝜆𝑘 and
+𝑒®𝑘 denote the 𝑘th eigenvalue/eigenvector of the estimated covariance matrix.
+
+5
+
+Intuitively, this means that the confidence region is an ellipsoid in shape, and that the ground truth (e.g., noise-free)
+counter value is contained within the ellipsoid with (1 − 𝛼)confidence. We adapt it to a linear program in the following
+section. The confidence region can be made tighter by obtaining more samples (e.g., with longer running programs),
+providing the program has consistent steady-state behavior.
+Determining feasibility with a linear program. Given a
+model cone and a counter confidence region, we can assess
+the feasibility of an HEC observation at a specified confidence level. If the counter confidence region intersects the
+model cone, the observation is deemed feasible. If there is no
+intersection, the observed HEC values must violate at least
+one model constraint at that confidence level. For example,
+Figure 5c shows a counter confidence region which intersects
+with the model cone, indicating a feasible observation.
+To test for feasibility, CounterPoint uses linear programming because of its efficiency, relative simplicity, and availability in mature software libraries [5, 30, 37, 76]. CounterPoint constructs a linear program6 by instantiating nonnegative variables for the flow and counter values (see Section 3). The flows and counter values are related by the
+Counter Flow Equation, implicitly describing the model cone.
+The counter confidence region, being a quadratic form, cannot be directly encoded. Instead, we approximate it with a
+bounding hyper-rectangle (Figure 5c). This bounding box is
+aligned with the principal components of the data, producing the tightest rectangular bound on the confidence region.
+Empirically, our bounding box approximation detects many
+surprising constraint violations (Section 7). We leave alternatives like quadratic programming for future work.
+
+Guided Model Exploration
+
+Discovering microarchitectural features. The specific
+model constraints that are violated guide the expert in identifying which microarchitectural features need to be added
+or modified in the 𝜇DD to make it feasible. When a model
+constraint of the form 𝑎 · 𝑥 ≤ 𝑏 · 𝑥 is violated, then for all
+feasible 𝜇DDs, there must exist a 𝜇path whose 𝜇path counter
+signature 𝑆®(𝑝) satisfies 𝑎 · 𝑆®(𝑝) > 𝑏 · 𝑆®(𝑝).
+We illustrate this with an example (Figure 6). Figure 6a is
+a simple 𝜇DD for load 𝜇ops upon a TLB miss. We assume
+that the load 𝜇op first initializes the page table walker - incrementing load.causes_walk- before looking up the PDE
+cache. In the event of a cache miss, load.pde$_miss is incremented. This model implies model constraint C (6b).
+CounterPoint identifies that Constraint C is violated by
+one or more HEC observations7 . Therefore there are workloads where load.pde$_miss exceeds load.causes_walk.
+To explain this apparent contradiction, we must introduce
+one or more microarchitectural features into the 𝜇DD that
+allow for this constraint to be broken. This corresponds to
+modifying the 𝜇DD such that it contains 𝜇path(s) whose
+𝜇path counter signatures explicitly violate C.
+One way to resolve this is to assume that (i) the PDE cache
+is accessed before starting a page table walk, and (ii) translation requests can be aborted between the PDE cache lookup
+and the start of the walk. This allows lookups to access the
+PDE cache without incrementing load.causes_walk. Applying these assumptions produces a new 𝜇DD (Figure 6c),
+with a new 𝜇path 𝑝 whose 𝜇path counter signature 𝑆®(𝑝)
+7When an observation is deemed infeasible with respect to an 𝜇DD, Counter-
+
+Point automatically tests the observation against each feasibility constraint
+to identify violations. Deriving and testing the feasibility constraints is a
+non-trival procedure; we describe our implementation in Section 6.
+
+6 The full linear program is provided in Appendix A.
+
+8
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+Start
+Walk
+
+START
+
+Miss
+
+l oad.
+pde$_mi ss
+
+END
+
+Lookup
+PDE$
+
+l oad.
+causes_wal k
+
+{ F1 , F2 , F3 }
++ F2 , F3
+
+{ F1 }
+
+Pde$
+Status
+
+- F2
+
+{ F1 , F3 }
+
+{ F2 , F3 }
+
+Initial
+{}
+
+{ F1 , F2 }
+
+- F1
+
++ F1
+
+Hit
+
+- F3
+
+- F1
+
+{ F3 }
+
+Key
+
+Discovery
+
+Elimination
+
+(a) Initial model.
+
+Figure 8. Expert-in-the-loop heuristic search algorithm navigates the model space without needing to explore the full
+cross-product of microarchitectural features. 𝐹 · denote microarchitectural features; models (boxes) are identified by (i)
+their set of features and (ii) their consistency with HECs.
+
+C ≜ load.pde$_miss ≤ load.causes_walk
+(b) Violated model constraint.
+Lookup
+PDE$
+
+START
+
+Miss
+
+Pde$
+Status
+
+l oad.
+pde$_mi ss
+
+Hit
+
+END
+
+l oad.
+causes_wal k
+
+No
+
+Start
+Walk
+
+Abort
+
+Path p
+
+Consider Figure 7. There are four models, each identified
+by the presence or absence of features 𝐹𝑋 and 𝐹𝑌 . Consistent
+models are highlighted in green and inconsistent models in
+red. There are two consistent models; introducing ambiguity
+in what model is the best fit. However, all consistent models
+contain Feature 𝐹𝑌 . If we have covered the relevant feature
+space—by running a wide enough range of programs to ensure that the hardware we are trying to reverse-engineer is
+adequately exercised—then CounterPoint can reliably conclude that Feature 𝐹𝑌 must be present. On the other hand,
+Feature 𝐹𝑋 in isolation is insufficient to explain the performance counter observations, but it is possible that Feature
+𝐹𝑋 and Feature 𝐹𝑌 are both present. Given a feature space
+(e.g., 𝐹𝑋 × 𝐹𝑌 ), we can infer viable feature combinations.
+Enumerating models. Feature discovery and model classification can be employed together to infer the presence of
+microarchitectural features. We propose a expert-in-the-loop
+algorithm for this purpose.
+Our algorithm accepts an initial 𝜇DD and a dataset of
+HEC observations, and returns a set of 𝜇DD characterized
+by their features and feasibility. The algorithm consists of
+two phases: discovery and elimination. We advocate starting
+with a conservative model to ensure a more informative set
+of constraints that enable discrimination between candidate
+features, but the expert can start with any model. Features
+are discovered through the Discovery phase. Figure 8 shows
+an example search graph generated by the algorithm.
+Discovery phase. Constraint violations are detected by CounterPoint, and the expert user eliminates the constraints by
+introducing new microarchitectural features or modifying
+existing ones. When more than one feature can eliminate a
+constraint, all features should be added to their model. This
+process is repeated until a feasible 𝜇DD is obtained.
+In Figure 8, the initial 𝜇DD is shown at the bottom left.
+Feature 𝐹 1 is added to produce a new model {𝐹 1 }; features
+𝐹 2 and 𝐹 3 are then added to create the 𝜇DD at the top of the
+tree {𝐹 1, 𝐹 2, 𝐹 3 }. This 𝜇DD is a candidate microarchitectural
+model for the system. At each iteration step, the model cones
+are verified to ensure that the model cone is expanded.
+
+Yes
+
+(c) Refined model.
+
+Pde$
+Status
+Miss
+
+Abort
+Yes
+
+load.
+causes_walk
+0
+
+load.
+pde$_miss
+1
+
+Satisfies
+C
+No
+
+(d) Properties of 𝜇path 𝑝 including 𝜇path counter signature.
+
+Figure 6. Modifying 𝜇DD to remove constraint violations is
+equivalent to identifying candidate microarchitectural features. (a) Initial 𝜇DD of page table walk. (b) Model implies
+this model constraint, which is violated. (c) 𝜇DD is updated
+by (i) assuming PDE cache is looked up prior to starting walk,
+and (ii) allowing translation requests to be aborted before
+starting a walk. (d) Model no longer implies constraint C as
+𝑆®(𝑝) does not satisfy constraint.
+
+No
+
+Feature Y
+
+Yes
+
+{ }
+
+{ FY }
+
+{ FX }
+
+{ FX , FY }
+
+Figure 7. Microarchitectural models (boxes) classified by
+their features and consistency with hardware performance
+counter data. Red: inconsistent. Green: consistent.
+
+explicitly violates constraint C (Figure 6d). Analysis of this
+𝜇DD confirms that C is no longer implied, resolving the violation. In practice, many constraints often need resolution,
+requiring an iterative 𝜇DD refinement process.
+Classifying microarchitectural models. Feasibility testing partitions the set of 𝜇DD into subsets of feasible and
+infeasible 𝜇DDs. It is possible for different 𝜇DDs representing different microarchitectural assumptions to be feasible.
+When this happens, experts can identify common structures
+in feasible 𝜇DDs to determine likely hardware features despite the ambiguity introduced by multiple feasible 𝜇DDs.
+9
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+Elimination phase. The candidate 𝜇DD may contain more
+features than required for a feasible model. In the elimination phase, we recommend recursively pruning microarchitectural features until infeasible 𝜇DDs are obtained. This is
+based on our empirical observation–captured through refinement of close to a hundred models–that pruning infeasible
+models tends to produce infeasible models, so the sub-tree
+need not be explored further. In Figure 8, features 𝐹 1 -𝐹 3 are
+removed from the top 𝜇DD to create separate 𝜇DDs. The
+𝜇DD {𝐹 1, 𝐹 3 } remains feasible, so features 𝐹 1 and 𝐹 3 are removed separately, resulting in infeasible 𝜇DDs.
+
+6
+
+Python library computes conic hulls, and standard numeric
+methods (e.g., QR factorization) are ill-conditioned, whilst
+symbolic operations preserve exact integer values.
+
+7
+
+A Case Study: The Intel Haswell MMU
+
+We demonstrate CounterPoint’s capabilities and evaluate its
+usability and performance on the Intel Haswell MMU. This
+case study shows how CounterPoint can uncover the behavior of advanced microarchitectural components, even when
+they interact deeply with complex systems software. The
+Haswell MMU is a strong case study target due to its rich
+set of HECs [53, 103] and its frequent use in prior research
+on address translation [4, 7, 33, 63, 84, 114]. Haswell also
+exhibits complex microarchitectural interactions across data
+and instruction activity [29], as well as under native and virtualized execution [3, 6, 18, 19, 28, 45, 83, 89, 114]. For these
+reasons, validating and/or refuting assumptions about the
+Haswell MMU represents a strong test of CounterPoint’s effectiveness. This foundation positions us to extend our study
+to more modern architectures. For this study, we focus specifically on data-side activity in native execution. While full
+confirmation of our findings would require proprietary RTL,
+CounterPoint enables high confidence conclusions possible
+even without direct access to the RTL.
+
+Implementing CounterPoint
+
+We implement CounterPoint as a Python library with roughly
+3K lines of code, integrating with Pandas [82] for convenient
+data processing. To support broader community adoption,
+CounterPoint is designed for easy portability using a reproducible Docker [74] environment. We will share our MMU
+𝜇DDs to help seed the development of improved MMU models in widely used software simulators [38, 39, 64, 113].
+Domain-specific language for 𝜇DDs. We introduce a simple DSL for specifying 𝜇DDs: action and counter nodes
+are single-line statements, done nodes use the done keyword, and decision nodes are expressed with C-style switch
+cases. The DSL does not support functions, loops, or variables
+beyond 𝜇path properties. Our DSL serves as a reference implementation, avoiding errors that could arise from deriving
+𝜇DDs directly from RTL or C/C++ simulator specifications.
+Feasibility testing. Given a 𝜇DD and a set of HEC observations, CounterPoint tests each observation for feasibility
+by constructing and solving a linear program (Appendix A).
+This entails enumerating every counter and 𝜇path counter
+signature, implemented by a breadth-first traversal of the
+𝜇DD. The back-end LP solver we use is pulp [76]. Constraint
+violations are identified by testing infeasible observations
+against the half-space defined by each constraint.
+Deducing model constraints. Model constraints are derived from 𝜇path counter signatures as follows. First, 𝜇path
+counter signatures are normalized by dividing each element
+by the greatest common factor, and duplicates are removed.
+Second, Gaussian elimination identifies equality constraints
+and eliminates redundant HECs8 . Third, 𝜇path counter signatures that lie fully within the interior of the model cone are
+identified using linear programming and removed. Fourth,
+the conic hull is computed by: (i) adding the zero vector to
+the set of 𝜇path counter signatures; (ii) computing the convex
+hull; (iii) selecting all faces which contain the origin, corresponding to the faces of the cone. The inequality model
+constraints are given by the planar equations of the resulting faces. We implemented this custom solution because no
+
+7.1
+
+Guided Model Exploration.
+
+Our initial model of the Intel Haswell MMU includes features
+that are well-established through documentation and prior
+research [20, 33, 47, 87, 88], and are typically integrated in
+software simulators. We assume a two-level TLB hierarchy
+and a four-level page table. Building on reverse-engineering
+studies of Haswell MMU caches [41, 107], we assume the
+presence of a PDE cache and an additional MMU cache for
+the page table level immediately preceding the PDE level.
+Consistent with conventional wisdom, we further assumed
+that the PDE cache is consulted once during every walk.
+We refine the model using a diverse set of HEC observations from workloads that stress the MMU. We measured
+workloads from the GAPBS [16], SPEC2006 [49], PARSEC
+[26], and YCSB [31] benchmark suites, sweeping memory
+footprints from 250 MB to 600 GB using input generators.
+We also collected HEC data for two microbenchmarks: a
+linear access pattern (parametrized by footprint, stride, and
+load-store ratio) and a random access pattern (parametrized
+by footprint and load-store ratio). Through ablation studies,
+we found that removing these microbenchmarks causes us to
+miss violations of key model constraints (e.g., Constraint (1)
+in Table 1) that are essential for reverse-engineering the presence and trigger conditions of the TLB prefetchers described
+below9 . To stress different MMU behaviors, experiments
+9We ensured that all of our HEC measurements were unaffected by any
+
+published HEC errata. For errata that are triggered when SMT is enabled
+(e.g., HSD29/HSM30 affecting mem_uops_retired), we addressed this by
+disabling SMT in the BIOS.
+
+8 For example, consider the following relationship:
+
+load.stlb_hit = load.stlb_hit_4k + load.stlb_hit_2m.
+10
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+were repeated with 4 KB, 2 MB, and 1 GB page sizes. Together,
+these workloads and configuration options yield about 20
+million HEC samples—enough observations to thoroughly
+stress-test our model assumptions and drive higher-quality
+model refinement.
+We evaluate our models at the 99% confidence level. Across
+dozens of representative 𝜇DDs, we found that correlated
+counter confidence regions detect over 24% more model constraint violations compared to confidence regions that assume HECs are independent. For some models, exploiting
+correlations revealed over 75% additional violations compared to baseline. CounterPoint’s confidence regions are
+effective because HECs are highly correlated: in our dataset
+we find that over 25% of counter pairs have a Pearson correlation coefficient that exceeds 0.9 (where 1.0 indicates perfect
+correlation, and 0.0 indicates no correlation).
+With CounterPoint’s support for guided model refinement,
+we explored dozens of 𝜇DDs. Our initial 𝜇DD contained 31
+constraints, 8 of which were violated. We refined our initial 𝜇DD over several iterations, details of which we provide in Appendix C. Across all explored models, there were
+thousands of 𝜇paths and over a thousand model constraint
+violations. Our guided refinement surpasses prior ad hoc
+reverse-engineering efforts [10, 41, 110, 120], enabling us to
+uncover subtleties (with high confidence) in:
+Address translation prefetchers. Several studies have proposed address translation prefetching mechanisms, but little
+is known about how such prefetchers are actually implemented in real-world processors [25, 57, 73, 96, 108, 109].
+Recent work suggests that underdocumented translation
+prefetching features may be at the core of unexplained performance anomalies in real-world workloads [17].
+Using CounterPoint, we uncovered hardware in the Intel
+Haswell MMU that prefetches page table entries into its
+L1/L2 TLBs as well as PDE cache. Our analysis revealed
+three key aspects of the prefetcher’s implementation:
+First, we identified prefetch trigger conditions. If a workload is feasible with an 𝜇DD that includes the prefetcher
+but infeasible in one without it, the workload must trigger
+prefetches. This helps us deduce that prefetching logic scans
+virtual page numbers in the load/store queue and is triggered by sequential accesses predicted to cross a page boundary—contradicting the common assumption that prefetches
+are triggered exclusively by TLB misses. For increasing virtual addresses, prefetching is triggered after consecutive
+accesses to cache lines 51 and 52 within a page; for decreasing addresses, the trigger occurs at cache lines 8 and 7. No
+other cache line pairs were observed to initiate prefetching.
+Second, we found that the load/store queue logic responsible for virtual-page prefetching relies on the page table
+walker to resolve translation prefetch requests. In practice,
+this means that prefetches trigger the walker to inject additional load instructions into the CPU pipeline—the same way
+
+it injects loads for demand page table walks themselves (previously called “ghost” or “stuffed” loads [67, 120]). In some
+cases, the walker generates hundreds of such additional loads.
+This overturns the prevailing model in prior work, which
+assumed prefetches bypass the pipeline and enter the memory hierarchy directly, and therefore model prefetches with
+unrealistically low latency. It also implies that significantly
+more prefetches can be injected than previously believed.
+Third, we found that prefetch-induced page table walks
+abort when they encounter a page table entry whose access (reference) bit is unset—unlike regular page table walks,
+which set this bit. Consequently, the TLB prefetch does not
+complete. This behavior is logical: allowing a speculatively
+set access bit for an ineffective TLB prefetch could, in principle, lead to suboptimal paging decisions, and permitting
+TLB prefetches to set the access bit would also introduce
+additional microarchitectural complexity. Prefetch-induced
+page walks can still modify cache state, with potential performance and security implications. Some recent TLB prefetcher
+proposals allow prefetch-induced page walks to set the access
+bit and complete [108, 109]. While this behavior is architecturally permitted [54], we have not observed it on Haswell.
+Page table walk merging. Despite decades of research on
+TLBs and MMU caches, little is publicly known about how
+MMUs schedule page table walks. Using CounterPoint, we
+discover that MMUs can merge multiple outstanding walks
+to the same virtual page into a single page table walk, which
+we capture by modeling MSHRs within our MMU 𝜇DD.
+Historically, MMU MSHRs have not been modeled in address translation studies because their design involves subtleties beyond those of conventional cache MSHRs [60, 61,
+105]. For instance, page sizes—and therefore virtual page
+numbers—are unknown until after translation [33], making
+MSHR lookup and allocation non-trivial. Further, distinct
+page table walks have unique rules for updating access and
+dirty bits, as well as for determining whether they are allowed to touch physical memory regions marked speculative
+versus non-speculative [46]. These complexities make it far
+from obvious how walk merging can be safely implemented.
+Our results show that MMU MSHRs are nonetheless critical for performance. For some workloads, page table walk
+merging reduces the number of distinct walks by nearly half.
+This finding underscores the importance of explicitly modeling MMU MSHRs in simulators used to evaluate address
+translation optimizations [4, 10, 12, 15, 20, 22–24, 58, 120].
+Finally, CounterPoint reveals a surprising detail: the PDE
+cache is queried before outstanding walks to the same virtual
+page are merged. Prior studies have not considered this interaction [12, 20]. One might expect walk merging to reduce
+PDE cache lookups, easing port pressure, cutting bandwidth,
+and eliminating queuing delays. Instead, our 𝜇DD suggests
+that the PDE cache is looked up prior to MSHR allocation,
+11
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+Time (ms)
+
+likely to reduce latency via pipelining. Importantly, CounterPoint is able to do this because it enables discovery of not
+just individual hardware components, but also their relative
+placement within the pipeline.
+Root-level MMU cache. A large body of address translation
+research proposing hardware optimizations [20, 24, 72, 86, 94,
+99, 114] assumes the presence of a root-level MMU cache, yet
+some recent reverse-engineering studies have found no evidence of its existence [41, 107]. CounterPoint demonstrates
+its compatibility with all other address translation features
+identified in this paper for the workloads we analyze, giving
+architecture researchers confidence in including it in their
+models. When walk bypassing is not modeled, several workloads become feasible only with a root-level MMU cache
+in the 𝜇DD. These workloads use 1GB pages which would
+stress a hypothetical PML4E cache (which is explicitly for
+1GB pages), suggesting that for these workloads, the “missing” page table walker accesses could be explained by PML4E
+cache.
+Aborted page table walks. Recent research has studied
+page table walks under speculation in modern out-of-order
+processors [48, 63, 120]. While prior work shows that x86-64
+processors can abort in-flight page table walks in response to
+machine clears [63, 92, 120], the underlying implementation
+details remain poorly understood.
+Using CounterPoint, we find that aborted walks are entirely consistent with all our HEC measurements and newly
+discovered features. Additionally, they appear to be triggered
+more frequently by workloads with high walker utilization.
+While more detailed study is necessary to better understand
+how aborted page table walks are implemented, CounterPoint suggests that page table walks can be aborted at any
+point—even before issuing a single memory access. This implies that aborted walks can still consume MMU and memory
+hierarchy resources, effectively imposing a hidden performance tax that should be explicitly modeled in simulation
+infrastructures for address translation [4, 58].
+Page table walk replays. We observe that page table walks
+can complete without generating any memory accesses. This
+suggests that the core may include a mechanism allowing
+walks to finish without engaging the cache hierarchy. Prior
+work has shown a complex interplay between the hardware
+page table walker and microarchitectural structures that
+maintain memory consistency [112, 120]. We hypothesize
+that these “missing” accesses occur because walks are replayed or handled by hidden internal address translation
+caching structures not reflected in the walk_ref counter. Understanding these structures more concretely would require
+implementing new HECs or access to proprietary RTL. An
+alternative explanation is that the “missing” accesses do occur but are not counted because, unlike regular page-walker
+accesses, they are non-speculative. If we assume that aborted
+walks are replayed at micro-op retirement as non-speculative
+
+200
+
+Models
+Mean
+
+100
+
+Ret | 4
+
+L2TLB | 10
+
+Walk | 22
+
+Refs | 23
+
+Counter Groups | Total Counters
+
+(a) Evaluation time per observation per model.
+
+Time (s)
+
+101
+100
+
+Models
+Geomean
+
+10 1
+Ret | 4
+
+L2TLB | 10
+
+Walk | 22
+
+Refs | 23
+
+Counter Groups | Total Counters
+
+(b) Constraint deduction time per model.
+
+Figure 9. CounterPoint performance (quantified for 20 representative 𝜇DDs) varies with models and scales with HECs.
+Blue lines represent individual models; groups of semantically related counters are added along x-axis. (a) Feasibility
+testing time scales linearly. (b) Constraint deduction time
+scales exponentially. The red lines represent (a) arithmetic,
+and (b) geometric means.
+
+walks—as suggested in prior sources [32, 46, 112]—then the
+resulting 𝜇DD becomes feasible, but only once features such
+as TLB prefetching and miss merging are incorporated.
+7.2
+
+CounterPoint Performance Characterization
+
+We evaluate CounterPoint on a 24-core Intel Xeon E5-2680 v3
+CPU running at 2.5GHz. For this analysis, we evaluate every
+observation against every constraint to produce a worst-case
+runtime, even though in practice only infeasible observations
+need to be checked. We parallelize the parts of CounterPoint
+devoted to determining feasibility constraints. On average,
+CounterPoint evaluates a model in 213 seconds, with the
+majority of time spent assessing individual model constraints.
+Determining model feasibility is much faster than checking
+each constraint, as model cones allow all constraints to be
+tested simultaneously. This makes it practical to evaluate
+models with large numbers of counters.
+Figure 9a plots the time taken to determine observation
+feasibility as a function of the counters present in the model.
+For the full suite of counters, CounterPoint takes around
+200 milliseconds to determine if an observation is feasible.
+Empirically, the time taken scales approximately linearly as
+counter groups are added. Additionally, observation feasibility testing is embarrassingly parallel, allowing large numbers
+of observations to be tested simultaneously.
+12
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+Figure 9b shows how the time required to find the model
+constraints scales with the counter groups. The logarithmic yscale demonstrates that empirically the constraint deduction
+time scales exponentially as counter groups as added. Despite
+this, CounterPoint only takes between 800 milliseconds and
+10 seconds to determine the set of constraints for models
+with all counters present. Note that explicitly determining
+the model constraints is only used for providing feedback
+for model refinement; it is not a prerequisite for determining
+the feasibility of individual observations.
+
+8
+
+At the same time, CounterPoint processes noisy HEC measurements into reliable, high-confidence ranges, bridging intuition with data-driven analysis. CounterPoint accelerates
+and sharpens the modeling of complex architectures, freeing
+experts to focus on insight rather than bookkeeping, and
+making advanced microarchitectural modeling faster and
+more insightful. By accelerating the productivity of these influential experts, insights extracted by CounterPoint’s have
+the potential to shape the broader field of computing.
+While this first paper demonstrates the promise of CounterPoint, several productive directions remain for future
+work. For example, CounterPoint could potentially be used
+to reverse-engineer not only microarchitectural details but
+also the semantics of undocumented HECs (see our work on
+reverse-engineering the semantics of the walk_ref counter
+for page table walk replays). Establishing this, however,
+would require a detailed study beyond the scope of this work,
+which we leave for future work. Additionally, our current
+study evaluates the benefit of CounterPoint on CPUs; exploring the utility of CounterPoint to hardware accelerators
+would broaden its applicability. Finally, this paper presents
+a first proof-of-concept study of the key ideas and principles
+behind CounterPoint. Substantial work remains to extend it
+into a robust, system-wide modeling framework, including
+support for multiple cores, multiple sockets, hyperthreading,
+kernel-level activity, and much more.
+
+Related Work
+
+Computer architects have recently used HECs to reverseengineer specific microarchitectural features. HECs are used
+by uops.info [1] and nanoBench [2] to reverse-engineer microop performance and port assignment, as well as cache replacement policies. Several studies have focused on reverse
+engineering the MMU [10, 41, 110, 120], while Ragab et al
+[92] use HECs to characterize the security implications of
+machine clears. Binoculars [120] use HECs to characterize
+page table walker contention. With 𝜇DD models, CounterPoint offers a more general-purpose approach.
+Multiplexing noise is a well-studied problem [8, 11, 68].
+Azimi et al [9] quantify multiplexing noise for a range of
+workloads. CounterMiner [68] replacing outliers with interpolated values. BayesPerf [11] reduces noise by exploiting known statistical relationships between counter values.
+CounterPoint infers correlations to reduce noise impact.
+Interpreting HEC values correctly remains challenging.
+Vendors provide explicit metrics that convert HEC values
+to standard metrics (e.g., CPI, MPKI, hit rates, etc.), but not
+all HECs are used. The Counter Inspection Toolkit [34] and
+related work [13, 14] correlate counters with individual microbenchmarks to define new metrics. Top Down Methodology [117] employs metrics and thresholds to enable application developers to identify performance bottlenecks. Unlike
+bespoke approaches, CounterPoint 𝜇DDs capture both HEC
+semantics and microarchitectural features by construction.
+Formal modeling for microarchitectures has recently been
+used for memory consistency [50, 51, 66, 67, 69, 77], cache
+coherence [35, 78–80, 90, 91], and security [52, 104]. CheckSuite and related tools [50–52, 66, 67, 69, 77, 104] describe
+microarchitectural executions using 𝜇spec models featuring
+𝜇paths and inter- and intra-𝜇path dependencies. CounterPoint’s 𝜇DD formalism is compatible with these approaches.
+
+9
+
+10
+
+Acknowledgments
+
+We thank the anonymous reviewers, Neil Zhao, Michael Wu,
+and Grace Jia for their valuable feedback on drafts of this
+paper. We also thank Manolis Zampetakis for his insights
+on our constraint deduction algorithm and for highlighting
+potential directions for future optimizations. We appreciate
+the technical discussions with Lieven Eeckhout, Andrew
+Milas, and Matt Sinclair. This work was supported in part
+by National Science Foundation awards 2236855, 2112562,
+and 2047220. We thank Intel for supporting the IISWC 2024
+paper that preceded and motivated this work.
+
+References
+[1] Andreas Abel and Jan Reineke. 2019. uops. info: Characterizing latency, throughput, and port usage of instructions on intel microarchitectures. In Proceedings of the Twenty-Fourth International Conference
+on Architectural Support for Programming Languages and Operating
+Systems. 673–686.
+[2] Andreas Abel and Jan Reineke. 2020. nanobench: A low-overhead
+tool for running microbenchmarks on x86 systems. In 2020 IEEE
+International Symposium on Performance Analysis of Systems and
+Software (ISPASS). IEEE, 34–46.
+[3] Keith Adams and Ole Agesen. 2006. A comparison of software and
+hardware techniques for x86 virtualization. ACM Sigplan Notices 41,
+11 (2006), 2–13.
+[4] Mohammad Agbarya, Idan Yaniv, Jayneel Gandhi, and Dan Tsafrir.
+2020. Predicting execution times with partial simulations in virtual
+memory research: Why and how. In Proceedings of the Annual International Symposium on Microarchitecture, MICRO, Vol. 2020-Octob. IEEE
+
+Conclusion & Future Work
+
+We presented CounterPoint, a framework that transforms
+large HEC datasets into accurate, high-quality microarchitectural models. By encoding an expert’s mental model as a 𝜇DD
+and automatically generating model constraints, CounterPoint eliminates the tedium and errors of manual derivation.
+13
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+Computer Society, 456–470. doi:10.1109/MICRO50266.2020.00046
+[5] Akshay Agrawal, Robin Verschueren, Steven Diamond, and Stephen
+Boyd. 2018. A rewriting system for convex optimization problems.
+Journal of Control and Decision 5, 1 (2018), 42–60.
+[6] Jeongseob Ahn, Seongwook Jin, and Jaehyuk Huh. 2012. Revisiting
+hardware-assisted page walks for virtualized systems. ACM SIGARCH
+Computer Architecture News 40, 3 (2012), 476–487.
+[7] Hanna Alam, Tianhao Zhang, Mattan Erez, and Yoav Etsion. 2017.
+Do-It-Yourself Virtual Memory Translation. In Proceedings of the 44th
+Annual International Symposium on Computer Architecture (Toronto,
+ON, Canada) (ISCA ’17). Association for Computing Machinery, New
+York, NY, USA, 457–468. doi:10.1145/3079856.3080209
+[8] Reza Azimi, Michael Stumm, and Robert W. Wisniewski. 2005. Online performance analysis by statistical sampling of microprocessor
+performance counters. In Proceedings of the 19th Annual International
+Conference on Supercomputing (Cambridge, Massachusetts) (ICS ’05).
+Association for Computing Machinery, New York, NY, USA, 101–110.
+doi:10.1145/1088149.1088163
+[9] Reza Azimi, David K Tam, Livio Soares, and Michael Stumm. 2009.
+Enhancing operating system support for multicore processors by
+using hardware performance monitoring. ACM SIGOPS Operating
+Systems Review 43, 2 (2009), 56–65.
+[10] Vlastimil Babka and Petr Tuma. 2009. Investigating cache parameters
+of x86 family processors. In SPEC Benchmark Workshop. Springer,
+77–96.
+[11] Subho S. Banerjee, Saurabh Jha, Zbigniew Kalbarczyk, and Ravishankar K. Iyer. 2021. BayesPerf: Minimizing performance monitoring
+errors using Bayesian statistics. International Conference on Architectural Support for Programming Languages and Operating Systems - ASPLOS (2021), 832–844. arXiv:2102.10837 doi:10.1145/3445814.3446739
+[12] Thomas W Barr, Alan L Cox, and Scott Rixner. 2010. Translation
+caching: skip, don’t walk (the page table). ACM SIGARCH Computer
+Architecture News 38, 3 (2010), 48–59.
+[13] Daniel Barry, Anthony Danalis, and Jack Dongarra. 2024. Automated
+data analysis for defining performance metrics from raw hardware
+events. In 2024 IEEE International Parallel and Distributed Processing
+Symposium Workshops (IPDPSW). IEEE, 716–725.
+[14] Daniel Barry, Anthony Danalis, and Heike Jagode. 2021. Effortless monitoring of arithmetic intensity with papi’s counter analysis
+toolkit. In Tools for High Performance Computing 2018/2019: Proceedings of the 12th and of the 13th International Workshop on Parallel
+Tools for High Performance Computing, Stuttgart, Germany, September
+2018, and Dresden, Germany, September 2019. Springer, 195–218.
+[15] Arkaprava Basu, Jayneel Gandhi, Jichuan Chang, Mark D. Hill, and
+Michael M. Swift. 2013. Efficient virtual memory for big memory
+servers. ACM SIGARCH Computer Architecture News 41, 3 (2013),
+237–248. doi:10.1145/2508148.2485943
+[16] Scott Beamer, Krste Asanović, and David Patterson. 2017. The GAP
+Benchmark Suite. arXiv:1508.03619 [cs.DC] https://arxiv.org/abs/
+1508.03619
+[17] Andrin Bertschi. 2022. Battling the Prefetcher: Exploring Coffee Lake
+(Part 1). https://abertschi.ch/blog/2022/prefetching/#intel-manualson-prefetching. Accessed: 2025-04-29.
+[18] Ravi Bhargava, Benjamin Serebrin, Francesco Spadini, and Srilatha
+Manne. 2008. Accelerating two-dimensional page walks for virtualized systems. In Proceedings of the 13th international conference
+on Architectural support for programming languages and operating
+systems. 26–35.
+[19] Nikhil Bhatia. 2009. Performance evaluation of Intel EPT hardware
+assist. VMware, Inc (2009).
+[20] Abhishek Bhattacharjee. 2013. Large-reach memory management
+unit caches. MICRO 2013 - Proceedings of the 46th Annual IEEE/ACM
+International Symposium on Microarchitecture (2013), 383–394. doi:10.
+1145/2540708.2540741
+
+[21] Abhishek Bhattacharjee. 2017. Preserving Virtual Memory by Mitigating the Address Translation Wall. IEEE Micro 37, 5 (2017), 6–10.
+doi:10.1109/MM.2017.3711640
+[22] Abhishek Bhattacharjee. 2017. Translation-triggered prefetching.
+ACM SIGPLAN Notices 52, 4 (4 2017), 63–76. doi:10.1145/3037697.
+3037705
+[23] Abhishek Bhattacharjee. 2019. Appendix L: Advanced Concepts on
+Address Translation.
+[24] Abhishek Bhattacharjee and Daniel Lustig. 2018. Architectural and
+Operating System Support for Virtual Memory. Morgan and Claypool
+Publishers.
+[25] Abhishek Bhattacharjee and Margaret Martonosi. 2010. Inter-core
+cooperative TLB for chip multiprocessors. ACM Sigplan Notices 45, 3
+(2010), 359–370.
+[26] Christian Bienia, Sanjeev Kumar, Jaswinder Pal Singh, and Kai Li.
+2008. The PARSEC benchmark suite: Characterization and architectural implications. In Proceedings of the 17th international conference
+on Parallel architectures and compilation techniques. 72–81.
+[27] William Lloyd Bircher and Lizy K. John. 2012. Complete System
+Power Estimation Using Processor Performance Events. IEEE Trans.
+Comput. 61, 4 (2012), 563–577. doi:10.1109/TC.2011.47
+[28] Xiaotao Chang, Hubertus Franke, Yi Ge, Tao Liu, Kun Wang, Jimi
+Xenidis, Fei Chen, and Yu Zhang. 2013. Improving virtualization in
+the presence of software managed translation lookaside buffers. In
+Proceedings of the 40th Annual International Symposium on Computer
+Architecture. 120–129.
+[29] Dimitrios Chasapis, Georgios Vavouliotis, Daniel A. Jiménez, and
+Marc Casas. 2025. Instruction-Aware Cooperative TLB and Cache
+Replacement Policies. In Proceedings of the 30th ACM International
+Conference on Architectural Support for Programming Languages and
+Operating Systems, Volume 1 (Rotterdam, Netherlands) (ASPLOS ’25).
+Association for Computing Machinery, New York, NY, USA, 619–636.
+doi:10.1145/3669940.3707247
+[30] COIN-OR Project. 2024. coin-or/Cbc: Release releases/2.10.12. doi:10.
+5281/zenodo.13347261
+[31] Brian F Cooper, Adam Silberstein, Erwin Tam, Raghu Ramakrishnan,
+and Russell Sears. 2010. Benchmarking cloud serving systems with
+YCSB. In Proceedings of the 1st ACM symposium on Cloud computing.
+143–154.
+[32] Peter Cordes. 2021. What happens after a L2 TLB miss? https:
+//stackoverflow.com/a/32258855. Accessed: April 6th, 2025.
+[33] Guilherme Cox and Abhishek Bhattacharjee. 2017. Efficient address
+translation for architectures with multiple page sizes. ACM SIGPLAN
+Notices 52, 4 (2017), 435–448.
+[34] Anthony Danalis, Heike Jagode, Hanumantharayappa, Sangamesh
+Ragate, and Jack Dongarra. 2017. Counter inspection toolkit: Making
+sense out of hardware performance events. In International Workshop
+on Parallel Tools for High Performance Computing. Springer, 17–37.
+[35] Nirav Dave, Man Cheuk Ng, et al. 2005. Automatic synthesis of
+cache-coherence protocol processors using bluespec. In Proceedings.
+Second ACM and IEEE International Conference on Formal Methods
+and Models for Co-Design, 2005. MEMOCODE’05. IEEE, 25–34.
+[36] John Demme, Matthew Maycock, Jared Schmitz, Adrian Tang, Adam
+Waksman, Simha Sethumadhavan, and Salvatore Stolfo. 2013. On the
+feasibility of online malware detection with performance counters.
+ACM SIGARCH computer architecture news 41, 3 (2013), 559–570.
+[37] Steven Diamond and Stephen Boyd. 2016. CVXPY: A Pythonembedded modeling language for convex optimization. Journal of
+Machine Learning Research 17, 83 (2016), 1–5.
+[38] Gem5 Discussion. 2024. Riscv Virtual Address Translation Process.
+https://github.com/orgs/gem5/discussions/1220 (2024).
+[39] Gem5 Discussion. 2025. Adding realistic SMMU invalidation delays
+to gem5. https://github.com/orgs/gem5/discussions/2227 (2025).
+
+14
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+[40] Joel S Emer and Douglas W Clark. 1984. A Characterization of
+Processor Performance in the VAX-11/780. (1984), 301–310. doi:10.
+1145/800015.808199
+[41] Philipp Ertmer, Robert Dumitru, and Yuval Yarom. 2025. ReverseEngineering the Address Translation Caches. (2025), 149–168.
+[42] Stijn Eyerman, Lieven Eeckhout, Tejas Karkhanis, and James E Smith.
+2007. A top-down approach to architecting CPI component performance counters. IEEE micro 27, 1 (2007), 84–93.
+[43] Vadim Filanovsky and Harshad Sane. 2022. Seeing through hardware
+counters: a journey to threefold performance increase. Netflix Blog
+(2022).
+[44] Komei Fukuda. 2004. What is the Minkowski–Weyl theorem for
+convex polyhedra? Polyhedral Computation FAQ. https://people.
+inf.ethz.ch/fukudak/polyfaq/node14.html Accessed via ETH Zurich
+website (people.inf.ethz.ch/fukudak/polyfaq/).
+[45] Jayneel Gandhi, Mark D Hill, and Michael M Swift. 2016. Agile paging:
+Exceeding the best of nested and shadow paging. ACM SIGARCH
+Computer Architecture News 44, 3 (2016), 707–718.
+[46] Andy Glew, Glenn Hinton, and Haitham Akkary. 1997. Method
+and apparatus for performing page table walks in a microprocessor
+capable of processing speculative instructions. US Patent 5,680,565.
+[47] Krishnan Gosakan, Jaehyun Han, William Kuszmaul, Ibrahim N.
+Mubarek, Nirjhar Mukherjee, Karthik Sriram, Guido Tagliavini,
+Evan West, Michael A. Bender, Abhishek Bhattacharjee, Alex Conway, Martin Farach-Colton, Jayneel Gandhi, Rob Johnson, Sudarsun Kannan, and Donald E. Porter. 2023. Mosaic Pages: Big TLB
+Reach with Small Pages. In International Conference on Architectural Support for Programming Languages and Operating Systems
+- ASPLOS, Vol. 3. Association for Computing Machinery, 433–448.
+doi:10.1145/3582016.3582021
+[48] Siddharth Gupta, Atri Bhattacharyya, Yunho Oh, Abhishek Bhattacharjee, Babak Falsafi, and Mathias Payer. 2021. Rebooting virtual memory with Midgard. Proceedings - International Symposium
+on Computer Architecture 2021-June (2021), 512–525. doi:10.1109/
+ISCA52012.2021.00047
+[49] John L Henning. 2006. SPEC CPU2006 benchmark descriptions. ACM
+SIGARCH Computer Architecture News 34, 4 (2006), 1–17.
+[50] Naorin Hossain, Caroline Trippel, and Margaret Martonosi. 2020.
+TransForm: Formally Specifying Transistency Models and Synthesizing Enhanced Litmus Tests. Proceedings - International Symposium
+on Computer Architecture 2020-May (2020), 874–887. doi:10.1109/
+ISCA45697.2020.00076
+[51] Yao Hsiao, Dominic P. Mulligan, Nikos Nikoleris, Gustavo Petri, and
+Caroline Trippel. 2021. Synthesizing formal models of hardware from
+RTL for efficient verification of memory model implementations. Proceedings of the Annual International Symposium on Microarchitecture,
+MICRO (2021), 679–694. doi:10.1145/3466752.3480087
+[52] Yao Hsiao, Nikos Nikoleris, Artem Khyzha, Dominic P Mulligan,
+Gustavo Petri, Christopher W Fletcher, and Caroline Trippel. 2024.
+RTL2M𝜇PATH: Multi-𝜇PATH synthesis with applications to hardware security verification. In 2024 57th IEEE/ACM International Symposium on Microarchitecture (MICRO). IEEE, 507–524.
+[53] Intel Corporation. [n. d.]. Intel Performance Monitoring Events (perfmon). https://github.com/intel/perfmon/tree/main.
+[54] Intel Corporation. 2025. Intel® 64 and IA-32 Architectures Software
+Developer’s Manual, Combined Volumes (PDF). https://cdrdv2.intel.
+com/v1/dl/getContent/671200. Published October 2025..
+[55] International Business Machines Corporation. 2018. POWER9 Performance Monitor Unit User’s Guide (version 1.2 ed.). IBM Systems,
+Somers, NY, USA.
+[56] Canturk Isci and Margaret Martonosi. 2003. Runtime power monitoring in high-end processors: Methodology and empirical data.
+In Proceedings. 36th Annual IEEE/ACM International Symposium on
+Microarchitecture, 2003. MICRO-36. IEEE, 93–104.
+
+[57] Gokul B Kandiraju and Anand Sivasubramaniam. 2002. Going the
+distance for TLB prefetching: An application-driven study. ACM
+SIGARCH Computer Architecture News 30, 2 (2002), 195–206.
+[58] Konstantinos Kanellopoulos, Konstantinos Sgouras, F. Nisa Bostanci,
+Andreas Kosmas Kakolyris, Berkin Kerim Konar, Rahul Bera, Mohammad Sadrosadati, Rakesh Kumar, Nandita Vijaykumar, and Onur
+Mutlu. 2025. Virtuoso: Enabling Fast and Accurate Virtual Memory
+Research via an Imitation-based Operating System Simulation Methodology. Association for Computing Machinery, New York, NY, USA.
+1400–1421 pages. https://doi.org/10.1145/3676641.3716027
+[59] Shinichi Kawaguchi and Toshiaki Yachi. 2016. Adaptive Power Efficiency Control by Computer Power Consumption Prediction Using
+Performance Counters. IEEE Transactions on Industry Applications
+52, 1 (2016), 407–413. doi:10.1109/TIA.2015.2466687
+[60] David Kroft. 1998. Lockup-free instruction fetch/prefetch cache
+organization. In 25 years of the international symposia on Computer
+architecture (selected papers). 195–201.
+[61] Chang Joo Lee, Veynu Narasiman, Onur Mutlu, and Yale N Patt.
+2009. Improving memory bank-level parallelism in the presence of
+prefetching. In Proceedings of the 42nd Annual IEEE/ACM International
+Symposium on Microarchitecture. 327–336.
+[62] Kyeong-Jae Lee and Kevin Skadron. 2005. Using Performance Counters for Runtime Temperature Sensing in High-Performance Processors. In Proceedings of the 19th IEEE International Parallel and
+Distributed Processing Symposium (IPDPS’05) - Workshop 11 - Volume 12 (IPDPS ’05). IEEE Computer Society, USA, 232.1. doi:10.1109/
+IPDPS.2005.448
+[63] Nick Lindsay and Abhishek Bhattacharjee. 2024. Understanding Address Translation Scaling Behaviours Using Hardware Performance
+Counters. In 2024 IEEE International Symposium on Workload Characterization (IISWC). IEEE, 236–246.
+[64] Jason Lowe-Power. 2025.
+PIPT/VIPT caches and
+TLB lookup latency.
+Gem5 Discussion (2025),
+https://github.com/orgs/gem5/discussions/2227.
+[65] Daniel Lustig, Michael Pellauer, and Margaret Martonosi. 2014.
+PipeCheck: Specifying and verifying microarchitectural enforcement
+of memory consistency models. In 2014 47th Annual IEEE/ACM International Symposium on Microarchitecture. IEEE, 635–646.
+[66] Daniel Lustig, Michael Pellauer, and Margaret Martonosi. 2015. Pipe
+Check: Specifying and Verifying Microarchitectural Enforcement of
+Memory Consistency Models. Proceedings of the Annual International
+Symposium on Microarchitecture, MICRO 2015-Janua, January (2015),
+635–646. doi:10.1109/MICRO.2014.38
+[67] Daniel Lustig, Geet Sethi, Margaret Martonosi, and Abhishek Bhattacharjee. 2016. COATCheck: Verifying memory ordering at the
+hardware-OS interface. ACM SIGPLAN Notices 51, 4 (apr 2016), 233–
+247. doi:10.1145/2872362.2872399
+[68] Yirong Lv, Bin Sun, Qingyi Luo, Jing Wang, Zhibin Yu, and Xuehai Qian. 2018. Counterminer: Mining big performance data from
+hardware counters. Proceedings of the Annual International Symposium on Microarchitecture, MICRO 2018-Octob (2018), 613–626.
+doi:10.1109/MICRO.2018.00056
+[69] Yatin A. Manerkar, Daniel Lustig, Margaret Martonosi, and Aarti
+Gupta. 2018. PipeProof: Automated memory consistency proofs for
+microarchitectural specifications. Proceedings of the Annual International Symposium on Microarchitecture, MICRO 2018-Octob (2018),
+788–801. doi:10.1109/MICRO.2018.00069
+[70] Yatin A. Manerkar, Daniel Lustig, Michael Pellauer, and Margaret
+Martonosi. 2015. CCICheck: Using 𝜈hb graphs to verify the
+coherence-consistency interface. Proceedings of the Annual International Symposium on Microarchitecture, MICRO 05-09-Dece (2015),
+26–37. doi:10.1145/2830772.2830782
+[71] Aninda Manocha, Zi Yan, Esin Tureci, Juan Luis Aragón, David Nellans, and Margaret Martonosi. 2022. The implications of page size
+15
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+management on graph analytics. In 2022 IEEE International Symposium on Workload Characterization (IISWC). IEEE, 199–214.
+[72] Artemiy Margaritov, Dmitrii Ustiugov, Edouard Bugnion, and Boris
+Grot. 2019. Prefetched address translation. In Proceedings of the
+52nd Annual IEEE/ACM International Symposium on Microarchitecture.
+1023–1036.
+[73] Artemiy Margaritov, Dmitrii Ustiugov, Amna Shahab, and Boris Grot.
+2021. Ptemagnet: Fine-grained physical memory reservation for
+faster page walks in public clouds. In Proceedings of the 26th ACM
+International Conference on Architectural Support for Programming
+Languages and Operating Systems. 211–223.
+[74] Dirk Merkel. 2014. Docker: lightweight linux containers for consistent development and deployment. Linux journal 2014, 239 (2014),
+2.
+[75] Timothy Merrifield and H Reza Taheri. 2016. Performance implications of extended page tables on virtualized x86 processors. In
+Proceedings of the12th ACM SIGPLAN/SIGOPS International Conference on Virtual Execution Environments. 25–35.
+[76] Stuart Mitchell, Michael OSullivan, and Iain Dunning. 2011. Pulp: a
+linear programming toolkit for python. The University of Auckland,
+Auckland, New Zealand 65 (2011), 25.
+[77] Chase Norman, Adwait Godbole, and Yatin A. Manerkar. 2023.
+PipeSynth: Automated Synthesis of Microarchitectural Axioms for Memory Consistency. Vol. 3. Association for Computing Machinery. 513–
+527 pages. doi:10.1145/3582016.3582056
+[78] Nicolai Oswald, Vijay Nagarajan, and Daniel J Sorin. 2018. ProtoGen:
+Automatically generating directory cache coherence protocols from
+atomic specifications. In 2018 ACM/IEEE 45th Annual International
+Symposium on Computer Architecture (ISCA). IEEE, 247–260.
+[79] Nicolai Oswald, Vijay Nagarajan, and Daniel J Sorin. 2020. HieraGen:
+Automated generation of concurrent, hierarchical cache coherence
+protocols. In 2020 ACM/IEEE 47th Annual International Symposium
+on Computer Architecture (ISCA). IEEE, 888–899.
+[80] Nicolai Oswald, Vijay Nagarajan, Daniel J Sorin, Vasilis Gavrielatos,
+Theo Olausson, and Reece Carr. 2022. Heterogen: Automatic synthesis of heterogeneous cache coherence protocols. In 2022 IEEE
+International Symposium on High-Performance Computer Architecture
+(HPCA). IEEE, 756–771.
+[81] Yueyang Pan, Yash Lala, Musa Unal, Yujie Ren, Seung seob Lee,
+Yizhou Shan, Abhishek Bhattacharjee, Anurag Khandelwal, and
+Sanidhya Kashyap. 2024. Scalable Far Memory: Balancing Faults
+and Evictions. SOSP (2024).
+[82] The pandas development team. 2025. pandas-dev/pandas: Pandas.
+doi:10.5281/zenodo.15831829
+[83] Ashish Panwar, Reto Achermann, Arkaprava Basu, Abhishek Bhattacharjee, K Gopinath, and Jayneel Gandhi. 2021. Fast local pagetables for virtualized numa servers with vmitosis. In Proceedings of
+the 26th ACM International Conference on Architectural Support for
+Programming Languages and Operating Systems. 194–210.
+[84] Ashish Panwar, Sorav Bansal, and K Gopinath. 2019. Hawkeye:
+Efficient fine-grained os support for huge pages. In Proceedings of
+the Twenty-Fourth International Conference on Architectural Support
+for Programming Languages and Operating Systems. 347–360.
+[85] Chang Hyun Park, Taekyung Heo, and Jaehyuk Huh. 2016. Efficient
+synonym filtering and scalable delayed translation for hybrid virtual
+caching. ACM SIGARCH Computer Architecture News 44, 3 (2016),
+217–229.
+[86] Chang Hyun Park, Ilias Vougioukas, Andreas Sandberg, and David
+Black-Schaffer. 2022. Every walk’s a hit: making page walks singleaccess cache hits. (2022), 128–141. doi:10.1145/3503222.3507718
+[87] Binh Pham, Abhishek Bhattacharjee, Yasuko Eckert, and Gabriel H.
+Loh. 2014. Increasing TLB reach by exploiting clustering in
+page translations. Proceedings - International Symposium on HighPerformance Computer Architecture (2014), 558–567. doi:10.1109/
+
+HPCA.2014.6835964
+[88] Binh Pham, Viswanathan Vaidyanathan, Aamer Jaleel, and Abhishek
+Bhattacharjee. 2012. CoLT: Coalesced Large-Reach TLBs. In Proceedings of the 2012 45th Annual IEEE/ACM International Symposium
+on Microarchitecture (Vancouver, B.C., CANADA) (MICRO-45). IEEE
+Computer Society, USA, 258–269. doi:10.1109/MICRO.2012.32
+[89] Binh Pham, Ján Veselỳ, Gabriel H Loh, and Abhishek Bhattacharjee.
+2015. Large pages and lightweight memory management in virtualized environments: Can you have it both ways?. In Proceedings of the
+48th International Symposium on Microarchitecture. 1–12.
+[90] Fong Pong and Michel Dubois. 1993. The verification of cache coherence protocols. In Proceedings of the fifth annual ACM symposium on
+Parallel Algorithms and Architectures. 11–20.
+[91] Fong Pong and Michel Dubois. 1995. A new approach for the verification of cache coherence protocols. IEEE Transactions on Parallel
+and Distributed Systems 6, 8 (1995), 773–787.
+[92] Hany Ragab, Enrico Barberis, Herbert Bos, and Cristiano Giuffrida.
+2021. Rage against the machine clear: A systematic analysis of machine clears and their implications for transient execution attacks.
+Proceedings of the 30th USENIX Security Symposium (2021), 1451–
+1468.
+[93] Benny Rubin, Saksham Agarwal, Qizhe Cai, and Rachit Agarwal.
+2024. Fast & Safe IO Memory Protection. SOSP (2024).
+[94] Jee Ho Ryoo, Nagendra Gulur, Shuang Song, and Lizy K. John. 2017.
+Rethinking TLB designs in virtualized environments: A very large
+part-of-memory TLB . In 2017 ACM/IEEE 44th Annual International
+Symposium on Computer Architecture (ISCA). IEEE Computer Society,
+Los Alamitos, CA, USA, 469–480. doi:10.1145/3079856.3080210
+[95] Daniel Sanchez and Christos Kozyrakis. 2013. ZSim: Fast and accurate microarchitectural simulation of thousand-core systems. ACM
+SIGARCH Computer architecture news 41, 3 (2013), 475–486.
+[96] Ashley Saulsbury, Fredrik Dahlgren, and Per Stenström. 2000.
+Recency-based TLB preloading. In Proceedings of the 27th annual
+international symposium on Computer architecture. 117–127.
+[97] Balvinder Pal Singh and B Thangaraju. 2020. Power, Performance
+And Thermal Management Using Hardware Performance Counters. In 2020 IEEE International Conference on Electronics, Computing and Communication Technologies (CONECCT). 1–7. doi:10.1109/
+CONECCT50063.2020.9198372
+[98] Richard L Sites. 2022. Performance Counters I’d Like to See – Part
+II. https://www.sigarch.org/performance-counters-id-like-to-seepart-ii/. [Accessed 05-01-2025].
+[99] Dimitrios Skarlatos, Apostolos Kokolis, Tianyin Xu, and Josep Torrellas. 2020. Elastic cuckoo page tables: Rethinking virtual memory
+translation for parallelism. In Proceedings of the Twenty-Fifth International Conference on Architectural Support for Programming Languages
+and Operating Systems. 1093–1108.
+[100] Lingjia Tang, Jason Mars, Neil Vachharajani, Robert Hundt, and
+Mary Lou Soffa. 2013. The Impact of Memory Subsystem Resource
+Sharing on Datacenter Applications. ISCA (2013).
+[101] Lingjia Tang, Jason Mars, Xiao Zhang, Robert Hagmann, Robert
+Hundt, and Eric Tune. 2013. Optimizing Google’s warehouse scale
+computers: The NUMA experience. HPCA (2013).
+[102] Andrei Tatar, Daniël Trujillo, Cristiano Giuffrida, and Herbert Bos.
+2022. {TLB; DR}: Enhancing {TLB-based} attacks with {TLB}
+desynchronized reverse engineering. In 31st USENIX Security Symposium (USENIX Security 22). 989–1007.
+[103] The Linux Kernel Developers. [n. d.]. pmu-events: Performance
+Monitoring Unit (PMU) events definitions in Linux perf. https://
+github.com/torvalds/linux/tree/master/tools/perf/pmu-events.
+[104] Caroline Trippel, Daniel Lustig, and Margaret Martonosi. 2018.
+CheckMate: Automated synthesis of hardware exploits and security litmus tests. Proceedings of the Annual International Symposium on Microarchitecture, MICRO 2018-Octob (2018), 947–960.
+16
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+doi:10.1109/MICRO.2018.00081
+[105] James Tuck, Luis Ceze, and Josep Torrellas. 2006. Scalable cache miss
+handling for high memory-level parallelism. In 2006 39th Annual
+IEEE/ACM International Symposium on Microarchitecture (MICRO’06).
+IEEE, 409–422.
+[106] Pennsylvania State University. n.d.. Chapter 4. In Statistics 505.
+https://online.stat.psu.edu/stat505/book/export/html/636
+[107] Stephan van Schaik, Kaveh Razavi, Ben Gras, Herbert Bos, and Cristiano Giuffrida. 2017. Reverse engineering hardware page table
+caches using side-channel attacks on the mmu. Vrije Universiteit
+Amsterdam, Tech. Rep (2017).
+[108] Georgios Vavouliotis, Lluc Alvarez, Boris Grot, Daniel Jiménez, and
+Marc Casas. 2021. Morrigan: A composite instruction tlb prefetcher.
+In MICRO-54: 54th Annual IEEE/ACM International Symposium on
+Microarchitecture. 1138–1153.
+[109] Georgios Vavouliotis, Lluc Alvarez, Vasileios Karakostas, Konstantinos Nikas, Nectarios Koziris, Daniel A Jiménez, and Marc Casas.
+2021. Exploiting page table locality for agile TLB prefetching. In
+2021 ACM/IEEE 48th Annual International Symposium on Computer
+Architecture (ISCA). IEEE, 85–98.
+[110] Alan Wang, Boru Chen, Yingchen Wang, Christopher Fletcher, Daniel
+Genkin, David Kohlbrenner, and Riccardo Paccagnella. 2024. Peeka-Walk: Leaking Secrets via Page Walk Side Channels. In 2025
+IEEE Symposium on Security and Privacy (S&P). IEEE.[Online]. Available: https://www. computer. org/csdl/proceedings-article/sp/2025/22360
+0a023/21B7QepK7Fm.
+[111] Xueyang Wang and Ramesh Karri. 2013. Numchecker: Detecting
+kernel control-flow modifying rootkits by using hardware performance counters. In Proceedings of the 50th annual design automation
+conference. 1–7.
+[112] Henry Wong. 2015. TLB and Pagewalk Coherence in x86 Processors.
+http://blog.stuffedcow.net/2015/08/pagewalk-coherence/
+[113] Yu Xia, Vishnu Ramadas, Matthew Poremba, and Matthew D. Sinclair. 2025. Narrowing the GAP: Enhancing gem5’s GPU Memory
+Bandwidth Accuracy. Gem5 Workshop (2025).
+[114] Zi Yan, Ján Veselỳ, Guilherme Cox, and Abhishek Bhattacharjee.
+2017. Hardware translation coherence for virtualized systems. In
+Proceedings of the 44th Annual International Symposium on Computer
+Architecture. 430–443.
+[115] Xi Yang, Stephen Blackburn, and Kathryn McKinley. 2015. Computer
+Performance Microscopy with SHIM. ISCA (2015).
+[116] Yihao Yang, Pengfei Qiu, Chunlu Wang, Yu Jin, Qiang Gao, Xiaoyong Li, DongSheng Wang, and Gang Qu. 2023. Exploration
+and Exploitation of Hidden PMU Events. In 2023 IEEE/ACM International Conference on Computer Aided Design (ICCAD). 1–9.
+doi:10.1109/ICCAD57390.2023.10323695
+[117] Ahmad Yasin. 2014. A Top-Down method for performance analysis
+and counters architecture. ISPASS 2014 - IEEE International Symposium on Performance Analysis of Systems and Software (2014), 35–44.
+doi:10.1109/ISPASS.2014.6844459
+[118] Reza Zamani and Ahmad Afsahi. 2012. A study of hardware performance monitoring counter selection in power modeling of computing
+systems. In 2012 International Green Computing Conference (IGCC).
+IEEE, 1–10.
+[119] Xiao Zhang, Sandhya Dwarkadas, Girts Folkmanis, and Kai Shen.
+2007. Processor hardware counter statistics as a first-class system
+resource.. In HotOS.
+[120] Zirui Neil Zhao, Adam Morrison, Christopher W. Fletcher, and Josep
+Torrellas. 2022. Binoculars: Contention-Based Side-Channel Attacks
+Exploiting the Page Walker. Proceedings of the 31st USENIX Security
+Symposium, Security 2022 (2022), 699–716.
+
+17
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+A
+
+Table 2. Hardware event counters used in paper. Grp is
+our event group classification, This Paper is the HEC name
+used in this paper, and Full Event Name Suffix is the suffix of the full event named described in the Linux perf
+event database [103]. All events other than Refs are parameterized by access type T ∈ {load, store}. All Walk
+and STLB group events have full event names prefixed by
+stlb_T_misses. All Refs events have a full event name prefixed by page_walker_loads. All Ret events have a full
+event name prefixed by mem_uops_retired.
+
+Linear Program Formulation
+
+We construct and solve the following linear program to determine the feasibility of microarchitectural observations
+against a 𝜇DD model:
+𝑣® ∈ R+𝑁 (Counter variables)
+
+
+
+∀𝑝 ∈ P (𝐷) . 𝑓 (𝑝) ∈ R (Flow variables)
+
++
+
+
+∑︁
+
+
+𝑣® =
+®
+𝑆 (𝑝) · 𝑓 (𝑝) (Counter flow equation) 
+
+ (LP)
+
+𝑝 ∈ P (𝐷 )
+
+
+√︃
+
+
+
+∀𝑖 ∈ 𝑛 . |®
+2
+𝑒𝑖 · (®
+𝑣 − 𝑌¯ )| ≤ 𝜆𝑖 𝜒𝑑,1−𝛼
+
+
+
+
+
+ (Counter confidence region encoding)
+
+
+Each path through the 𝜇DD is enumerated by breadth-first
+search. Variables are instantiated for the the true counter values 𝑣® and the flow 𝑓 (𝑝) down each 𝜇path. The variables are
+constrained to be non-negative. Counter and flow variables
+are related by the Counter Flow Equation, which implicitly
+describes the model cone.
+The confidence ellipsoid cannot be directly encoded in
+the linear program as it is a quadratic form. Instead, the
+bounding box is constructed - aligning edges to the principle
+axes of the ellipsoid (Figure 5c). The directions of the principle axes of the confidence ellipsoid are determined by the
+normalized eigenvectors 𝑒®1, ..., 𝑒®𝑛 of the covariance
+matrix.
+√︃
+
+Grp
+
+Walk
+(12)
+
+.
+Refs
+(4)
+Ret
+(4)
+STLB
+(6)
+
+The half-length of the 𝑖th axis is given by 𝜆𝑖 𝜒 𝑁2 ,1−𝛼 , where
+𝜆𝑖 is the 𝑖th eigenvalue. Figure 5c graphically depicts the
+construction for systems with two counters.
+
+This Paper
+T.causes_walk
+T.walk_done_4k
+T.walk_done_2m
+T.walk_done_1g
+T.walk_done
+T.pde$_miss
+walk_ref.l1
+walk_ref.l2
+walk_ref.l3
+walk_ref.mem
+T.ret_stlb_miss
+T.ret
+T.stlb_hit_4k
+T.stlb_hit_2m
+T.stlb_hit
+subset of
+
+B
+
+m4?
+
+Hardware Performance Counter Events
+
+Full Event Name Suffix
+miss_causes_a_walk
+walk_completed_4k
+walk_completed_2m_4m
+walk_completed_1g
+walk_completed
+pde_cache_miss
+dtlb_l1
+dtlb_l2
+dtlb_l3
+memory
+stlb_miss_Ts
+all_Ts
+stlb_hit_4k
+stlb_hit_2m
+stlb_hit
+m8
+
+P
+
+P
+
+subset of
+P
+
+P
+
+m9
+
+C
+
+CR
+
+P
+
+P
+
+P
+P subset of
+
+Table 2 lists the hardware event counters and their group
+classification used within this paper.
+
+Case Study: Full Search Procedure
+
+m5
+
+m3
+
+subset of
+
+CounterPoint is an automated approach and tool for refuting and refining 𝜇DDs given a set of programs. The set of
+candidate 𝜇DDs depends on the aspects of the microarchitecture the user wishes to capture, and the set of feasible
+𝜇DDs depends on the programs being recorded. Suites of
+programs that exhibit diverse microarchitectural behaviors
+enable models of greater fidelity. In exploring address translation on Intel Haswell, we created and tested dozens of 𝜇DDs,
+and we continue to refine our models.
+
+m6
+
+CR
+
+subset of
+
+m2
+
+subset of
+
+subset of
+
+m7
+
+m11
+
+subset of
+
+CR
+
+Key
+
+m1
+name
+Model
+subset of
+
+m10
+
+CR
+Constraint
+Relaxation
+
+CR
+
+P
+Pruning
+
+Refinement
+is subset of
+
+m0
+
+Feasible
+
+Infeasible
+
+Subset Relationship
+
+Cone
+
+C.1
+
+Initial model search
+Figure 10. Models and model cones obtained by our initial
+search procedure. Even exploring a small number of models
+and features yields elaborate relationships among model
+cones.
+
+We identified many microarchitectural features in the initial
+phase of our search. We describe our initial model assumptions, corresponding to model m0 in Table 3, in Section 7.
+Note that we assume there are two fundamental micro-op
+types (load and store), and that only micro-ops that obtain a
+valid translation are allowed to retire.
+We explore a wide range of models (Table 3) using the
+search procedure outlined in Section 5. Figure 10 shows the
+18
+
+CounterPoint: Using Hardware Event Counters to Refute and Refine Microarchitectural Assumptions
+
+Table 3. 𝜇DDs explored in the initial search. Models are identified by their name (left column), features (middle columns),
+and number of infeasible observations (right column).
+
+m0
+m1
+m2
+m3
+⋆ m4
+m5
+m6
+m7
+m8
+m9
+m10
+m11
+
+Tlb
+Pf*
+✗
+✓
+✓
+✓
+✓
+✗
+✓
+✓
+✓
+✗
+✓
+✓
+
+Early
+Psc
+✗
+✗
+✓
+✓
+✓
+✓
+✗
+✓
+✓
+✓
+✗
+✓
+
+Merging
+✗
+✗
+✓
+✓
+✓
+✓
+✓
+✗
+✓
+✓
+✓
+✗
+
+Pml4e Walk
+Cache Bypass
+✗
+✗
+✗
+✗
+✗
+✗
+✓
+✗
+✓
+✓
+✓
+✓
+✓
+✓
+✓
+✓
+✗
+✓
+✗
+✓
+✗
+✓
+✗
+✓
+
+Table 5. 𝜇DDs explored in TLB prefetching analysis. All
+𝜇DDs are derivatives of m4.
+
+#
+Inf.
+209
+204
+91
+56
+0
+5
+142
+143
+0
+5
+142
+143
+
+⋆ t0
+t1
+t2
+t3
+t4
+t5
+t6
+t7
+t8
+t9
+t10
+t11
+t12
+t13
+t14
+t15
+t16
+t17
+
+*TLB Prefetching.
+
+Table 4. Microarchitecture features (initial model search).
+Feature
+TLB
+Prefetching
+Early PSC
+Merging
+PML4E
+Cache
+Walk
+Bypass
+
+Description
+Prefetches form an additional kind of
+translation requests
+Paging structure caches are looked up
+before starting a walk
+Page table walks can be merged by an
+L2TLB MSHR
+There exists paging structure cache for
+root (PML4E) level of page table
+Walks can complete without making
+visible memory access
+
+TLB Prefetch Trigger Conditions
+Dtlb Stlb
+Spec. Load Store
+Miss Miss
+✓
+✓
+✗
+✗
+✗
+✓
+✓
+✗
+✓
+✗
+✓
+✓
+✗
+✗
+✓
+✓
+✗
+✓
+✗
+✗
+✓
+✗
+✓
+✓
+✗
+✓
+✗
+✓
+✗
+✓
+✓
+✓
+✓
+✗
+✗
+✓
+✓
+✓
+✓
+✗
+✓
+✓
+✓
+✗
+✓
+✗
+✓
+✗
+✗
+✗
+✗
+✓
+✗
+✓
+✗
+✗
+✓
+✗
+✗
+✓
+✗
+✗
+✓
+✗
+✗
+✗
+✗
+✓
+✓
+✗
+✗
+✗
+✓
+✗
+✓
+✗
+✓
+✓
+✗
+✗
+✗
+✓
+✓
+✓
+✗
+✗
+✓
+✓
+✗
+✓
+
+#
+Inf.
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+4
+4
+0
+4
+4
+0
+3
+4
+
+Table 6. Candidate TLB prefetcher trigger conditions.
+Condition
+Spec
+Load
+Store
+L1TLB
+Miss
+L2TLB
+Miss
+
+C.2
+
+explored search space. Each white box indicates a particular
+𝜇DD. Edges connect models depending on whether they
+were derived through constraint relaxation (blue edges) or by
+feature pruning (yellow edges). Each 𝜇DD is associated with
+a model cone, which is either feasible (green) or infeasible
+(red). Multiple 𝜇DDs might produce the same model cone,
+as illustrated by a model cone box containing more than one
+model.
+Tables 3, 4 list the features associated with each model
+that we explore. Models m4 and m8 are identified as feasible.
+For the purposes of this search methodology, we consider
+m4 as our model because experts assume its presence in typical address translation research studies. A separate search
+trajectory could be invoked using m8 as the starting point
+for the continued trajectory.
+
+Description
+Can be triggered by purely speculative
+micro-ops (versus only retiring).
+Can be triggered by load micro-ops
+Can be triggered by store micro-ops
+Demand L1TLB misses can cause
+prefetcher to inject page table walk.
+Demand L2TLB misses can cause
+prefetcher to inject page table walk.
+
+TLB prefetch trigger conditions
+
+We further refine the TLB trigger conditions by removing
+the abstract prefetch translation request type and instead
+associate TLB prefetches directly with their triggering 𝜇op.
+We generate 18 separate models (Table 5), each a variant of the m4 model but with different TLB prefetch trigger
+conditions. Tables 5, 6 list the models and trigger conditions.
+Feasibility analysis (Table 5) reveals that all 𝜇DDs that
+allow TLB prefetches to be triggered by speculative microops are feasible. If prefetching is restricted to only nonspeculative micro-ops, then the TLB prefetcher can only
+be triggered before DTLB lookup (prefetches cannot be triggered by the DTLB or STLB miss stream).
+We make further insights based on the following heuristic. All workloads that require TLB prefetching are specific
+19
+
+Nick Lindsay, Caroline Trippel, Anurag Khandelwal, and Abhishek Bhattacharjee
+
+Table 7. Models with different abort points.
+
+a0
+a1
+a2
+a3
+
+Translation Request Abort Point
+During After After
+After
+Walk
+PSC L2TLB L1TLB
+✓
+✗
+✗
+✗
+✓
+✓
+✗
+✗
+✓
+✓
+✓
+✗
+✓
+✓
+✓
+✓
+
+C.4
+
+We consider page table walk replays as an alternative to walk
+bypassing. An Intel patent [46] describes a mechanism to
+implement page table walks on an out-of-order processor
+with speculative execution: walks can be performed for speculative instructions, however, under certain conditions (e.g.,
+invalid PTEs [32], unset Accessed/Dirty bits [46], and memory ordering conflicts [112]), the page table walk must be
+replayed should the 𝜇op reach the head of the ROB (e.g., the
+𝜇op is not squashed).
+Choosing t0 as an example starting point, we replaced
+the walk-bypassing feature with the walk-replay feature described above. The resulting model was found to be feasible.
+The model relies on an assumption that memory references
+made by a replayed walk are not recorded by any of the
+walk_ref counters. We justify this assumption because, unlike regular page walker accesses, replay accesses have special attributes, and accesses with such attributes may not be
+captured by walk_ref. In particular, replay walk accesses are
+non-speculative, which enables them to access uncacheable
+memory locations that regular speculative walks cannot access [54].
+The walk replay mechanism requires that speculative
+walks can be aborted, so we include a walk abort feature.
+We find that removing other features identified in this work
+(such as miss-merging) makes the resulting model infeasible.
+This highlights that CounterPoint’s holistic modeling strategy can discover rich microarchitectural interactions that
+prior work, which considers features in isolation, does not.
+
+#
+Inf.
+37
+37
+37
+37
+
+instances of the linear access microbenchmark. This microbenchmark consists of an infinite while loop of memory accesses that is terminated after 10 minutes. This is an
+extremely simple control flow pattern that the branch predictor should be able to learn perfectly. For this reason, we
+assume that all micro-ops in the workload eventually retire
+(i.e., that HEC increments for micro-ops that do not retire
+are absorbed by the confidence region). Therefore, we can
+assume that our microbenchmark consists solely of retiring
+micro-ops, and we can use the feasibility results for models
+with non-speculative TLB prefetching triggers to determine
+the overall feature set, provided we restrict our analysis to
+the linear-access microbenchmark. Analysis of these models
+with this microbenchmark reveals that TLB prefetching must
+be triggered prior to DTLB lookups (e.g., in the load-store
+queue).
+Furthermore, no instances of our microbenchmark with a
+store-only access pattern trigger TLB prefetching (i.e., the
+sequential access microbenchmark with stores does not violate any constraint that is relaxed by TLB prefetching). This
+leads us to believe that only load micro-ops can trigger TLB
+prefetches.
+For these reasons, and for the purpose of demonstration,
+we believe 𝜇DD t0 to be a representative model. We were unable to determine whether speculative non-retired micro-ops
+can trigger the TLB prefetcher; therefore, we conservatively
+assume that all load micro-ops (including purely speculative
+load micro-ops) can trigger TLB prefetching. We leave determining if wrong-path speculative load micro-ops can trigger
+the TLB prefetcher for future work.
+C.3
+
+Page table walk replays
+
+Aborts as alternative to walk bypassing
+
+We were interested in further exploring mechanisms for walk
+bypassing. We consider page table walk aborts, as described
+by Zhao et al. [120], as an alternative to our proposed walkbypassing feature. Using t0 as an example starting point,
+we replaced walk bypassing with translation request aborts
+at four locations within the MMU pipeline (Table 7). None
+of the resulting models were feasible - not even the most
+aggressive, which allows aborts at all pipeline stages. This indicates that, if model t0 is accurate, translation aborts alone
+are insufficient to explain the "missing" memory accesses
+accounted for by walk bypassing.
+20
+
+

@@ -1,0 +1,4241 @@
+{
+ "table": "cfg/STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc",
+ "builds": {
+  "stt-master": [
+   "/work/stt-master/build/X86/gem5.opt",
+   "--outdir=<out>",
+   "/work/stt-master/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=DerivO3CPU",
+   "--caches",
+   "--scheme=2",
+   "--output=<file>"
+  ],
+  "gem5-recon-modded": [
+   "/work/gem5-recon-modded/build/X86/gem5.opt",
+   "--outdir=<out>",
+   "/work/gem5-recon-modded/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=X86O3CPU",
+   "--caches",
+   "--scheme=2",
+   "--output=<file>"
+  ],
+  "stt-legacy": [
+   "/work/stt/build/X86/gem5.opt",
+   "--outdir=<out>",
+   "/work/stt/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=DerivO3CPU",
+   "--caches",
+   "--scheme=2",
+   "--output=<file>"
+  ],
+  "amulet-STT": [
+   "/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt",
+   "--outdir=<out>",
+   "/work/amulet/amulet-gem5-STT_AE-v1.1/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=DerivO3CPU",
+   "--caches",
+   "--scheme=2",
+   "--num-cpu=1",
+   "--cpu-clock=2GHz",
+   "--sys-clock=2GHz",
+   "--ruby",
+   "--L1_TBEs=256",
+   "--L2_TBEs=256",
+   "--DC_TBEs=256",
+   "--l1d_size=32kB",
+   "--l1d_assoc=8",
+   "--l1i_size=32kB",
+   "--cacheline_size=64",
+   "--l2_size=2MB",
+   "--l2_assoc=8",
+   "--DTB_entries=64",
+   "--needsTSO=1",
+   "--STT=1",
+   "--implicit_channel=1",
+   "--threat_model=Futuristic",
+   "--access-backing-store",
+   "--output=<file>"
+  ],
+  "amulet-InvisiSpec": [
+   "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt",
+   "--outdir=<out>",
+   "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=DerivO3CPU",
+   "--caches",
+   "--scheme=2",
+   "--num-cpu=1",
+   "--cpu-clock=2GHz",
+   "--sys-clock=2GHz",
+   "--ruby",
+   "--L1_TBEs=256",
+   "--L2_TBEs=256",
+   "--DC_TBEs=256",
+   "--l1d_size=32kB",
+   "--l1d_assoc=8",
+   "--l1i_size=32kB",
+   "--l1i_assoc=8",
+   "--cacheline_size=64",
+   "--l2_size=2MB",
+   "--l2_assoc=8",
+   "--DTB_entries=64",
+   "--needsTSO=0",
+   "--scheme=FuturisticSafeInvisibleSpec",
+   "--access-backing-store",
+   "--output=<file>"
+  ],
+  "amulet-CleanupSpec": [
+   "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt",
+   "--outdir=<out>",
+   "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=DerivO3CPU",
+   "--caches",
+   "--scheme=2",
+   "--num-cpu=1",
+   "--cpu-clock=2GHz",
+   "--sys-clock=2GHz",
+   "--ruby",
+   "--L1_TBEs=256",
+   "--L2_TBEs=256",
+   "--DC_TBEs=256",
+   "--l1d_size=32kB",
+   "--l1d_assoc=8",
+   "--l1i_size=32kB",
+   "--l1i_assoc=2",
+   "--cacheline_size=64",
+   "--l2_size=2MB",
+   "--l2_assoc=8",
+   "--DTB_entries=64",
+   "--needsTSO=0",
+   "--scheme_invisispec=UnsafeBaseline",
+   "--scheme_cleanupcache=Cleanup_FOR_L1L2",
+   "--access-backing-store",
+   "--output=<file>"
+  ],
+  "amulet-SpecLFB": [
+   "/work/amulet/amulet-gem5-SpecLFB_AE-v1.1/build/X86/gem5.opt",
+   "--outdir=<out>",
+   "/work/amulet/amulet-gem5-SpecLFB_AE-v1.1/configs/example/se.py",
+   "--cmd=<bin>",
+   "--cpu-type=DerivO3CPU",
+   "--caches",
+   "--scheme=2",
+   "--num-cpu=1",
+   "--cpu-clock=2GHz",
+   "--sys-clock=2GHz",
+   "--l2cache",
+   "--l1d_size=32kB",
+   "--l1d_assoc=8",
+   "--l1i_size=32kB",
+   "--l1i_assoc=2",
+   "--cacheline_size=64",
+   "--l2_size=2MB",
+   "--l2_assoc=8",
+   "--DTB_entries=64",
+   "--bp-type=BiModeBP",
+   "--scheme=Speclfb",
+   "--output=<file>"
+  ]
+ },
+ "scenarios": [
+  [
+   "r12",
+   "rsi",
+   "rdi"
+  ],
+  [
+   "r13",
+   "rax",
+   "rax"
+  ],
+  [
+   "r9",
+   "rcx",
+   "rdx"
+  ],
+  [
+   "r15",
+   "r8",
+   "rbx"
+  ]
+ ],
+ "vectors": [
+  [
+   "0x123456789abcdef",
+   "0xfedcba9876543210"
+  ],
+  [
+   "0x5",
+   "0x0"
+  ],
+  [
+   "0x0",
+   "0x8000000000000000"
+  ],
+  [
+   "0xffffffffffffffff",
+   "0x3"
+  ]
+ ],
+ "baseline_warn": {
+  "stt-master": [
+   "warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: Sockets disabled, not accepting gdb connections",
+   "warn: Unknown operating system; assuming Linux."
+  ],
+  "gem5-recon-modded": [
+   "build/X86/arch/x86/linux/se_workload.cc:N: warn: Unknown operating system; assuming Linux.",
+   "build/X86/base/remote_gdb.cc:N: warn: Sockets disabled, not accepting gdb connections",
+   "build/X86/mem/dram_interface.cc:N: warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: No dot file generated. Please install pydot to generate the dot file and pdf."
+  ],
+  "stt-legacy": [
+   "warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: Sockets disabled, not accepting gdb connections",
+   "warn: Unknown operating system; assuming Linux."
+  ],
+  "amulet-STT": [
+   "warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: Replacement policy updates recently became the responsibility of SLICC state machines. Make sure to setMRU() near callbacks in .sm files!",
+   "warn: Sockets disabled, not accepting gdb connections",
+   "warn: Unknown operating system; assuming Linux."
+  ],
+  "amulet-InvisiSpec": [
+   "warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: Failed to import pydot",
+   "warn: Replacement policy updates recently became the responsibility of SLICC state machines. Make sure to setMRU() near callbacks in .sm files!",
+   "warn: Sockets disabled, not accepting gdb connections",
+   "warn: Unknown operating system; assuming Linux."
+  ],
+  "amulet-CleanupSpec": [
+   "warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: Replacement policy updates recently became the responsibility of SLICC state machines. Make sure to setMRU() near callbacks in .sm files!",
+   "warn: Sockets disabled, not accepting gdb connections",
+   "warn: Unknown operating system; assuming Linux."
+  ],
+  "amulet-SpecLFB": [
+   "build/X86/arch/x86/linux/se_workload.cc:N: warn: Unknown operating system; assuming Linux.",
+   "build/X86/base/remote_gdb.cc:N: warn: Sockets disabled, not accepting gdb connections",
+   "build/X86/mem/dram_interface.cc:N: warn: DRAM device capacity (N Mbytes) does not match the address range assigned (N Mbytes)",
+   "warn: No dot file generated. Please install pydot to generate the dot file and pdf.",
+   "warn: The `get_runtime_isa` function is deprecated. Please migrate away from using this function."
+  ]
+ },
+ "summary": {
+  "add": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffff",
+    "0x5",
+    "0x8000000000000000",
+    "0x2"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "ADD_R_R",
+      "add",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "ADD_R_R:add"
+    ]
+   }
+  },
+  "xor": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffff",
+    "0x5",
+    "0x8000000000000000",
+    "0xfffffffffffffffc"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "XOR_R_R",
+      "xor",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "and": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x3"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "AND_R_R",
+      "and",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "imul": {
+   "probe": false,
+   "class": "mul",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x2236d88fe5618cf0",
+    "0x0",
+    "0x0",
+    "0xfffffffffffffffd"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "IMUL_R_R",
+      "mul1s",
+      "t16, r12, rdi",
+      "IntMult"
+     ],
+     [
+      "IMUL_R_R",
+      "mulel",
+      "r12, t16,",
+      "IntAlu"
+     ],
+     [
+      "IMUL_R_R",
+      "muleh",
+      "t0, t17,",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "lea": {
+   "probe": false,
+   "class": "lea",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffff",
+    "0x5",
+    "0x8000000000000000",
+    "0x2"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "LEA_R_M",
+      "lea",
+      "r12, DS:[rdi + rsi]",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "shl": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x91a2b3c4d5e6f78",
+    "0x28",
+    "0x0",
+    "0xfffffffffffffff8"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SAL_R_I",
+      "slli",
+      "r12, r12, 0x3",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "jmp": {
+   "probe": false,
+   "class": "control_direct",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "JMP_I",
+      "rdip",
+      "t1, %ctrl153,",
+      "IntAlu"
+     ],
+     [
+      "JMP_I",
+      "limm",
+      "t2, 0",
+      "IntAlu"
+     ],
+     [
+      "JMP_I",
+      "wrip",
+      ", t1, t2",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sub": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x2468acf13579bdf",
+    "0x5",
+    "0x8000000000000000",
+    "0xfffffffffffffffc"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SUB_R_R",
+      "sub",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "SUB_R_R:sub"
+    ]
+   }
+  },
+  "or": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffff",
+    "0x5",
+    "0x8000000000000000",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "OR_R_R",
+      "or",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "adc": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdee",
+    "0xa",
+    "0x8000000000000000",
+    "0x2"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "ADD_R_R",
+      "add",
+      "r12, r12, rdi",
+      "IntAlu"
+     ],
+     [
+      "ADC_R_R",
+      "adc",
+      "r12, r12, rsi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "ADD_R_R:add",
+     "ADC_R_R:adc"
+    ]
+   }
+  },
+  "sbb": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x0",
+    "0x7fffffffffffffff",
+    "0xfffffffffffffffd"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SUB_R_R",
+      "sub",
+      "r12, r12, rdi",
+      "IntAlu"
+     ],
+     [
+      "SBB_R_R",
+      "sbb",
+      "r12, r12, rsi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "SUB_R_R:sub",
+     "SBB_R_R:sbb"
+    ]
+   }
+  },
+  "neg": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xfedcba9876543211",
+    "0xfffffffffffffffb",
+    "0x0",
+    "0x1"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "NEG_R",
+      "sub",
+      "r12, t0, r12",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "NEG_R:sub"
+    ]
+   }
+  },
+  "not": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xfedcba9876543210",
+    "0xfffffffffffffffa",
+    "0xffffffffffffffff",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "NOT_R",
+      "limm",
+      "t1, 0xffffffffffffffff",
+      "IntAlu"
+     ],
+     [
+      "NOT_R",
+      "xor",
+      "r12, r12, t1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "inc": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdf0",
+    "0x6",
+    "0x1",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "INC_R",
+      "addi",
+      "r12, r12, 0x1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "INC_R:addi"
+    ]
+   }
+  },
+  "dec": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdee",
+    "0x4",
+    "0xffffffffffffffff",
+    "0xfffffffffffffffe"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "DEC_R",
+      "subi",
+      "r12, r12, 0x1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "DEC_R:subi"
+    ]
+   }
+  },
+  "add_imm": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abddf0",
+    "0x1006",
+    "0x1001",
+    "0x1000"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "ADD_R_I",
+      "limm",
+      "t1, 0x1001",
+      "IntAlu"
+     ],
+     [
+      "ADD_R_I",
+      "add",
+      "r12, r12, t1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "ADD_R_I:add"
+    ]
+   }
+  },
+  "add32": {
+   "probe": false,
+   "class": "int_alu",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffff",
+    "0x5",
+    "0x0",
+    "0x2"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12d, r12d, esi",
+      "IntAlu"
+     ],
+     [
+      "ADD_R_R",
+      "add",
+      "r12d, r12d, edi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "ADD_R_R:add"
+    ]
+   }
+  },
+  "add8_merge": {
+   "probe": false,
+   "class": "partial_width",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdff",
+    "0x5",
+    "0x0",
+    "0xffffffffffffff02"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "ADD_R_R",
+      "add",
+      "r12b, r12b, dil",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "ADD_R_R:add"
+    ]
+   }
+  },
+  "mov16_merge": {
+   "probe": false,
+   "class": "partial_width",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789ab3210",
+    "0x0",
+    "0x0",
+    "0xffffffffffff0003"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "MOV_R_R",
+      "mov",
+      "r12w, r12w, di",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "cmp_setz": {
+   "probe": false,
+   "class": "cmp_setcc",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ],
+     [
+      "CMP_R_R",
+      "sub",
+      "t0, rsi, rdi",
+      "IntAlu"
+     ],
+     [
+      "SETZ_R",
+      "movi",
+      "r12b, r12b, 0x1",
+      "IntAlu"
+     ],
+     [
+      "SETZ_R",
+      "movi",
+      "r12b, r12b, 0",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "cmp_setb": {
+   "probe": false,
+   "class": "cmp_setcc",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x1",
+    "0x0",
+    "0x1",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ],
+     [
+      "CMP_R_R",
+      "sub",
+      "t0, rsi, rdi",
+      "IntAlu"
+     ],
+     [
+      "SETB_R",
+      "movi",
+      "r12b, r12b, 0x1",
+      "IntAlu"
+     ],
+     [
+      "SETB_R",
+      "movi",
+      "r12b, r12b, 0",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "cmp_setl": {
+   "probe": false,
+   "class": "cmp_setcc",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x1"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ],
+     [
+      "CMP_R_R",
+      "sub",
+      "t0, rsi, rdi",
+      "IntAlu"
+     ],
+     [
+      "SETL_R",
+      "movi",
+      "r12b, r12b, 0x1",
+      "IntAlu"
+     ],
+     [
+      "SETL_R",
+      "movi",
+      "r12b, r12b, 0",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "test_setnz": {
+   "probe": false,
+   "class": "cmp_setcc",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x1"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ],
+     [
+      "TEST_R_R",
+      "and",
+      "t0, rsi, rdi",
+      "IntAlu"
+     ],
+     [
+      "SETNZ_R",
+      "movi",
+      "r12b, r12b, 0x1",
+      "IntAlu"
+     ],
+     [
+      "SETNZ_R",
+      "movi",
+      "r12b, r12b, 0",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "cmovb_min": {
+   "probe": false,
+   "class": "cmov",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x0",
+    "0x0",
+    "0x3"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "CMP_R_R",
+      "sub",
+      "t0, rdi, rsi",
+      "IntAlu"
+     ],
+     [
+      "CMOVB_R_R",
+      "mov",
+      "r12, r12, r12",
+      "IntAlu"
+     ],
+     [
+      "CMOVB_R_R",
+      "mov",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "CMOVB_R_R:mov",
+     "CMOVB_R_R:mov"
+    ]
+   }
+  },
+  "cmovl_min": {
+   "probe": false,
+   "class": "cmov",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xfedcba9876543210",
+    "0x0",
+    "0x8000000000000000",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "CMP_R_R",
+      "sub",
+      "t0, rdi, rsi",
+      "IntAlu"
+     ],
+     [
+      "CMOVL_R_R",
+      "mov",
+      "r12, r12, r12",
+      "IntAlu"
+     ],
+     [
+      "CMOVL_R_R",
+      "mov",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "CMOVL_R_R:mov",
+     "CMOVL_R_R:mov"
+    ]
+   }
+  },
+  "cmovz_test": {
+   "probe": false,
+   "class": "cmov",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x0",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "TEST_R_R",
+      "and",
+      "t0, rdi, rdi",
+      "IntAlu"
+     ],
+     [
+      "CMOVZ_R_R",
+      "mov",
+      "r12, r12, r12",
+      "IntAlu"
+     ],
+     [
+      "CMOVZ_R_R",
+      "mov",
+      "r12, r12, rdi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "CMOVZ_R_R:mov",
+     "CMOVZ_R_R:mov"
+    ]
+   }
+  },
+  "shr": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x2468acf13579b",
+    "0x0",
+    "0x0",
+    "0x1ffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SHR_R_I",
+      "srli",
+      "r12, r12, 0x7",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "sar": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x2468acf13579",
+    "0x0",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SAR_R_I",
+      "srai",
+      "r12, r12, 0xb",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "rol": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x68acf13579bde024",
+    "0xa000",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "ROL_R_I",
+      "roli",
+      "r12, r12, 0xd",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "ror": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x4d5e6f78091a2b3c",
+    "0x2800000000",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "ROR_R_I",
+      "rori",
+      "r12, r12, 0x1d",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "shld": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x2468acf13579bdff",
+    "0xa0",
+    "0x10",
+    "0xffffffffffffffe0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SHLD_R_R_I",
+      "mdbi",
+      "t21, rdi, 0",
+      "IntAlu"
+     ],
+     [
+      "SHLD_R_R_I",
+      "sldi",
+      "r12, r12, 0x5",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "shrd": {
+   "probe": false,
+   "class": "shift",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x80091a2b3c4d5e6",
+    "0x0",
+    "0x0",
+    "0x1ffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "SHRD_R_R_I",
+      "mdbi",
+      "t21, rdi, 0",
+      "IntAlu"
+     ],
+     [
+      "SHRD_R_R_I",
+      "srdi",
+      "r12, r12, 0x9",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "bt_setc": {
+   "probe": false,
+   "class": "bit",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x1",
+    "0x1",
+    "0x0",
+    "0x1"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ],
+     [
+      "BT_R_R",
+      "sext",
+      "t0, rsi, rdi",
+      "IntAlu"
+     ],
+     [
+      "SETB_R",
+      "movi",
+      "r12b, r12b, 0x1",
+      "IntAlu"
+     ],
+     [
+      "SETB_R",
+      "movi",
+      "r12b, r12b, 0",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "bts": {
+   "probe": false,
+   "class": "bit",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x5",
+    "0x1",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_R",
+      "sext",
+      "t0, r12, rdi",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_R",
+      "limm",
+      "t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_R",
+      "rol",
+      "t1, t1, rdi",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_R",
+      "or",
+      "r12, r12, t1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "btr": {
+   "probe": false,
+   "class": "bit",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789aacdef",
+    "0x4",
+    "0x0",
+    "0xfffffffffffffff7"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "BTR_R_R",
+      "sext",
+      "t0, r12, rdi",
+      "IntAlu"
+     ],
+     [
+      "BTR_R_R",
+      "limm",
+      "t1, 0xfffffffffffffffe",
+      "IntAlu"
+     ],
+     [
+      "BTR_R_R",
+      "rol",
+      "t1, t1, rdi",
+      "IntAlu"
+     ],
+     [
+      "BTR_R_R",
+      "and",
+      "r12, r12, t1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "btc_imm": {
+   "probe": false,
+   "class": "bit",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123454789abcdef",
+    "0x2000000005",
+    "0x2000000000",
+    "0xffffffdfffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "BTC_R_I",
+      "sexti",
+      "t0, r12, 0x25",
+      "IntAlu"
+     ],
+     [
+      "BTC_R_I",
+      "limm",
+      "t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BTC_R_I",
+      "roli",
+      "t1, t1, 0x25",
+      "IntAlu"
+     ],
+     [
+      "BTC_R_I",
+      "xor",
+      "r12, r12, t1",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "bsf": {
+   "probe": false,
+   "class": "bit",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x3f",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_I",
+      "sexti",
+      "t0, r12, 0x3f",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_I",
+      "limm",
+      "t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_I",
+      "roli",
+      "t1, t1, 0x3f",
+      "IntAlu"
+     ],
+     [
+      "BTS_R_I",
+      "or",
+      "r12, r12, t1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t0",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "and",
+      "t1, r12, r12",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "br",
+      "0x1d",
+      "No_OpClass"
+     ],
+     [
+      "BSF_R_R",
+      "movi",
+      "r12, r12, 0",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "subi",
+      "t2, t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "xor",
+      "t1, t2, t1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "fault",
+      "No Fault",
+      "No_OpClass"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:subi",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov"
+    ]
+   }
+  },
+  "bsr": {
+   "probe": false,
+   "class": "bit",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x38",
+    "0x2",
+    "0x0",
+    "0x3f"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "OR_R_I",
+      "limm",
+      "t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "OR_R_I",
+      "or",
+      "r12, r12, t1",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t0",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "and",
+      "t1, r12, r12",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "br",
+      "0x1b",
+      "No_OpClass"
+     ],
+     [
+      "BSR_R_R",
+      "movi",
+      "r12, r12, 0",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "fault",
+      "No Fault",
+      "No_OpClass"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov"
+    ]
+   }
+  },
+  "imul3_imm": {
+   "probe": false,
+   "class": "mul",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x7f6e5d4c3b2a189",
+    "0x23",
+    "0x0",
+    "0xfffffffffffffff9"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "IMUL_R_R_I",
+      "limm",
+      "t1, 0x7",
+      "IntAlu"
+     ],
+     [
+      "IMUL_R_R_I",
+      "mul1s",
+      "t16, rsi, t1",
+      "IntMult"
+     ],
+     [
+      "IMUL_R_R_I",
+      "mulel",
+      "r12, t16,",
+      "IntAlu"
+     ],
+     [
+      "IMUL_R_R_I",
+      "muleh",
+      "t0, t17,",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "imul32": {
+   "probe": false,
+   "class": "mul",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xe5618cf0",
+    "0x0",
+    "0x0",
+    "0xfffffffd"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12d, r12d, esi",
+      "IntAlu"
+     ],
+     [
+      "IMUL_R_R",
+      "mul1s",
+      "t16d, r12d, edi",
+      "IntMult"
+     ],
+     [
+      "IMUL_R_R",
+      "mulel",
+      "r12d, t16d,",
+      "IntAlu"
+     ],
+     [
+      "IMUL_R_R",
+      "muleh",
+      "t0d, t17d,",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "mov": {
+   "probe": false,
+   "class": "move",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x5",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "movzbl": {
+   "probe": false,
+   "class": "extend",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xef",
+    "0x5",
+    "0x0",
+    "0xff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVZX_B_R_R",
+      "mov",
+      "t1b, t1b, sil",
+      "IntAlu"
+     ],
+     [
+      "MOVZX_B_R_R",
+      "zexti",
+      "r12d, t1d, 0x7",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOVZX_B_R_R:mov"
+    ]
+   }
+  },
+  "movzwl": {
+   "probe": false,
+   "class": "extend",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xcdef",
+    "0x5",
+    "0x0",
+    "0xffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVZX_W_R_R",
+      "zexti",
+      "r12d, esi, 0xf",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "movsbq": {
+   "probe": false,
+   "class": "extend",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffef",
+    "0x5",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVSX_B_R_R",
+      "mov",
+      "t1b, t1b, sil",
+      "IntAlu"
+     ],
+     [
+      "MOVSX_B_R_R",
+      "sexti",
+      "r12, t1, 0x7",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOVSX_B_R_R:mov"
+    ]
+   }
+  },
+  "movswq": {
+   "probe": false,
+   "class": "extend",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffcdef",
+    "0x5",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVSX_W_R_R",
+      "sexti",
+      "r12, rsi, 0xf",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "movslq": {
+   "probe": false,
+   "class": "extend",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffff89abcdef",
+    "0x5",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVSXD_R_R",
+      "sexti",
+      "r12, rsi, 0x1f",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "bswap": {
+   "probe": false,
+   "class": "move",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xefcdab8967452301",
+    "0x500000000000000",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12, r12, rsi",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "r12w, r12w, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "t1d, r12d, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "t1w, t1w, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "t1, t1, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "srli",
+      "t2, r12, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "t2w, t2w, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "t2d, t2d, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "roli",
+      "t2w, t2w, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_Q_R",
+      "or",
+      "r12, t1, t2",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "bswap32": {
+   "probe": false,
+   "class": "move",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xefcdab89",
+    "0x5000000",
+    "0x0",
+    "0xffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_R",
+      "mov",
+      "r12d, r12d, esi",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_D_R",
+      "roli",
+      "r12w, r12w, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_D_R",
+      "roli",
+      "r12d, r12d, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSWAP_D_R",
+      "roli",
+      "r12w, r12w, 0x8",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "MOV_R_R:mov"
+    ]
+   }
+  },
+  "mov_imm64": {
+   "probe": false,
+   "class": "constant",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x123456789abcdef",
+    "0x123456789abcdef",
+    "0x123456789abcdef"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_I",
+      "limm",
+      "r12, 0x123456789abcdef",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "mov_imm32": {
+   "probe": false,
+   "class": "constant",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x3039",
+    "0x3039",
+    "0x3039",
+    "0x3039"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOV_R_I",
+      "limm",
+      "r12d, 0x3039",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "zero_xor": {
+   "probe": false,
+   "class": "constant",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "lea_scaled": {
+   "probe": false,
+   "class": "lea",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xf8091a2b3c4d5e6f",
+    "0x5",
+    "0x0",
+    "0x17"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "LEA_R_M",
+      "lea",
+      "r12, DS:[8*rdi + rsi]",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "lea_disp": {
+   "probe": false,
+   "class": "lea",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abce2f",
+    "0x45",
+    "0x40",
+    "0x3f"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "LEA_R_M",
+      "lea",
+      "r12, DS:[rsi + 0x40]",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "lea_full": {
+   "probe": false,
+   "class": "lea",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xfc962fc962fc9617",
+    "0xffffffffffffffed",
+    "0xffffffffffffffe8",
+    "0xfffffffffffffff3"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "LEA_R_M",
+      "lea",
+      "r12, DS:[4*rdi + rsi + 0xffffffffffffffe8]",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "nop1": {
+   "probe": false,
+   "class": "nop",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc"
+   ],
+   "microops": {
+    "microops": [],
+    "spt_bwd_hits": []
+   }
+  },
+  "nop_long": {
+   "probe": false,
+   "class": "nop",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "HINT_NOP",
+      "fault",
+      "No Fault",
+      "No_OpClass"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "nopw_long": {
+   "probe": false,
+   "class": "nop",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc",
+    "0xc3c3c3c3cccccccc"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "HINT_NOP",
+      "fault",
+      "No Fault",
+      "No_OpClass"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_movq_rt": {
+   "probe": false,
+   "class": "sse_move",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x123456789abcdef",
+    "0x5",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_paddq": {
+   "probe": false,
+   "class": "sse_int",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffff",
+    "0x5",
+    "0x8000000000000000",
+    "0x2"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "PADDQ_XMM_XMM",
+      "maddi",
+      "%xmm14_low, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "PADDQ_XMM_XMM",
+      "maddi",
+      "%xmm14_high, %xmm14_high, %xmm15_high",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_pxor": {
+   "probe": false,
+   "class": "sse_int",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xffffffffffffffff",
+    "0x5",
+    "0x8000000000000000",
+    "0xfffffffffffffffc"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "PXOR_XMM_XMM",
+      "mxor",
+      "%xmm14_low, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "PXOR_XMM_XMM",
+      "mxor",
+      "%xmm14_high, %xmm14_high, %xmm15_high",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_pand": {
+   "probe": false,
+   "class": "sse_int",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x3"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "PAND_XMM_XMM",
+      "mand",
+      "%xmm14_low, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "PAND_XMM_XMM",
+      "mand",
+      "%xmm14_high, %xmm14_high, %xmm15_high",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_pshufd": {
+   "probe": false,
+   "class": "sse_int",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "PSHUFD_XMM_XMM_I",
+      "shuffle",
+      "%ufp1, %xmm15_low, %xmm15_high",
+      "FloatAdd"
+     ],
+     [
+      "PSHUFD_XMM_XMM_I",
+      "shuffle",
+      "%xmm14_high, %xmm15_low, %xmm15_high",
+      "FloatAdd"
+     ],
+     [
+      "PSHUFD_XMM_XMM_I",
+      "movfp",
+      "%xmm14_low, %ufp1, %xmm14_low",
+      "IntAlu"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_addsd": {
+   "probe": false,
+   "class": "sse_fp",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xfedcba9876543210",
+    "0x5",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "ADDSD_XMM_XMM",
+      "maddf",
+      "%xmm14_low, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_mulsd": {
+   "probe": false,
+   "class": "sse_fp",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0xc0114d19d334fae0",
+    "0x0",
+    "0x8000000000000000",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MULSD_XMM_XMM",
+      "mmulf",
+      "%xmm14_low, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_divsd": {
+   "probe": false,
+   "class": "sse_fp",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x8000000000000000",
+    "0x7ff0000000000000",
+    "0xfff8000000000000",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "DIVSD_XMM_XMM",
+      "mdivf",
+      "%xmm14_low, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_sqrtsd": {
+   "probe": false,
+   "class": "sse_fp",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x2088d53c68b012b2",
+    "0x1e71e3779b97f4a8",
+    "0x0",
+    "0xffffffffffffffff"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "SQRTSD_XMM_XMM",
+      "msqrt",
+      "%xmm14_low, %xmm15_low, %xmm14_low",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_cvtsi2sd": {
+   "probe": false,
+   "class": "sse_cvt",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x43723456789abcdf",
+    "0x4014000000000000",
+    "0x0",
+    "0xbff0000000000000"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "CVTSI2SD_XMM_R",
+      "mov2fp",
+      "%ufp1, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "CVTSI2SD_XMM_R",
+      "cvti2f",
+      "%xmm15_low, %ufp1, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_cvttsd2si": {
+   "probe": false,
+   "class": "sse_cvt",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x8000000000000000"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "CVTTSD2SI_R_XMM",
+      "cvtf2i",
+      "%ufp1, %xmm15_low, %ufp1",
+      "FloatAdd"
+     ],
+     [
+      "CVTTSD2SI_R_XMM",
+      "mov2int",
+      "r12, r12, 0",
+      "FloatAdd"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "sse_ucomisd_setb": {
+   "probe": false,
+   "class": "sse_fp",
+   "per_build": {
+    "stt-master": "ok",
+    "gem5-recon-modded": "ok",
+    "stt-legacy": "ok",
+    "amulet-STT": "ok",
+    "amulet-InvisiSpec": "ok",
+    "amulet-CleanupSpec": "ok",
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x0",
+    "0x1"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm14_low, rsi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm14_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "mov2fp",
+      "%xmm15_low, rdi, 0",
+      "FloatAdd"
+     ],
+     [
+      "MOVD_XMM_R",
+      "lfpimm",
+      "%xmm15_high, 0",
+      "FloatAdd"
+     ],
+     [
+      "XOR_R_R",
+      "xor",
+      "r12d, r12d, r12d",
+      "IntAlu"
+     ],
+     [
+      "UCOMISD_XMM_XMM",
+      "mcmpf2rf",
+      "%cc0, %xmm14_low, %xmm15_low",
+      "FloatAdd"
+     ],
+     [
+      "SETB_R",
+      "movi",
+      "r12b, r12b, 0x1",
+      "IntAlu"
+     ],
+     [
+      "SETB_R",
+      "movi",
+      "r12b, r12b, 0",
+      "IntAlu"
+     ]
+    ],
+    "spt_bwd_hits": []
+   }
+  },
+  "popcnt": {
+   "probe": true,
+   "class": "bit",
+   "per_build": {
+    "stt-master": [
+     "s0 gem5 rc=-6 tail=['/work/stt-master/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x59f02aef7b5b]', '/work/stt-master/build/X86/gem5.opt(main+0x47)[0x59f02a42f7f7]', '--- END LIBC BACKTRACE ---']",
+     "s0 gem5 output [] != native ['0x20', '0x7878787877777777', '0x2', '0x878787878888888d', '0x0', '0x787878788888888', '0x40', '0x7878787877777774']",
+     "s0 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s1 gem5 rc=-6 tail=['/work/stt-master/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x63be3ab15b5b]', '/work/stt-master/build/X86/gem5.opt(main+0x47)[0x63be3a04d7f7]', '--- END LIBC BACKTRACE ---']",
+     "s1 gem5 output [] != native ['0x20', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0x0', '0xbbbbbbbbbbbbbbbb', '0x40', '0x4444444444444444']",
+     "s1 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s2 gem5 rc=-6 tail=['/work/stt-master/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x62c92b33bb5b]', '/work/stt-master/build/X86/gem5.opt(main+0x47)[0x62c92a8737f7]', '--- END LIBC BACKTRACE ---']",
+     "s2 gem5 output [] != native ['0x20', '0x6969696966666666', '0x2', '0x969696969999999c', '0x0', '0x1696969699999999', '0x40', '0x6969696966666665']",
+     "s2 new gem5 warnings: ['panic: Tried to read unmapped address 0x123456789abcd78.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s3 gem5 rc=-6 tail=['/work/stt-master/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x63f0d5329b5b]', '/work/stt-master/build/X86/gem5.opt(main+0x47)[0x63f0d48617f7]', '--- END LIBC BACKTRACE ---']",
+     "s3 gem5 output [] != native ['0x20', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0x0', '0xad2d2d2d22222222', '0x40', '0xd2d2d2d2ddddddde']",
+     "s3 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]"
+    ],
+    "gem5-recon-modded": "ok",
+    "stt-legacy": [
+     "s0 gem5 rc=-6 tail=['/work/stt/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x561165aaa05b]', '/work/stt/build/X86/gem5.opt(main+0x47)[0x561165a747d7]', '--- END LIBC BACKTRACE ---']",
+     "s0 gem5 output [] != native ['0x20', '0x7878787877777777', '0x2', '0x878787878888888d', '0x0', '0x787878788888888', '0x40', '0x7878787877777774']",
+     "s0 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s1 gem5 rc=-6 tail=['/work/stt/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x63c3f6a8805b]', '/work/stt/build/X86/gem5.opt(main+0x47)[0x63c3f6a527d7]', '--- END LIBC BACKTRACE ---']",
+     "s1 gem5 output [] != native ['0x20', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0x0', '0xbbbbbbbbbbbbbbbb', '0x40', '0x4444444444444444']",
+     "s1 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s2 gem5 rc=-6 tail=['/work/stt/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5629494d205b]', '/work/stt/build/X86/gem5.opt(main+0x47)[0x56294949c7d7]', '--- END LIBC BACKTRACE ---']",
+     "s2 gem5 output [] != native ['0x20', '0x6969696966666666', '0x2', '0x969696969999999c', '0x0', '0x1696969699999999', '0x40', '0x6969696966666665']",
+     "s2 new gem5 warnings: ['panic: Tried to read unmapped address 0x123456789abcd78.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s3 gem5 rc=-6 tail=['/work/stt/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x64d4eae4a05b]', '/work/stt/build/X86/gem5.opt(main+0x47)[0x64d4eae147d7]', '--- END LIBC BACKTRACE ---']",
+     "s3 gem5 output [] != native ['0x20', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0x0', '0xad2d2d2d22222222', '0x40', '0xd2d2d2d2ddddddde']",
+     "s3 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]"
+    ],
+    "amulet-STT": [
+     "s0 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x57b18e39dc5b]', '/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(main+0x47)[0x57b18ddb9897]', '--- END LIBC BACKTRACE ---']",
+     "s0 gem5 output [] != native ['0x20', '0x7878787877777777', '0x2', '0x878787878888888d', '0x0', '0x787878788888888', '0x40', '0x7878787877777774']",
+     "s0 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s1 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5dd81b651c5b]', '/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(main+0x47)[0x5dd81b06d897]', '--- END LIBC BACKTRACE ---']",
+     "s1 gem5 output [] != native ['0x20', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0x0', '0xbbbbbbbbbbbbbbbb', '0x40', '0x4444444444444444']",
+     "s1 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s2 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x60d847b8fc5b]', '/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(main+0x47)[0x60d8475ab897]', '--- END LIBC BACKTRACE ---']",
+     "s2 gem5 output [] != native ['0x20', '0x6969696966666666', '0x2', '0x969696969999999c', '0x0', '0x1696969699999999', '0x40', '0x6969696966666665']",
+     "s2 new gem5 warnings: ['panic: Tried to read unmapped address 0x123456789abcd78.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s3 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5dd588828c5b]', '/work/amulet/amulet-gem5-STT_AE-v1.1/build/X86/gem5.opt(main+0x47)[0x5dd588244897]', '--- END LIBC BACKTRACE ---']",
+     "s3 gem5 output [] != native ['0x20', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0x0', '0xad2d2d2d22222222', '0x40', '0xd2d2d2d2ddddddde']",
+     "s3 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]"
+    ],
+    "amulet-InvisiSpec": [
+     "s0 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x641d08bae5fb]', '/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x641d08ac1637]', '--- END LIBC BACKTRACE ---']",
+     "s0 gem5 output [] != native ['0x20', '0x7878787877777777', '0x2', '0x878787878888888d', '0x0', '0x787878788888888', '0x40', '0x7878787877777774']",
+     "s0 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s1 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5b5a384d45fb]', '/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x5b5a383e7637]', '--- END LIBC BACKTRACE ---']",
+     "s1 gem5 output [] != native ['0x20', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0x0', '0xbbbbbbbbbbbbbbbb', '0x40', '0x4444444444444444']",
+     "s1 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s2 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5a6d811d85fb]', '/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x5a6d810eb637]', '--- END LIBC BACKTRACE ---']",
+     "s2 gem5 output [] != native ['0x20', '0x6969696966666666', '0x2', '0x969696969999999c', '0x0', '0x1696969699999999', '0x40', '0x6969696966666665']",
+     "s2 new gem5 warnings: ['panic: Tried to read unmapped address 0x123456789abcd78.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s3 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5f7dfd1e65fb]', '/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x5f7dfd0f9637]', '--- END LIBC BACKTRACE ---']",
+     "s3 gem5 output [] != native ['0x20', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0x0', '0xad2d2d2d22222222', '0x40', '0xd2d2d2d2ddddddde']",
+     "s3 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]"
+    ],
+    "amulet-CleanupSpec": [
+     "s0 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x6077603068bb]', '/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x60775fd5ee27]', '--- END LIBC BACKTRACE ---']",
+     "s0 gem5 output [] != native ['0x20', '0x7878787877777777', '0x2', '0x878787878888888d', '0x0', '0x787878788888888', '0x40', '0x7878787877777774']",
+     "s0 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s1 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x6543bc67b8bb]', '/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x6543bc0d3e27]', '--- END LIBC BACKTRACE ---']",
+     "s1 gem5 output [] != native ['0x20', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0x0', '0xbbbbbbbbbbbbbbbb', '0x40', '0x4444444444444444']",
+     "s1 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s2 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x5f4529fa78bb]', '/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x5f45299ffe27]', '--- END LIBC BACKTRACE ---']",
+     "s2 gem5 output [] != native ['0x20', '0x6969696966666666', '0x2', '0x969696969999999c', '0x0', '0x1696969699999999', '0x40', '0x6969696966666665']",
+     "s2 new gem5 warnings: ['panic: Tried to read unmapped address 0x123456789abcd78.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]",
+     "s3 gem5 rc=-6 tail=['/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(_Z6m5MainiPPc+0x8b)[0x592566d0a8bb]', '/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt(main+0x47)[0x592566762e27]', '--- END LIBC BACKTRACE ---']",
+     "s3 gem5 output [] != native ['0x20', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0x0', '0xad2d2d2d22222222', '0x40', '0xd2d2d2d2ddddddde']",
+     "s3 new gem5 warnings: ['panic: Tried to read unmapped address 0x3c3c3c3c333332bc.', \"warn: instruction 'popcnt_Gv_Ev' unimplemented\"]"
+    ],
+    "amulet-SpecLFB": "ok"
+   },
+   "native_results_s0": [
+    "0x20",
+    "0x2",
+    "0x0",
+    "0x40"
+   ],
+   "microops": {
+    "microops": [],
+    "spt_bwd_hits": []
+   }
+  },
+  "lzcnt": {
+   "probe": true,
+   "class": "bit",
+   "per_build": {
+    "stt-master": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "gem5-recon-modded": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "stt-legacy": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-STT": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-InvisiSpec": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-CleanupSpec": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-SpecLFB": [
+     "s0 gem5 output ['0x38', '0x7878787877777777', '0x2', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x3f', '0x7878787877777774'] != native ['0x7', '0x7878787877777777', '0x3d', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x38', '0xba98fedc32107654', '0x2', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x3f', '0x4444444444444444'] != native ['0x7', '0xba98fedc32107654', '0x3d', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x38', '0x6969696966666666', '0x2', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x3f', '0x6969696966666665'] != native ['0x7', '0x6969696966666666', '0x3d', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x38', '0xd2d2d2d2dddddddd', '0x2', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x3f', '0xd2d2d2d2ddddddde'] != native ['0x7', '0xd2d2d2d2dddddddd', '0x3d', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ]
+   },
+   "native_results_s0": [
+    "0x7",
+    "0x3d",
+    "0x40",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t0",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "and",
+      "t1, rsi, rsi",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "br",
+      "0x1b",
+      "No_OpClass"
+     ],
+     [
+      "BSR_R_R",
+      "movi",
+      "r12, r12, 0",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "srli",
+      "t3, t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "ori",
+      "t4, r12, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSR_R_R",
+      "fault",
+      "No Fault",
+      "No_OpClass"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov",
+     "BSR_R_R:mov"
+    ]
+   }
+  },
+  "tzcnt": {
+   "probe": true,
+   "class": "bit",
+   "per_build": {
+    "stt-master": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "gem5-recon-modded": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "stt-legacy": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-STT": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-InvisiSpec": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-CleanupSpec": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ],
+    "amulet-SpecLFB": [
+     "s0 gem5 output ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0xc3c3c3c3cccccccc', '0x787878788888888', '0x0', '0x7878787877777774'] != native ['0x0', '0x7878787877777777', '0x0', '0x878787878888888d', '0x40', '0x787878788888888', '0x0', '0x7878787877777774']",
+     "s1 gem5 output ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0xd2d2d2d2dddddddd', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444'] != native ['0x0', '0xba98fedc32107654', '0x0', '0xbbbbbbbbbbbbbbbe', '0x40', '0xbbbbbbbbbbbbbbbb', '0x0', '0x4444444444444444']",
+     "s2 gem5 output ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x9696969699999999', '0x1696969699999999', '0x0', '0x6969696966666665'] != native ['0x0', '0x6969696966666666', '0x0', '0x969696969999999c', '0x40', '0x1696969699999999', '0x0', '0x6969696966666665']",
+     "s3 gem5 output ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0xf0f0f0f0ffffffff', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde'] != native ['0x0', '0xd2d2d2d2dddddddd', '0x0', '0x2d2d2d2d22222227', '0x40', '0xad2d2d2d22222222', '0x0', '0xd2d2d2d2ddddddde']"
+    ]
+   },
+   "native_results_s0": [
+    "0x0",
+    "0x0",
+    "0x40",
+    "0x0"
+   ],
+   "microops": {
+    "microops": [
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t0",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "and",
+      "t1, rsi, rsi",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "br",
+      "0x1d",
+      "No_OpClass"
+     ],
+     [
+      "BSF_R_R",
+      "movi",
+      "r12, r12, 0",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "subi",
+      "t2, t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "xor",
+      "t1, t2, t1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x20",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x10",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x8",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x2",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "t1, t1, t3",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "srli",
+      "t3, t1, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "ori",
+      "t4, r12, 0x1",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "mov",
+      "r12, r12, t4",
+      "IntAlu"
+     ],
+     [
+      "BSF_R_R",
+      "fault",
+      "No Fault",
+      "No_OpClass"
+     ]
+    ],
+    "spt_bwd_hits": [
+     "BSF_R_R:mov",
+     "BSF_R_R:subi",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov",
+     "BSF_R_R:mov"
+    ]
+   }
+  }
+ }
+}

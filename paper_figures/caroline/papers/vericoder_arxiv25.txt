@@ -1,0 +1,1448 @@
+1
+
+VeriCoder: Enhancing LLM-Based RTL Code Generation through
+Functional Correctness Validation
+
+arXiv:2504.15659v2 [cs.AR] 24 Aug 2025
+
+Anjiang Wei , Huanmi Tan ,Tarun Suresh , Daniel Mendoza ,
+Thiago S. F. X. Teixeira , Ke Wang ,Caroline Trippel , and Alex Aiken
+
+involved in complex design tasks, making it a timely and
+impactful area of research.
+Developing open-source, lightweight models for RTL code
+generation is essential for advancing both research and deployment. Proprietary models such as GPT-4o and Claude 3.7 restrict customization and lack transparency, making them unsuitable for in-depth analysis and academic exploration. They also
+raise privacy and security concerns, especially when handling
+RTL designs that may contain sensitive intellectual property. In
+contrast, lightweight models that can run locally offer a secure,
+privacy-preserving alternative—enabling hardware engineers
+to integrate AI directly into their design workflows. However,
+existing open-source models still underperform on RTL tasks,
+largely due to the absence of high-quality, functionally validated
+RTL datasets in their training corpora [21], [22]. While training
+algorithms are readily available, progress is bottlenecked by
+the lack of open datasets with functional correctness validation.
+A key challenge in building such datasets lies in constructing
+large-scale, high-quality training data that pairs natural language
+specifications with RTL implementations. Despite efforts to
+mine RTL code from open-source repositories [23]–[26], much
+of the collected data lacks validation and may not align with
+its intended functionality. To address this, recent work has
+turned to LLMs-either prompting them to synthesize RTL
+Index Terms—RTL, Code Generation, Large Language Model. designs from keyword-based specifications [6], [7] or leveraging
+them to rewrite existing RTL code and generate matching
+specifications [8], [24], [26]. In both cases, syntax checkers are
+often employed to filter uncompilable code or provide feedback
+I. I NTRODUCTION
+for iterative refinement, but these techniques still fall short of
+Large Language Models (LLMs) have demonstrated revalidating functional correctness.
+markable performance across natural language processing
+As far as we know, all these prior work [6]–[8], [24],
+tasks, spurring growing interest in applying their capabilities
+[26] have focused solely on ensuring syntactic correctness,
+to a broad range of Electronic Design Automation (EDA)
+overlooking functional correctness. As a result, many dataset
+problems [1]–[4]. Recent efforts explore LLMs for code generexamples compile successfully but may not implement the
+ation [5]–[12], architecture design [13]–[15], verification [16],
+behavior described in their natural language specifications.
+[17], tool assistance [18], [19], and debugging [1], [20]. In
+The distinction between syntactic correctness and functional
+this work, we focus on generating Register Transfer Level
+correctness has important implications for model evaluation
+(RTL) code from natural language specifications. Automating
+and real-world deployment. While functionally correct code
+RTL code generation has the potential to significantly boost
+inherently satisfies syntax constraints, syntactic correctness
+hardware design productivity and reduce the manual effort
+alone does not guarantee correct functionality. This gap is
+evident in the results reported by the RTLLM benchmark [10],
+Anjiang Wei, Daniel Mendoza, Caroline Trippel, and Alex Aiken
+are affiliated with Stanford University (e-mail: anjiang@cs.stanford.edu; where GPT-4o attains a high syntax accuracy of 100.0%,
+dmendo@stanford.edu; trippel@stanford.edu; aiken@cs.stanford.edu).
+yet achieve only 69.0% in terms of functional correctness.
+Huanmi Tan is affiliated with Carnegie Mellon University (e-mail:
+Ultimately, in real-world settings, it is functional correctness
+huanmi.tan@gmail.com).
+Tarun Suresh is affiliated with University of Illinois Urbana-Champaign
+rather than syntactic validity that truly matters.
+(e-mail: tsuresh3@illinois.edu).
+In this work, we introduce VeriCoder, a model for RTL
+Thiago S. F. X. Teixeira is with Intel Corporation (e-mail: thicode
+generation fine-tuned on a high-quality dataset consisting
+ago.teixeira@intel.com).
+Ke Wang is with Nanjing University (e-mail: kwg@nju.edu.cn).
+of 125,777 examples that has been validated for functional
+Abstract—Recent advances in Large Language Models (LLMs)
+have sparked growing interest in applying them to Electronic
+Design Automation (EDA) tasks, particularly Register Transfer
+Level (RTL) code generation. While several RTL datasets have
+been introduced, most focus on syntactic validity rather than
+functional validation with tests, leading to training examples that
+compile but may not implement the intended behavior. We present
+V ERI C ODER, a model for RTL code generation fine-tuned on
+a dataset validated for functional correctness. This fine-tuning
+dataset is constructed using a novel methodology that combines
+unit test generation with feedback-directed refinement. Given
+a natural language specification and an initial RTL design, we
+prompt a teacher model (GPT-4o-mini) to generate unit tests
+and iteratively revise the RTL design based on its simulation
+results using the generated tests. If necessary, the teacher model
+also updates the tests to ensure they comply with the natural
+language specification. As a result of this process, every example
+in our dataset is functionally validated, consisting of a natural
+language description, an RTL implementation, and passing tests.
+Fine-tuned on this dataset of 125,777 examples, V ERI C ODER
+achieves state-of-the-art metrics in functional correctness on
+VerilogEval and RTLLM, with relative gains of up to 71.7%
+and 27.4%, respectively. An ablation study further shows that
+models trained on our functionally validated dataset outperform
+those trained on functionally non-validated datasets, underscoring
+the importance of high-quality datasets in RTL code generation. Our code, data, and models are publicly available at
+https://github.com/Anjiang-Wei/VeriCoder
+
+2
+
+Prior Work
+RTLCoder [7]
+OriGen [8]
+BetterV [24]
+VeriGen [26]
+
+Strategy
+
+Description
+
+Keyword-based Generation,
+Mutation
+Code-to-Code, Syntax
+Error Correction
+Web Scraping & Cleaning,
+Alignment with C
+Manually Collect Textbook
+and Open-Source Code
+
+Prompt LLM with keywords and existing code, followed by
+iterative mutation to get instruction-code pairs.
+Applies LLM-driven code-to-code pipeline on existing RTL
+code and filters them by compiler error feedback.
+Large-scale web-collected Verilog, cleaned and filtered to
+enforce coding standards; aligns C with Verilog.
+Mines real-world RTL from GitHub and textbooks, manually
+cleans and organizes them into a structured dataset.
+Converts Verilog ASTs into natural-language prompts and
+injects semantic error variants via EDA-tool feedback.
+
+ChipGPT [27]
+
+AST-based Synthesis
+
+VeriCoder
+(Our Work)
+
+Feedback-Directed
+Refinement, Simulation,
+Unit Test Generation
+
+Iteratively generate unit tests with a teacher LLM, check
+implementations via compiler and simulator, and refining
+designs and tests until each design passes.
+
+Syntax
+Checker
+
+Unit
+Tests
+
+✓
+
+✗
+
+✓
+
+✗
+
+✓
+
+✗
+
+✓
+
+✗
+
+✓
+
+✗
+
+✓
+
+✓
+
+TABLE I: Comparison of Verilog fine-tuning dataset construction approaches.
+correctness1 . To construct this dataset, we develop a novel
+triples of natural language specifications, RTL designs,
+pipeline that combines unit test generation with feedbackand passing tests.
+directed refinement guided by a teacher LLM (GPT-4o-mini).
+• We conduct an ablation study showing that functional
+Given a natural language specification and an initial RTL
+validation during dataset construction improves model
+implementation, the teacher model first generates a unit test.
+performance, underscoring the importance of using highIf the RTL code fails the simulation, the model iteratively
+quality functionally validated datasets for RTL code
+revises the design based on the observed error messages.
+generation.
+When needed, the unit test is also updated to better reflect
+the intended functionality described by the specification. This
+II. BACKGROUND AND R ELATED W ORK
+process continues until the design passes simulation or a retry
+limit is reached. The resulting fine-tuning dataset consists of A. Language Modeling and Fine-Tuning
+Large Language Models (LLMs) are deep neural networks
+125,777 validated triples: a natural language specification, a
+trained to perform language modeling, a task where the model
+correct RTL design, and a self-checking unit test.
+We fine-tune VeriCoder from Qwen2.5-14B-Instruct using learns to predict the next token in a sequence. Formally, given a
+our curated dataset and evaluate it on two established RTL sequence of tokens x = (x1 , x2 , . . . , xT ), the training objective
+code generation benchmarks: VerilogEval [9] and RTLLM [10]. is to maximize the log-likelihood:
+VeriCoder achieves new state-of-the-art performance, achieving
+T
+X
+up to 71.7% and 27.4% relative gains in the pass@k metric
+(1)
+LLM =
+log P (xt | x<t ; θ),
+over the previous best fine-tuned model OriGen [8].
+t=1
+We conduct an ablation study demonstrating that models
+where θ denotes the model parameters and x<t =
+trained on our functionally validated dataset outperform those
+(x
+, . . . , xt−1 ) represents the context tokens. This autoregres1
+trained on non-validated data, under the same base model and
+sive
+objective enables the model to generate coherent text and
+training setup. These results highlight the importance of highcapture
+long-range dependencies across various domains.
+quality, functionally validated datasets for RTL code generation.
+The training of LLMs is typically organized into two stages:
+Our contributions are as follows:
+• Pre-training: The model is trained on massive, diverse
+• We introduce VeriCoder, an RTL code generation model
+corpora (e.g., web data, books, source code) to acquire
+fine-tuned on a dataset validated for functional correctness.
+broad knowledge and language understanding. This stage
+On the VerilogEval and RTLLM benchmarks, VeriCoder
+is expensive and performed once per model.
+achieves state-of-the-art performance among open-source
+• Post-training: The pre-trained model is adapted to specific
+fine-tuned models, yielding relative pass@k gains of up
+tasks using smaller, curated datasets. This stage includes
+to 71.7% and 27.4% over the prior best.
+supervised fine-tuning (SFT), where the model is trained
+• We develop a dataset augmentation pipeline that combines
+on task-specific input-output pairs.
+unit test generation with feedback-directed refinement
+guided by a teacher LLM. This yields, to the best of
+Since post-training large models from scratch is resourceour knowledge, the largest fine-tuning dataset to date intensive, researchers have developed parameter-efficient finewith functional validation, consisting of 125,777 validated tuning methods. One widely used approach is Low-Rank
+Adaptation (LoRA) [28]. Instead of updating the full weight
+1While functional correctness is not fully guaranteed, we manually reviewed
+d×k
+in each linear layer, LoRA freezes the
+100 randomly sampled examples and found that 92% of the generated RTL matrices W ∈ R
+code correctly matches the corresponding natural language descriptions.
+original weights and introduces a trainable low-rank update:
+
+3
+
+module div (...);
+...
+always @...
+begin
+cnt <= cnt + 1;
+end
+...
+endmodule
+
+Task Spec
+...
+
+Generated design and test
+
+RTL Design
+...
+Your Task
+Generate a test
+
+Original dataset D
+{spec, design}
+
+`timescale 1ns / 1ns
+module tb;
+...
+if (clk !== 0)
+$fatal("...");
+...
+$finish;
+endmodule
+
+LLM
+
+Test Generation
+Prompt
+
+Task Spec
+...
+RTL Design
+...
+Test
+...
+Error Message
+...
+Your Task
+
+Compiler &
+Simulator
+
+Validated dataset D’
+{spec, design, test}
+
+Simulation failed:
+FATAL: ./test.sv:128:
+expected 10, got 0
+
+Debug
+
+Refinement Prompt
+
+Error Message
+
+Fig. 1: LLM-guided dataset augmentation overview.
+Natural Language Specification
+Create a Verilog module and3 with three one-bit
+inputs a, b, c, and a one-bit output y. The output
+should perform a bitwise AND across all three
+inputs using a procedural block. The truth table:
+
+module and3 (
+input wire
+3
+input wire
+4
+input wire
+5
+output reg
+6 );
+1
+2
+
+7
+
+a
+
+b
+
+c
+
+y
+
+0
+x
+x
+1
+
+x
+0
+x
+1
+
+x
+x
+0
+1
+
+0
+0
+0
+1
+
+2
+
+a,
+b,
+c,
+y
+
+7
+
+always @ * begin
+9
+y <= a ;
+10
+y <= y & c ;
+11
+y <= y & b ;
+12 end
+
+10
+
+13
+
+13
+
+8
+
+14
+
+(a) Natural language specification taken from the
+Origen [8] dataset.
+
+module and3 (
+input wire
+3
+input wire
+4
+input wire
+5
+output reg
+6 );
+1
+
+a,
+b,
+c,
+y
+
+endmodule
+
+8
+
+always @ * begin
+// combinational AND
+11
+y = a & b & c;
+12 end
+9
+
+14
+
+(b) Buggy design taken from the
+Origen [8] dataset. It times out on the
+generated test shown in Figure 3.
+
+endmodule
+
+(c) Correct design fixed by the teacher
+model that passes the generated test in
+Figure 3.
+
+Fig. 2: Natural language specification (left) and the corresponding buggy and corrected Verilog designs (middle and right).
+The specification and buggy design are from the original dataset [8], which lacks tests, while the test (Figure 3) and corrected
+design are generated by a teacher model (GPT-4o-mini) and included in our validated dataset.
+
+W ′ = W + ∆W = W + AB,
+
+(2)
+
+and syntactic validity. CraftRTL [29] augments fine-tuning
+data with non-textual code representations, injecting synthetic
+errors derived from intermediate model checkpoints into opensource Verilog code. Other works [8], [30], [31] adopt similar
+methodologies for sourcing and preprocessing RTL code.
+
+where A ∈ Rd×r and B ∈ Rr×k , and r ≪ min(d, k).
+Only A and B are updated during training, while W remains
+unchanged. This technique reduces both memory and compute
+Another line of work leverages a commercial LLM for
+overhead during adaptation, making it feasible to specialize
+synthetic data generation. RTLCoder [6] prompts GPT-3.5
+large LLMs to domain-specific applications, such as RTL
+with domain keywords to generate both task descriptions
+generation, with limited computational resources.
+and corresponding RTL, discarding any outputs that fail to
+compile. OriGen [8] further employs Claude 3.5 in a two-stage
+code-to-code pipeline: first turning mined RTL code into natural
+B. Related Work on RTL Code Generation
+language specifications, then regenerating code from these
+Progress on open-source RTL code generation is limited by
+specifications under compiler guidance, combining the strengths
+the absence of large-scale, high-quality datasets. To mitigate
+of real-world examples and synthetic generation. ChipGPT [27]
+this, recent efforts have focused on automated data mining
+transforms Verilog ASTs into natural language specifications.
+and augmentation techniques to enrich existing corpora of
+While most of the existing work listed in Table I ensures
+RTL examples. Table I presents the comparison of different
+syntax
+validity, none of them has any evidence of functional corstrategies for constructing fine-tuning datasets.
+rectness.
+Without comprehensive unit tests or simulation-based
+Mining open-source RTL designs is a common strategy for
+feedback
+during dataset construction, models fine-tuned on
+dataset construction. VeriGen [26] compiles Verilog modules
+these
+corpora
+may produce code that compiles but still fails to
+from GitHub and textbooks into a structured corpus using
+meet
+the
+intended
+natural language specification.
+automated syntax checks. BetterV [24] collects Verilog modules
+from the internet and then filters designs based on coding style
+A recent work, OpenLLM-RTL [32], explores the idea of
+
+4
+
+` timescale 1 ns /1 ps
+module tb_and3 ;
+3
+reg a = 0 , b = 0 , c = 0;
+4
+wire y ;
+1
+2
+
+5
+6
+7
+
+// Instantiate the DUT ( Design Under Test )
+and3 uut (. a ( a ) , . b ( b ) , . c ( c ) , . y ( y ) ) ;
+
+8
+9
+10
+11
+
+initial begin
+// Wait for signals to settle
+#1;
+
+12
+13
+14
+15
+
+// Set all inputs to 1; expected y = 1
+{a , b , c } = 3 ’ b111 ;
+#1;
+
+16
+17
+18
+19
+
+// Check output , report error if incorrect
+if ( y !== 1 ’ b1 )
+$fatal (1 , " FAIL : y =% b ( expected 1) " , y ) ;
+
+20
+
+$display ( " PASS " ) ;
+$finish ;
+23
+end
+24 endmodule
+21
+22
+
+Fig. 3: Unit test for the and3 module. The buggy design
+(Figure 2b) times out on this test, while the corrected design
+(Figure 2c) passes successfully. The test is generated by the
+teacher model GPT-4o-mini using the prompt in Figure 4a,
+and is used to validate and augment the original dataset, which
+contains no tests.
+using LLMs to generate assertions, producing a functionally
+verified dataset of 7k examples. While sharing the same goal
+of improving functional correctness in fine-tuning datasets,
+our work takes a different approach by generating unit
+tests for validation. Our final dataset contains over 125,777
+examples—the largest functionally validated RTL dataset to
+date.
+Beyond data collection and synthesis techniques, several
+works explore other methods to enhance RTL code generation
+quality. ScaleRTL [33] emphasizes reasoning by generating
+intermediate traces and leveraging test-time compute through
+iterative self-reflection. DeepRTL [34] adopts curriculum
+learning guided by multi-level natural language summaries.
+VeriSeek [35] applies reinforcement learning with feedback
+derived from AST-level similarity between LLM outputs and
+reference designs. AutoVCoder [36] incorporates retrievalaugmented generation (RAG), dynamically supplying relevant
+Verilog snippets to the model. CodeV [37] extends generation
+capabilities to tasks such as fill-in-the-middle (FIM). Our
+work adopts standard supervised fine-tuning while focusing
+on constructing a large-scale, functionally validated dataset.
+Our approach is complementary and orthogonal to existing
+techniques.
+III. M ETHODOLOGY
+A. Overview
+We aim to improve the quality of fine-tuning datasets
+consisting of natural language specifications paired with
+syntactically correct Verilog designs, as seen in prior work [6]–
+[8], [24], [26]. These datasets, including Origen [8], contain
+
+Verilog designs that pass syntax checks but are not validated
+against unit tests to ensure functional correctness. To address
+this limitation, we introduce an automated dataset augmentation
+pipeline that leverages a teacher language model, e.g., GPT-4omini, to validate each example through iterative refinement. As
+illustrated in Figure 1, given a natural language specification
+and an initial RTL design, the teacher model first generates
+a unit test. If the RTL design fails the simulation, the model
+iteratively revises the design based on the error message. When
+needed, it also updates the unit test to better align with the
+natural language specification. Although our experiments focus
+on augmenting the Origen dataset due to its size and quality,
+the proposed methodology is broadly applicable to any dataset
+lacking test validation.
+The pipeline begins with the original dataset D =
+{(specification, design)}, where each RTL design is intended
+to implement a corresponding natural language specification.
+However, because no tests are provided, there is no evidence
+that the designs exhibit the intended functional behavior. For
+each pair, we prompt the teacher model, GPT-4o-mini, to
+generate a unit test for the design. The test is compiled and
+simulated with the design to check for correctness, where
+correctness means the design passes the simulation test.
+If the simulation fails, we extract the resulting error message
+and re-invoke the teacher model using a refinement prompt.
+This prompt includes the specification, the current design and
+test, and the error message. The model attempts to resolve the
+failure by making minimal modifications to the design, the
+test, or both. This refinement process repeats iteratively: each
+candidate is re-simulated, and the cycle continues until the
+design passes the test or a maximum number of attempts is
+reached.
+The final output is a validated dataset D′
+=
+{(specification, design, test)}, where each triplet contains a
+natural language specification, a Verilog design, and unit tests.
+A concrete motivating example is shown in Section III-B,
+and the details of the algorithm and prompts are provided in
+Section III-C.
+B. Motivating Example
+Figure 2 presents a motivating example taken directly from
+the Origen dataset [8], highlighting a key limitation of datasets
+that rely only on syntax checks for validation. Prior work in
+RTL generation typically assumes that syntactic correctness
+is sufficient for fine-tuning, without verifying functionality
+through unit tests. This example demonstrates that a design
+can compile without errors yet fail to implement the intended
+behavior. It also illustrates how our method can automatically
+detect and correct such issues through test generation and
+iterative refinement.
+This example includes a natural language specification
+(Figure 2a), a buggy RTL design from the original dataset
+(Figure 2b), and a corrected design produced by our pipeline
+(Figure 2c). The specification describes a simple combinational
+module, and3, which computes the bitwise AND of three onebit inputs: a, b, and c.
+The original design, though syntactically valid, is functionally
+incorrect due to several semantic issues. First, it misuses non-
+
+5
+
+Prompt Template
+
+Prompt Template
+
+System Prompt You are a Verilog design and testing expert. Given
+a hardware specification described in natural language, your job is to
+generate both a correct Verilog module and a corresponding unit test
+that checks its functionality through simulation.
+
+System Prompt You are a Verilog design and testing expert. Analyze
+a failing design and its test, and make minimal yet sufficient edits to
+correct the issue while preserving the intended behavior specified in
+natural language.
+
+User Prompt
+• Natural Language Specification: {NL Spec}
+• Initial Implementation: {design}
+• Your task:
+1) Provide the unit tests for the given design.
+2) Revise the Verilog implementation if the original design fails to
+pass your test cases.
+3) Follow good coding practices, such as using meaningful comments
+to document key logic and decision points.
+4) Use $fatal(1, "msg") to flag incorrect behavior.
+5) Output format: {"design": "...", "test": "..."}
+
+User Prompt
+• Natural Language Specification: {NL Spec}
+• Previous Design and Test: {design}, {test}
+• Simulation Output: {error message}
+• Your task:
+1) Carefully identify the root cause of the failure by analyzing the
+code and the error message.
+2) Make changes to either the design or the test (or both) to resolve
+the issue while maintaining correctness.
+3) Output format: {"explanation": "...", "design": "...",
+"test": "..."}
+
+(a) Prompt for generating a Verilog module’s corresponding test
+
+(b) Prompt for refining a failing Verilog design and test
+
+Fig. 4: Prompt templates provided to the teacher model for automated Verilog test generation and refinement, ensuring that the
+final design passes the generated test and matches the original natural language specification.
+blocking assignments (<=) inside a combinational always @* Algorithm 1 Dataset Augmentation with a Teacher LLM
+block, which can lead to counterintuitive synthesis results. Input: Original dataset D = {(si , di )}N
+i=1
+Second, if instead used inside a sequential block, the sequence
+▷ si : NL specification; di : RTL design
+of non-blocking assignments in the design—y <= a, then y <=
+Maximum attempts T
+y & c, and finally y <= y & b—does not correctly compute Define: GenTestTpl ← prompt template for test generation
+and store in y the bitwise AND of a, b, and c. In particular,
+RefineTpl ← prompt template for iterative refinement
+non-blocking assignments defer updates until the end of the Output: Augmented dataset D′ = {(si , di , ti )}M
+i=1
+current timestep, meaning that all assignments operate on the
+▷ ti : Generated unit test
+same initial value of y, and only the final assignment takes
+1: D ′ ← ∅
+effect. Finally, if the non-blocking assignments were replaced
+2: for each (s, d) ∈ D do
+with blocking ones, the code would introduce a combinational
+3:
+attempt ← 0, success ← false
+feedback loop, which cannot stabilize.
+4:
+while attempt < T ∧ ¬success do
+These types of errors occur because the RTL code in prior
+5:
+attempt ← attempt + 1
+datasets, including Origen [8], is synthetically generated by
+6:
+if attempt == 1 then
+teacher LLMs such as Claude 3.5 and filtered only through
+7:
+d, t ← LLMInvoke(GenTestTpl , s, d)
+syntax checks. Without simulation or test-based validation,
+8:
+else
+semantic bugs that affect functional correctness remain unde9:
+d, t ← LLMInvoke(RefineTpl , s, d, t, err)
+tected.
+10:
+success, err ← RunVerilogTest(d, t)
+We provide the natural language specification and the buggy
+11:
+if success then
+RTL design to the teacher model GPT-4o-mini, prompting it
+12:
+D′ ← D′ ∪ {(s, d, t)}
+to generate a unit test using the template shown in Figure 4a
+′
+(further detailed in Section III-C). The resulting test is shown 13: return D
+in Figure 3, which sets all three inputs to 1 and checks whether
+the output y evaluates to 1 as expected. When the buggy design
+immediately with the result of a & b & c, as required by the
+(Figure 2b) is simulated with this test, it hangs and ultimately
+specification. This version passes the test generated by the
+times out. The bug exemplifies a combinational loop. The
+teacher model and behaves correctly under simulation.
+always @* block is meant for combinational logic and its
+This example underscores the importance of functional valievaluation is triggered upon changes to any of the variables
+dation in RTL datasets. Syntax checks alone cannot catch subtle
+read inside the block. In this case, an evaluation of the block
+but critical semantic errors. Our methodology, through teacheris triggered when either y, a, b, or c changes. However, y
+driven test generation and iterative refinement, ensures that
+is both read (on the RHS) and written (on the LHS) in the
+each design in the augmented dataset is not only syntactically
+same block. Upon evaluating the block, it schedules an update
+valid but also functionally validated with unit tests.
+to y, which causes a change to y. This change retriggers the
+block, leading to another scheduled update to y, and so on.
+This loop continues indefinitely, preventing the simulation from C. Algorithm and Prompts
+Algorithm 1 presents our automated pipeline for transforming
+converging.
+The corrected version replaces the non-blocking assignments an unvalidated RTL dataset into a functionally validated
+with a single blocking assignment (=), ensuring that y is updated one. Starting from a dataset D = {(si , di )}N
+i=1 , where each
+
+6
+
+example consists of a natural language specification si and
+a corresponding RTL design di (e.g., from Origen [8]), the
+goal is to generate a unit test ti that validates the functional
+correctness of the design. If the design fails to pass the test,
+we invoke an iterative refinement loop that updates the design
+and test until it passes or a maximum number of attempts T
+is reached. We set T = 5 in our experiments.
+The procedure is powered by a teacher model, GPT-4o-mini,
+which corresponds to the LLMInvoke calls in Algorithm 1.
+While stronger models such as GPT-4o or o3-mini may yield
+better performance, we use GPT-4o-mini in practice because of
+the large size of the dataset (217,462 examples in Origen) and
+the high cost associated with repeated API queries to OpenAI
+models.
+The process begins by prompting the teacher model with the
+test generation template (Figure 4a), together with a natural
+language specification and its initial RTL design (e.g., Figure 2a
+and Figure 2b). The model then produces a candidate unit test
+(e.g., Figure 3) designed to check whether the design satisfies
+the intended functionality under simulation.
+The design and test are compiled and simulated using
+standard Verilog tooling. If the test fails, for example due to a
+timeout, incorrect output, or another runtime error, we construct
+a refinement prompt (Figure 4b) that includes the specification,
+the failing design and test, and the simulation error message
+(corresponding to the err variable in Algorithm 1). This prompt
+is then passed to the teacher model, which attempts to fix the
+issue by making edits to the design, the test, or both.
+The refinement process repeats until the updated design
+passes simulation or the maximum number of attempts T is
+reached. Once a design successfully passes its test, the validated
+triple (si , di , ti ) is added to the output dataset D′ .
+This strategy enables systematic detection and correction
+of subtle RTL bugs that cannot be identified through syntax
+checks alone. By integrating LLM-based test generation and
+iterative refinement into the dataset construction pipeline, we
+produce a dataset that is not only syntactically valid but also
+functionally validated through simulation.
+While functional correctness under all possible inputs cannot
+be guaranteed, the inclusion of unit tests makes our augmented
+dataset substantially more robust than prior approaches that
+rely solely on syntactic checking. We view this as a practical
+and scalable step toward building higher-quality fine-tuning
+datasets for RTL generation. To assess quality, we manually
+reviewed 100 randomly sampled examples and found that 92%
+of the generated RTL code correctly matched the corresponding
+natural language descriptions.
+
+Category
+NL specification (words)
+Design (lines of RTL)
+Unit tests (lines of RTL)
+
+Length
+
+Count
+Min
+
+Max
+
+Avg
+
+116
+5
+6
+
+549
+225
+197
+
+247
+35
+55
+
+125,777
+
+TABLE II: Dataset statistics: total number of examples and
+length distributions for natural language specifications, RTL
+implementations, and unit tests in the VeriCoder dataset.
+
+tests average 55 lines (ranging from 6 to 197). We use the
+specification–solution pairs from this dataset to train our model,
+VeriCoder.
+B. LoRA Fine-Tuning Setup
+Following standard practices for LLM fine-tuning, we finetune the base model of Qwen2.5-14B-Instruct using Low-Rank
+Adaptation (LoRA, described in Section II-A), with a rank of
+16 and a scaling factor of 32 to all linear projection layers in
+the transformer. Training is conducted over 3 epochs with a
+batch size of 40. We adopt a constant learning rate of 1 × 10−5 ,
+paired with a linear decay scheduler and a warm-up ratio of
+0.05. The optimizer is used with a weight decay of 1 × 10−4 ,
+and gradient clipping is applied with a maximum norm of 1.
+C. Benchmarks and Metrics
+Following the evaluation protocol established in prior
+work [7], [8], we benchmark against VerilogEval [9] and
+RTLLM [10]. For VerilogEval, we report the standard Pass@k
+metric with k ∈ {1, 5, 10}, which estimates the expected
+probability that at least one of the top-k generated programs
+passes all test cases. The metric is defined as:
+"
+#
+n−c
+Pass@k = E 1 − nk 
+k
+
+where n is the total number of generated programs and c is
+the number of correct ones. All test cases are manually created
+by experts who design the benchmarks. In all evaluations, we
+set n = 10. For RTLLM, we report both syntax correctness
+and functional correctness using Pass@5. This evaluation setup
+aligns with that used in prior work [8].
+D. Models for Evaluation
+
+We evaluate two groups of models. The first group consists of
+pretrained-only base models, including OpenAI’s latest releases
+(o4-mini, o3-mini, GPT-4o, GPT-4o-mini), Google’s Gemini
+IV. E XPERIMENTAL S ETUP
+2.0 Flash, DeepSeek’s R1 and DeepSeek-Coder-7B-v1.5 (the
+A. Dataset
+base model used in prior work [8]), Meta’s LLaMA2-7B model,
+Following the methodology described in Section III, we and Alibaba’s Qwen2.5-14B-Instruct (our base model for fineconstruct a fine-tuning dataset comprising 125,777 examples. tuning). The second group includes fine-tuned models with
+Each example includes a natural language specification, a released weights from prior work: Origen [8], RTLCoder [6],
+corresponding RTL design, and associated unit tests. Table II and ChipGPT [27].
+summarizes key statistics: the specifications contain an average
+To ensure a fair comparison, we use identical input prompts
+of 247 words (ranging from 116 to 549), RTL implementations and post-processing scripts across all models. For models
+average 35 lines of code (ranging from 5 to 225), and unit released by prior work, we do not adopt their model-specific
+
+7
+
+Model Type
+
+VerilogEval V1.0 [9]
+(using pass@k metric)
+
+Evaluated Model
+
+RTLLM V1.1 [10]
+(using pass@5 metric)
+
+Eval-Machine (%)
+k=1
+k=5 k=10
+
+Eval-Human (%)
+k=1
+k=5 k=10
+
+Syntax-VCS
+(%)
+
+Functional
+(%)
+
+Base Models
+
+o4-mini-2025-04-16
+GPT-4o-2024-11-20
+GPT-4o-mini-2024-07-18
+DeepSeek-R1
+o3-mini-2025-01-31
+Qwen2.5-14B-Instruct
+Gemini-2.0-flash-001
+DeepSeek-R1-Distill-Qwen-14B
+DeepSeek-Coder-7B-v1.5
+LLaMA-2-7B
+
+61.9
+63.7
+55.7
+65.7
+66.4
+47.8
+60.3
+46.2
+44.4
+7.0
+
+67.8
+66.5
+62.4
+70.9
+71.6
+54.2
+62.6
+64.1
+58.9
+15.6
+
+68.6
+67.1
+64.3
+72.0
+72.0
+55.2
+63.6
+68.5
+62.9
+18.9
+
+64.3
+54.3
+44.7
+62.8
+62.0
+35.3
+52.1
+36.7
+25.8
+0.4
+
+66.4
+60.4
+51.6
+69.1
+68.9
+40.0
+57.6
+51.7
+40.2
+2.1
+
+67.1
+62.2
+55.1
+69.9
+69.9
+42.3
+59.0
+55.1
+44.9
+3.8
+
+86.2
+100.0
+89.7
+79.3
+69.0
+69.0
+65.5
+62.1
+48.3
+3.4
+
+72.4
+69.0
+65.5
+58.6
+55.2
+41.4
+34.5
+34.5
+24.1
+0.0
+
+Fine-Tuned Models
+(Prior Work)
+
+OriGen [8]
+RTLCoder-DeepSeek [6]
+RTLCoder-Mistral [6]
+ChipGPT-LLaMA3.1-8B-SFT [27]
+ChipGPT-LLaMA2-SFT-7B [27]
+
+35.9
+22.0
+17.6
+17.6
+0.9
+
+65.1
+51.4
+46.4
+46.4
+4.2
+
+68.5
+57.3
+56.6
+56.6
+7.7
+
+22.3
+14.7
+12.4
+12.4
+0.6
+
+47.5
+35.2
+31.5
+31.5
+2.2
+
+51.9
+42.3
+36.5
+36.5
+3.8
+
+51.7
+17.2
+3.4
+13.8
+6.9
+
+37.9
+10.3
+0.0
+0.0
+0.0
+
+Our Work
+
+VeriCoder
+
+55.7
+
+62.9
+
+64.3
+
+38.3
+
+49.2
+
+51.9
+
+79.3
+
+48.3
+
+TABLE III: RTL code generation performance across models. To ensure a fair comparison, we use the same input prompts and
+apply identical post-processing scripts, running inference with model weights released by prior work.
+
+prompts [8] or inference pipelines [6], [27]. Instead, we apply
+a uniform evaluation script, with the only variable being the
+model under test. This standardization is critical, as both
+input formatting and post-processing can significantly affect
+performance. By controlling these factors, we isolate model
+capability and enable a fair comparison.
+
+variant. For a fair comparison, we do not apply any of the
+model-specific customized post-processing scripts that attempt
+to fix syntax or header issues. Instead, we use a standardized
+evaluation script for all models, extracting Verilog code as-is
+to ensure consistency.
+
+b) Effectiveness of our fine-tuning: Starting from
+Qwen-2.5-14B-Instruct as our base model, VeriCoder delivers
+substantial gains across VerilogEval. On the VerilogEvalA. Main Evaluation Results
+Machine split, pass@1 jumps up by 7.6%, pass@5 by 4.0%,
+Table III shows the results. Our major findings are as follows:
+and pass@10 by 2.1%, and VerilogEval-Human reflects the
+a) Comparison with prior work: VeriCoder achieves
+same trend. On RTLLM, functional pass@5 is 7% higher
+state-of-the-art results across two RTL code generation benchthan its base model. Specifically, VeriCoder even marginally
+marks, outperforming all previously released open-source fineoutperforms one of the commercial models, Google’s Geminituned models. On VerilogEval-Machine, VeriCoder attains a
+2.0-flash, on pass@5 and pass@10 metrics of Eval-Machine as
+pass@1 accuracy of 55.7%, representing a 19.8 percentage
+well as on RTLLM. Together, these results demonstrate that our
+point improvement over the best prior model, OriGen. On
+fine-tuning process and our validated dataset significantly boost
+VerilogEval-Human, it reaches 38.3%, exceeding OriGen by
+pass@k metrics and semantic correctness in RTL generation.
+16.0 percentage points. Across all evaluated k-shot settings
+(k=1, 5, 10), VeriCoder consistently maintains its lead on
+the Human split. On the RTLLM benchmark, VeriCoder
+c) Model gap remains: Despite the observed improveachieves 79.3% syntax correctness and 48.3% functional ments, a substantial performance gap persists between Vericorrectness, surpassing OriGen’s 51.7% and 37.9%, respectively. Coder and the strongest large models. For instance, o3In conclusion, VeriCoder delivers relative improvements of up mini attains 66.4% on VerilogEval Pass@1 compared to
+to 71.7% on VerilogEval and 27.4% on RTLLM in pass@k VeriCoder’s 55.7%. DeepSeek-R1 achieves 69.1% on humanaccuracy, surpassing the previous state-of-the-art model on both graded Pass@5, versus VeriCoder’s 49.2%. Commercial LLMs
+benchmarks.
+such as GPT-4o reach a perfect 100.0% Syntax-VCS validity
+To better understand the relatively low performance of and 69.0% functional correctness, while VeriCoder records
+ChipGPT [27], we examined its outputs in detail. We observed 79.3% and 48.3%, respectively. Despite the performance gap,
+that its generated RTL designs often include module headers open-source lightweight models offer compelling advantages.
+that deviate from the given specifications, revealing difficulty They provide transparency, allow for local deployment, and
+in precise instruction following. Moreover, its base model, ensure intellectual property protection, i.e., capabilities that
+LLaMA2-7B, performs even worse, suggesting that limitations are particularly important for RTL design workflows where
+in the instruction-following capabilities of the underlying security, customizability, and integration into existing toolchains
+pretrained model constrain the effectiveness of the fine-tuned are critical.
+V. R ESULTS
+
+8
+
+Model
+Qwen2.5-14B-Instruct (base)
+Qwen w/ unvalidated data
+Qwen w/ validated data
+
+VerilogEval [9]
+(Pass@5)
+46.8
+53.5
+55.8
+
+RTLLM [10]
+(Pass@5)
+Syntax
+
+Func
+
+69.0
+75.9
+79.3
+
+41.4
+44.8
+48.3
+
+TABLE IV: We performed fine-tuning on the same base model
+using a functionally validated dataset and the functionally
+unvalidated dataset [8]. We report Pass@5 metrics for all
+models on two benchmarks.
+
+B. Ablation Study of Dataset
+To assess the impact of dataset quality on RTL code
+generation, we conduct an ablation study using the same base
+model, Qwen2.5-14B-Instruct, fine-tuned on two datasets: (1)
+the unvalidated OriGen dataset from prior work [8], and (2)
+our newly curated, functionally validated dataset. All factors,
+including dataset size, fine-tuning hyperparameters, training
+procedures, and evaluation settings, are held constant to ensure
+a fair comparison.
+Across all metrics, we observe a consistent improvement
+as dataset quality increases. On the VerilogEval benchmark
+(covering both Machine and Human subsets), the base model
+achieves 46.8% Pass@5. Fine-tuning on the unvalidated dataset
+raises performance to 53.5%, while our validated dataset further
+improves it to 55.8%. For RTLLM syntax correctness, the trend
+is similar: 69.0% for the base model, 75.9% for the unvalidated
+version, and 79.3% when trained on validated data. Functional
+correctness sees even more significant improvement, rising
+from 41.4% (base) to 44.8% (unvalidated) and ultimately to
+48.3% (validated).
+These results demonstrate that functionally validated data
+provides more effective supervision than existing unvalidated
+data. This also underscores the importance of dataset quality
+in fine-tuning LLMs for RTL code generation.
+
+C. Test Passing Rates of Non-Validated Datasets
+
+Prior Datasets
+
+# Sampled Examples
+
+Test Passing (%)
+
+RTLCoder [6]
+OriGen [8]
+
+1000
+1000
+
+24.4
+53.5
+
+TABLE V: Test passing rates (%) of datasets released by prior
+work on a randomly sampled set of 1000 examples.
+VI. D ISCUSSION AND F UTURE W ORK
+While VeriCoder, combining unit test generation with
+feedback-driven refinement, improves the functional correctness
+of generated RTL code, it does not fully guarantee correctness.
+Synthetic test cases may fail to capture all possible edge
+cases. To address this challenge, future work should explore
+integrating formal verification techniques into the dataset
+construction pipeline to rigorously ensure the correctness of
+the generated code. Recent advancements have demonstrated
+promising results in translating natural language instructions
+into formal specifications [16], [38], as well as enforcing formal
+constraints during LLM-based code generation [39].
+Moreover, most existing approaches, including VeriCoder,
+focus on small-scale RTL generation. However, practical hardware development often involves large, repository-level codebases with intricate cross-file dependencies and requirements
+for long-range context [40]–[42]. Recent work has begun to
+address these challenges through techniques such as combining
+fine-tuning with retrieval-augmented RTL code generation [43],
+[44]. Extending VeriCoder’s unit test generation and feedbackdirected refinement components to the repository scale will
+enable LLMs to handle more real-world RTL tasks.
+Furthermore, reinforcement learning (RL) offers a powerful
+framework for further optimizing large language models’
+performance beyond what is achievable through supervised
+fine-tuning alone. Recent studies have demonstrated the effectiveness of RL in enhancing LLM-based code generation
+by incorporating diverse forms of feedback, such as test
+case outcomes, compiler diagnostics, and formal verification
+results [32], [45], [46]. Building on this progress, future work
+could investigate applying RL techniques to the VeriCoder
+dataset, using the accompanying test cases as a feedback signal
+to iteratively improve RTL code generation quality.
+
+We examine the quality of fine-tuning datasets released
+VII. C ONCLUSION
+by prior work by evaluating their passing rates against our
+synthetic unit tests generated by the teacher model GPT-4oRecent advances in Large Language Models (LLMs) have
+mini. For each corpus, we randomly sample 1,000 Verilog opened new possibilities for Electronic Design Automation
+implementations and apply the test generation and refinement (EDA), particularly in RTL code generation. However, most
+pipeline described in Section III. We then run corresponding existing datasets emphasize syntactic validity while overlooking
+unit tests against the original design and measure the proportion functional correctness, which limits the effectiveness of fineof the original designs that successfully pass the generated tests. tuned models. We introduce V ERI C ODER, a model fine-tuned
+As shown in Table V, only 24.4% examples of the RTLCoder on a dataset with 125,000 examples that is validated for
+dataset [6] pass our functional tests, while OriGen [8] reaches functional correctness. This dataset is constructed using a
+53.5%.
+feedback-directed refinement pipeline guided by a teacher LLM,
+OriGen’s higher pass rate aligns with its stronger code which generates and iteratively updates both RTL designs and
+generation results in Table III, hinting at a positive link unit tests until the design passes simulation. The resulting
+between dataset validity and downstream performance. These dataset consists of functionally validated triples comprising a
+findings highlight the potential value of incorporating functional natural language specification, an RTL implementation, and a
+correctness validation into fine-tuning dataset curation for better passing test. Fine-tuned on this dataset, V ERI C ODER achieves
+RTL code generation.
+state-of-the-art results on two established RTL benchmarks,
+
+9
+
+yielding relative improvements of up to 71.7% on VerilogEval
+and 27.4% on RTLLM. An ablation study confirms the impact
+of functional validation on model performance, underscoring
+the importance of high-quality training data. Future work may
+explore formal verification and reinforcement learning to further
+advance AI-assisted hardware design.
+ACKNOWLEDGMENT
+We thank Samantha Archer, Yao Hsiao, Mohammad Rahmani Fadiheh and Subhasish Mitra for their discussions. This
+work was partially supported by a Google Research Award.
+R EFERENCES
+[1] M. Liu, T.-D. Ene, R. Kirby, C. Cheng, N. Pinckney, R. Liang, J. Alben,
+H. Anand, S. Banerjee, I. Bayraktaroglu et al., “Chipnemo: Domainadapted llms for chip design,” arXiv preprint arXiv:2311.00176, 2023.
+[2] L. Chen, Y. Chen, Z. Chu, W. Fang, T.-Y. Ho, R. Huang, Y. Huang,
+S. Khan, M. Li, X. Li et al., “The dawn of ai-native eda: Opportunities
+and challenges of large circuit models,” arXiv preprint arXiv:2403.07257,
+2024.
+[3] R. Zhong, X. Du, S. Kai, Z. Tang, S. Xu, H.-L. Zhen, J. Hao,
+Q. Xu, M. Yuan, and J. Yan, “Llm4eda: Emerging progress in large
+language models for electronic design automation,” arXiv preprint
+arXiv:2401.12224, 2023.
+[4] Z. He and B. Yu, “Large language models for eda: Future or mirage?” in
+Proceedings of the 2024 International Symposium on Physical Design,
+2024, pp. 65–66.
+[5] X. Yao, Y. Wang, X. Li, Y. Lian, R. Chen, L. Chen, M. Yuan, H. Xu, and
+B. Yu, “Rtlrewriter: Methodologies for large models aided rtl code
+optimization,” in Proceedings of the 43rd IEEE/ACM International
+Conference on Computer-Aided Design, 2024, pp. 1–7.
+[6] S. Liu, W. Fang, Y. Lu, J. Wang, Q. Zhang, H. Zhang, and Z. Xie,
+“Rtlcoder: Fully open-source and efficient llm-assisted rtl code generation
+technique,” IEEE Transactions on Computer-Aided Design of Integrated
+Circuits and Systems, 2024.
+[7] S. Liu, W. Fang, Y. Lu, Q. Zhang, H. Zhang, and Z. Xie, “Rtlcoder:
+Outperforming gpt-3.5 in design rtl generation with our open-source
+dataset and lightweight solution,” in 2024 IEEE LLM Aided Design
+Workshop (LAD). IEEE, 2024, pp. 1–5.
+[8] F. Cui, C. Yin, K. Zhou, Y. Xiao, G. Sun, Q. Xu, Q. Guo, D. Song, D. Lin,
+X. Zhang et al., “Origen: Enhancing rtl code generation with code-tocode augmentation and self-reflection,” arXiv preprint arXiv:2407.16237,
+2024.
+[9] M. Liu, N. Pinckney, B. Khailany, and H. Ren, “Verilogeval: Evaluating
+large language models for verilog code generation,” in 2023 IEEE/ACM
+International Conference on Computer Aided Design (ICCAD). IEEE,
+2023, pp. 1–8.
+[10] Y. Lu, S. Liu, Q. Zhang, and Z. Xie, “Rtllm: An open-source benchmark
+for design rtl generation with large language model,” in 2024 29th Asia
+and South Pacific Design Automation Conference (ASP-DAC). IEEE,
+2024, pp. 722–727.
+[11] Y. Tsai, M. Liu, and H. Ren, “Rtlfixer: Automatically fixing rtl syntax
+errors with large language model,” in Proceedings of the 61st ACM/IEEE
+Design Automation Conference, 2024, pp. 1–6.
+[12] Y. Liao, T. Adegbija, and R. Lysecky, “Are llms any good for highlevel synthesis?” in Proceedings of the 43rd IEEE/ACM International
+Conference on Computer-Aided Design, 2024, pp. 1–8.
+[13] Y. Fu, Y. Zhang, Z. Yu, S. Li, Z. Ye, C. Li, C. Wan, and Y. C. Lin,
+“Gpt4aigchip: Towards next-generation ai accelerator design automation
+via large language models,” in 2023 IEEE/ACM International Conference
+on Computer Aided Design (ICCAD). IEEE, 2023, pp. 1–9.
+[14] Z. Yan, Y. Qin, X. S. Hu, and Y. Shi, “On the viability of using llms
+for sw/hw co-design: An example in designing cim dnn accelerators,”
+in 2023 IEEE 36th International System-on-Chip Conference (SOCC).
+IEEE, 2023, pp. 1–6.
+[15] Z. Liang, J. Cheng, R. Yang, H. Ren, Z. Song, D. Wu, X. Qian, T. Li,
+and Y. Shi, “Unleashing the potential of llms for quantum computing: A
+study in quantum architecture design,” arXiv preprint arXiv:2307.08191,
+2023.
+
+[16] M. Cosler, C. Hahn, D. Mendoza, F. Schmitt, and C. Trippel, “nl2spec:
+Interactively translating unstructured natural language to temporal logics
+with large language models,” in International Conference on Computer
+Aided Verification. Springer, 2023, pp. 383–396.
+[17] C. Sun, C. Hahn, and C. Trippel, “Towards improving verification productivity with circuit-aware translation of natural language to systemverilog
+assertions,” in First International Workshop on Deep Learning-aided
+Verification, 2023.
+[18] H. Wu, Z. He, X. Zhang, X. Yao, S. Zheng, H. Zheng, and B. Yu,
+“Chateda: A large language model powered autonomous agent for eda,”
+IEEE Transactions on Computer-Aided Design of Integrated Circuits
+and Systems, 2024.
+[19] Z. Xiao, X. He, H. Wu, B. Yu, and Y. Guo, “Eda-copilot: A ragpowered intelligent assistant for eda tools,” ACM Transactions on Design
+Automation of Electronic Systems, 2025.
+[20] K. Xu, J. Sun, Y. Hu, X. Fang, W. Shan, X. Wang, and Z. Jiang, “Meic:
+Re-thinking rtl debug automation using llms,” in Proceedings of the 43rd
+IEEE/ACM International Conference on Computer-Aided Design, 2024,
+pp. 1–9.
+[21] R. Li, L. B. Allal, Y. Zi, N. Muennighoff, D. Kocetkov, C. Mou,
+M. Marone, C. Akiki, J. Li, J. Chim et al., “Starcoder: may the source
+be with you!” arXiv preprint arXiv:2305.06161, 2023.
+[22] A. Lozhkov, R. Li, L. B. Allal, F. Cassano, J. Lamy-Poirier, N. Tazi,
+A. Tang, D. Pykhtar, J. Liu, Y. Wei et al., “Starcoder 2 and the stack
+v2: The next generation,” arXiv preprint arXiv:2402.19173, 2024.
+[23] E. Dehaerne, B. Dey, S. Halder, and S. De Gendt, “A deep learning
+framework for verilog autocompletion towards design and verification
+automation,” arXiv preprint arXiv:2304.13840, 2023.
+[24] Z. Pei, H.-L. Zhen, M. Yuan, Y. Huang, and B. Yu, “Betterv: Controlled verilog generation with discriminative guidance,” arXiv preprint
+arXiv:2402.03375, 2024.
+[25] S. Thakur, B. Ahmad, Z. Fan, H. Pearce, B. Tan, R. Karri, B. DolanGavitt, and S. Garg, “Benchmarking large language models for automated
+verilog rtl code generation,” in 2023 Design, Automation & Test in Europe
+Conference & Exhibition (DATE). IEEE, 2023, pp. 1–6.
+[26] S. Thakur, B. Ahmad, H. Pearce, B. Tan, B. Dolan-Gavitt, R. Karri, and
+S. Garg, “Verigen: A large language model for verilog code generation,”
+ACM Transactions on Design Automation of Electronic Systems, vol. 29,
+no. 3, pp. 1–31, 2024.
+[27] K. Chang, K. Wang, N. Yang, Y. Wang, D. Jin, W. Zhu, Z. Chen, C. Li,
+H. Yan, Y. Zhou et al., “Data is all you need: Finetuning llms for
+chip design via an automated design-data augmentation framework,” in
+Proceedings of the 61st ACM/IEEE Design Automation Conference, 2024,
+pp. 1–6.
+[28] E. J. Hu, Y. Shen, P. Wallis, Z. Allen-Zhu, Y. Li, S. Wang, L. Wang,
+W. Chen et al., “Lora: Low-rank adaptation of large language models.”
+ICLR, vol. 1, no. 2, p. 3, 2022.
+[29] M. Liu, Y.-D. Tsai, W. Zhou, and H. Ren, “Craftrtl: Highquality synthetic data generation for verilog code models with
+correct-by-construction non-textual representations and targeted code
+repair,” ArXiv, vol. abs/2409.12993, 2024. [Online]. Available:
+https://api.semanticscholar.org/CorpusID:272770433
+[30] Y. Zhang, Z. Yu, Y. Fu, C. Wan, and Y. C. Lin, “Mg-verilog: Multigrained dataset towards enhanced llm-assisted verilog generation,” in
+2024 IEEE LLM Aided Design Workshop (LAD). IEEE, 2024, pp. 1–5.
+[31] E. Goh, M. Xiang, I. Wey, T. H. Teo et al., “From english to asic:
+Hardware implementation with large language model,” arXiv preprint
+arXiv:2403.07039, 2024.
+[32] S. Liu, Y. Lu, W. Fang, M. Li, and Z. Xie, “Openllm-rtl: Open dataset
+and benchmark for llm-aided design rtl generation,” in Proceedings of the
+43rd IEEE/ACM International Conference on Computer-Aided Design,
+2024, pp. 1–9.
+[33] C. Deng, Y.-D. Tsai, G.-T. Liu, Z. Yu, and H. Ren, “Scalertl: Scaling
+llms with reasoning data and test-time compute for accurate rtl code
+generation,” ArXiv, vol. abs/2506.05566, 2025. [Online]. Available:
+https://api.semanticscholar.org/CorpusID:279243692
+[34] Y. Liu, C. Xu, Y. Zhou, Z. Li, and Q. Xu, “Deeprtl: Bridging
+verilog understanding and generation with a unified representation
+model,” ArXiv, vol. abs/2502.15832, 2025. [Online]. Available:
+https://api.semanticscholar.org/CorpusID:276574886
+[35] N. Wang, B. Yao, J. Zhou, X. Wang, Z. Jiang, and N. Guan,
+“Large language model for verilog generation with golden code
+feedback,” ArXiv, vol. abs/2407.18271, 2024. [Online]. Available:
+https://api.semanticscholar.org/CorpusID:271516462
+[36] M. Gao, J. Zhao, Z. Lin, W. Ding, X. Hou, Y. Feng, C. Li, and
+M. Guo, “Autovcoder: A systematic framework for automated verilog
+code generation using llms,” 2024 IEEE 42nd International Conference
+
+10
+
+on Computer Design (ICCD), pp. 162–169, 2024. [Online]. Available:
+https://api.semanticscholar.org/CorpusID:271516210
+[37] Y. Zhao, D. Huang, C. Li, P. Jin, Z. Nan, T. Ma, L. Qi,
+Y. Pan, Z. Zhang, R. Zhang, X. Zhang, Z. Du, Q. Guo,
+X. Hu, and Y. Chen, “Codev: Empowering llms with hdl
+generation through multi-level summarization,” 2024. [Online]. Available:
+https://api.semanticscholar.org/CorpusID:271212791
+[38] D. Mendoza, C. Hahn, and C. Trippel, “Translating natural language
+to temporal logics with large language models and model checkers,” in
+2024 Formal Methods in Computer-Aided Design (FMCAD), 2024, pp.
+1–11.
+[39] P. Aggarwal, B. Parno, and S. Welleck, “Alphaverus: Bootstrapping
+formally verified code generation through self-improving translation and
+treefinement,” arXiv preprint arXiv:2412.06176, 2024.
+[40] C. E. Jimenez, J. Yang, A. Wettig, S. Yao, K. Pei, O. Press, and
+K. Narasimhan, “Swe-bench: Can language models resolve real-world
+github issues?” arXiv preprint arXiv:2310.06770, 2023.
+[41] T. Suresh, R. G. Reddy, Y. Xu, Z. Nussbaum, A. Mulyar, B. Duderstadt,
+and H. Ji, “Cornstack: High-quality contrastive data for better code
+retrieval and reranking,” in The Thirteenth International Conference on
+Learning Representations, 2025.
+[42] N. Jain, M. Shetty, T. Zhang, K. Han, K. Sen, and I. Stoica, “R2e:
+Turning any github repository into a programming agent environment,”
+in ICML, 2024.
+[43] P. Wu, N. Guo, J. Lv, X. Xiao, and X. Ye, “Rtlrepocoder: Repositorylevel rtl code completion through the combination of fine-tuning and
+retrieval augmentation,” arXiv preprint arXiv:2504.08862, 2025.
+[44] Z. Li, C. Xu, Z. Shi, Z. Peng, Y. Liu, Y. Zhou, L. Zhou, C. Ma, J. Zhong,
+X. Wang et al., “Deepcircuitx: A comprehensive repository-level dataset
+for rtl code understanding, generation, and ppa analysis,” arXiv preprint
+arXiv:2502.18297, 2025.
+[45] N. Wang, B. Yao, J. Zhou, X. Wang, Z. Jiang, and N. Guan, “Large
+language model for verilog generation with golden code feedback,” arXiv
+preprint arXiv:2407.18271, 2024.
+[46] J. Wang, Z. Zhang, Y. He, Y. Song, T. Shi, Y. Li, H. Xu, K. Wu, G. Qian,
+Q. Chen et al., “Enhancing code llms with reinforcement learning in
+code generation,” arXiv preprint arXiv:2412.20367, 2024.
+
+

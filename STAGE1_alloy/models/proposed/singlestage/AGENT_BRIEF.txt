@@ -1,0 +1,69 @@
+SINGLE-STAGE (FLAT) DRAFT MODELS — shared brief for the per-family agents (2026-11-09, session "singlestage")
+Repo: /Users/annaeaton/trippel/simspect (owner: Anna). Read CLAUDE.md rules below before acting; they are binding.
+
+GOAL
+Anna's two-stage Alloy pipeline (Stage 1 minimal "cores" -> Stage 1.5 pins each core into the production model at exactly 6
+instructions) provably cannot emit some shapes the flat production model can (an ALU op feeding the transmitter), and it
+always adds exactly 6-k instructions. She wants a SINGLE-STAGE analogue per model family: one flat Alloy model that directly
+enumerates leaking programs WITH unnecessary (non-core) instructions, also at a larger bound, and she wants them RUN.
+Background (read the last two sections, both dated 2026-11-09 / 2026-11-08, only as needed):
+  wiki/design/TWO_PHASE_MODELS.md  ("Dedup and shape-coverage audit")
+  STAGE1_alloy/models/proposed_twophase/stage15_bound/SECTION_for_TWO_PHASE_MODELS.md  (what is tied to the bound N: S1-S4)
+
+WHAT TO BUILD, per base model B in your family (all NEW files, in STAGE1_alloy/models/proposed/singlestage/<FAMILY>/):
+  V0  n6_prod            = the base model itself, unchanged. No new file. Just run it (random seeds are the new part).
+  V1  <B>_flat_n8_prod.als             exactly 8 instructions, the base model's own minimality
+  V2  <B>_flat_n8_prod_nospacer.als    as V1 + no operand-free padding instructions (--shape nospacer)
+  V3  <B>_flat_n8_leakrs_nospacer.als  exactly 8, minimality = leak + state-minimality only (--minimality leak_rs), nospacer
+Generator (do not edit it): STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py, e.g.
+  python3 .../make_s15_model.py --model <B.als> --pin none --n 8 --operands 16 --intbits 6 [--shape nospacer] [--minimality leak_rs] --out <new.als>
+  (worked example already made: STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_prod.als; it ran on cafe2.)
+It must change ONLY bound-tied text (scope, IX position atoms, protection-set fold depth, Int bitwidth, operand scope) plus the
+requested minimality/shape clause. The defense block (speculation contract, protection set + propagation, leakage function)
+must stay byte-identical: verify with a diff against the base and say so in your report. If the generator's text anchors do
+not match your base model (likely for SPT's nested fold, the *_u "ultimate" models, STL models), do NOT hand-edit and do NOT
+edit make_s15_model.py or anything in singlestage/tools/: write your own small generator script in your family folder
+(copy + adapt), keep the same "only bound-tied text" rule, and explain what differed. If a variant cannot be built soundly,
+skip it and say why; never weaken a check to get output. For SPT, N=8 with the nested fold translates slowly (~40 s) — fine.
+Every new .als must start with a comment header: UNAPPROVED DRAFT, date, generator command, base file + its sha256.
+
+HARD RULES (from CLAUDE.md; violating any of these is worse than not finishing)
+  - NEVER edit, reformat or "fix" any existing .als, STAGE2_compilation/parsexml.py, gem5 hooks, launchers, or shared tools.
+    New files only, only inside your family folder (and your own dir on cafe2).
+  - NO git writes of any kind (no add/commit/stash/checkout/...). Read-only git is fine.
+  - Do NOT edit shared docs (claudenotes.md, claudelog.md, STATUS.md, URGENT_TODO.md, anything under wiki/). The parent
+    session has already claimed this work in claudenotes.md and will write the docs from your report. Create NO .md files.
+  - Never invent a value or semantics. If something is unclear, report it as an open question instead of guessing.
+  - Nothing important in /tmp or a scratchpad. No external actions (no messages, no pushes). Do not spawn further agents.
+  - Any hard semantic choice you had to make (what a clause should mean) goes in your report as a DECISION FOR ANNA, with options.
+
+RUNNING (cafe2, inside the gem5_dev container; the Mac is too small and its disk is 95% full — do not enumerate locally
+beyond a tiny smoke test with /opt/homebrew/opt/openjdk@17/bin/java)
+  Reach it:   ssh -o BatchMode=yes cafe2 "docker exec -i gem5_dev bash -lc '<cmd>'"     (works without extra setup)
+  Workspace:  /tests/singlestage_20261109/   tools/ (run_flat.py, census_flat.py, check_bound_consistency.py), classes/
+              (a6RandomModels compiled), models/<FAMILY>/ (put your .als here), out/<FAMILY>/<model stem>/, logs/
+  Alloy dir:  /tests/simspect_alloy_20261108/STAGE1_alloy   (alloy6.jar + a6CountModels.class)
+  Push files: tar czf - -C STAGE1_alloy/models/proposed/singlestage <FAMILY> | ssh -o BatchMode=yes cafe2 "docker exec -i gem5_dev bash -lc 'cd /tests/singlestage_20261109/models && tar xzf -'"
+  Base models that are not in your family folder: copy them to models/<FAMILY>/base/ on cafe2 (read-only copies) for V0.
+  Step 1 smoke (foreground, each new model):  python3 tools/run_flat.py --model models/<FAMILY>/<m>.als --out out/<FAMILY>/_smoke_<m>
+       --alloy-dir /tests/simspect_alloy_20261108/STAGE1_alloy --classes /tests/singlestage_20261109/classes --seeds default,7 --cap 40 --timeout 400 --jobs 2
+       It must lint OK and return instances (or a clean EXHAUSTED 0 = UNSAT, which is a finding to report). Delete _smoke_* after.
+  Step 2 real run (detached, so it survives your ssh):
+       docker exec -d gem5_dev bash -lc 'cd /tests/singlestage_20261109 && nohup nice -n 5 python3 tools/run_flat.py --model ... --out out/<FAMILY>/<m>
+       --alloy-dir ... --classes ... --seeds default,1,2,3 --cap 10000 --timeout 1500 --jobs 4 > logs/<FAMILY>__<m>.nohup.txt 2>&1'
+       Limits: at most 8 JVMs of yours at once (2 models x 4 seeds). Other sessions share the node; if `uptime` load > 56, wait.
+       Poll with a remote wait loop per ssh call (e.g. 'for i in $(seq 16); do grep -q "^.* END$" out/.../run_flat.log && break; sleep 30; done; tail -3 out/.../run_flat.log'),
+       each Bash call under 10 minutes. A run is over when run_flat.log ends with END; results are in runs.jsonl.
+  Step 3 census:  python3 tools/census_flat.py --jobs 8 --json out/<FAMILY>/<m>/census.json [--cores <core dir>] out/<FAMILY>/<m>/default out/<FAMILY>/<m>/1 out/<FAMILY>/<m>/2 out/<FAMILY>/<m>/3
+       --cores only for the exactly-6 base run (V0), with your family's Stage-1 cores if they exist (listed in your prompt):
+       it tells how many flat programs contain a core under the exact Stage-1.5 pin vs the path pin. census is CPU heavy at 40k files: nice it.
+  Clean up: remove _smoke_* dirs and anything you put in /tmp. Leave the real outputs. Do not touch other sessions' dirs or processes.
+
+DELIVERABLES
+  1. The new .als drafts (+ any family generator script) in STAGE1_alloy/models/proposed/singlestage/<FAMILY>/.
+  2. STAGE1_alloy/models/proposed/singlestage/<FAMILY>/RESULTS.json: for every model run: base file + sha256, generator command,
+     lint line, runs.jsonl rows (seed, instances, verdict, secs), and the census UNION + PAIRWISE_OVERLAP blocks, cafe2 paths.
+  3. A final report (plain text, under 500 words): which variants exist and ran; per variant: instances, distinct, verdicts,
+     alu_feeds_xmit, two_load_merge, unnecessary_avg/hist, bare_avg, unresolved_brs_hist, speed; for V0 the core-coverage
+     numbers; anything that failed or was skipped with the exact error; what surprised you; DECISIONS FOR ANNA.
+     State plainly what you verified and what you did not. Do not round a failure into a success.

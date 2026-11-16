@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Usage: python3 mf_classify.py <query-name> [--show N]   (reads queries/mf/<name>.out/inst-*.txt)
-"""mf_classify.py -- explain every instance a model-fixes differential query returned (2026-11-08).
+"""mf_classify.py -- explain every instance a model-fixes differential query returned.
 t1_gained / t1_lost      : STT_6 vs STT_6_v2 (cross-checked with mf_semantics.py; reason = the R-1 witness)
 t2d2_recon_only          : Recon_6_v2-useful, not STT_6_v2-useful (reason = which perturbation a reveal makes secure)
 t2d3_stt_only            : STT_6_v2-useful, not Recon_6_v2-useful (reason = the revealed read on xm's path)

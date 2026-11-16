@@ -1,0 +1,14 @@
+start 2026-11-10 11:26:45 campaign=/tests/simspect_alloy_20261108/firstdet_final/T2g_Footprint_6_u_core_lpP_fv3/cs_evidence
+mispredict_not_taken/inst-007667 causes=['unattributed']
+    inst-007667 L1D 0x75c0 under_clean -> unattributed: install item, no split/E->M chain
+    inst-007667 L2 0x75c0 under_clean -> unattributed: install item, no split/E->M chain
+mispredict_not_taken/inst-009970 causes=['unattributed']
+    inst-009970 L1D 0x75c0 under_clean -> unattributed: install item, no split/E->M chain
+    inst-009970 L2 0x75c0 under_clean -> unattributed: install item, no split/E->M chain
+mispredict_not_taken/inst-019027 causes=['unattributed']
+    inst-019027 L1D 0x75c0 under_clean -> unattributed: install item, no split/E->M chain
+    inst-019027 L2 0x75c0 under_clean -> unattributed: install item, no split/E->M chain
+mispredict_not_taken/inst-021207 causes=['UV5_older_load']
+    inst-021207 L1D 0x75c0 over_clean -> UV5_older_load: S=3151 fill 0x75c0 @17483500; older committed U=3124 req=ld addr=0x75c0 size=8 hits @17484000; cleanup_inv @22572000
+    inst-021207 L2 0x75c0 over_clean -> UV5_older_load: S=3151 fill 0x75c0 @17405000; older committed U=3124 req=ld addr=0x75c0 size=8 hits @17484000; cleanup_inv @22572000
+end 2026-11-10 11:26:46 stems=4 elapsed=1.1s

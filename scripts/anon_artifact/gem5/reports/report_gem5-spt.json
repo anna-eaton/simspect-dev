@@ -1,0 +1,36 @@
+{
+ "build": "gem5-spt",
+ "base": "pristine/gem5-spt",
+ "copied": 4176,
+ "modified": [
+  "configs/common/Options.py",
+  "configs/example/se.py",
+  "src/cpu/o3/O3CPU.py",
+  "src/cpu/o3/commit.hh",
+  "src/cpu/o3/commit_impl.hh",
+  "src/cpu/o3/cpu.cc",
+  "src/cpu/o3/cpu.hh",
+  "src/cpu/o3/fetch.hh",
+  "src/cpu/o3/iew_impl.hh",
+  "src/cpu/pred/BranchPredictor.py",
+  "src/cpu/pred/bpred_unit.cc",
+  "src/cpu/pred/bpred_unit.hh"
+ ],
+ "added": [
+  "configs/example/se_exp.py",
+  "configs/example/se_slowcomm.py"
+ ],
+ "deleted": [],
+ "comments_removed": 85,
+ "skipped_mixed": [],
+ "new_binary": [],
+ "top_excluded": [
+  "build_hooks.log",
+  "parsetab.py"
+ ],
+ "new_noncode": [],
+ "derived_from": {
+  "configs/example/se_exp.py": "configs/example/se.py",
+  "configs/example/se_slowcomm.py": "configs/example/se.py"
+ }
+}

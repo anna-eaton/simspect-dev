@@ -82,7 +82,7 @@ Every Alloy model is **shared skeleton + a small defense-definition block**. The
 
 ## Directives mirrored from `~/Documents/CLAUDE.md` (home of these rules)
 
-These rules live in `~/Documents/CLAUDE.md`. They're copied here so that sessions on cafe2 or the mini, which don't load that file, still follow them. If the two copies ever disagree, the Documents copy wins.
+These rules live in `~/Documents/CLAUDE.md`. They're copied here because no SimSpect session loads that file automatically: the repo moved from `~/Documents/stanford/trippel/simspect` to `~/trippel/simspect` on 2026-11-09, so it is no longer under `~/Documents`, and cafe2 and the mini never had the file. This mirror is therefore the only copy a session sees; when a rule changes, update both. If the two copies ever disagree, the Documents copy wins.
 
 > ## ⛔ NO EXTERNAL ACTIONS WITHOUT AN EXPLICIT ASK (highest-priority rule)
 > Never do anything that reaches outside this machine **unless Anna explicitly asks for that specific action in the current message**. That means: never send a text, iMessage, email, DM, or invite to **anyone**; never post, publish, push, comment, RSVP, create events, buy, sign up, or change any online account or setting. Reading public pages (docs, papers, repos) is OK; anything that *sends, creates, or changes* something outside the machine is not, unless explicitly asked. When in doubt, ask first. A todo like "email X" is a reminder for Anna, never an instruction to do it.
@@ -101,10 +101,10 @@ The paper/writing workspace is a **separate repo at `/tests/SimSpect-S-P-2027/`*
 `git@github.com:anna-eaton/SimSpect-S-P-2027.git`) — see its own `CLAUDE.md` for all paper
 conventions (critique style, figure generation, logs). Do paper work there, not here.
 
-**Current paper repo (2026-11-04):** `git@github.com:anna-eaton/ISCA-27.git` (https://github.com/anna-eaton/ISCA-27; replaces the retired `test-paper`), Overleaf-synced. Anna's advisor reads it, so keep "Claude" out of the paper: notes use `\reviewnote` (renders [Note]) and `\reviewtag`, never Claude names in note text or comments; root `bare_conf_compsoc.tex`, figures in `tikz/` with `_standalone_<name>.tex` + `-1.png` previews. Local clone (the one working copy): `~/trippel/ISCA-27`.
+**Current paper repo (2026-11-04):** `git@github.com:anna-eaton/ISCA-27.git` (https://github.com/anna-eaton/ISCA-27; replaces the retired `test-paper`), Overleaf-synced. Anna's advisor reads it, so keep "Claude" out of the paper: notes use `\reviewnote` (renders [Note]) and `\reviewtag`, never Claude names in note text or comments; root `main.tex` (ACM `acmart`, since 2026-11-10; the old IEEE root now sits in `ISCA2027_ACM_template/bare_conf_compsoc.tex`), figures in `tikz/` with `_standalone_<name>.tex` + `-1.png` previews. Local clone (the one working copy): `~/trippel/ISCA-27`.
 
 > ## ⛔ Paper text is read-only; new figures are OK (Anna, 2026-10-28, STRICT)
-> Claude has **no permission to edit the paper's text** — not `sections/*.tex`, captions in existing files, the main `.tex`, the preamble, or `.bib`; not even a typo or a `\input` swap. Propose prose in chat or a doc and Anna pastes it. Claude **may upload new figure files** (new `tikz/*.tex`, standalone previews, images) to the paper repo, adding new files only and never overwriting an existing one, and then tells Anna exactly which line to change to use them. Paper repo (since 2026-11-04): `git@github.com:anna-eaton/ISCA-27.git` (Overleaf-synced; root `bare_conf_compsoc.tex`); the old `test-paper` repo is retired.
+> Claude has **no permission to edit the paper's text** — not `sections/*.tex`, captions in existing files, the main `.tex`, the preamble, or `.bib`; not even a typo or a `\input` swap. Propose prose in chat or a doc and Anna pastes it. Claude **may upload new figure files** (new `tikz/*.tex`, standalone previews, images) to the paper repo, adding new files only and never overwriting an existing one, and then tells Anna exactly which line to change to use them. Paper repo (since 2026-11-04): `git@github.com:anna-eaton/ISCA-27.git` (Overleaf-synced; root `main.tex`, ACM `acmart`); the old `test-paper` repo is retired.
 
 ## Write everything down — minimize fragile session state (governing principle)
 
@@ -405,65 +405,18 @@ nohup python3 -u results/_sweep_watcher.py \
   - **Every diagnostic that re-decides "real leak vs check_ld FP" MUST reuse this exact gate** — `check_ld._xmit_cache_fate` + pipeview `complete` — not `diag_ld_cache_reach.classify_trace`'s `real_access` (which is **trace-only** and flags `reached_cache` *only*, so it misses `store_forward` leaks). The race attributor `diag_stt_vp_squash_race.py` was aligned to this (its access tick = packet tick for `reached_cache`, completion tick for `store_forward`); copy that pattern in new diagnostics.
 - `check_br.py`: branch-redirect detection. Note it does **not** enforce the `lc/fnc` window the way `check_ld` does — a known gap that inflates branch hit rates.
 
-**Bug-diagnosis scripts (per-results, known-vs-new triage).** Each results
-folder carries its own `diagnostics/` directory of bug-attribution scripts. The
-point is **results-specific bucketing**: once a particular bug/problem/artifact is
-known to exist on a particular gem5 build + model, write a script that buckets
-exactly that case, so on every future run the records split into **known**
-(attributed) vs **new** (unexplained — the fresh research signal). This keeps
-re-runs from re-litigating solved cases and surfaces only genuinely novel hit
-types. A script takes a record (its `window-results.json` row + the test's
-XML / `.ann.json` / pipeview) and returns whether *this* record is explained by
-*that* one cause — it encodes the cause's signature, not just "is it a hit."
+**Hit attribution: one Python module per bug, one orchestrator (`STAGE3_gem5/bugs/`, Anna 2026-11-15: "1 python script per bug ... very clean").** Every known cause of a hit has exactly one module in `STAGE3_gem5/bugs/`, and `STAGE3_gem5/bugs/classify.py` runs them all. A module decides, from one record (its checker row plus the test's trace / `.ann.json` / XML), whether *that* cause explains *that* record; it encodes the cause's signature, not just "is it a hit." The records then split into **known** (attributed) and **new** (unexplained, the research signal), so re-runs never re-litigate solved cases. Commands: `wiki/state/COMMANDS.md` "Hit attribution"; per-cause write-ups (signature, evidence, verdict): `wiki/findings/bug/BUGS.md` "Bug scripts"; registry: `specs/hit_categories.json` (one entry per module).
 
-**Rules (enforce these):**
-- **Super specific — one cause per script.** A diagnostic encodes exactly one
-  bug/artifact. Don't write a catch-all.
-- **Propagate only to the cause's true scope — never beyond it.**
-  - A **testset-specific** cause (model-expressivity / concretization artifact tied
-    to a particular testset, e.g. the const-addr load artifact in `SPT_6_oneLP`)
-    goes **only to runs on that same testset** — *not* to other models/testsets in
-    the same name family (e.g. `SPT_6_full` is a different testset → does not get it).
-  - A **build-specific** cause (a behavior of one gem5 build) goes to **all runs on
-    that build**. (We have none of these yet.)
-  - Never blanket-copy across a name family; if it matches 0 in a folder, it doesn't
-    belong there.
-- **Conservative.** Only bucket a record when **100% certain** it's that cause —
-  never hide a record that could be a real leak. Ambiguous → leave it **new**.
-- **It may bucket errors, not just hits.** If a known code/build bug (e.g. the
-  dup-PC Stage-2 codegen bug) is why a *specific* run errors or drops tests, an
-  error-bucketing diagnostic in that run's folder is correct.
-- **Every diagnostic script MUST ship with a bug `.md` next to it** (same
-  `diagnostics/` dir) that explains: (1) the exact issue it diagnoses and its
-  signature, (2) the evidence/root cause, and (3) an explicit verdict on whether it
-  is a **real bug** (model-expressivity gap, concretization/codegen bug, gem5
-  hook bug, or a real gem5 bug) **or a build/config issue** — so a future session
-  knows what the bucket means without re-deriving it.
-- Scripts live with the results (not in `STAGE3_gem5/`) because attribution is
-  defense/build-specific. A **global checker fix** (e.g. `check_br.py`) or a
-  source bug-fix is **not** a diagnostic — it goes in the pipeline; only the
-  *bucketing of a known cause's records* is a diagnostic.
-
-**Systematic hit bucketing (the "big test").** Every results folder's diagnostics
-are aggregated by one orchestrator, `results/<run>/diagnostics/bucket_hits.py`,
-which auto-discovers each `diag_*.py` (any module exposing `is_known(stem,
-xml_dir)` plus metadata `PHASE` ∈ {`disqualifier`,`real_bug`}, `CATEGORY`,
-`NEEDS_GEM5`, `ORDER`) and assigns every hit to the **first** cause that matches.
-Drop a new `diag_*.py` in the folder and it joins the run with no edit to the
-orchestrator. **Mandatory ordering — disqualifiers before real-bug diagnoses, so
-only *pure bugs* survive as `NEW`:**
-  1. **Disqualifiers** (the hit is *not* a real leak), cheap→expensive:
-     - **(a) model/Alloy artifacts** — pure XML, `NEEDS_GEM5=False` (e.g.
-       `diag_constaddr_load`, `diag_rf_clobber`). Run first.
-     - **(b) non-cache / checker false positives** — `NEEDS_GEM5=True`
-       (gem5 cache-reach: the load never sent a cache packet, or STLF). Run on the
-       survivors of (a) only (gem5 is expensive), via `--with-gem5`.
-  2. **Known real bugs** — confirmed-bug signatures (`PHASE='real_bug'`). None yet.
-  3. **Leftover = `NEW_candidate_pure_bug`** — the genuine research signal; this is
-     the set to hand to a root-causing pass. Never label a hit a real bug until it
-     has cleared **all** disqualifiers.
-Each `diag_*.py` still ships with its bug `.md` and the real-bug-vs-artifact
-verdict (rule above). Per-bucket stem lists land in `diagnostics/buckets/<mode>/`.
+- **Module layout.** Named by the paper's label where there is one (`a_uv1_invisispec.py` … `a_uv6_speclfb_first_load.py` for AMuLeT's replicated bugs, `uv1_stt_xmm4.py` … `uv6_vp_squash_race.py` for SimSpect's new ones), other known causes by their internal name (`r_sa13_recon_sse_load.py`, `cs_em_rmw.py`, …), disqualifiers as `disq_*.py`. Each module has a docstring (signature, evidence pointer, verdict: real gem5 bug vs model / concretization / hook / checker artifact) and metadata `LABEL`, `PAPER_LABEL`, `ALIASES`, `DEFENSES`, `PHASE` (`disqualifier` | `real_bug`), `VERDICT`, `ORDER`, `NEEDS_GEM5`. Shared helpers (`_trace.py`, `_speclfb.py`) only extract facts and decide nothing.
+- **One cause per module.** Never a catch-all. A new known cause = a new module + its registry entry + its BUGS.md section, in the same change.
+- **Scope lives in the metadata, not in copies.** `DEFENSES` (and any testset/build restriction) says where a cause applies; a testset-specific artifact applies only to that testset, a build-specific cause to every run on that build. Never widen a cause beyond its evidence; if it matches 0 records somewhere, it does not belong there.
+- **Conservative.** Attribute a record only when 100% certain; anything ambiguous stays **new**. Never hide a record that could be a real leak.
+- **Mandatory order: disqualifiers before real bugs, so only pure bugs survive as new.** (1) Disqualifiers (the hit is not a real leak), cheap to expensive: model/Alloy artifacts (XML only) first, then checker false positives that need gem5 evidence (the data-obtained gate, padding, setup-block events, the check_ld RMW limm artifact). (2) Known real bugs. (3) Leftover = new candidate bug, the set to hand to a root-causing pass. Never call a hit a real bug before it has cleared every disqualifier.
+- **Errors may be attributed too,** when a known code or build bug is why a specific run errors or drops tests.
+- **A global checker fix or a source bug fix is not an attribution module;** it goes into the pipeline. Only the bucketing of a known cause's records is.
+- **Decided rules encoded once:** DG-3 option (i) (Anna 2026-11-15: CleanupSpec over_clean lines are exempt from the outside-window filter) lives in `bugs/_dg3.py`.
+- **Faithfulness:** `bugs/_regress.py` compares the orchestrator's labels record by record with a reference run (exit 1 on any change). Run it whenever a module changes.
+- **Legacy (reference only, do not extend):** `STAGE3_gem5/timing/{classify_hits,cleanupspec_skip_evidence,classify_cs_rmw,speclfb_analyze}.py`, `runconfigs/twostage_lp/eval_20261110/{eval_gate,bucket_eval}.py`, the per-results `results/<run>/diagnostics/{bucket_hits.py,diag_*.py}` convention and `STAGE3_gem5/triage/diag/` (whose R-SA-12, NDA, DoM and SPT diagnostics are not ported yet). They stay until the switch-over, after the SpecLFB/InvisiSpec regression comes back clean.
 
 ## Gotchas
 

@@ -9,7 +9,7 @@ Signature (static ann + rerun evidence, NEEDS_GEM5=False): the test is a fanout_
 transmitter IS the test's transmitter (ann fanout_v2.otb.applied and otb.xmit_pc == xmit.pc), and the
 faithful rerun (recon_stlf_evidence.json) reproduced the hit with the transmitter's STL_CHECK
 `isTainted=1 isSpeculative=1` (gem5 taints it, so this is not a lost-taint case).
-Evidence: bug-investigate-e2new (claudelog 2026-11-09 18:50): 11/11 E2 fv2 NEW stems per mode are
+Evidence (claudelog 2026-11-09 18:50): 11/11 E2 fv2 NEW stems per mode are
 OTB-xmit tests, 0 non-OTB; traced rerun of inst-086032 shows `Released tainted load` at the older L2's
 commit. SOURCE_AUDIT_RECON.md R-SA-8 'gem5 check'. Scope: gem5-recon-modded scheme 2 (E2).
 Bug note: diag_recon_oldest_taint.md.

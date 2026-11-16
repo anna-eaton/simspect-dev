@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 summarize_runs.py: per-campaign status / error / hit counts, split by the cache_setup each
-test actually ran with (2026-11-09, cache-random session).
+test actually ran with.
 
 Reads the full checker records of testrun.py campaigns (<campaign>/<mode>/_sweep_raw/*.json;
 every record carries `cache_setup`, and under gem5.cache_setup random also

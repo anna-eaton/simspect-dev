@@ -1,0 +1,94 @@
+{
+ "N_prefix": 4000,
+ "n_rows": 4000,
+ "n_rmw_in_prefix": 568,
+ "status": {
+  "ok": 4000
+ },
+ "hits": 52,
+ "gem5_cpu_s_per_test": 1.666,
+ "total_cpu_s_per_test": 3.867,
+ "targets": {
+  "UV3": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  },
+  "UV4": {
+   "first_idx": 16,
+   "tests_to_first": 17,
+   "stem": "inst-074876",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 19.28,
+   "cum_total_cpu_s": 48.76,
+   "K": 52,
+   "N": 4000,
+   "expected_tests_to_first": 75.49,
+   "expected_gem5_cpu_s_to_first": 125.77,
+   "expected_total_cpu_s_to_first": 291.94
+  },
+  "UV5": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  }
+ },
+ "separate_non_amulet": {
+  "CS1": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  },
+  "EM_rmw": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  },
+  "EM_other": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  },
+  "UV3_other_actor": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  },
+  "unattributed": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  }
+ },
+ "excluded_padding": {
+  "UV3_padding": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  },
+  "EM_padding": {
+   "K": 0,
+   "N": 4000,
+   "expected_tests_to_first": 4001.0,
+   "expected_gem5_cpu_s_to_first": 6665.7,
+   "expected_total_cpu_s_to_first": 15472.99
+  }
+ },
+ "other": {}
+}

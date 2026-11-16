@@ -1,0 +1,61 @@
+
+========================================================================================================================
+Config 0: /tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/docker_gem5_v1_final_cache_ipcFP.yaml
+
+Command line: 
+python3.11 cli.py fuzz -s /tests/simspect_alloy_20261108/timing/amulet_t5/amulet-repo/src/x86/isa_spec/base.json -i 70 -n 201 -c /tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/docker_gem5_v1_final_cache_ipcFP.yaml -p bench_t5InvisiSpec_config0_round0 --no-save-stats --result-dir=/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0 --ruby --InvisiSpec --InvisiSpec_Futuristic --nonstop
+
+avg_wall_time: 2210.12
+total_system_time: 70723.89
+total_test_programs: 6400
+input_count: 140
+total_test_cases: 896000
+total_violations: 270
+avg_violations: 8.44
+
+contract_clause: CT-SEQ
+detected_violation: YES
+avg_detection_time: 8.19
+testing_throughput: 405.41
+campaign_execution_time: 2210.12
+
+Detailed Results - Config 0
+===========================
+Round    | Execution Time (s)   | Test Cases   | Violations Found   | First Violation (s)   
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+       0 |              2044.61 |          200 |                  5 |                 186.11
+       1 |              2133.40 |          200 |                  8 |                  54.43
+       2 |              2104.86 |          200 |                  7 |                 373.12
+       3 |              2322.66 |          200 |                 14 |                 226.11
+       4 |              2571.39 |          200 |                 22 |                  48.34
+       5 |              2164.61 |          200 |                  2 |                 327.35
+       6 |              2000.74 |          200 |                  0 |                    N/A
+       7 |              2044.91 |          200 |                  9 |                  13.36
+       8 |              2382.33 |          200 |                  8 |                 184.33
+       9 |              1979.84 |          200 |                  0 |                    N/A
+      10 |              2017.42 |          200 |                  4 |                  59.63
+      11 |              2139.68 |          200 |                  6 |                 201.36
+      12 |              1995.04 |          200 |                  0 |                    N/A
+      13 |              2219.80 |          200 |                 10 |                 340.60
+      14 |              2051.48 |          200 |                  1 |                 147.52
+      15 |              1976.40 |          200 |                  0 |                    N/A
+      16 |              2130.35 |          200 |                  3 |                  35.22
+      17 |              2265.19 |          200 |                 10 |                  56.82
+      18 |              2274.24 |          200 |                 12 |                  83.61
+      19 |              2460.24 |          200 |                 18 |                 197.53
+      20 |              2493.73 |          200 |                 18 |                  13.68
+      21 |              2313.32 |          200 |                 17 |                 192.93
+      22 |              2103.98 |          200 |                  8 |                  99.04
+      23 |              2150.18 |          200 |                  3 |                 322.75
+      24 |              2281.12 |          200 |                 14 |                 127.05
+      25 |              2304.15 |          200 |                 11 |                 225.83
+      26 |              2267.48 |          200 |                 16 |                 134.44
+      27 |              2541.33 |          200 |                 12 |                 364.90
+      28 |              2287.51 |          200 |                  8 |                 174.98
+      29 |              2015.69 |          200 |                  2 |                 193.76
+      30 |              2644.33 |          200 |                 17 |                 261.35
+      31 |              2041.86 |          200 |                  5 |                 111.97
+    Mean |              2210.12 |            - |             8.4375 |                      -
+ Std Dev |               186.76 |            - |               6.23 |                      -
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+========================================================================================================================

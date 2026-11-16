@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Usage: python3 shapes.py <dir-with-inst-*.txt> [spt|stt]   (spt adds store transmitters). Census of Alloy instance dumps: ALU on xm's leak-operand path, direct-load feed, declassify-same-value shape. Used for MODEL_AUDIT_SPT_RECON.md Q2.
-"""shapes.py DIR [--leak spt|stt]  -- census of Alloy instance .txt dumps (model-audit 2026-11-08).
+"""shapes.py DIR [--leak spt|stt]  -- census of Alloy instance .txt dumps.
 Per instance: is an ALU (Other*) op in the rf+ddi backward cone of xm's leak operand?
 direct = xm leak operand rf-fed straight from a load outreg. declass (SPT) = the xm leak
 operand's rf producer also rf-feeds a NON-speculative transmitter operand.

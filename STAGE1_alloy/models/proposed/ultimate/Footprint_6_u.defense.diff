@@ -1,0 +1,19 @@
+1c1,3
+<  * Specific defense model InvisiSpec (footprint; branch shadows)
+---
+>  * Specific defense model: footprint (InvisiSpec / CleanupSpec / SpecLFB), ultimate skeleton (Footprint_6_u)  -- [fu-1..fu-2]
+>  * Clause lines = InvisiSpec_6.als's (CleanupSpec_6 and SpecLFB_6 have the same code; their paper quotes differ,
+>  * see those files). Only the retype the Operand-typed skeleton requires is new, tagged [fu-n].
+19c21,22
+< fun hardware_protection_policy: State {Mem_s + (Reg_s - Instruction.outreg.opstate)}
+---
+> // footprint (old skeleton): fun hardware_protection_policy: State {Mem_s + (Reg_s - Instruction.outreg.opstate)}
+> fun hardware_protection_policy[p: PTag->univ]: Operand {(Mem_s + (Reg_s - Instruction.outreg.opstate)).(~opstate)} -- [fu-1] retype only: the .(~opstate) lift the old skeleton applied in secure_*/tag_xm
+26c29
+< fun prot_set_propagation_p[p:PTag->univ,i:Instruction,s:State] : State {
+---
+> fun prot_set_propagation_p[p:PTag->univ,i:Instruction,o:Operand] : Operand { -- [fu-2] retype only (was s: State : State)
+29c32
+< 	s // (2) all memory stays protected: there is no visibility-point untaint
+---
+> 	o // (2) all memory stays protected: there is no visibility-point untaint  -- [fu-2] (was: s)

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Census of SPT-model over-generation shapes over a whole testset's XML (2026-11-08).
+"""Census of SPT-model over-generation shapes over a whole testset's XML.
 
 Per instance (pure XML, no gem5), with the transmitter operand X = the xmit's
 inaddr (ld, str) or inreg (br_x):

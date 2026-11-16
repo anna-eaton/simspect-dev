@@ -209,7 +209,7 @@
       "leakage": "speclfb.json",
       "timing": "stock.json",
       "fanout": "standard.json",
-      "stl_scope": "yes: SpecLFB's memory-order MUSLs (SpecLFB Sec. 5; MODELS_AND_BUILDS.md fit table). Stimulus STT_6_stl; needs the STL hooks ported to the amulet build (apply_stl_hooks.py).",
+      "stl_scope": "yes: SpecLFB's memory-order MUSLs (SpecLFB Sec. 5; MODELS_AND_BUILDS.md fit table). Stimulus STT_6_stl. STL hooks built 2026-11-09 in a copy, /work/amulet/hooks_stl_work/SpecLFB (specs/gem5_builds.json amulet-SpecLFB-stl); controls on 60 STT_6_stl tests: STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'.",
       "status": "to_run",
       "results": [
         "STT_6_speclfb"
@@ -267,7 +267,7 @@
       "leakage": "invisispec.json",
       "timing": "stock.json",
       "fanout": "standard.json",
-      "stl_scope": "Futuristic mode only (store-load alias is a squash source, InvisiSpec Sec. IV Table I); not Spectre mode. Stimulus STT_6_stl; needs the STL hooks ported to the amulet build.",
+      "stl_scope": "Futuristic mode only (store-load alias is a squash source, InvisiSpec Sec. IV Table I); not Spectre mode. Stimulus STT_6_stl. STL hooks built 2026-11-09 in a copy, /work/amulet/hooks_stl_work/InvisiSpec (specs/gem5_builds.json amulet-InvisiSpec-stl); controls on 60 STT_6_stl tests: STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'.",
       "status": "to_run",
       "results": [
         "STT_6_invisispec",
@@ -296,7 +296,7 @@
       "leakage": "cleanupspec.json",
       "timing": "stock.json",
       "fanout": "standard.json",
-      "stl_scope": "yes: every transient instruction is unsafe until it retires (CleanupSpec Sec. 2.1). Stimulus STT_6_stl; needs the STL hooks ported to the amulet build.",
+      "stl_scope": "yes: every transient instruction is unsafe until it retires (CleanupSpec Sec. 2.1). Stimulus STT_6_stl. STL hooks built 2026-11-09 in a copy, /work/amulet/hooks_stl_work/CleanupSpec (specs/gem5_builds.json amulet-CleanupSpec-stl); controls on 60 STT_6_stl tests: STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'.",
       "status": "to_run",
       "results": [
         "STT_6_cleanupspec_residue"

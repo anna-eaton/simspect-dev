@@ -1,0 +1,18 @@
+# BF2: R-SA-13 (ReCon: SSE loads never speculative) bug figure
+
+**Files (new, ISCA-27, uncommitted):** `tikz/prop_rsa13_sse_8pt.tex` (figure + caption, `\label{fig:rsa13}`), `tikz/_standalone_prop_rsa13_sse.tex` (preview, 241pt minipage), `tikz/_standalone_prop_rsa13_sse-1.png`. Compiled only in a scratch copy (pdflatex rc=0). No existing paper file touched; no git writes.
+
+**What it shows.** An abstract execution of generated test inst-002760 in three parts. (a) FP corpus: under the unresolved branch i0 (tan band), i1 = `movq (%r13,%r14),%xmm12; movq $0,%r14; movq %xmm12,%r14` (micro-ops ldfp / limm / mov2int), protected memory operand in lavender, status "not speculative" and "%r14 untainted" in red; the dataflow to the transmitter i2 `movq (%r13,%r14),%r14` is dashed (no taint), and i2 "executes" with a red star. (b) GPR twin: i1 is a plain `ld`, speculative and tainted, thick lavender dataflow, i2 "tainted, held". (c) Blue defense box: the four ordered tests of ReCon `decode.cc:684-695` (isCondCtrl, isStore, isFloating → nothing, isLoad && shadow → insertSpecInst), with ldfp stopping at test 3 and ld reaching test 4, plus one "why" sentence.
+
+**Sources.** Test text: `wiki/findings/audits/2026-11-08/SOURCE_AUDIT_RECON.md:349`. Decode order and IsFloating origin: same file :319-330. STT consequence (propagateTaints, untainted dest): :333. Counts (E2 121/121 fp-only hits with a direct SSE producer, 0/177 without; twins hold): :339-351 and claudelog 2026-11-09 12:40. Micro-ops and twin form: `wiki/design/VOCAB_TABLES.md:276-278,289`. All provenance is also in the figure file's header comments.
+
+**Proposed caption** (in the file, with `\reviewtag{[TODO: ...]}`): "ReCon never marks an SSE load speculative (gem5-recon-modded, STT scheme, generated test inst-002760). (a) In the FP corpus, i1 loads the protected value (lavender) into xmm12 with an SSE load (ldfp), then copies it to r14, the address of the transmitter i2. Both run in the shadow of the unresolved branch i0 (tan). ReCon does not mark i1 speculative, so r14 is untainted (dashed) and i2 executes in the window (star). (b) The same program with an integer load: i1 is speculative, its result is tainted (thick: the protected dataflow), and i2 is held. (c) ReCon's decode stage tests isFloating() before isLoad(), and an FP-register load is floating. In the first 300 FP-corpus tests on the STT scheme, all 121 tests that leak only in FP form have such a load on the transmitter's path, and none of the 177 tests without one leaks."
+
+**Where it goes.** `sections/results.tex` has no R-SA-13 subsection yet. Once Anna adds one (e.g. after UV3 `\input{tikz/recon_otb_v2_8pt}` at results.tex:61), add the line `\input{tikz/prop_rsa13_sse_8pt}` right after that subsection's lead paragraph.
+
+**Open questions / TODO.**
+- DECIDE (Anna): does R-SA-13 get its own UV subsection and figure, or a sentence in the STT xmm4 paragraph? It is generated only by the opt-in FP corpus.
+- The branch i0 is drawn abstractly: its exact instruction and the full inst-002760 listing are only on cafe2 (`testsets_twostage/STT_6_fv2fp`); pull them to confirm the registers and to check that i1's address (%r13,%r14) is untainted.
+- The E2 ld hits obtain data by store forwarding (audit :344); the figure says only "executes", not "accesses the cache". Decide whether the caption should say "obtains its data by store forwarding" or whether a br_x example (E8 NDA, 50/50) is better.
+- The "121 of 300" count is from the first 300 tests of a then-running campaign; refresh from the finished campaign before printing.
+- Not checked in the ACM (acmart, Libertine) build; only in a CM standalone at 241pt.

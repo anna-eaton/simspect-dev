@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """stage2_sharded.py — parallel Stage 2 (XML -> .ll + ann) for one testset, sample stems first.
 
-DRAFT TOOLING (2026-11-09, simspect-c8). pipeline.py's llvm phase runs ONE batch_generate.py over
+pipeline.py's llvm phase runs ONE batch_generate.py over
 every XML. This builds the exact same batch_generate.py command line as pipeline.py:phase_llvm
 (same keys: instruction_tables, interleave, fpr, reg_naming, fanout_v2, store_separation,
 branch_cond) and runs it over shards in parallel, writing into the same

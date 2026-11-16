@@ -1181,8 +1181,7 @@ def defense_units() -> dict:
 # ══════════════════════════════════════════════════════════════════════════════
 # 4h. eval manifest (the official experiment list + live run statuses)
 # ══════════════════════════════════════════════════════════════════════════════
-# Sources of truth (Anna 2026-11-08: "make sure that this dashboard (add a page) has
-# the official experiment manifest and the statuses"):
+# Sources of truth for the eval-manifest page:
 #   wiki/state/EVAL_MANIFEST.md  — the human manifest (rendered to HTML by dashboard.py,
 #                                  since this module has no HTML code);
 #   specs/defense_units.json     — its machine copy (unit.eval rows E1..E14, T rows, C rows);

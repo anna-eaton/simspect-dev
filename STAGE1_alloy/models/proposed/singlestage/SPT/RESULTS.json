@@ -1,0 +1,1540 @@
+{
+ "_about": "Single-stage (flat) SPT drafts, agent singlestage-spt, 2026-11-09 (cafe2 clock 2026-11-10 UTC). UNAPPROVED drafts. Runs: run_flat.py --seeds default,1,2,3 --cap 10000 --timeout 1500 --jobs 4 (nice 5). Census: census_flat.py --jobs 8. cafe2 workspace /tests/singlestage_20261109 (inside gem5_dev).",
+ "models": [
+  {
+   "variant": "V0",
+   "stem": "SPT_6_oneLP_v2",
+   "base_file": "STAGE1_alloy/models/SPT_6_oneLP_v2.als",
+   "base_sha256": "acb1f2e21e5e6c3b98e7dfd8eec71bc9d9282578303626655334768addb61e8d",
+   "model_file": "STAGE1_alloy/models/SPT_6_oneLP_v2.als",
+   "model_sha256": "acb1f2e21e5e6c3b98e7dfd8eec71bc9d9282578303626655334768addb61e8d",
+   "generator_command": null,
+   "cafe2_model": "/tests/singlestage_20261109/models/SPT/base/SPT_6_oneLP_v2.als",
+   "cafe2_out": "/tests/singlestage_20261109/out/SPT/SPT_6_oneLP_v2",
+   "cafe2_log": "/tests/singlestage_20261109/logs/SPT__SPT_6_oneLP_v2.nohup.txt",
+   "start": "2026-11-10T01:25:43+00:00 START pid=2295865 host=543cef85d966 model=/tests/singlestage_20261109/models/SPT/base/SPT_6_oneLP_v2.als sha256=acb1f2e21e5e6c3b98e7dfd8eec71bc9d9282578303626655334768addb61e8d scope='for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+   "lint": "2026-11-10T01:25:43+00:00 LINT OK   /tests/singlestage_20261109/models/SPT/base/SPT_6_oneLP_v2.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "rc": 0,
+     "secs": 1186,
+     "ended": "2026-11-10T01:45:30+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 4760,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:43+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 5108,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:43+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 4520,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:43+00:00"
+    }
+   ],
+   "census": {
+    "census.json": {
+     "UNION": {
+      "instances": 24388,
+      "distinct": 16313,
+      "sizes": {
+       "6": 16313
+      },
+      "kind_sequences": 3372,
+      "xm_kinds": {
+       "TBranchx": 5727,
+       "TStore": 5622,
+       "TLoad": 4964
+      },
+      "alu_feeds_xmit": 5167,
+      "two_load_merge": 0,
+      "unnecessary_avg": 2.62,
+      "unnecessary_hist": {
+       "0": 2,
+       "1": 92,
+       "2": 5974,
+       "3": 10245
+      },
+      "bare_avg": 2.23,
+      "unresolved_brs_hist": {
+       "1": 16313
+      }
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 2195,
+      "default∩2": 2088,
+      "default∩3": 2443,
+      "1∩2": 2372,
+      "1∩3": 2547,
+      "2∩3": 2486
+     },
+     "per_run": {
+      "default": {
+       "instances": 10000,
+       "distinct": 10000,
+       "sizes": {
+        "6": 10000
+       },
+       "kind_sequences": 1009,
+       "xm_kinds": {
+        "TBranchx": 3337,
+        "TStore": 3327,
+        "TLoad": 3336
+       },
+       "alu_feeds_xmit": 4295,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.57,
+       "unnecessary_hist": {
+        "2": 4349,
+        "3": 5651
+       },
+       "bare_avg": 2.54,
+       "unresolved_brs_hist": {
+        "1": 10000
+       },
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 4760,
+       "distinct": 4760,
+       "sizes": {
+        "6": 4760
+       },
+       "kind_sequences": 1777,
+       "xm_kinds": {
+        "TStore": 1641,
+        "TLoad": 1324,
+        "TBranchx": 1795
+       },
+       "alu_feeds_xmit": 625,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.78,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 30,
+        "2": 963,
+        "3": 3766
+       },
+       "bare_avg": 2.32,
+       "unresolved_brs_hist": {
+        "1": 4760
+       },
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 4520,
+       "distinct": 4520,
+       "sizes": {
+        "6": 4520
+       },
+       "kind_sequences": 1735,
+       "xm_kinds": {
+        "TBranchx": 1636,
+        "TLoad": 1266,
+        "TStore": 1618
+       },
+       "alu_feeds_xmit": 606,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.78,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 35,
+        "2": 931,
+        "3": 3553
+       },
+       "bare_avg": 2.36,
+       "unresolved_brs_hist": {
+        "1": 4520
+       },
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 5108,
+       "distinct": 5108,
+       "sizes": {
+        "6": 5108
+       },
+       "kind_sequences": 1778,
+       "xm_kinds": {
+        "TStore": 1872,
+        "TBranchx": 1807,
+        "TLoad": 1429
+       },
+       "alu_feeds_xmit": 650,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.8,
+       "unnecessary_hist": {
+        "1": 27,
+        "2": 970,
+        "3": 4111
+       },
+       "bare_avg": 2.41,
+       "unresolved_brs_hist": {
+        "1": 5108
+       },
+       "parse_errors": 0
+      }
+     }
+    },
+    "census_cores_allk_sample300.json": {
+     "UNION": {
+      "instances": 300,
+      "distinct": 300,
+      "sizes": {
+       "6": 300
+      },
+      "kind_sequences": 246,
+      "xm_kinds": {
+       "TLoad": 92,
+       "TBranchx": 100,
+       "TStore": 108
+      },
+      "alu_feeds_xmit": 85,
+      "two_load_merge": 0,
+      "unnecessary_avg": 2.67,
+      "unnecessary_hist": {
+       "1": 1,
+       "2": 98,
+       "3": 201
+      },
+      "bare_avg": 2.44,
+      "unresolved_brs_hist": {
+       "1": 300
+      },
+      "contain_core_exact_pin": 263,
+      "contain_core_path_pin": 264,
+      "no_core_even_path_pin_examples": [
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000023.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000027.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000057.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000067.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000100.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000104.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000110.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000120.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000128.txt",
+       "out/SPT/SPT_6_oneLP_v2/_sample300_seed0/inst-000137.txt"
+      ]
+     },
+     "PAIRWISE_OVERLAP": {},
+     "per_run": {
+      "_sample300_seed0": {
+       "instances": 300,
+       "distinct": 300,
+       "sizes": {
+        "6": 300
+       },
+       "kind_sequences": 246,
+       "xm_kinds": {
+        "TLoad": 92,
+        "TBranchx": 100,
+        "TStore": 108
+       },
+       "alu_feeds_xmit": 85,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.67,
+       "unnecessary_hist": {
+        "1": 1,
+        "2": 98,
+        "3": 201
+       },
+       "bare_avg": 2.44,
+       "unresolved_brs_hist": {
+        "1": 300
+       },
+       "contain_core_exact_pin": 263,
+       "contain_core_path_pin": 264,
+       "parse_errors": 0
+      }
+     }
+    },
+    "census_cores_default_1.json": {
+     "UNION": {
+      "instances": 14760,
+      "distinct": 12565,
+      "sizes": {
+       "6": 12565
+      },
+      "kind_sequences": 2142,
+      "xm_kinds": {
+       "TBranchx": 4359,
+       "TStore": 4201,
+       "TLoad": 4005
+      },
+      "alu_feeds_xmit": 4589,
+      "two_load_merge": 0,
+      "unnecessary_avg": 2.6,
+      "unnecessary_hist": {
+       "0": 1,
+       "1": 30,
+       "2": 4937,
+       "3": 7597
+      },
+      "bare_avg": 2.39,
+      "unresolved_brs_hist": {
+       "1": 12565
+      },
+      "contain_core_exact_pin": 7976,
+      "contain_core_path_pin": 8171,
+      "no_core_even_path_pin_examples": [
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000182.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000186.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000187.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000188.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000189.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000190.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000191.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000192.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000193.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000194.txt"
+      ]
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 2195
+     },
+     "per_run": {
+      "default": {
+       "instances": 10000,
+       "distinct": 10000,
+       "sizes": {
+        "6": 10000
+       },
+       "kind_sequences": 1009,
+       "xm_kinds": {
+        "TBranchx": 3337,
+        "TStore": 3327,
+        "TLoad": 3336
+       },
+       "alu_feeds_xmit": 4295,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.57,
+       "unnecessary_hist": {
+        "2": 4349,
+        "3": 5651
+       },
+       "bare_avg": 2.54,
+       "unresolved_brs_hist": {
+        "1": 10000
+       },
+       "contain_core_exact_pin": 5705,
+       "contain_core_path_pin": 5777,
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 4760,
+       "distinct": 4760,
+       "sizes": {
+        "6": 4760
+       },
+       "kind_sequences": 1777,
+       "xm_kinds": {
+        "TStore": 1641,
+        "TLoad": 1324,
+        "TBranchx": 1795
+       },
+       "alu_feeds_xmit": 625,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.78,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 30,
+        "2": 963,
+        "3": 3766
+       },
+       "bare_avg": 2.32,
+       "unresolved_brs_hist": {
+        "1": 4760
+       },
+       "contain_core_exact_pin": 4135,
+       "contain_core_path_pin": 4312,
+       "parse_errors": 0
+      }
+     }
+    },
+    "census_cores_k3k5_all.json": {
+     "UNION": {
+      "instances": 24388,
+      "distinct": 16313,
+      "sizes": {
+       "6": 16313
+      },
+      "kind_sequences": 3372,
+      "xm_kinds": {
+       "TBranchx": 5727,
+       "TStore": 5622,
+       "TLoad": 4964
+      },
+      "alu_feeds_xmit": 5167,
+      "two_load_merge": 0,
+      "unnecessary_avg": 2.62,
+      "unnecessary_hist": {
+       "0": 2,
+       "1": 92,
+       "2": 5974,
+       "3": 10245
+      },
+      "bare_avg": 2.23,
+      "unresolved_brs_hist": {
+       "1": 16313
+      },
+      "contain_core_exact_pin": 11146,
+      "contain_core_path_pin": 11569,
+      "no_core_even_path_pin_examples": [
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000182.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000186.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000187.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000188.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000189.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000190.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000191.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000192.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000193.txt",
+       "out/SPT/SPT_6_oneLP_v2/default/inst-000194.txt"
+      ]
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 2195,
+      "default∩2": 2088,
+      "default∩3": 2443,
+      "1∩2": 2372,
+      "1∩3": 2547,
+      "2∩3": 2486
+     },
+     "per_run": {
+      "default": {
+       "instances": 10000,
+       "distinct": 10000,
+       "sizes": {
+        "6": 10000
+       },
+       "kind_sequences": 1009,
+       "xm_kinds": {
+        "TBranchx": 3337,
+        "TStore": 3327,
+        "TLoad": 3336
+       },
+       "alu_feeds_xmit": 4295,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.57,
+       "unnecessary_hist": {
+        "2": 4349,
+        "3": 5651
+       },
+       "bare_avg": 2.54,
+       "unresolved_brs_hist": {
+        "1": 10000
+       },
+       "contain_core_exact_pin": 5705,
+       "contain_core_path_pin": 5777,
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 4760,
+       "distinct": 4760,
+       "sizes": {
+        "6": 4760
+       },
+       "kind_sequences": 1777,
+       "xm_kinds": {
+        "TStore": 1641,
+        "TLoad": 1324,
+        "TBranchx": 1795
+       },
+       "alu_feeds_xmit": 625,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.78,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 30,
+        "2": 963,
+        "3": 3766
+       },
+       "bare_avg": 2.32,
+       "unresolved_brs_hist": {
+        "1": 4760
+       },
+       "contain_core_exact_pin": 4135,
+       "contain_core_path_pin": 4312,
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 4520,
+       "distinct": 4520,
+       "sizes": {
+        "6": 4520
+       },
+       "kind_sequences": 1735,
+       "xm_kinds": {
+        "TBranchx": 1636,
+        "TLoad": 1266,
+        "TStore": 1618
+       },
+       "alu_feeds_xmit": 606,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.78,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 35,
+        "2": 931,
+        "3": 3553
+       },
+       "bare_avg": 2.36,
+       "unresolved_brs_hist": {
+        "1": 4520
+       },
+       "contain_core_exact_pin": 3914,
+       "contain_core_path_pin": 4091,
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 5108,
+       "distinct": 5108,
+       "sizes": {
+        "6": 5108
+       },
+       "kind_sequences": 1778,
+       "xm_kinds": {
+        "TStore": 1872,
+        "TBranchx": 1807,
+        "TLoad": 1429
+       },
+       "alu_feeds_xmit": 650,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.8,
+       "unnecessary_hist": {
+        "1": 27,
+        "2": 970,
+        "3": 4111
+       },
+       "bare_avg": 2.41,
+       "unresolved_brs_hist": {
+        "1": 5108
+       },
+       "contain_core_exact_pin": 4458,
+       "contain_core_path_pin": 4621,
+       "parse_errors": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "variant": "V1",
+   "stem": "SPT_6_oneLP_v2_flat_n8_prod",
+   "base_file": "STAGE1_alloy/models/SPT_6_oneLP_v2.als",
+   "base_sha256": "acb1f2e21e5e6c3b98e7dfd8eec71bc9d9282578303626655334768addb61e8d",
+   "model_file": "STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v2_flat_n8_prod.als",
+   "model_sha256": "642028dff9c79a3cc7862ac02b1dd4543b6b6dfc98be2c2bb8773aa5bd235015",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/SPT_6_oneLP_v2.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v2_flat_n8_prod.als",
+   "cafe2_model": "/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_prod.als",
+   "cafe2_out": "/tests/singlestage_20261109/out/SPT/SPT_6_oneLP_v2_flat_n8_prod",
+   "cafe2_log": "/tests/singlestage_20261109/logs/SPT__SPT_6_oneLP_v2_flat_n8_prod.nohup.txt",
+   "start": "2026-11-10T01:25:44+00:00 START pid=2296010 host=543cef85d966 model=/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_prod.als sha256=642028dff9c79a3cc7862ac02b1dd4543b6b6dfc98be2c2bb8773aa5bd235015 scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+   "lint": "2026-11-10T01:25:44+00:00 LINT OK   /tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "ended": true,
+   "runs": [
+    {
+     "seed": "2",
+     "instances": 159,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:44+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 175,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:44+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 188,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:44+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 347,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T01:50:44+00:00"
+    }
+   ],
+   "census": {
+    "census.json": {
+     "UNION": {
+      "instances": 869,
+      "distinct": 860,
+      "sizes": {
+       "8": 860
+      },
+      "kind_sequences": 755,
+      "xm_kinds": {
+       "TLoad": 270,
+       "TBranchx": 397,
+       "TStore": 193
+      },
+      "alu_feeds_xmit": 60,
+      "two_load_merge": 1,
+      "unnecessary_avg": 4.78,
+      "unnecessary_hist": {
+       "2": 4,
+       "3": 19,
+       "4": 136,
+       "5": 701
+      },
+      "bare_avg": 2.77,
+      "unresolved_brs_hist": {
+       "1": 860
+      }
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 2,
+      "default∩2": 4,
+      "default∩3": 1,
+      "1∩2": 1,
+      "1∩3": 0,
+      "2∩3": 1
+     },
+     "per_run": {
+      "default": {
+       "instances": 347,
+       "distinct": 347,
+       "sizes": {
+        "8": 347
+       },
+       "kind_sequences": 303,
+       "xm_kinds": {
+        "TLoad": 65,
+        "TBranchx": 223,
+        "TStore": 59
+       },
+       "alu_feeds_xmit": 2,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.99,
+       "unnecessary_hist": {
+        "4": 2,
+        "5": 345
+       },
+       "bare_avg": 4.14,
+       "unresolved_brs_hist": {
+        "1": 347
+       },
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 175,
+       "distinct": 175,
+       "sizes": {
+        "8": 175
+       },
+       "kind_sequences": 169,
+       "xm_kinds": {
+        "TBranchx": 57,
+        "TStore": 39,
+        "TLoad": 79
+       },
+       "alu_feeds_xmit": 25,
+       "two_load_merge": 1,
+       "unnecessary_avg": 4.66,
+       "unnecessary_hist": {
+        "2": 3,
+        "3": 3,
+        "4": 45,
+        "5": 124
+       },
+       "bare_avg": 1.89,
+       "unresolved_brs_hist": {
+        "1": 175
+       },
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 159,
+       "distinct": 159,
+       "sizes": {
+        "8": 159
+       },
+       "kind_sequences": 156,
+       "xm_kinds": {
+        "TStore": 38,
+        "TLoad": 61,
+        "TBranchx": 60
+       },
+       "alu_feeds_xmit": 15,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.63,
+       "unnecessary_hist": {
+        "2": 1,
+        "3": 8,
+        "4": 40,
+        "5": 110
+       },
+       "bare_avg": 2.01,
+       "unresolved_brs_hist": {
+        "1": 159
+       },
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 188,
+       "distinct": 188,
+       "sizes": {
+        "8": 188
+       },
+       "kind_sequences": 185,
+       "xm_kinds": {
+        "TStore": 59,
+        "TLoad": 68,
+        "TBranchx": 61
+       },
+       "alu_feeds_xmit": 18,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.65,
+       "unnecessary_hist": {
+        "3": 8,
+        "4": 49,
+        "5": 131
+       },
+       "bare_avg": 1.86,
+       "unresolved_brs_hist": {
+        "1": 188
+       },
+       "parse_errors": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "variant": "V2",
+   "stem": "SPT_6_oneLP_v2_flat_n8_prod_nospacer",
+   "base_file": "STAGE1_alloy/models/SPT_6_oneLP_v2.als",
+   "base_sha256": "acb1f2e21e5e6c3b98e7dfd8eec71bc9d9282578303626655334768addb61e8d",
+   "model_file": "STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v2_flat_n8_prod_nospacer.als",
+   "model_sha256": "7feae9319e4c2e6c651a8f18a7f5aa7ffb1b4d68afd5b1d872f3d031283bd399",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/SPT_6_oneLP_v2.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v2_flat_n8_prod_nospacer.als",
+   "cafe2_model": "/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_prod_nospacer.als",
+   "cafe2_out": "/tests/singlestage_20261109/out/SPT/SPT_6_oneLP_v2_flat_n8_prod_nospacer",
+   "cafe2_log": "/tests/singlestage_20261109/logs/SPT__SPT_6_oneLP_v2_flat_n8_prod_nospacer.nohup.txt",
+   "start": "2026-11-10T01:50:55+00:00 START pid=2608622 host=543cef85d966 model=/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_prod_nospacer.als sha256=7feae9319e4c2e6c651a8f18a7f5aa7ffb1b4d68afd5b1d872f3d031283bd399 scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+   "lint": "2026-11-10T01:50:55+00:00 LINT OK   /tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 199,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 131,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 85,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 78,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    }
+   ],
+   "census": {
+    "census.json": {
+     "UNION": {
+      "instances": 493,
+      "distinct": 493,
+      "sizes": {
+       "8": 493
+      },
+      "kind_sequences": 448,
+      "xm_kinds": {
+       "TBranchx": 190,
+       "TStore": 126,
+       "TLoad": 177
+      },
+      "alu_feeds_xmit": 34,
+      "two_load_merge": 0,
+      "unnecessary_avg": 4.72,
+      "unnecessary_hist": {
+       "2": 6,
+       "3": 10,
+       "4": 100,
+       "5": 377
+      },
+      "bare_avg": 0.0,
+      "unresolved_brs_hist": {
+       "1": 493
+      }
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 0,
+      "default∩2": 0,
+      "default∩3": 0,
+      "1∩2": 0,
+      "1∩3": 0,
+      "2∩3": 0
+     },
+     "per_run": {
+      "default": {
+       "instances": 199,
+       "distinct": 199,
+       "sizes": {
+        "8": 199
+       },
+       "kind_sequences": 187,
+       "xm_kinds": {
+        "TBranchx": 112,
+        "TStore": 45,
+        "TLoad": 42
+       },
+       "alu_feeds_xmit": 2,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.98,
+       "unnecessary_hist": {
+        "4": 3,
+        "5": 196
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 199
+       },
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 85,
+       "distinct": 85,
+       "sizes": {
+        "8": 85
+       },
+       "kind_sequences": 84,
+       "xm_kinds": {
+        "TBranchx": 23,
+        "TLoad": 42,
+        "TStore": 20
+       },
+       "alu_feeds_xmit": 7,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.64,
+       "unnecessary_hist": {
+        "2": 1,
+        "3": 3,
+        "4": 22,
+        "5": 59
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 85
+       },
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 78,
+       "distinct": 78,
+       "sizes": {
+        "8": 78
+       },
+       "kind_sequences": 76,
+       "xm_kinds": {
+        "TBranchx": 19,
+        "TLoad": 36,
+        "TStore": 23
+       },
+       "alu_feeds_xmit": 10,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.6,
+       "unnecessary_hist": {
+        "2": 1,
+        "3": 1,
+        "4": 26,
+        "5": 50
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 78
+       },
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 131,
+       "distinct": 131,
+       "sizes": {
+        "8": 131
+       },
+       "kind_sequences": 125,
+       "xm_kinds": {
+        "TBranchx": 36,
+        "TStore": 38,
+        "TLoad": 57
+       },
+       "alu_feeds_xmit": 15,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.44,
+       "unnecessary_hist": {
+        "2": 4,
+        "3": 6,
+        "4": 49,
+        "5": 72
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 131
+       },
+       "parse_errors": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "variant": "V3",
+   "stem": "SPT_6_oneLP_v2_flat_n8_leakrs_nospacer",
+   "base_file": "STAGE1_alloy/models/SPT_6_oneLP_v2.als",
+   "base_sha256": "acb1f2e21e5e6c3b98e7dfd8eec71bc9d9282578303626655334768addb61e8d",
+   "model_file": "STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v2_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "11f19a70ca19714afceb0a7f9f71918efe1d95997aa0a565191c953a13508877",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/SPT_6_oneLP_v2.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --minimality leak_rs --out STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v2_flat_n8_leakrs_nospacer.als",
+   "cafe2_model": "/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_leakrs_nospacer.als",
+   "cafe2_out": "/tests/singlestage_20261109/out/SPT/SPT_6_oneLP_v2_flat_n8_leakrs_nospacer",
+   "cafe2_log": "/tests/singlestage_20261109/logs/SPT__SPT_6_oneLP_v2_flat_n8_leakrs_nospacer.nohup.txt",
+   "start": "2026-11-10T01:50:55+00:00 START pid=2608795 host=543cef85d966 model=/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_leakrs_nospacer.als sha256=11f19a70ca19714afceb0a7f9f71918efe1d95997aa0a565191c953a13508877 scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+   "lint": "2026-11-10T01:50:55+00:00 LINT OK   /tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v2_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "ended": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 173,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 171,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 178,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 1007,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:15:55+00:00"
+    }
+   ],
+   "census": {
+    "census.json": {
+     "UNION": {
+      "instances": 1529,
+      "distinct": 1528,
+      "sizes": {
+       "8": 1528
+      },
+      "kind_sequences": 592,
+      "xm_kinds": {
+       "TLoad": 637,
+       "TBranchx": 566,
+       "TStore": 325
+      },
+      "alu_feeds_xmit": 65,
+      "two_load_merge": 1,
+      "unnecessary_avg": 4.06,
+      "unnecessary_hist": {
+       "1": 9,
+       "2": 25,
+       "3": 100,
+       "4": 1130,
+       "5": 264
+      },
+      "bare_avg": 0.0,
+      "unresolved_brs_hist": {
+       "1": 1253,
+       "2": 245,
+       "3": 27,
+       "4": 3
+      }
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 0,
+      "default∩2": 0,
+      "default∩3": 0,
+      "1∩2": 0,
+      "1∩3": 1,
+      "2∩3": 0
+     },
+     "per_run": {
+      "default": {
+       "instances": 1007,
+       "distinct": 1007,
+       "sizes": {
+        "8": 1007
+       },
+       "kind_sequences": 125,
+       "xm_kinds": {
+        "TLoad": 391,
+        "TBranchx": 409,
+        "TStore": 207
+       },
+       "alu_feeds_xmit": 0,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.0,
+       "unnecessary_hist": {
+        "1": 1,
+        "2": 7,
+        "3": 24,
+        "4": 932,
+        "5": 43
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 850,
+        "2": 157
+       },
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 173,
+       "distinct": 173,
+       "sizes": {
+        "8": 173
+       },
+       "kind_sequences": 167,
+       "xm_kinds": {
+        "TLoad": 86,
+        "TBranchx": 48,
+        "TStore": 39
+       },
+       "alu_feeds_xmit": 22,
+       "two_load_merge": 1,
+       "unnecessary_avg": 4.19,
+       "unnecessary_hist": {
+        "1": 2,
+        "2": 5,
+        "3": 27,
+        "4": 63,
+        "5": 76
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 130,
+        "2": 31,
+        "3": 11,
+        "4": 1
+       },
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 178,
+       "distinct": 178,
+       "sizes": {
+        "8": 178
+       },
+       "kind_sequences": 165,
+       "xm_kinds": {
+        "TStore": 39,
+        "TLoad": 86,
+        "TBranchx": 53
+       },
+       "alu_feeds_xmit": 18,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.16,
+       "unnecessary_hist": {
+        "1": 5,
+        "2": 7,
+        "3": 25,
+        "4": 59,
+        "5": 82
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 142,
+        "2": 27,
+        "3": 8,
+        "4": 1
+       },
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 171,
+       "distinct": 171,
+       "sizes": {
+        "8": 171
+       },
+       "kind_sequences": 161,
+       "xm_kinds": {
+        "TBranchx": 56,
+        "TLoad": 75,
+        "TStore": 40
+       },
+       "alu_feeds_xmit": 25,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.15,
+       "unnecessary_hist": {
+        "1": 1,
+        "2": 6,
+        "3": 24,
+        "4": 76,
+        "5": 64
+       },
+       "bare_avg": 0.0,
+       "unresolved_brs_hist": {
+        "1": 132,
+        "2": 30,
+        "3": 8,
+        "4": 1
+       },
+       "parse_errors": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "variant": "V0",
+   "stem": "SPT_6_oneLP_v3",
+   "base_file": "STAGE1_alloy/models/proposed/SPT_6_oneLP_v3.als",
+   "base_sha256": "6b2a09482b9bc223e6129e3e637dad12faa92d43054958413cfdcd502fa31bbd",
+   "model_file": "STAGE1_alloy/models/proposed/SPT_6_oneLP_v3.als",
+   "model_sha256": "6b2a09482b9bc223e6129e3e637dad12faa92d43054958413cfdcd502fa31bbd",
+   "generator_command": null,
+   "cafe2_model": "/tests/singlestage_20261109/models/SPT/base/SPT_6_oneLP_v3.als",
+   "cafe2_out": "/tests/singlestage_20261109/out/SPT/SPT_6_oneLP_v3",
+   "cafe2_log": "/tests/singlestage_20261109/logs/SPT__SPT_6_oneLP_v3.nohup.txt",
+   "start": "2026-11-10T02:16:21+00:00 START pid=2775297 host=543cef85d966 model=/tests/singlestage_20261109/models/SPT/base/SPT_6_oneLP_v3.als sha256=6b2a09482b9bc223e6129e3e637dad12faa92d43054958413cfdcd502fa31bbd scope='for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+   "lint": "2026-11-10T02:16:21+00:00 LINT OK   /tests/singlestage_20261109/models/SPT/base/SPT_6_oneLP_v3.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)",
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "rc": 0,
+     "secs": 1358,
+     "ended": "2026-11-10T02:39:00+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 3243,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:22+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 3916,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:22+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 3414,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:22+00:00"
+    }
+   ],
+   "census": {
+    "census.json": {
+     "UNION": {
+      "instances": 20573,
+      "distinct": 14677,
+      "sizes": {
+       "6": 14677
+      },
+      "kind_sequences": 3029,
+      "xm_kinds": {
+       "TBranchx": 5111,
+       "TLoad": 4575,
+       "TStore": 4991
+      },
+      "alu_feeds_xmit": 5053,
+      "two_load_merge": 1,
+      "unnecessary_avg": 2.58,
+      "unnecessary_hist": {
+       "0": 2,
+       "1": 82,
+       "2": 5974,
+       "3": 8619
+      },
+      "bare_avg": 2.33,
+      "unresolved_brs_hist": {
+       "1": 14677
+      }
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 1823,
+      "default∩2": 1554,
+      "default∩3": 1638,
+      "1∩2": 1714,
+      "1∩3": 1825,
+      "2∩3": 1644
+     },
+     "per_run": {
+      "default": {
+       "instances": 10000,
+       "distinct": 10000,
+       "sizes": {
+        "6": 10000
+       },
+       "kind_sequences": 1006,
+       "xm_kinds": {
+        "TBranchx": 3344,
+        "TLoad": 3330,
+        "TStore": 3326
+       },
+       "alu_feeds_xmit": 4294,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.57,
+       "unnecessary_hist": {
+        "2": 4348,
+        "3": 5652
+       },
+       "bare_avg": 2.54,
+       "unresolved_brs_hist": {
+        "1": 10000
+       },
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 3916,
+       "distinct": 3916,
+       "sizes": {
+        "6": 3916
+       },
+       "kind_sequences": 1520,
+       "xm_kinds": {
+        "TStore": 1354,
+        "TBranchx": 1400,
+        "TLoad": 1162
+       },
+       "alu_feeds_xmit": 543,
+       "two_load_merge": 1,
+       "unnecessary_avg": 2.75,
+       "unnecessary_hist": {
+        "1": 26,
+        "2": 933,
+        "3": 2957
+       },
+       "bare_avg": 2.49,
+       "unresolved_brs_hist": {
+        "1": 3916
+       },
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 3243,
+       "distinct": 3243,
+       "sizes": {
+        "6": 3243
+       },
+       "kind_sequences": 1395,
+       "xm_kinds": {
+        "TBranchx": 1226,
+        "TStore": 1142,
+        "TLoad": 875
+       },
+       "alu_feeds_xmit": 463,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.73,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 25,
+        "2": 835,
+        "3": 2382
+       },
+       "bare_avg": 2.44,
+       "unresolved_brs_hist": {
+        "1": 3243
+       },
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 3414,
+       "distinct": 3414,
+       "sizes": {
+        "6": 3414
+       },
+       "kind_sequences": 1375,
+       "xm_kinds": {
+        "TBranchx": 1257,
+        "TStore": 1243,
+        "TLoad": 914
+       },
+       "alu_feeds_xmit": 501,
+       "two_load_merge": 0,
+       "unnecessary_avg": 2.73,
+       "unnecessary_hist": {
+        "0": 1,
+        "1": 31,
+        "2": 849,
+        "3": 2533
+       },
+       "bare_avg": 2.49,
+       "unresolved_brs_hist": {
+        "1": 3414
+       },
+       "parse_errors": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "variant": "V1",
+   "stem": "SPT_6_oneLP_v3_flat_n8_prod",
+   "base_file": "STAGE1_alloy/models/proposed/SPT_6_oneLP_v3.als",
+   "base_sha256": "6b2a09482b9bc223e6129e3e637dad12faa92d43054958413cfdcd502fa31bbd",
+   "model_file": "STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v3_flat_n8_prod.als",
+   "model_sha256": "85008d5e4e09055df1266bea0a93c6c4018dafc66fd43821a64d128e14374587",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/proposed/SPT_6_oneLP_v3.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/SPT/SPT_6_oneLP_v3_flat_n8_prod.als",
+   "cafe2_model": "/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v3_flat_n8_prod.als",
+   "cafe2_out": "/tests/singlestage_20261109/out/SPT/SPT_6_oneLP_v3_flat_n8_prod",
+   "cafe2_log": "/tests/singlestage_20261109/logs/SPT__SPT_6_oneLP_v3_flat_n8_prod.nohup.txt",
+   "start": "2026-11-10T02:16:22+00:00 START pid=2775525 host=543cef85d966 model=/tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v3_flat_n8_prod.als sha256=85008d5e4e09055df1266bea0a93c6c4018dafc66fd43821a64d128e14374587 scope='for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool' seeds=default,1,2,3 cap=10000 timeout=1500 jobs=4 p=0.05",
+   "lint": "2026-11-10T02:16:22+00:00 LINT OK   /tests/singlestage_20261109/models/SPT/SPT_6_oneLP_v3_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)",
+   "ended": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 63,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:23+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 51,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:23+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 53,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:23+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 265,
+     "verdict": "TIMEOUT",
+     "rc": -9,
+     "secs": 1500,
+     "ended": "2026-11-10T02:41:23+00:00"
+    }
+   ],
+   "census": {
+    "census.json": {
+     "UNION": {
+      "instances": 432,
+      "distinct": 422,
+      "sizes": {
+       "8": 422
+      },
+      "kind_sequences": 371,
+      "xm_kinds": {
+       "TLoad": 106,
+       "TBranchx": 216,
+       "TStore": 100
+      },
+      "alu_feeds_xmit": 32,
+      "two_load_merge": 0,
+      "unnecessary_avg": 4.74,
+      "unnecessary_hist": {
+       "2": 1,
+       "3": 6,
+       "4": 94,
+       "5": 321
+      },
+      "bare_avg": 3.75,
+      "unresolved_brs_hist": {
+       "1": 422
+      }
+     },
+     "PAIRWISE_OVERLAP": {
+      "default∩1": 4,
+      "default∩2": 1,
+      "default∩3": 4,
+      "1∩2": 0,
+      "1∩3": 2,
+      "2∩3": 0
+     },
+     "per_run": {
+      "default": {
+       "instances": 265,
+       "distinct": 265,
+       "sizes": {
+        "8": 265
+       },
+       "kind_sequences": 228,
+       "xm_kinds": {
+        "TLoad": 49,
+        "TBranchx": 162,
+        "TStore": 54
+       },
+       "alu_feeds_xmit": 0,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.91,
+       "unnecessary_hist": {
+        "4": 23,
+        "5": 242
+       },
+       "bare_avg": 4.52,
+       "unresolved_brs_hist": {
+        "1": 265
+       },
+       "parse_errors": 0
+      },
+      "1": {
+       "instances": 63,
+       "distinct": 63,
+       "sizes": {
+        "8": 63
+       },
+       "kind_sequences": 61,
+       "xm_kinds": {
+        "TStore": 23,
+        "TLoad": 19,
+        "TBranchx": 21
+       },
+       "alu_feeds_xmit": 14,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.6,
+       "unnecessary_hist": {
+        "3": 1,
+        "4": 23,
+        "5": 39
+       },
+       "bare_avg": 2.78,
+       "unresolved_brs_hist": {
+        "1": 63
+       },
+       "parse_errors": 0
+      },
+      "2": {
+       "instances": 51,
+       "distinct": 51,
+       "sizes": {
+        "8": 51
+       },
+       "kind_sequences": 51,
+       "xm_kinds": {
+        "TLoad": 18,
+        "TStore": 16,
+        "TBranchx": 17
+       },
+       "alu_feeds_xmit": 9,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.29,
+       "unnecessary_hist": {
+        "2": 1,
+        "3": 3,
+        "4": 27,
+        "5": 20
+       },
+       "bare_avg": 1.9,
+       "unresolved_brs_hist": {
+        "1": 51
+       },
+       "parse_errors": 0
+      },
+      "3": {
+       "instances": 53,
+       "distinct": 53,
+       "sizes": {
+        "8": 53
+       },
+       "kind_sequences": 52,
+       "xm_kinds": {
+        "TBranchx": 23,
+        "TLoad": 21,
+        "TStore": 9
+       },
+       "alu_feeds_xmit": 9,
+       "two_load_merge": 0,
+       "unnecessary_avg": 4.53,
+       "unnecessary_hist": {
+        "3": 2,
+        "4": 21,
+        "5": 30
+       },
+       "bare_avg": 3.28,
+       "unresolved_brs_hist": {
+        "1": 53
+       },
+       "parse_errors": 0
+      }
+     }
+    }
+   }
+  }
+ ],
+ "notes": [
+  "Defense block (speculation_contract_p .. end of prot_set_propagation_p) verified byte-identical to the base for every generated .als (python slice compare); full diff vs base = header comments, IX atoms/lt_ix/idx sums (6->8), fold regenerated 8 deep (same seed hardware_protection_policy[p]), scope 'exactly 8 Instruction, 16 Operand, 6 Int', plus the minimality/nospacer clause where requested.",
+  "check_bound_consistency: OK for all four generated models (fold depth 8 vs N 8, 8 IX atoms, Int set).",
+  "Generator anchors matched SPT v2/v3 unchanged (make_s15_model.py used as is, --fold auto = nested fold, no family generator script needed).",
+  "SPT v2/v3 gen_useful_litmus base clause is already 'not secure_speculation_scheme_p[no_p]' ([v2-3]); one_insecure_speculation_scheme_p is only commented out. So --minimality leak_rs keeps the same base clause and only drops RR + boundary RC/RR (RS kept) - same meaning as for STT.",
+  "Smoke (default,7; cap 40; timeout 400) run for the three v2 N=8 models: lint OK, instances returned (prod: default 40 CAPPED/147 s, seed7 21 TIMEOUT; nospacer: 28/19 TIMEOUT; leakrs_nospacer: 32/34 TIMEOUT). v3 N=8 prod was not smoked separately; its real run linted OK and produced instances. _smoke_ dirs deleted.",
+  "V0 core coverage: census_cores_k3k5_all.json uses only the k3 (546, complete) + k5_Branchxs/Loads/Stores (83+83+45) Stage-1 cores = 757 cores (copied to out/SPT/cores_v2_k3_k5). k4 (200,000 cores, enumeration CAPPED at 200000) was excluded from the full census because it is too slow; k1, k2, k5_rest, k6_* dirs hold 0 cores. census_cores_allk_sample300.json = a seeded random sample (random.seed(0), 300 of the 24,388 V0 instance files, list in out/SPT/SPT_6_oneLP_v2/_sample300_seed0/SOURCES.txt) checked against ALL 200,757 cores.",
+  "census_cores_default_1.json = earlier k3+k5 coverage run on default and 1 only (superseded by census_cores_k3k5_all.json; numbers identical for those two dirs).",
+  "v3 V2/V3 drafts were generated and then deleted unrun (out of the requested scope: v3 V0 + V1 only); regenerate with the same generator command plus --shape nospacer [--minimality leak_rs] and --model STAGE1_alloy/models/proposed/SPT_6_oneLP_v3.als."
+ ]
+}

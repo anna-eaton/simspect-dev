@@ -1,0 +1,123 @@
+[2026-11-16 05:03:06] worker pid=121276 START key=check_footprint.py code_root=/tests/timing_20261115/simspect_fast python=3.8.10 pipeline=/tests/timing_20261115/simspect_fast/pipeline.py startup_cpu_s=0.056 nice=19
+[2026-11-16 05:03:07] worker pid=121276 BIND checker=check_footprint.py SIMSPECT_env={"SIMSPECT_BRANCH_ANN_ENABLE": "1", "SIMSPECT_CACHE_SETUP": "random_all", "SIMSPECT_CRITERION": "/tests/timing_20261115/simspect_fast/specs/leakage/invisispec.json", "SIMSPECT_FAST_PATH": "1", "SIMSPECT_GEM5_BIN": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt", "SIMSPECT_GEM5_CPU": "DerivO3CPU", "SIMSPECT_GEM5_DBG_FILE": "pipeview.txt", "SIMSPECT_GEM5_DBG_FLAG": "O3PipeView", "SIMSPECT_GEM5_DIR": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1", "SIMSPECT_GEM5_EXTRA": "--num-cpu=1\u001f--cpu-clock=2GHz\u001f--sys-clock=2GHz\u001f--ruby\u001f--L1_TBEs=256\u001f--L2_TBEs=256\u001f--DC_TBEs=256\u001f--l1d_size=32kB\u001f--l1d_assoc=8\u001f--l1i_size=32kB\u001f--l1i_assoc=8\u001f--cacheline_size=64\u001f--l2_size=2MB\u001f--l2_assoc=8\u001f--DTB_entries=64\u001f--needsTSO=0\u001f--scheme=FuturisticSafeInvisibleSpec\u001f--access-backing-store", "SIMSPECT_SE_CONFIG": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/configs/example/se.py"}
+[2026-11-16 05:03:07] fastpath pid=121276 tid=133771098064704 INSTALL gem5_common=/tests/timing_20261115/simspect_fast/STAGE3_gem5/gem5_common.py gem5_bin=/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt max_trace_mb=512 python=3.8.10 (hook-scan cache + routed trace read inside process_one; records identical by construction)
+[2026-11-16 05:03:07] fastpath pid=121276 tid=133771098064704 HOOKSCAN /work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt size=1116308112 mtime_ns=1794099376751905629 hooks=True scan_s=0.049 (cached for this process)
+[2026-11-16 05:03:07] fastpath pid=121276 tid=133771098064704 TEST inst-005354 path=fast trace_mb=2.70 lines=35078 o3pv=4998 simspect=2063 lsq=0 commit_inst=555 commit_squash=4 read_s=0.072 reloads=0 status=ok iiw=True wall_s=0.70
+[2026-11-16 05:03:07] worker pid=121276 TEST idx=0 mispredict_not_taken/inst-005354 rc=0 path=fast cpu_self=0.246 cpu_children=0.509 wall=0.75
+[2026-11-16 05:03:12] fastpath pid=121276 tid=133771098064704 TEST inst-005415 path=fast trace_mb=16.01 lines=189616 o3pv=13412 simspect=16533 lsq=0 commit_inst=1606 commit_squash=4 read_s=0.313 reloads=0 status=ok iiw=True wall_s=1.88
+[2026-11-16 05:03:12] worker pid=121276 TEST idx=2 mispredict_not_taken/inst-005415 rc=0 path=fast cpu_self=0.812 cpu_children=1.145 wall=1.95
+[2026-11-16 05:03:13] fastpath pid=121276 tid=133771098064704 TEST inst-000340 path=fast trace_mb=1.89 lines=25345 o3pv=5369 simspect=2171 lsq=0 commit_inst=568 commit_squash=4 read_s=0.051 reloads=0 status=ok iiw=True wall_s=0.63
+[2026-11-16 05:03:13] worker pid=121276 TEST idx=13 mispredict_taken/inst-000340 rc=0 path=fast cpu_self=0.178 cpu_children=0.508 wall=0.68
+[2026-11-16 05:03:15] fastpath pid=121276 tid=133771098064704 TEST inst-008288 path=fast trace_mb=16.00 lines=188823 o3pv=12782 simspect=16937 lsq=0 commit_inst=1623 commit_squash=4 read_s=0.376 reloads=0 status=ok iiw=True wall_s=1.99
+[2026-11-16 05:03:15] worker pid=121276 TEST idx=10 mispredict_not_taken/inst-008288 rc=0 path=fast cpu_self=0.897 cpu_children=1.172 wall=2.06
+[2026-11-16 05:03:16] fastpath pid=121276 tid=133771098064704 TEST inst-000228 path=fast trace_mb=2.77 lines=36048 o3pv=5285 simspect=2160 lsq=0 commit_inst=589 commit_squash=4 read_s=0.073 reloads=0 status=ok iiw=True wall_s=0.66
+[2026-11-16 05:03:16] worker pid=121276 TEST idx=19 mispredict_taken/inst-000228 rc=0 path=fast cpu_self=0.193 cpu_children=0.516 wall=0.70
+[2026-11-16 05:03:19] fastpath pid=121276 tid=133771098064704 TEST inst-012940 path=fast trace_mb=1.96 lines=26291 o3pv=5488 simspect=2247 lsq=0 commit_inst=589 commit_squash=7 read_s=0.054 reloads=0 status=ok iiw=True wall_s=0.63
+[2026-11-16 05:03:19] worker pid=121276 TEST idx=21 mispredict_taken/inst-012940 rc=0 path=fast cpu_self=0.181 cpu_children=0.500 wall=0.68
+[2026-11-16 05:03:21] fastpath pid=121276 tid=133771098064704 TEST inst-000918 path=fast trace_mb=16.17 lines=192909 o3pv=16142 simspect=17207 lsq=0 commit_inst=1623 commit_squash=12 read_s=0.332 reloads=0 status=ok iiw=True wall_s=1.91
+[2026-11-16 05:03:21] worker pid=121276 TEST idx=18 mispredict_taken/inst-000918 rc=0 path=fast cpu_self=0.855 cpu_children=1.133 wall=1.98
+[2026-11-16 05:03:22] fastpath pid=121276 tid=133771098064704 TEST inst-006252 path=fast trace_mb=1.91 lines=25705 o3pv=5418 simspect=2135 lsq=0 commit_inst=578 commit_squash=4 read_s=0.051 reloads=0 status=ok iiw=True wall_s=0.62
+[2026-11-16 05:03:22] worker pid=121276 TEST idx=25 mispredict_not_taken/inst-006252 rc=0 path=fast cpu_self=0.176 cpu_children=0.494 wall=0.67
+[2026-11-16 05:03:22] fastpath pid=121276 tid=133771098064704 TEST inst-012690 path=fast trace_mb=1.89 lines=25406 o3pv=5264 simspect=2099 lsq=0 commit_inst=564 commit_squash=4 read_s=0.044 reloads=0 status=ok iiw=True wall_s=0.61
+[2026-11-16 05:03:22] worker pid=121276 TEST idx=27 mispredict_taken/inst-012690 rc=0 path=fast cpu_self=0.168 cpu_children=0.497 wall=0.66
+[2026-11-16 05:03:24] fastpath pid=121276 tid=133771098064704 TEST inst-001898 path=fast trace_mb=1.93 lines=26166 o3pv=5803 simspect=2167 lsq=0 commit_inst=586 commit_squash=7 read_s=0.055 reloads=0 status=ok iiw=True wall_s=0.63
+[2026-11-16 05:03:24] worker pid=121276 TEST idx=29 mispredict_taken/inst-001898 rc=0 path=fast cpu_self=0.182 cpu_children=0.495 wall=0.67
+[2026-11-16 05:03:36] fastpath pid=121276 tid=133771098064704 TEST inst-010991 path=fast trace_mb=1.96 lines=26199 o3pv=5362 simspect=2191 lsq=0 commit_inst=605 commit_squash=4 read_s=0.055 reloads=0 status=ok iiw=True wall_s=0.64
+[2026-11-16 05:03:36] worker pid=121276 TEST idx=46 mispredict_taken/inst-010991 rc=0 path=fast cpu_self=0.187 cpu_children=0.500 wall=0.68
+[2026-11-16 05:03:37] fastpath pid=121276 tid=133771098064704 TEST inst-004918 path=fast trace_mb=1.96 lines=26416 o3pv=5523 simspect=2080 lsq=0 commit_inst=610 commit_squash=4 read_s=0.056 reloads=0 status=ok iiw=True wall_s=0.62
+[2026-11-16 05:03:37] worker pid=121276 TEST idx=48 mispredict_not_taken/inst-004918 rc=0 path=fast cpu_self=0.178 cpu_children=0.490 wall=0.66
+[2026-11-16 05:03:41] fastpath pid=121276 tid=133771098064704 TEST inst-012287 path=fast trace_mb=17.58 lines=207892 o3pv=13006 simspect=17045 lsq=0 commit_inst=1631 commit_squash=4 read_s=0.363 reloads=0 status=ok iiw=True wall_s=2.07
+[2026-11-16 05:03:41] worker pid=121276 TEST idx=45 mispredict_not_taken/inst-012287 rc=0 path=fast cpu_self=0.855 cpu_children=1.282 wall=2.13
+[2026-11-16 05:03:45] fastpath pid=121276 tid=133771098064704 TEST inst-013138 path=fast trace_mb=4.34 lines=55316 o3pv=5425 simspect=2169 lsq=0 commit_inst=577 commit_squash=4 read_s=0.107 reloads=0 status=ok iiw=True wall_s=0.75
+[2026-11-16 05:03:45] worker pid=121276 TEST idx=56 mispredict_not_taken/inst-013138 rc=0 path=fast cpu_self=0.235 cpu_children=0.559 wall=0.80
+[2026-11-16 05:03:49] fastpath pid=121276 tid=133771098064704 TEST inst-006169 path=fast trace_mb=15.26 lines=179538 o3pv=13664 simspect=18402 lsq=0 commit_inst=1615 commit_squash=4 read_s=0.306 reloads=0 status=ok iiw=True wall_s=1.89
+[2026-11-16 05:03:49] worker pid=121276 TEST idx=57 mispredict_taken/inst-006169 rc=0 path=fast cpu_self=0.832 cpu_children=1.143 wall=1.96
+[2026-11-16 05:03:51] fastpath pid=121276 tid=133771098064704 TEST inst-007595 path=fast trace_mb=2.74 lines=35699 o3pv=5299 simspect=2185 lsq=0 commit_inst=590 commit_squash=4 read_s=0.073 reloads=0 status=ok iiw=True wall_s=0.68
+[2026-11-16 05:03:51] worker pid=121276 TEST idx=67 mispredict_taken/inst-007595 rc=0 path=fast cpu_self=0.201 cpu_children=0.528 wall=0.72
+[2026-11-16 05:03:54] fastpath pid=121276 tid=133771098064704 TEST inst-006484 path=fast trace_mb=16.89 lines=198300 o3pv=12775 simspect=18720 lsq=0 commit_inst=1639 commit_squash=4 read_s=0.344 reloads=0 status=ok iiw=True wall_s=2.05
+[2026-11-16 05:03:54] worker pid=121276 TEST idx=63 mispredict_taken/inst-006484 rc=0 path=fast cpu_self=0.902 cpu_children=1.233 wall=2.13
+[2026-11-16 05:03:56] fastpath pid=121276 tid=133771098064704 TEST inst-005336 path=fast trace_mb=2.72 lines=35565 o3pv=5348 simspect=2096 lsq=0 commit_inst=568 commit_squash=4 read_s=0.069 reloads=0 status=ok iiw=True wall_s=0.65
+[2026-11-16 05:03:56] worker pid=121276 TEST idx=75 mispredict_not_taken/inst-005336 rc=0 path=fast cpu_self=0.194 cpu_children=0.512 wall=0.70
+[2026-11-16 05:03:58] fastpath pid=121276 tid=133771098064704 TEST inst-000202 path=fast trace_mb=2.74 lines=35529 o3pv=4977 simspect=2116 lsq=0 commit_inst=567 commit_squash=4 read_s=0.071 reloads=0 status=ok iiw=True wall_s=0.65
+[2026-11-16 05:03:58] worker pid=121276 TEST idx=78 mispredict_not_taken/inst-000202 rc=0 path=fast cpu_self=0.190 cpu_children=0.505 wall=0.69
+[2026-11-16 05:04:00] fastpath pid=121276 tid=133771098064704 TEST inst-011958 path=fast trace_mb=13.66 lines=160793 o3pv=13426 simspect=17193 lsq=0 commit_inst=1589 commit_squash=3 read_s=0.271 reloads=0 status=ok iiw=True wall_s=1.86
+[2026-11-16 05:04:00] worker pid=121276 TEST idx=74 mispredict_not_taken/inst-011958 rc=0 path=fast cpu_self=0.792 cpu_children=1.140 wall=1.92
+[2026-11-16 05:04:08] fastpath pid=121276 tid=133771098064704 TEST inst-010766 path=fast trace_mb=2.72 lines=35504 o3pv=5432 simspect=2149 lsq=0 commit_inst=590 commit_squash=4 read_s=0.073 reloads=0 status=ok iiw=True wall_s=0.69
+[2026-11-16 05:04:08] worker pid=121276 TEST idx=92 mispredict_taken/inst-010766 rc=0 path=fast cpu_self=0.193 cpu_children=0.541 wall=0.73
+[2026-11-16 05:04:11] fastpath pid=121276 tid=133771098064704 TEST inst-012237 path=fast trace_mb=1.91 lines=25636 o3pv=5292 simspect=2136 lsq=0 commit_inst=589 commit_squash=4 read_s=0.054 reloads=0 status=ok iiw=True wall_s=0.64
+[2026-11-16 05:04:11] worker pid=121276 TEST idx=95 mispredict_not_taken/inst-012237 rc=0 path=fast cpu_self=0.187 cpu_children=0.503 wall=0.68
+[2026-11-16 05:04:19] fastpath pid=121276 tid=133771098064704 TEST inst-011032 path=fast trace_mb=14.00 lines=164295 o3pv=13020 simspect=17682 lsq=0 commit_inst=1599 commit_squash=4 read_s=0.279 reloads=0 status=ok iiw=True wall_s=1.86
+[2026-11-16 05:04:19] worker pid=121276 TEST idx=101 mispredict_not_taken/inst-011032 rc=0 path=fast cpu_self=0.823 cpu_children=1.116 wall=1.93
+[2026-11-16 05:04:26] fastpath pid=121276 tid=133771098064704 TEST inst-011382 path=fast trace_mb=17.60 lines=208388 o3pv=12929 simspect=16480 lsq=0 commit_inst=1596 commit_squash=4 read_s=0.379 reloads=0 status=ok iiw=True wall_s=1.97
+[2026-11-16 05:04:26] worker pid=121276 TEST idx=107 mispredict_taken/inst-011382 rc=0 path=fast cpu_self=0.906 cpu_children=1.149 wall=2.05
+[2026-11-16 05:04:27] fastpath pid=121276 tid=133771098064704 TEST inst-000870 path=fast trace_mb=2.73 lines=35625 o3pv=5306 simspect=2195 lsq=0 commit_inst=587 commit_squash=4 read_s=0.065 reloads=0 status=ok iiw=True wall_s=0.65
+[2026-11-16 05:04:27] worker pid=121276 TEST idx=116 mispredict_not_taken/inst-000870 rc=0 path=fast cpu_self=0.191 cpu_children=0.516 wall=0.70
+[2026-11-16 05:04:36] fastpath pid=121276 tid=133771098064704 TEST inst-012582 path=fast trace_mb=13.95 lines=165316 o3pv=15645 simspect=17843 lsq=0 commit_inst=1619 commit_squash=9 read_s=0.298 reloads=0 status=ok iiw=True wall_s=1.86
+[2026-11-16 05:04:36] worker pid=121276 TEST idx=124 mispredict_taken/inst-012582 rc=0 path=fast cpu_self=0.869 cpu_children=1.073 wall=1.93
+[2026-11-16 05:04:43] fastpath pid=121276 tid=133771098064704 TEST inst-002880 path=fast trace_mb=4.37 lines=55572 o3pv=5341 simspect=2143 lsq=0 commit_inst=583 commit_squash=4 read_s=0.153 reloads=0 status=ok iiw=True wall_s=0.80
+[2026-11-16 05:04:43] worker pid=121276 TEST idx=140 mispredict_taken/inst-002880 rc=0 path=fast cpu_self=0.281 cpu_children=0.573 wall=0.85
+[2026-11-16 05:04:55] fastpath pid=121276 tid=133771098064704 TEST inst-010450 path=fast trace_mb=16.81 lines=197610 o3pv=12894 simspect=18480 lsq=0 commit_inst=1588 commit_squash=4 read_s=0.340 reloads=0 status=ok iiw=True wall_s=1.94
+[2026-11-16 05:04:55] worker pid=121276 TEST idx=151 mispredict_not_taken/inst-010450 rc=0 path=fast cpu_self=0.894 cpu_children=1.132 wall=2.02
+[2026-11-16 05:04:56] fastpath pid=121276 tid=133771098064704 TEST inst-001878 path=fast trace_mb=4.42 lines=56576 o3pv=5999 simspect=2265 lsq=0 commit_inst=594 commit_squash=7 read_s=0.107 reloads=0 status=ok iiw=True wall_s=0.78
+[2026-11-16 05:04:56] worker pid=121276 TEST idx=156 mispredict_taken/inst-001878 rc=0 path=fast cpu_self=0.236 cpu_children=0.586 wall=0.82
+[2026-11-16 05:04:57] fastpath pid=121276 tid=133771098064704 TEST inst-002947 path=fast trace_mb=4.36 lines=55638 o3pv=5530 simspect=2198 lsq=0 commit_inst=580 commit_squash=4 read_s=0.100 reloads=0 status=ok iiw=True wall_s=0.74
+[2026-11-16 05:04:57] worker pid=121276 TEST idx=158 mispredict_not_taken/inst-002947 rc=0 path=fast cpu_self=0.231 cpu_children=0.558 wall=0.78
+[2026-11-16 05:04:58] fastpath pid=121276 tid=133771098064704 TEST inst-011321 path=fast trace_mb=1.88 lines=24639 o3pv=4410 simspect=2107 lsq=0 commit_inst=577 commit_squash=5 read_s=0.051 reloads=0 status=ok iiw=True wall_s=0.71
+[2026-11-16 05:04:58] worker pid=121276 TEST idx=160 mispredict_not_taken/inst-011321 rc=0 path=fast cpu_self=0.175 cpu_children=0.580 wall=0.75
+[2026-11-16 05:04:59] fastpath pid=121276 tid=133771098064704 TEST inst-004533 path=fast trace_mb=2.78 lines=36355 o3pv=5656 simspect=2232 lsq=0 commit_inst=625 commit_squash=7 read_s=0.116 reloads=0 status=ok iiw=True wall_s=0.75
+[2026-11-16 05:04:59] worker pid=121276 TEST idx=161 mispredict_taken/inst-004533 rc=0 path=fast cpu_self=0.260 cpu_children=0.543 wall=0.80
+[2026-11-16 05:05:02] fastpath pid=121276 tid=133771098064704 TEST inst-000192 path=fast trace_mb=17.68 lines=209446 o3pv=12971 simspect=16556 lsq=0 commit_inst=1620 commit_squash=4 read_s=0.367 reloads=0 status=ok iiw=True wall_s=2.01
+[2026-11-16 05:05:02] worker pid=121276 TEST idx=157 mispredict_not_taken/inst-000192 rc=0 path=fast cpu_self=0.908 cpu_children=1.184 wall=2.08
+[2026-11-16 05:05:02] fastpath pid=121276 tid=133771098064704 TEST inst-006236 path=fast trace_mb=2.75 lines=35860 o3pv=5236 simspect=2113 lsq=0 commit_inst=576 commit_squash=4 read_s=0.074 reloads=0 status=ok iiw=True wall_s=0.67
+[2026-11-16 05:05:02] worker pid=121276 TEST idx=166 mispredict_not_taken/inst-006236 rc=0 path=fast cpu_self=0.196 cpu_children=0.525 wall=0.72
+[2026-11-16 05:05:05] fastpath pid=121276 tid=133771098064704 TEST inst-004676 path=fast trace_mb=2.72 lines=35496 o3pv=5285 simspect=2148 lsq=0 commit_inst=563 commit_squash=6 read_s=0.071 reloads=0 status=ok iiw=True wall_s=0.68
+[2026-11-16 05:05:05] worker pid=121276 TEST idx=171 mispredict_taken/inst-004676 rc=0 path=fast cpu_self=0.190 cpu_children=0.541 wall=0.73
+[2026-11-16 05:05:06] fastpath pid=121276 tid=133771098064704 TEST inst-001881 path=fast trace_mb=4.39 lines=55927 o3pv=5558 simspect=2178 lsq=0 commit_inst=591 commit_squash=4 read_s=0.107 reloads=0 status=ok iiw=True wall_s=0.74
+[2026-11-16 05:05:06] worker pid=121276 TEST idx=172 mispredict_not_taken/inst-001881 rc=0 path=fast cpu_self=0.224 cpu_children=0.556 wall=0.77
+[2026-11-16 05:05:08] fastpath pid=121276 tid=133771098064704 TEST inst-010112 path=fast trace_mb=2.77 lines=36184 o3pv=5418 simspect=2109 lsq=0 commit_inst=600 commit_squash=4 read_s=0.071 reloads=0 status=ok iiw=True wall_s=0.70
+[2026-11-16 05:05:08] worker pid=121276 TEST idx=176 mispredict_not_taken/inst-010112 rc=0 path=fast cpu_self=0.193 cpu_children=0.556 wall=0.75
+[2026-11-16 05:05:11] fastpath pid=121276 tid=133771098064704 TEST inst-009443 path=fast trace_mb=14.23 lines=166987 o3pv=12999 simspect=17958 lsq=0 commit_inst=1619 commit_squash=4 read_s=0.331 reloads=0 status=ok iiw=True wall_s=1.95
+[2026-11-16 05:05:11] worker pid=121276 TEST idx=173 mispredict_not_taken/inst-009443 rc=0 path=fast cpu_self=0.908 cpu_children=1.131 wall=2.03
+[2026-11-16 05:05:12] fastpath pid=121276 tid=133771098064704 TEST inst-002726 path=fast trace_mb=2.74 lines=35949 o3pv=5754 simspect=2194 lsq=0 commit_inst=586 commit_squash=4 read_s=0.072 reloads=0 status=ok iiw=True wall_s=0.71
+[2026-11-16 05:05:12] worker pid=121276 TEST idx=182 mispredict_not_taken/inst-002726 rc=0 path=fast cpu_self=0.209 cpu_children=0.551 wall=0.75
+[2026-11-16 05:05:16] fastpath pid=121276 tid=133771098064704 TEST inst-004868 path=fast trace_mb=2.77 lines=36349 o3pv=5698 simspect=2131 lsq=0 commit_inst=568 commit_squash=4 read_s=0.070 reloads=0 status=ok iiw=True wall_s=0.68
+[2026-11-16 05:05:16] worker pid=121276 TEST idx=186 mispredict_taken/inst-004868 rc=0 path=fast cpu_self=0.190 cpu_children=0.535 wall=0.72
+[2026-11-16 05:05:17] fastpath pid=121276 tid=133771098064704 TEST inst-012373 path=fast trace_mb=2.78 lines=36204 o3pv=5376 simspect=2209 lsq=0 commit_inst=586 commit_squash=7 read_s=0.072 reloads=0 status=ok iiw=True wall_s=0.73
+[2026-11-16 05:05:17] worker pid=121276 TEST idx=187 mispredict_taken/inst-012373 rc=0 path=fast cpu_self=0.204 cpu_children=0.576 wall=0.77
+[2026-11-16 05:05:25] fastpath pid=121276 tid=133771098064704 TEST inst-013229 path=fast trace_mb=16.79 lines=197524 o3pv=13090 simspect=18413 lsq=0 commit_inst=1593 commit_squash=4 read_s=0.346 reloads=0 status=ok iiw=True wall_s=2.01
+[2026-11-16 05:05:25] worker pid=121276 TEST idx=192 mispredict_not_taken/inst-013229 rc=0 path=fast cpu_self=0.920 cpu_children=1.180 wall=2.09
+[2026-11-16 05:05:27] fastpath pid=121276 tid=133771098064704 TEST inst-001970 path=fast trace_mb=16.04 lines=191073 o3pv=15498 simspect=16950 lsq=0 commit_inst=1605 commit_squash=10 read_s=0.327 reloads=0 status=ok iiw=True wall_s=1.97
+[2026-11-16 05:05:27] worker pid=121276 TEST idx=197 mispredict_taken/inst-001970 rc=0 path=fast cpu_self=0.880 cpu_children=1.183 wall=2.05
+[2026-11-16 05:05:29] fastpath pid=121276 tid=133771098064704 TEST inst-004615 path=fast trace_mb=4.42 lines=56526 o3pv=5852 simspect=2251 lsq=0 commit_inst=587 commit_squash=7 read_s=0.109 reloads=0 status=ok iiw=True wall_s=0.77
+[2026-11-16 05:05:29] worker pid=121276 TEST idx=204 mispredict_taken/inst-004615 rc=0 path=fast cpu_self=0.236 cpu_children=0.576 wall=0.81
+[2026-11-16 05:05:31] fastpath pid=121276 tid=133771098064704 TEST inst-001009 path=fast trace_mb=15.37 lines=183437 o3pv=15967 simspect=16643 lsq=0 commit_inst=1619 commit_squash=11 read_s=0.311 reloads=0 status=ok iiw=True wall_s=1.85
+[2026-11-16 05:05:31] worker pid=121276 TEST idx=200 mispredict_taken/inst-001009 rc=0 path=fast cpu_self=0.843 cpu_children=1.090 wall=1.92
+[2026-11-16 05:05:34] fastpath pid=121276 tid=133771098064704 TEST inst-008260 path=fast trace_mb=15.14 lines=180158 o3pv=15505 simspect=16923 lsq=0 commit_inst=1616 commit_squash=12 read_s=0.344 reloads=0 status=ok iiw=True wall_s=1.95
+[2026-11-16 05:05:34] worker pid=121276 TEST idx=205 mispredict_taken/inst-008260 rc=0 path=fast cpu_self=0.874 cpu_children=1.154 wall=2.02
+[2026-11-16 05:05:36] fastpath pid=121276 tid=133771098064704 TEST inst-011949 path=fast trace_mb=15.17 lines=178294 o3pv=12845 simspect=17817 lsq=0 commit_inst=1597 commit_squash=4 read_s=0.365 reloads=0 status=ok iiw=True wall_s=2.04
+[2026-11-16 05:05:36] worker pid=121276 TEST idx=206 mispredict_not_taken/inst-011949 rc=0 path=fast cpu_self=0.961 cpu_children=1.181 wall=2.13
+[2026-11-16 05:05:38] fastpath pid=121276 tid=133771098064704 TEST inst-003218 path=fast trace_mb=4.34 lines=55283 o3pv=5334 simspect=2141 lsq=0 commit_inst=572 commit_squash=4 read_s=0.111 reloads=0 status=ok iiw=True wall_s=0.78
+[2026-11-16 05:05:38] worker pid=121276 TEST idx=215 mispredict_taken/inst-003218 rc=0 path=fast cpu_self=0.235 cpu_children=0.592 wall=0.82
+[2026-11-16 05:05:39] fastpath pid=121276 tid=133771098064704 TEST inst-010894 path=fast trace_mb=4.36 lines=55308 o3pv=5124 simspect=2146 lsq=0 commit_inst=574 commit_squash=4 read_s=0.110 reloads=0 status=ok iiw=True wall_s=0.76
+[2026-11-16 05:05:39] worker pid=121276 TEST idx=216 mispredict_taken/inst-010894 rc=0 path=fast cpu_self=0.242 cpu_children=0.568 wall=0.80
+[2026-11-16 05:05:48] fastpath pid=121276 tid=133771098064704 TEST inst-003901 path=fast trace_mb=17.59 lines=208022 o3pv=13104 simspect=17043 lsq=0 commit_inst=1615 commit_squash=4 read_s=0.350 reloads=0 status=ok iiw=True wall_s=2.02
+[2026-11-16 05:05:48] worker pid=121276 TEST idx=223 mispredict_not_taken/inst-003901 rc=0 path=fast cpu_self=0.890 cpu_children=1.217 wall=2.10
+[2026-11-16 05:05:51] fastpath pid=121276 tid=133771098064704 TEST inst-002882 path=fast trace_mb=4.36 lines=55496 o3pv=5250 simspect=2149 lsq=0 commit_inst=575 commit_squash=4 read_s=0.109 reloads=0 status=ok iiw=True wall_s=0.77
+[2026-11-16 05:05:51] worker pid=121276 TEST idx=230 mispredict_not_taken/inst-002882 rc=0 path=fast cpu_self=0.238 cpu_children=0.577 wall=0.81
+[2026-11-16 05:05:52] fastpath pid=121276 tid=133771098064704 TEST inst-005731 path=fast trace_mb=2.80 lines=36636 o3pv=5740 simspect=2228 lsq=0 commit_inst=614 commit_squash=4 read_s=0.071 reloads=0 status=ok iiw=True wall_s=0.69
+[2026-11-16 05:05:52] worker pid=121276 TEST idx=234 mispredict_taken/inst-005731 rc=0 path=fast cpu_self=0.205 cpu_children=0.535 wall=0.73
+[2026-11-16 05:05:54] fastpath pid=121276 tid=133771098064704 TEST inst-008779 path=fast trace_mb=2.73 lines=35709 o3pv=5439 simspect=2168 lsq=0 commit_inst=585 commit_squash=4 read_s=0.070 reloads=0 status=ok iiw=True wall_s=0.69
+[2026-11-16 05:05:54] worker pid=121276 TEST idx=237 mispredict_not_taken/inst-008779 rc=0 path=fast cpu_self=0.190 cpu_children=0.540 wall=0.73
+[2026-11-16 05:05:57] fastpath pid=121276 tid=133771098064704 TEST inst-009626 path=fast trace_mb=1.89 lines=25294 o3pv=5152 simspect=2101 lsq=0 commit_inst=567 commit_squash=4 read_s=0.052 reloads=0 status=ok iiw=True wall_s=0.64
+[2026-11-16 05:05:57] worker pid=121276 TEST idx=247 mispredict_not_taken/inst-009626 rc=0 path=fast cpu_self=0.185 cpu_children=0.512 wall=0.69
+[2026-11-16 05:05:59] fastpath pid=121276 tid=133771098064704 TEST inst-003816 path=fast trace_mb=14.83 lines=174644 o3pv=12915 simspect=16985 lsq=0 commit_inst=1592 commit_squash=4 read_s=0.299 reloads=0 status=ok iiw=True wall_s=1.90
+[2026-11-16 05:05:59] worker pid=121276 TEST idx=241 mispredict_not_taken/inst-003816 rc=0 path=fast cpu_self=0.840 cpu_children=1.138 wall=1.97
+[2026-11-16 05:06:09] fastpath pid=121276 tid=133771098064704 TEST inst-005025 path=fast trace_mb=17.00 lines=200762 o3pv=12845 simspect=16906 lsq=0 commit_inst=1646 commit_squash=4 read_s=0.350 reloads=0 status=ok iiw=True wall_s=2.05
+[2026-11-16 05:06:09] worker pid=121276 TEST idx=257 mispredict_not_taken/inst-005025 rc=0 path=fast cpu_self=0.922 cpu_children=1.215 wall=2.13
+[2026-11-16 05:06:11] fastpath pid=121276 tid=133771098064704 TEST inst-005813 path=fast trace_mb=1.94 lines=26157 o3pv=5614 simspect=2153 lsq=0 commit_inst=619 commit_squash=4 read_s=0.053 reloads=0 status=ok iiw=True wall_s=0.63
+[2026-11-16 05:06:11] worker pid=121276 TEST idx=264 mispredict_not_taken/inst-005813 rc=0 path=fast cpu_self=0.183 cpu_children=0.502 wall=0.68
+[2026-11-16 05:06:13] fastpath pid=121276 tid=133771098064704 TEST inst-004954 path=fast trace_mb=4.41 lines=56328 o3pv=5859 simspect=2260 lsq=0 commit_inst=590 commit_squash=7 read_s=0.110 reloads=0 status=ok iiw=True wall_s=0.75
+[2026-11-16 05:06:13] worker pid=121276 TEST idx=270 mispredict_taken/inst-004954 rc=0 path=fast cpu_self=0.241 cpu_children=0.564 wall=0.80
+[2026-11-16 05:06:16] fastpath pid=121276 tid=133771098064704 TEST inst-010032 path=fast trace_mb=16.02 lines=188911 o3pv=13006 simspect=17203 lsq=0 commit_inst=1620 commit_squash=4 read_s=0.325 reloads=0 status=ok iiw=True wall_s=1.92
+[2026-11-16 05:06:16] worker pid=121276 TEST idx=266 mispredict_not_taken/inst-010032 rc=0 path=fast cpu_self=0.880 cpu_children=1.123 wall=1.99
+[2026-11-16 05:06:37] worker pid=121276 END exit requested: tests=59 test_cpu_s=72.22 lifetime_s=210

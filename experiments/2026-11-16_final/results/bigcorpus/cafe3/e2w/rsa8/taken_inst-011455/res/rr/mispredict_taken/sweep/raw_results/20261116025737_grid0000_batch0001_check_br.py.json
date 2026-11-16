@@ -1,0 +1,189 @@
+[
+  {
+    "name": "inst-011455",
+    "status": "ok",
+    "xmit_pc": "0x401cad",
+    "last_committed_pc": "0x401c65",
+    "first_noncommitted_pc": "0x401c8b",
+    "xmit_kind": "br_x",
+    "issued_in_window": true,
+    "xmit_issue": null,
+    "xmit_complete": 3931500,
+    "lc_retire": 3927500,
+    "fnc_retire": 8929500,
+    "fnc_complete": 3928500,
+    "error": null,
+    "cache_setup": "warm",
+    "retire_from_commit_trace": [],
+    "force_plan": [
+      {
+        "branch_pc": 2,
+        "addr": 4201566,
+        "mode": "correctly_not_taken",
+        "arch_taken": null,
+        "fallthrough": 4201568,
+        "static_target": 4201613,
+        "dest": 4201573,
+        "force": "not_taken"
+      },
+      {
+        "branch_pc": 4,
+        "addr": 4201611,
+        "mode": "mispredict_taken",
+        "arch_taken": null,
+        "fallthrough": 4201613,
+        "static_target": 4201625,
+        "dest": 4201630,
+        "force": "taken"
+      },
+      {
+        "branch_pc": 6,
+        "addr": 4201645,
+        "mode": "mispredict_not_taken",
+        "arch_taken": null,
+        "fallthrough": 4201647,
+        "static_target": 4201613,
+        "dest": 4201647,
+        "force": "not_taken"
+      }
+    ],
+    "br_resolve_source": "observed",
+    "br_events": {
+      "0x401000": {
+        "5": {
+          "resolve_visible": 81500,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 4
+        }
+      },
+      "0x401c5e": {
+        "566": {
+          "predict_force": 2671000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4201568,
+          "resolve_hold": 2676500,
+          "resolve_hold_stall": 2500,
+          "resolve_hold_fire": 3926500,
+          "resolve_hold_mispred": 0,
+          "resolve_release": 3926500,
+          "resolve_release_mispred": 0,
+          "resolve_visible": 3927000,
+          "resolve_visible_stall": 2500,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        }
+      },
+      "0x401c8b": {
+        "585": {
+          "predict_force": 2723500,
+          "predict_force_taken": 1,
+          "predict_force_target": 4201625,
+          "resolve_hold": 3928500,
+          "resolve_hold_stall": 10000,
+          "resolve_hold_fire": 8928500,
+          "resolve_hold_mispred": 1,
+          "resolve_release": 8928500,
+          "resolve_release_mispred": 1,
+          "resolve_bcast": 8928500,
+          "resolve_visible": 8929000,
+          "resolve_visible_stall": 10000,
+          "resolve_visible_mispred": 1,
+          "resolve_visible_upc": 2
+        }
+      },
+      "0x401cad": {
+        "595": {
+          "predict_force": 2724500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4201647,
+          "resolve_visible": 3932000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 1,
+          "resolve_visible_upc": 2
+        }
+      },
+      "0x401cb0": {
+        "599": {
+          "resolve_visible": 2729000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        }
+      },
+      "0x401c98": {
+        "634": {
+          "resolve_visible": 2734500,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        },
+        "944": {
+          "resolve_visible": 3940000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        },
+        "1254": {
+          "resolve_visible": 8937000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        }
+      }
+    },
+    "criteria": {
+      "lc_retired": true,
+      "signal_seen": true,
+      "branch_redirected": true,
+      "after_lc": true,
+      "before_fnc": true,
+      "branches_unresolved": true,
+      "resolved_correct": true,
+      "window_opened": true,
+      "stall_applied": true,
+      "force_applied": true
+    },
+    "xmit_signal": 3932000,
+    "xmit_redirect": 3932000,
+    "xmit_last_alive": 3931500,
+    "ft_last_alive": 2728000,
+    "ft_pc": "0x401caf",
+    "lc_unretired_but_specified": false,
+    "branches_unresolved": true,
+    "branch_resolutions": [
+      {
+        "pc": "0x401c8b",
+        "stall": 10000,
+        "source": "observed",
+        "complete": 3928500,
+        "seq": 585,
+        "hold_tick": 3928500,
+        "release_tick": 8928500,
+        "visible_tick": 8929000,
+        "dropped": false,
+        "stall_applied": true,
+        "estimate_tick": 8928500,
+        "resolve_tick": 8929000,
+        "ok": true
+      }
+    ],
+    "validity": {
+      "resolved_correct": true,
+      "window_opened": true,
+      "stall_applied": true,
+      "force_applied": true,
+      "notes": []
+    },
+    "resolved_branches": [
+      {
+        "pc": "0x401c5e",
+        "visible_tick": 3927000,
+        "stall": 2500,
+        "before_signal": true
+      }
+    ],
+    "resolved_before_signal": true,
+    "workdir": "/tmp/r8_taken_inst-011455/gem5_inst-011455_tbz7scxn"
+  }
+]

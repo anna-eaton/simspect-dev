@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 _fv2_evidence.py: shared reader for the rerun evidence files written by
-STAGE3_gem5/triage/rerun_hits_evidence.py (bucket-fv2, 2026-11-09). Not a diagnostic.
+STAGE3_gem5/triage/rerun_hits_evidence.py. Not a diagnostic.
 
 evidence(name) -> {"<mode>/<stem>": record} from diagnostics/<name>_evidence.json.
 usable(rec) -> the faithful rerun hit AND its offending (struct, kinds) signature equals the
@@ -15,7 +15,7 @@ rerun's own hit record, with `uop` = that seq's micro-op from the O3PipeView fet
              invisispec_flagged_events_triage.md §1, SOURCE_AUDIT_INVISISPEC.md "known and not counted")
   store      the event's req is st, or its seq's micro-op is a store (st/stis/stfp/stul...): the
              Futuristic actor does not filter for loads (invisispec_flagged_events_triage.md §2,
-             CHECKER ARTIFACT). 2026-11-09: also seen on the Spectre scheme (E12b), same mechanism: a
+             CHECKER ARTIFACT). Also seen on the Spectre scheme (E12b), same mechanism: a
              store micro-op with no pipeview record gets an infinite visibility point, and its normal
              post-commit write is counted (triage §2, seq 532 case).
   other      anything else (includes events whose seq has no fetch record)

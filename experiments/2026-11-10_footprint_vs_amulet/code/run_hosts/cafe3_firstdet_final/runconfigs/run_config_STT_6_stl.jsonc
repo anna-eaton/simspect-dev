@@ -1,0 +1,75 @@
+// STT_6_stl run config — store-to-load (memory-dependence) speculation only.
+// Parallel pipeline to STT_6: model STAGE1_alloy/models/STT_6_stl.als, one mode
+// "stl_bypass" (parsexml pass2_6_specify_stl), output under
+// testsets/STT_6_stl/stl_bypass/ and results/STT_6_stl/stl_bypass/.
+// Design + window check: wiki/design/STL_SPECULATION.md.
+//
+// gem5: /work/gem5-recon-stl = copy of gem5-recon-modded + the SimSpect-STL hooks
+// (gem5-hooks/stl/), built 2026-10-30; hook controls passed on 60 tests
+// (wiki/design/STL_SPECULATION.md "Hook test"). The window checker is NOT written
+// yet, so the gem5 phase's check_ld/check_br verdicts are NOT meaningful for this
+// testset (no lc, fnc = the store); use gem5-hooks/stl/stl_hooktest.py.
+// Alloy needs STAGE1_alloy/a6CountModels.class, which cafe2 lacks: run xml on the
+// Mac and copy testsets/STT_6_stl/xml over.
+{
+  "paths": {
+    "alloy_stage":        "STAGE1_alloy",
+    "models_dir":         "STAGE1_alloy/models",
+    "stage2_dir":         "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/instructions.jsonc",
+    "stage3_dir":         "STAGE3_gem5",
+    "testset_dir":        "testsets",
+    "results_dir":        "results",
+    "results_name":       "STT_6_stl"
+  },
+
+  "alloy": {
+    "max_instances": 100000,
+    "batch_size":    1000
+  },
+
+  "speculation": {
+    "control_flow": false,
+    "data_flow":    true,
+    "branch_modes": ["stl_bypass"]
+  },
+
+  "gem5": {
+    // gem5-recon-modded's STT/scheme 2 + the STL hooks (specs/gem5_builds.json gem5-recon-stl).
+    "binary":            "/work/gem5-recon-stl/build/X86/gem5.opt",
+    "config_script":     "/work/gem5-recon-stl/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type":          "X86O3CPU",
+    "scheme":            2,
+    "caches":            true,
+    "jobs":              40,
+    "debug_flags":       ["O3PipeView", "LSQUnit"],
+    "debug_file":        "pipeview.txt",
+    "fnc_commit_stall_cycles": 150,
+
+    // SimSpect-STL hooks. Store address hold = the same fixed D that STT_6 holds
+    // an unresolved branch for (run_config_STT_6.jsonc sweep.unresolved_stall_cycles).
+    // stl_alias_pred: "no_alias" = false-negative prediction (the primitive),
+    // "alias" = false-positive negative control (no window should open).
+    "stl_ann_enable":              true,
+    "stl_store_addr_stall_cycles": 5000,
+    "stl_alias_pred":              "no_alias"
+  },
+
+  "sweep": {
+    // Resolved-branch stalls, as in STT_6. There are no unresolved branches here,
+    // so unresolved_stall_cycles has nothing to apply to.
+    "enabled":                 true,
+    "points":                  [0, 500, 2500],
+    "unresolved_stall_cycles": 5000
+  },
+
+  "pipeline": {
+    "check":    "per_type",
+    "keep_tmp": false
+  },
+
+  "interleave": {
+    "enabled": false
+  }
+}

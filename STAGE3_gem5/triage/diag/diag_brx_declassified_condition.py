@@ -14,15 +14,15 @@ rf-linked to the same source (diag_nonspec_cotransmit / diag_store_cotransmit
 do not match): concretization gave both operands the same register (shared
 Reg_s state without an rf edge). Verdict: concretization/model artifact (the
 program has a data dependency the instance does not), not a gem5 bug. Open
-question for Anna: whether shared opstate without rf should be allowed at all
-(see wiki/results/results.md 2026-11-07).
+question: whether shared opstate without rf should be allowed at all
+(see wiki/results/results.md).
 
 Signature (all, from spt_brx_evidence.json): x86 slice verdict "declassified"
 (lists the declassifying instruction), the hit reproduced, gem5 did not make the
 transmitter branch's first mispredicting instance pending, and VPUntaints >= 1.
 Counterfactual proof: inst-043417 with the store's address register changed from
 %rax to %r12 has VPUntaints 0, every transmitter-branch instance is made pending,
-and the hit disappears (triage/counterfactual/, 2026-11-07).
+and the hit disappears (triage/counterfactual/).
 """
 import json, functools
 from pathlib import Path

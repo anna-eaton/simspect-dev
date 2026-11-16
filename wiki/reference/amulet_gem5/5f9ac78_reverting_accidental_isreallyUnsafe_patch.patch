@@ -1,0 +1,57 @@
+From 5f9ac78ebb9f72b8aafcea962f177776e4515635 Mon Sep 17 00:00:00 2001
+From: Brian Fu <fubof@cs.toronto.edu>
+Date: Thu, 6 Feb 2025 01:07:09 +0000
+Subject: [PATCH] Reverting accidental isreallyUnsafe() patch
+
+---
+ src/cpu/o3/dyn_inst.hh | 2 +-
+ src/cpu/o3/lsq_unit.cc | 9 +++++----
+ 2 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/src/cpu/o3/dyn_inst.hh b/src/cpu/o3/dyn_inst.hh
+index f902db2e..278104c7 100644
+--- a/src/cpu/o3/dyn_inst.hh
++++ b/src/cpu/o3/dyn_inst.hh
+@@ -638,7 +638,7 @@ class DynInst : public ExecContext, public RefCounted
+     
+ 
+     bool isUnsafe(){
+-      return !isSquashed() && ((isCUSL() || ismUSL())); // && isreallyUnsafe());
++      return !isSquashed() && ((isCUSL() || ismUSL()) && isreallyUnsafe());
+     }
+ 
+     void setCUSL()
+diff --git a/src/cpu/o3/lsq_unit.cc b/src/cpu/o3/lsq_unit.cc
+index 7b89ff60..2348db2f 100644
+--- a/src/cpu/o3/lsq_unit.cc
++++ b/src/cpu/o3/lsq_unit.cc
+@@ -813,8 +813,10 @@ void LSQUnit::updateSafeState() {
+     Unsafe rob_unsafe;
+     auto iter = loadQueue.begin();
+ 
+-    // while (++iter != loadQueue.end() &&iter->instruction()) {
+-    while ( (iter != loadQueue.end()) && iter->instruction()) {
++    // int load_idx = loadQueue.front();
++
++    while (++iter != loadQueue.end() &&iter->instruction()) {
++    //while ( (iter != loadQueue.end()) && iter->instruction()) {
+ 
+         DynInstPtr inst = iter->instruction();
+         DPRINTF(Speclfb, "Checking updateSafeState "
+@@ -909,7 +911,6 @@ void LSQUnit::updateSafeState() {
+                     inst->setreallyUnsafe();
+             }
+         }
+-
+         if(!inst->isUnsafe()) {
+             if(inst->isSpeclfbStalled()){
+                 inst->clearSpeclfbStalled();
+@@ -918,7 +919,7 @@ void LSQUnit::updateSafeState() {
+                     rob_unsafe.unsafePCremove(inst->pcState().instAddr());
+             }
+         }
+-        iter++;
++        //iter++;
+     }
+ }
+ 

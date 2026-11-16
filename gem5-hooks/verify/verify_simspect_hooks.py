@@ -102,6 +102,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--bin", required=True)
     ap.add_argument("--ref-bin")
+    ap.add_argument("--ref-se", help="config script for the ref binary "
+                    "(default: --se). Added 2026-11-09 for the STL port check, "
+                    "where new = copy tree and ref = in-place tree.")
     ap.add_argument("--se", required=True)
     ap.add_argument("--s", required=True)
     ap.add_argument("--ann")
@@ -126,7 +129,8 @@ def main():
     summ["sim_ticks_new"] = sim_ticks(out / "new")
     ok = bool(summ["kinds"]) and summ["joined_events"] > 0
     if a.ref_bin:
-        trr = run(a.ref_bin, a.se, test_bin, ann, extra, out / "ref", caches=not a.no_caches)
+        trr = run(a.ref_bin, a.ref_se or a.se, test_bin, ann, extra, out / "ref",
+                  caches=not a.no_caches)
         summ["sim_ticks_ref"] = sim_ticks(out / "ref")
         nn, rr = non_simspect(tr), non_simspect(trr)
         summ["ref_ref_has_simspect"] = any(
@@ -134,6 +138,8 @@ def main():
         summ["non_simspect_lines_new"] = len(nn)
         summ["non_simspect_lines_ref"] = len(rr)
         summ["non_simspect_identical"] = (nn == rr)
+        # every line of the debug file, simspect lines included (2026-11-09)
+        summ["all_lines_identical"] = (Path(tr).read_bytes() == Path(trr).read_bytes())
         summ["parse_pipeview_identical"] = (gc.parse_pipeview(tr) == gc.parse_pipeview(trr))
         ok = ok and summ["non_simspect_identical"] and \
             summ["sim_ticks_new"] == summ["sim_ticks_ref"] and summ["parse_pipeview_identical"]

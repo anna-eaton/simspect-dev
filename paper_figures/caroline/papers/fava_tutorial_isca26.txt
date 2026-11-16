@@ -1,0 +1,382 @@
+FAVA: Formal Hardware Verification for
+Architects
+Half-Day Hands-On Tutorial
+Yao Hsiao, Samantha Archer, Caroline Trippel
+Computer Science & Electrical Engineering Departments
+Stanford University
+
+June 27, 2026
+
+Introduction, Motivation, and Our Approach
+
+Caroline
+
+SYSTEM TRENDS
+
+Modern computer systems are highly complex in both their design
+and deployments
+DESIGNS
+Combine parallelism, hardware specialization,
+heterogeneity, and data-dependent optimization
+to improve performance at manageable power.
+
+(2019)
+40+ accelerators
+
+DEPLOYMENTS
+Are increasingly multi-tenant and hyperscale to
+reduce cost, improve utilization, and scale
+applications.
+Microsoft
+(2024)
+
+Meta
+(2020)
+
+AWS
+(2024)
+
+Google
+(2020)
+
+(2021)
+
+Together, these trends give rise to two critical computer architecture challenges.
+3
+
+CHALLENGE #1 - THE CONTRACTS CHALLENGE
+
+Traditional ISAs—SW-visible state, instruction syntax/semantics—lack
+details needed to capture how hardware may undermine software assurance.
+Correctness MEMORY CONSISTENCY
+
+Security HARDWARE SIDE CHANNELS
+
+// message passing
+init: data = 0; flag = 0
+
+// victim code
+uint8 A[lenA]
+uint8 B[64*256]
+void victim(size_t i) {
+if (i < lenA) {
+// mispred
+val = A[i];
+// acc sec
+tmp = B[64*val]; // leak sec
+}
+}
+
+// thread 1
+data = 1;
+flag = 1;
+
+// thread 2
+while (flag != 1) {}
+assert (data == 1);
+
+Can the assert fail?
+No on x86. Yes on Arm, IBM Power,
+NVIDIA, RISC-V.
+Why? (1) Hardware can reorder
+memory accesses, (2) threads
+communicate via shared memory.
+Memory Consistency Models (MCMs) - defining
+permitted load return values - adopted by major
+ISAs; evolving for complex memory systems.
+
+4
+
+Can victim be exploited to read
+arbitrary memory?
+Yes on most processors (Spectre).
+Why? (1) Hardware can predict control/data-flow, (2) unsafe insts’ operands
+can leak via HW side-channels.
+Side-Channel Leakage Contracts - defining
+unsafe instruction-operand pairs - adopted by
+Arm, x86, RISC-V; evolving for Spectre attacks.
+
+br, cond
+ld, addr
+st, addr
+div, op0
+div, op1
+
+CHALLENGE #2 - THE VERIFICATION CHALLENGE
+
+Verification is a major and growing hardware design bottleneck
+Critical bugs escape to first-silicon in >85% of
+HW projects (20-yr first-silicon success low!) w/
+>50% effort on verification [Siemens, 2024].
+
+Why is verification a bottleneck?
+
+GETTING WORSE
+
+Due to more contracts, driven by design diversity
+and solving The Contracts Challenge; and more
+bugs + shorter design times, driven by AI design.
+
+Natural Language Contract
+
+…
+A1 When the worker is not selected by the
+decoder,Checking
+all control signals
+shall be low.
+Translating abstract end-to-end
+a complex
+design against
+A2 When HTRANS is IDLE, all control
+Expert Manual
+contracts into detailed end-to-end signalsan
+end-to-end formal spec is hard.
+shall be low.
+Effort
+A3 First transfer of any sequence is
+formal specs is hard.
+[Godhal+, STTT’11]
+NONSEQ in nature.
+Golden ref models & formal temporal logic A4 Non-first
+For example,
+formal model
+transfercommercial
+of an AHB sequence
+(TL) properties (e.g., SVAs) demand
+checkers
+struggle
+to load full designs or
+will always
+be SEQ
+in nature.
+A5 Burst
+sequence
+of length four
+shall end at
+significant expert manual effort to
+produce
+deep-cycle
+proofs.
+Auto-Generate
+fourth
+occurrence
+of
+HREADY.
+construct.
+w/ AI + AR
+A6 If this is last transaction of a sequence
+SynthTL •
+and next cycle is not start of another sequence,
+FIFO design EX. END-TO-END SPEC
+Decomposition
+pays
+off
+EX.
+CADENCE
+[Mendoza+,
+HTRANS shall be IDLE in next cycle.
+FMCAD’24]
+JASPER is low, then all control
+A7 If HREADY
+With expert decomposition
+// FIFO-ness SVA: If d1 enqueues before d2,
+Without decomposition
+signals,! address
+data
+hold
+✓ unbounded
+proof
+// then d1 dequeues before d2
+boundedand
+proof
+(32buses
+cyc) shall
+256-entry, 64-bit-entries
+assume property (d1_enq |-> !d2_has_enq);their values.
+16-entry, 8-bit-entries
+9.85 minutes
+assert property (d1_deq |-> !d2_has_deq);…
+5 hours
+[Godhal+, STTT ’11]
+[Arm, AMBA AHB Protocol Specification]
+
+5
+
+Formal Temporal Logic Specification
+…
+∧((G (!_hsel_ -> (((_htransidle_ ∧
+_hburstsingle_) ∧ !_hwrite_ ∧
+!_start_ ∧ !_last_)))) ∧ (G
+((_htransidle_) -> ((_hburstsingle_)
+∧ !_hwrite_ ∧ !_start_ ∧ !_last_))) ∧
+(G (_start_ -> (_htransnonseq_))) ∧
+(G (!_last_ ∧ (_htransnonseq_) ∧
+_hready_ -> X (_htransseq_))) ∧ (G
+((_hlock_ ∧ (_hburstincr4_) ∧
+_hready_ ∧ (_htransnonseq_)) -> X
+(_htransseq_ U (_htransseq_ ∧
+_hready_ ∧ X(_htransseq_ U
+(_htransseq_ ∧ _hready_ ∧
+X(_htransseq_ U _hready_))))))) ∧ (G
+((_last_ ∧ X !_start_) -> X
+(_htransidle_))) ∧ (G ( !_hready_ ->
+(((_htransnonseq_ <->
+…
+
+OUR WORK: OVERVIEW
+
+Enabling High-Assurance—Correct, Secure, Reliable—Computer
+Architectures
+Correctness
+CHALLENGE #1
+
+MEMORY CONSISTENCY
+MemGlue • FMCAD’24 • FMSD’26
+(Selected as a top FMCAD’24 paper)
+DAM • DIMES’25
+TransForm • ISCA ’20
+
+The Contracts
+Challenge
+Specification of HW-SW
+contracts for current- and
+next-generation HW, plus
+design of SW analyses and
+HW implementations
+based on them
+CHALLENGE #2
+
+RTL2MµPATH
+
+SynthTL • FMCAD’24
+
+Design of automated
+formal verification
+approaches targeting
+current- and nextgeneration HW-SW
+contracts to verify HW
+implementations of them
+
+6
+
+ArMOR • ISCA’18
+
+HARDWARE SIDE-CHANNELS
+Helium • ISCA’26
+Protean • HPCA’26
+
+Reliability
+PERFORMANCE
+RAMSIS • EuroSys ’24
+
+Serberus • SP’24 • HES Top Pick’26
+
+RecShard • ASPLOS ’22
+
+Clou • ISCA’22
+
+RecSSD • ASPLOS ’21
+
+MLDs • ISCA’21
+
+OTHER
+Porcupine • PLDI’21
+
+FUNCTIONAL
+ARTEMIS • ICSE’26
+
+The Verification
+Challenge
+
+Today’s focus
+
+ILA-MCM • FMCAD’18
+
+Security
+
+nl2spec • CAV’23
+
+nl2sva • DAV’23
+G-QED • DAC’23
+
+A-QED • FMCAD’21
+MEMORY CONSISTENCY
+Blend • In Prep.
+qcmbr • Under Sub.
+RTL2µSPEC • MICRO’21
+TriCheck • ASPLOS’17 • Top Pick’21
+
+Other highlights (touched on very briefly)
+
+HARDWARE SIDE-CHANNELS
+SynthLC • MICRO’24 • HES Top Pick Shortlist’26
+CheckMate • MICRO 18 • Top Pick’19 •
+HES Top Pick Shortlist’22
+
+PERFORMANCE
+CounterPoint • ASPLOS ’26 •
+Best Paper Award
+SILENT DATA CORRUPTION
+ITHICA • Under Sub. • arXiv ’26
+
+THE VERIFICATION CHALLENGE • OUR BOTTOM-UP VERIFICATION APPROACH
+
+Automated and scalable end-to-end formal hardware verification
+via synthesizing HW-SW contracts from hardware implementations
+Cache Memory
+Consistency
+Model
+
+Core Memory
+Consistency
+Model
+
+qcmbr • Under Sub.
+
+~Functional
+Contract
+
+Blend • In Prep.
+RTL2µSPEC • MICRO’21
+
+Complex Memory Processor Core
+w/ Atomic Memory
+w/ Caches
+
+Hardware Implementation
+7
+
+Side-Channel
+Leakage
+Contract
+
+SynthLC • MICRO’24 • HES
+Top Pick Shortlist’26
+
+RTL2MµPATH
+
+Design-Specific Contract Generation
+(one abstract, automated)
+
+contract synthesis
+
+“Bottom-up” approach
+
+formally-verified HW-SW contracts, reflect HW reality
+
+Property evaluation results
+Unbound. proof / CEX
+Bounded proof
+
+most
+
+few
+
+Design-Property Checking
+(automated - formal model checkers)
+Design-Specific Property Generation
+(many simple, automated)
+Contract-Specific Property Templates
+(few simple, manual)
+
+

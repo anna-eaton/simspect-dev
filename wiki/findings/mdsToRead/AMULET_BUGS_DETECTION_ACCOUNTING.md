@@ -40,7 +40,7 @@ This section supersedes the June material below for InvisiSpec, CleanupSpec and 
 | UV6 first spec load unprotected | SpecLFB | yes (`LSQ:unsafe unsafe=0 … lqhead=1`, then a fill) | yes | yes: 1143 / 1142 of 1500 tests per mode | found |
 | walk-order (sticky PrevNoUnsafe) | SpecLFB | yes | yes | yes: 157 + 162 tests where it is the only cause | DECIDE: UV6 with a wider scope, or a separate bug? |
 | **jmp-shadow (NEW, verified)** | SpecLFB | yes | yes | yes: 148 taken-mode tests | **real bug**; see §3 |
-| KV3 spec store → D-TLB | STT | — | — | not targeted: our STT leakage function has load addresses and branch predicates, not store addresses | **out of scope (Anna, 2026-11-08):** speculative-store transmitters are not modeled. STT does not explicitly exclude stores (STT fn. 2 ties TLB protection to delaying loads); the paper paragraph frames it as our model's choice |
+| KV3 spec store → D-TLB | STT | — | — | not targeted: our STT leakage function has load addresses and branch predicates, not store addresses | **out of scope (Anna, 2026-11-08):** speculative-store transmitters are not modeled. It is out of scope per STT's own paper, not our choice (Anna, 2026-11-13): STT assumes stores are performed at retirement (§5 p5, p10), so STT's authors do not treat stores as transmitters and their implementation cannot be expected to protect them. (Corrects the earlier wording here that called it our model's choice.) |
 
 ### 3. New SpecLFB bug: jmp-shadow (review: `wiki/findings/bug/speclfb_jmp_shadow/README.md`)
 

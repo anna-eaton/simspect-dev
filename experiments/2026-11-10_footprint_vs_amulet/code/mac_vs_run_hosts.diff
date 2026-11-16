@@ -1,0 +1,645 @@
+--- run_hosts/cafe1_recipe_v3/pipeline.py	2026-11-10 01:33:42
++++ mac:pipeline.py	2026-11-10 03:23:22
+@@ -470,6 +470,85 @@
+     return out
+ 
+ 
++def _timing_mode(stem: str, sweep_cfg: dict):
++    """Per-test timing mix (sweep.timing_mix, firstdet-final 2026-11-10, Anna's UV5 check):
++    {"p_fixed": 0.5, "seed": "uv5mix-v1"} -> "fixed" (the old parity timing: points as configured, constant
++    unresolved_stall_cycles on every unresolved branch, no per-branch draws) with probability p_fixed, else
++    "random" (the per-branch draws of unresolved_/resolved_stall_per_branch). Deterministic per (seed, stem):
++    sha256("<seed>:<stem>")[:8] / 2**32 < p_fixed. Absent key -> None (legacy behaviour)."""
++    mix = sweep_cfg.get("timing_mix")
++    if not mix:
++        return None
++    import hashlib
++    u = int(hashlib.sha256(f"{mix.get('seed', 'uv5mix-v1')}:{stem}".encode()).hexdigest()[:8], 16) / 2**32
++    return "fixed" if u < float(mix.get("p_fixed", 0.5)) else "random"
++
++
++def _timing_grid_point(stem: str, sweep_cfg: dict):
++    """Whole-test timing point (sweep.timing_grid, firstdet-final 2026-11-10, Anna's protocol timing):
++    {"unresolved": [2500, 5000, 10000], "resolved": [0, 500, 2500], "seed": "tgrid-v1"} -> one (u, r) drawn
++    uniformly from the cross product, deterministic per (seed, stem): index = sha256("<seed>:<stem>")[:8] mod
++    len(product). Every unresolved (mispredicted) branch gets stall u, every resolved branch r (the transmitter's
++    own branch stays 0, _inject_stalls). The old parity timing (5000, 0) is one of the points. Absent -> None."""
++    g = sweep_cfg.get("timing_grid")
++    if not g:
++        return None
++    import hashlib
++    pts = [(int(u), int(r)) for u in g.get("unresolved", []) for r in g.get("resolved", [])]
++    if not pts:
++        raise ValueError("sweep.timing_grid needs non-empty unresolved and resolved lists")
++    k = int(hashlib.sha256(f"{g.get('seed', 'tgrid-v1')}:{stem}".encode()).hexdigest()[:8], 16) % len(pts)
++    return pts[k]
++
++
++def _per_branch_all(grid, resolved, unresolved, sweep_cfg, stem):
++    """Per-test stall assignment on top of the base grid. Legacy (no keys): unchanged. sweep.timing_grid: one
++    whole-test (u, r) point. Else: the per-branch draws, unless the timing mix picked the fixed timing."""
++    tp = _timing_grid_point(stem, sweep_cfg)
++    if tp is not None:
++        u, r = tp
++        out = []
++        for g in grid:
++            e = dict(g); e.update({pc: u for pc in unresolved}); e.update({pc: r for pc in resolved}); out.append(e)
++        return out
++    if _timing_mode(stem, sweep_cfg) == "fixed":
++        return grid
++    grid = _per_branch_unresolved(grid, unresolved, sweep_cfg.get("unresolved_stall_per_branch"),
++                                  stem, sweep_cfg.get("max_grid"))
++    return _per_branch_resolved(grid, resolved, sweep_cfg.get("resolved_stall_per_branch"), stem)
++
++
++def _per_branch_resolved(grid: list, resolved_pcs: list, cfg: dict,
++                         stem: str) -> list:
++    """Opt-in per-test random resolved-branch stalls
++    (sweep.resolved_stall_per_branch, firstdet-final 2026-11-10).
++
++    The legacy `points` list sweeps EVERY resolved-branch assignment (the
++    Cartesian product, len(points)**n_resolved gem5 runs per test). With this
++    key each test instead runs ONE assignment: every resolved branch draws its
++    stall from `choices`, seeded by (seed, stem, grid index), i.e. one
++    uniformly random point of the product, deterministic per (seed, stem).
++    Use it with `points: [0]` (one base grid point); the drawn value replaces
++    that resolved branch's stall in each grid point. The chosen stalls are in
++    the per-stem sweep sidecar (`grid_points[*].stalls`).
++      {"mode": "random", "choices": [0, 500, 2500], "seed": 0}
++    Absent / no resolved branches = grid unchanged (legacy behaviour)."""
++    if not cfg or not resolved_pcs:
++        return grid
++    choices = [int(c) for c in cfg.get("choices", [])]
++    if not choices:
++        return grid
++    mode = cfg.get("mode", "random")
++    if mode != "random":
++        raise ValueError(f"sweep.resolved_stall_per_branch.mode must be random: {mode!r}")
++    seed = int(cfg.get("seed", 0))
++    out = []
++    for i, g in enumerate(grid):
++        rng = _random.Random(zlib.crc32(f"resolved:{seed}:{stem}:{i}".encode()))
++        e = dict(g); e.update({pc: rng.choice(choices) for pc in resolved_pcs}); out.append(e)
++    return out
++
++
+ def _inject_stalls(ann: dict, stalls: dict, unresolved_stall: int) -> dict:
+     """Return a new ann dict with `resolve_stall_cycles` set per branch.
+ 
+@@ -526,9 +605,7 @@
+             unresolved_points=sweep_cfg.get("unresolved_points"),
+             max_grid=sweep_cfg.get("max_grid"),
+             seed=zlib.crc32(sf.stem.encode()))
+-        grid = _per_branch_unresolved(grid, unresolved,
+-                                      sweep_cfg.get("unresolved_stall_per_branch"),
+-                                      sf.stem, sweep_cfg.get("max_grid"))
++        grid = _per_branch_all(grid, resolved, unresolved, sweep_cfg, sf.stem)
+         manifest[sf.stem] = grid
+ 
+         for idx, stalls in enumerate(grid):
+@@ -1017,9 +1094,7 @@
+                     unresolved_points=sweep_cfg.get("unresolved_points"),
+                     max_grid=sweep_cfg.get("max_grid"),
+                     seed=zlib.crc32(sf.stem.encode()))
+-                grid = _per_branch_unresolved(
+-                    grid, unresolved, sweep_cfg.get("unresolved_stall_per_branch"),
+-                    sf.stem, sweep_cfg.get("max_grid"))
++                grid = _per_branch_all(grid, resolved, unresolved, sweep_cfg, sf.stem)
+                 local_manifest[sf.stem] = grid
+                 manifest[sf.stem]       = grid
+                 for idx, stalls in enumerate(grid):
+
+--- run_hosts/cafe1_loosepin_regen/code/pipeline.py	2026-11-09 21:28:13
++++ mac:pipeline.py	2026-11-10 03:23:22
+@@ -467,6 +467,85 @@
+     for i, g in enumerate(grid):
+         rng = _random.Random(zlib.crc32(f"{seed}:{stem}:{i}".encode()))
+         e = dict(g); e.update({pc: rng.choice(choices) for pc in unresolved_pcs}); out.append(e)
++    return out
++
++
++def _timing_mode(stem: str, sweep_cfg: dict):
++    """Per-test timing mix (sweep.timing_mix, firstdet-final 2026-11-10, Anna's UV5 check):
++    {"p_fixed": 0.5, "seed": "uv5mix-v1"} -> "fixed" (the old parity timing: points as configured, constant
++    unresolved_stall_cycles on every unresolved branch, no per-branch draws) with probability p_fixed, else
++    "random" (the per-branch draws of unresolved_/resolved_stall_per_branch). Deterministic per (seed, stem):
++    sha256("<seed>:<stem>")[:8] / 2**32 < p_fixed. Absent key -> None (legacy behaviour)."""
++    mix = sweep_cfg.get("timing_mix")
++    if not mix:
++        return None
++    import hashlib
++    u = int(hashlib.sha256(f"{mix.get('seed', 'uv5mix-v1')}:{stem}".encode()).hexdigest()[:8], 16) / 2**32
++    return "fixed" if u < float(mix.get("p_fixed", 0.5)) else "random"
++
++
++def _timing_grid_point(stem: str, sweep_cfg: dict):
++    """Whole-test timing point (sweep.timing_grid, firstdet-final 2026-11-10, Anna's protocol timing):
++    {"unresolved": [2500, 5000, 10000], "resolved": [0, 500, 2500], "seed": "tgrid-v1"} -> one (u, r) drawn
++    uniformly from the cross product, deterministic per (seed, stem): index = sha256("<seed>:<stem>")[:8] mod
++    len(product). Every unresolved (mispredicted) branch gets stall u, every resolved branch r (the transmitter's
++    own branch stays 0, _inject_stalls). The old parity timing (5000, 0) is one of the points. Absent -> None."""
++    g = sweep_cfg.get("timing_grid")
++    if not g:
++        return None
++    import hashlib
++    pts = [(int(u), int(r)) for u in g.get("unresolved", []) for r in g.get("resolved", [])]
++    if not pts:
++        raise ValueError("sweep.timing_grid needs non-empty unresolved and resolved lists")
++    k = int(hashlib.sha256(f"{g.get('seed', 'tgrid-v1')}:{stem}".encode()).hexdigest()[:8], 16) % len(pts)
++    return pts[k]
++
++
++def _per_branch_all(grid, resolved, unresolved, sweep_cfg, stem):
++    """Per-test stall assignment on top of the base grid. Legacy (no keys): unchanged. sweep.timing_grid: one
++    whole-test (u, r) point. Else: the per-branch draws, unless the timing mix picked the fixed timing."""
++    tp = _timing_grid_point(stem, sweep_cfg)
++    if tp is not None:
++        u, r = tp
++        out = []
++        for g in grid:
++            e = dict(g); e.update({pc: u for pc in unresolved}); e.update({pc: r for pc in resolved}); out.append(e)
++        return out
++    if _timing_mode(stem, sweep_cfg) == "fixed":
++        return grid
++    grid = _per_branch_unresolved(grid, unresolved, sweep_cfg.get("unresolved_stall_per_branch"),
++                                  stem, sweep_cfg.get("max_grid"))
++    return _per_branch_resolved(grid, resolved, sweep_cfg.get("resolved_stall_per_branch"), stem)
++
++
++def _per_branch_resolved(grid: list, resolved_pcs: list, cfg: dict,
++                         stem: str) -> list:
++    """Opt-in per-test random resolved-branch stalls
++    (sweep.resolved_stall_per_branch, firstdet-final 2026-11-10).
++
++    The legacy `points` list sweeps EVERY resolved-branch assignment (the
++    Cartesian product, len(points)**n_resolved gem5 runs per test). With this
++    key each test instead runs ONE assignment: every resolved branch draws its
++    stall from `choices`, seeded by (seed, stem, grid index), i.e. one
++    uniformly random point of the product, deterministic per (seed, stem).
++    Use it with `points: [0]` (one base grid point); the drawn value replaces
++    that resolved branch's stall in each grid point. The chosen stalls are in
++    the per-stem sweep sidecar (`grid_points[*].stalls`).
++      {"mode": "random", "choices": [0, 500, 2500], "seed": 0}
++    Absent / no resolved branches = grid unchanged (legacy behaviour)."""
++    if not cfg or not resolved_pcs:
++        return grid
++    choices = [int(c) for c in cfg.get("choices", [])]
++    if not choices:
++        return grid
++    mode = cfg.get("mode", "random")
++    if mode != "random":
++        raise ValueError(f"sweep.resolved_stall_per_branch.mode must be random: {mode!r}")
++    seed = int(cfg.get("seed", 0))
++    out = []
++    for i, g in enumerate(grid):
++        rng = _random.Random(zlib.crc32(f"resolved:{seed}:{stem}:{i}".encode()))
++        e = dict(g); e.update({pc: rng.choice(choices) for pc in resolved_pcs}); out.append(e)
+     return out
+ 
+ 
+@@ -526,9 +605,7 @@
+             unresolved_points=sweep_cfg.get("unresolved_points"),
+             max_grid=sweep_cfg.get("max_grid"),
+             seed=zlib.crc32(sf.stem.encode()))
+-        grid = _per_branch_unresolved(grid, unresolved,
+-                                      sweep_cfg.get("unresolved_stall_per_branch"),
+-                                      sf.stem, sweep_cfg.get("max_grid"))
++        grid = _per_branch_all(grid, resolved, unresolved, sweep_cfg, sf.stem)
+         manifest[sf.stem] = grid
+ 
+         for idx, stalls in enumerate(grid):
+@@ -601,7 +678,8 @@
+             hit = bool(row.get("issued_in_window"))
+             status = row.get("status", "unknown")
+             if row.get("cache_setup_mode") or row.get("cache_setup", "warm") != "warm":
+-                for k in ("cache_setup", "cache_setup_mode", "cache_setup_seed"):
++                for k in ("cache_setup", "cache_setup_mode", "cache_setup_seed",
++                          "cache_setup_choices"):
+                     if k in row:
+                         cs_keys.setdefault(k, row[k])
+             per_grid_summary.append({
+@@ -1016,9 +1094,7 @@
+                     unresolved_points=sweep_cfg.get("unresolved_points"),
+                     max_grid=sweep_cfg.get("max_grid"),
+                     seed=zlib.crc32(sf.stem.encode()))
+-                grid = _per_branch_unresolved(
+-                    grid, unresolved, sweep_cfg.get("unresolved_stall_per_branch"),
+-                    sf.stem, sweep_cfg.get("max_grid"))
++                grid = _per_branch_all(grid, resolved, unresolved, sweep_cfg, sf.stem)
+                 local_manifest[sf.stem] = grid
+                 manifest[sf.stem]       = grid
+                 for idx, stalls in enumerate(grid):
+
+--- run_hosts/cafe3_firstdet_final/testsetgen.py	2026-10-13 15:51:12
++++ mac:testsetgen.py	2026-11-09 21:28:26
+@@ -71,6 +71,16 @@
+             "mtime": alloy_jar.stat().st_mtime if alloy_jar.exists() else None,
+         },
+     }
++    # Seeded random solver order (loosepin 2026-11-09): recorded only when configured, so the
++    # default-order manifest is unchanged. Per-seed counts land in xml/SOLVER_ORDER.json.
++    if (cfg.get("alloy") or {}).get("solver_order") is not None:
++        import hashlib
++        import alloy_solver_order as _aso
++        so = _aso.configured(cfg)
++        if so is not None:
++            manifest["alloy_solver_order"] = so
++            manifest["model_sha256"] = (hashlib.sha256(model_file.read_bytes()).hexdigest()
++                                        if model_file.exists() else None)
+ 
+     sources = [
+         (stage2 / "parsexml.py",         "parsexml.py"),
+
+--- run_hosts/cafe1_firstdet_final/testsetgen.py	2026-10-13 15:51:12
++++ mac:testsetgen.py	2026-11-09 21:28:26
+@@ -71,6 +71,16 @@
+             "mtime": alloy_jar.stat().st_mtime if alloy_jar.exists() else None,
+         },
+     }
++    # Seeded random solver order (loosepin 2026-11-09): recorded only when configured, so the
++    # default-order manifest is unchanged. Per-seed counts land in xml/SOLVER_ORDER.json.
++    if (cfg.get("alloy") or {}).get("solver_order") is not None:
++        import hashlib
++        import alloy_solver_order as _aso
++        so = _aso.configured(cfg)
++        if so is not None:
++            manifest["alloy_solver_order"] = so
++            manifest["model_sha256"] = (hashlib.sha256(model_file.read_bytes()).hexdigest()
++                                        if model_file.exists() else None)
+ 
+     sources = [
+         (stage2 / "parsexml.py",         "parsexml.py"),
+
+--- run_hosts/cafe1_loosepin_regen/code/STAGE3_gem5/gem5_common.py	2026-11-09 19:19:16
++++ mac:STAGE3_gem5/gem5_common.py	2026-11-10 01:33:42
+@@ -84,6 +84,7 @@
+ # the Stage-2 prologue leaves the sandbox hot) or a strategy in cache_setup.STRATEGIES
+ # (e.g. "cold" = clflush the test's stack frame after the prologue barrier), or
+ # "random" (per-test warm/cold from SIMSPECT_CACHE_SETUP_SEED + stem, 2026-11-09), or
++# "random_all" (per-test uniform over the build's allowed warm/cold/full, 2026-11-10), or
+ # "full" (sweep an L1D-sized buffer so every set starts full; size from
+ # SIMSPECT_CACHE_SETUP_FILL_BYTES or --l1d_size in SIMSPECT_GEM5_EXTRA, 2026-11-09).
+ # Applied only by process_one via cache_setup.prepare; see build_binary's guard.
+@@ -1193,11 +1194,14 @@
+         import cache_setup as _cs
+         # random (2026-11-09): resolved per test from (seed, stem); the record keeps
+         # the strategy actually used plus the mode and seed. warm/cold: unchanged.
+-        _cs_used = _cs.resolve(CACHE_SETUP, name)
++        # random_all (2026-11-10): uniform over the setups this build allows (warm/cold/full).
++        _cs_used = _cs.resolve(CACHE_SETUP, name, gem5_bin=str(GEM5_BIN))
+         result["cache_setup"] = _cs_used
+         if CACHE_SETUP in _cs.META:
+             result["cache_setup_mode"] = CACHE_SETUP
+             result["cache_setup_seed"] = _cs.current_seed()
++        if CACHE_SETUP == "random_all":
++            result["cache_setup_choices"] = list(_cs.allowed_setups(str(GEM5_BIN)))
+         binary, ann_path, cs_info = _cs.prepare(s_path, ann_path, workdir, build_binary,
+                                                 _cs_used)
+         if cs_info is not None:
+
+--- run_hosts/cafe1_loosepin_regen/code/STAGE3_gem5/cache_setup.py	2026-11-09 19:28:55
++++ mac:STAGE3_gem5/cache_setup.py	2026-11-10 01:33:42
+@@ -38,6 +38,16 @@
+         bits are page-offset bits; recorded as set_cover_exact). Plain loads only, so no build is
+         refused for clflush reasons. The prologue zero-fill's sandbox lines are evicted from L1D
+         by the sweep (they stay in L2).
++
++  random_all  (2026-11-10, Anna TA-6: "one policy for every defense ... prime all the state just
++        like we do for the timing") each test runs ONE of the setups allowed on the run's build,
++        chosen uniformly per test by choose_all(stem, seed, gem5_bin): warm, cold and full, minus
++        cold where clflush does not flush (CLFLUSH_UNSUPPORTED; e.g. InvisiSpec -> warm, full).
++        Index = int(sha256(f"{seed}\0{stem}")[:8 bytes], big endian) % len(choices), choices in
++        the fixed order RANDOM_ALL_ORDER. Same seed knob and default as `random`. Records carry
++        `cache_setup` (the one used), `cache_setup_mode: "random_all"`, `cache_setup_seed` and
++        `cache_setup_choices`. Refused where `full` is (L1D size unknown), never where cold is.
++        `random` is unchanged (still warm/cold from the first hash byte).
+ 
+ Adding a strategy = one function `payload(frame) -> list[str]` in STRATEGIES.
+ 
+@@ -358,7 +368,10 @@
+ }
+ # Meta-strategies: resolved per test to a concrete one ("warm" or a STRATEGIES key).
+ RANDOM_CHOICES = ("warm", "cold")
+-META = ("random",)
++# random_all (2026-11-10): the candidate order; cold is dropped on builds whose clflush does
++# not flush (allowed_setups). Changing this order changes every choice: it is provenance.
++RANDOM_ALL_ORDER = ("warm", "cold", "full")
++META = ("random", "random_all")
+ KNOWN = ("warm",) + tuple(STRATEGIES) + META
+ # Default seed for `random` (run config gem5.cache_setup_seed overrides it). Changing it
+ # changes which tests run cold, so it is part of a campaign's provenance (manifest + records).
+@@ -383,9 +396,43 @@
+     return RANDOM_CHOICES[h[0] & 1]
+ 
+ 
+-def resolve(strategy: str, stem: str, seed: Optional[str] = None) -> str:
++def _gem5_bin(gem5_bin: Optional[str]) -> str:
++    b = gem5_bin if gem5_bin is not None else os.environ.get("SIMSPECT_GEM5_BIN", "")
++    if not str(b).strip():
++        raise CacheSetupError("cache_setup=random_all needs the gem5 binary path (to know which "
++                              "setups the build allows); set SIMSPECT_GEM5_BIN or pass gem5_bin")
++    return str(b)
++
++
++def allowed_setups(gem5_bin: Optional[str] = None) -> Tuple[str, ...]:
++    """random_all's candidates on this build: RANDOM_ALL_ORDER minus cold where clflush is a
++    no-op or panics (CLFLUSH_UNSUPPORTED, matched on the binary path as check_build does)."""
++    b = _gem5_bin(gem5_bin)
++    no_flush = any(key in b for key in CLFLUSH_UNSUPPORTED)
++    return tuple(x for x in RANDOM_ALL_ORDER if not (x == "cold" and no_flush))
++
++
++def choose_all(stem: str, seed: Optional[str] = None, gem5_bin: Optional[str] = None) -> str:
++    """`random_all`'s per-test choice, uniform over allowed_setups(gem5_bin).
++
++    Keyed on (seed, stem) exactly as choose() (stem's `__<suffix>` dropped), so reruns and
++    by-hand reproductions agree; index = first 8 digest bytes, big endian, mod len(choices)."""
++    import hashlib
++    stem = str(stem).split("__")[0]
++    seed = current_seed() if seed is None else str(seed)
++    choices = allowed_setups(gem5_bin)
++    h = hashlib.sha256(f"{seed}\0{stem}".encode()).digest()
++    return choices[int.from_bytes(h[:8], "big") % len(choices)]
++
++
++def resolve(strategy: str, stem: str, seed: Optional[str] = None,
++            gem5_bin: Optional[str] = None) -> str:
+     """Concrete strategy for one test (identity except for the META strategies)."""
+-    return choose(stem, seed) if strategy == "random" else strategy
++    if strategy == "random":
++        return choose(stem, seed)
++    if strategy == "random_all":
++        return choose_all(stem, seed, gem5_bin)
++    return strategy
+ 
+ # Builds whose clflush does not flush (smoke 2026-11-08,
+ # STAGE3_gem5/triage/cache_setup_20261108/smoke_cache_setup.py; table in
+@@ -401,9 +448,9 @@
+ 
+ 
+ def check_build(strategy: str, gem5_bin: str) -> None:
+-    if strategy == "full":   # plain loads: no build refused; the L1D size must be known
+-        fill_config()
+-        return
++    if strategy in ("full", "random_all"):   # plain loads: no build refused; the L1D size must
++        fill_config()                          # be known (random_all runs full on ~1/3 of tests;
++        return                                 # it drops cold itself where clflush is a no-op)
+     if strategy in ("cold", "cold_burst", "random"):   # random runs cold on ~half the tests
+         for key, why in CLFLUSH_UNSUPPORTED.items():
+             if key in str(gem5_bin):
+@@ -573,12 +620,16 @@
+     import argparse
+     ap = argparse.ArgumentParser(description="cache_setup helpers")
+     sub = ap.add_subparsers(dest="cmd", required=True)
+-    c = sub.add_parser("choose", help="print `random`'s choice (warm|cold) for test stems")
++    c = sub.add_parser("choose", help="print `random`'s choice (warm|cold) for test stems, or "
++                                      "random_all's with --mode random_all --gem5-bin <path>")
+     c.add_argument("stems", nargs="+")
+     c.add_argument("--seed", default=None, help=f"default: $SIMSPECT_CACHE_SETUP_SEED or {DEFAULT_SEED}")
++    c.add_argument("--mode", default="random", choices=("random", "random_all"))
++    c.add_argument("--gem5-bin", default=None, help="random_all: the run's gem5 binary "
++                                                     "(default $SIMSPECT_GEM5_BIN)")
+     a = ap.parse_args(argv)
+     for s in a.stems:
+-        print(f"{s}\t{choose(s, a.seed)}")
++        print(f"{s}\t{choose(s, a.seed) if a.mode == 'random' else choose_all(s, a.seed, a.gem5_bin)}")
+ 
+ 
+ if __name__ == "__main__":
+
+--- run_hosts/cafe1_recipe_v3/STAGE3_gem5/timing/classify_hits.py	2026-11-09 21:12:03
++++ mac:STAGE3_gem5/timing/classify_hits.py	2026-11-10 02:22:02
+@@ -297,6 +297,9 @@
+     ap.add_argument("--testset", default=None,
+                     help="testset model dir (<testset_dir>/<model>): enables H-PAD exclusion and STT S1_xmm4")
+     ap.add_argument("--jobs", type=int, default=1, help="worker processes for invisispec/speclfb (default 1)")
++    ap.add_argument("--incremental", action="store_true",
++                    help="(firstdet-final 2026-11-10, streaming runs) invisispec/speclfb: keep the sigs of hits already "
++                         "in classes.jsonl (same idx, mode, stem) and classify only new hits. Default off = full rerun.")
+     args = ap.parse_args()
+     testset = Path(args.testset) if args.testset else None
+     out = Path(args.out).resolve()
+@@ -321,7 +324,19 @@
+         if args.defense == "speclfb":
+             sys.path.insert(0, str(HERE))
+             import speclfb_analyze as an
+-        work = [(r, out, testset, args.defense) for r in hits]
++        prev = {}
++        if args.incremental and (out / "classes.jsonl").exists():
++            for l in (out / "classes.jsonl").read_text().splitlines():
++                try:
++                    c = json.loads(l)
++                except Exception:
++                    continue
++                r0 = rows.get(c["idx"])
++                if r0 and r0["mode"] == c["mode"] and r0["stem"] == c["stem"] and "classify_error" not in c["sigs"]:
++                    prev[c["idx"]] = set(c["sigs"])
++            cls.update({i: v for i, v in prev.items() if rows[i].get("hit")})
++            log.write(f"incremental: {len(prev)} hits kept from classes.jsonl\n")
++        work = [(r, out, testset, args.defense) for r in hits if r["idx"] not in prev]
+         if args.jobs > 1:   # (cache-full 2026-11-09) same per-hit function, in worker processes
+             from concurrent.futures import ProcessPoolExecutor
+             with ProcessPoolExecutor(args.jobs) as ex:
+
+--- run_hosts/cafe1_loosepin_regen/code/STAGE3_gem5/timing/classify_hits.py	2026-11-09 21:12:03
++++ mac:STAGE3_gem5/timing/classify_hits.py	2026-11-10 02:22:02
+@@ -297,6 +297,9 @@
+     ap.add_argument("--testset", default=None,
+                     help="testset model dir (<testset_dir>/<model>): enables H-PAD exclusion and STT S1_xmm4")
+     ap.add_argument("--jobs", type=int, default=1, help="worker processes for invisispec/speclfb (default 1)")
++    ap.add_argument("--incremental", action="store_true",
++                    help="(firstdet-final 2026-11-10, streaming runs) invisispec/speclfb: keep the sigs of hits already "
++                         "in classes.jsonl (same idx, mode, stem) and classify only new hits. Default off = full rerun.")
+     args = ap.parse_args()
+     testset = Path(args.testset) if args.testset else None
+     out = Path(args.out).resolve()
+@@ -321,7 +324,19 @@
+         if args.defense == "speclfb":
+             sys.path.insert(0, str(HERE))
+             import speclfb_analyze as an
+-        work = [(r, out, testset, args.defense) for r in hits]
++        prev = {}
++        if args.incremental and (out / "classes.jsonl").exists():
++            for l in (out / "classes.jsonl").read_text().splitlines():
++                try:
++                    c = json.loads(l)
++                except Exception:
++                    continue
++                r0 = rows.get(c["idx"])
++                if r0 and r0["mode"] == c["mode"] and r0["stem"] == c["stem"] and "classify_error" not in c["sigs"]:
++                    prev[c["idx"]] = set(c["sigs"])
++            cls.update({i: v for i, v in prev.items() if rows[i].get("hit")})
++            log.write(f"incremental: {len(prev)} hits kept from classes.jsonl\n")
++        work = [(r, out, testset, args.defense) for r in hits if r["idx"] not in prev]
+         if args.jobs > 1:   # (cache-full 2026-11-09) same per-hit function, in worker processes
+             from concurrent.futures import ProcessPoolExecutor
+             with ProcessPoolExecutor(args.jobs) as ex:
+
+--- run_hosts/cafe1_firstdet_final/STAGE3_gem5/timing/firstdet_report.py	2026-11-10 02:52:48
++++ mac:STAGE3_gem5/timing/firstdet_report.py	2026-11-10 03:12:54
+@@ -61,7 +61,7 @@
+     return pairs
+ 
+ 
+-def defense_rows(d: Path, defense: str, testset: Path = None, guard=True):
++def defense_rows(d: Path, defense: str, testset: Path = None, guard=True, snapshot_cut=True):
+     """Rows + classes. With testset (streaming runs): drop a row when (a) its .s/.ann.json changed after it ran
+     (sha in order_stream.tsv != current; the producer rebuilt it) or the file is gone, or (b) its current ann fails
+     the recipe-v3 provenance guard (firstdet_stream.provenance_ok). Dropped rows are counted, never scored."""
+@@ -97,7 +97,7 @@
+     # read results.jsonl have no class yet (classify_cs_rmw labels them no_evidence). Keep only the prefix of
+     # results.jsonl (file = completion order) before the first such pending hit, so K and N come from the same
+     # snapshot; the cut rows are counted in dropped["after_classify_snapshot"].
+-    order_lines = [r["idx"] for r in jl(d / "results.jsonl")]
++    order_lines = [r["idx"] for r in jl(d / "results.jsonl")] if snapshot_cut else []
+     cut = None
+     for k, i in enumerate(order_lines):
+         r = rows.get(i)
+@@ -109,6 +109,11 @@
+         n0 = len(rows)
+         rows = {i: r for i, r in rows.items() if i not in late}
+         dropped["after_classify_snapshot"] = n0 - len(rows)
++    if not snapshot_cut:   # prefix mode: pending hits (no class yet) are removed; the prefix stops at them
++        pend = [i for i, r in rows.items() if r.get("hit") and (i not in cls or cls[i] <= {"no_evidence"})]
++        for i in pend:
++            del rows[i]
++        dropped["pending_classification"] = len(pend)
+     cls = {i: v for i, v in cls.items() if i in rows}
+     return rows, cls, dict(dropped)
+ 
+@@ -156,9 +161,10 @@
+         if not dd:
+             continue
+         d = Path(dd)
+-        rows, cls, dropped = defense_rows(d, dfn, Path(args.testset), not args.no_guard)
+         mode_rows = args.rows if args.rows != "auto" else (
+             "prefix" if any((Path(args.testset) / f).exists() for f in ("READY", "DONE")) else "all")
++        rows, cls, dropped = defense_rows(d, dfn, Path(args.testset), not args.no_guard,
++                                          snapshot_cut=(mode_rows == "all"))
+         if mode_rows == "prefix":
+             have = {(r["mode"], r["stem"]): i for i, r in rows.items()}
+             L = 0
+@@ -229,7 +235,13 @@
+     js = json.dumps(res, indent=1)
+     if args.json:
+         Path(args.json).write_text(js)
+-    lines = ["| bug | defense | K/N | expected tests (N+1)/(K+1) | first (seed order / stream) | setups of detecting tests | AMuLeT pooled test cases | multiple (tests) | SimSpect exp. CPU-s (incl. gen) | AMuLeT pooled CPU-s | multiple (CPU) |",
++    modes_used = sorted({v.get("rows_mode") for v in res["defenses"].values()})
++    lines = [("**Rows: seed-20261109 order prefix of the full corpus (final semantics), longest fully run and classified prefix per defense.**"
++              if modes_used == ["prefix"] else
++              "**INTERIM: all classified tests so far (completion order, snapshot-consistent), not the final seed-order prefix.**")
++             + f" Report {res['generated_utc']}; N per defense: "
++             + ", ".join(f"{k} {v['N']}" for k, v in res["defenses"].items()) + "\n",
++             "| bug | defense | K/N | expected tests (N+1)/(K+1) | first (seed order / stream) | setups of detecting tests | AMuLeT pooled test cases | multiple (tests) | SimSpect exp. CPU-s (incl. gen) | AMuLeT pooled CPU-s | multiple (CPU) |",
+              "|---|---|---|---|---|---|---|---|---|---|---|"]
+     for b, v in res["bugs"].items():
+         gt = ">" if v["censored"] else ""
+
+--- run_hosts/cafe1_recipe_v3/STAGE3_gem5/timing/timing_driver.py	2026-11-10 01:33:50
++++ mac:STAGE3_gem5/timing/timing_driver.py	2026-11-10 03:23:32
+@@ -149,6 +149,24 @@
+         if raw.get("cache_setup_mode") == "random_all":   # 2026-11-10; random rows unchanged
+             for k in ("cache_setup_mode", "cache_setup_seed", "cache_setup_choices"):
+                 row[k] = raw.get(k)
++    if (cfg.get("sweep") or {}).get("timing_grid"):   # 2026-11-10: the whole-test (unresolved, resolved) stall point
++        sys.path.insert(0, str(args.code_root))
++        import pipeline as _pl
++        row["timing_point"] = list(_pl._timing_grid_point(stem, cfg["sweep"]))
++    if (cfg.get("sweep") or {}).get("timing_mix"):   # 2026-11-10: which timing this test drew (pipeline._timing_mode)
++        sys.path.insert(0, str(args.code_root))
++        import pipeline as _pl
++        row["timing_mode"] = _pl._timing_mode(stem, cfg["sweep"])
++    if (cfg.get("sweep") or {}).get("resolved_stall_per_branch") or (cfg.get("sweep") or {}).get("timing_grid"):
++        # firstdet-final 2026-11-10: per-test random timing; record the stalls this test ran with
++        # (one dict per sweep grid point, branch_pc -> resolve_stall_cycles, from the pipeline's
++        # per-stem sweep sidecar). Rows of configs without the key are unchanged.
++        row["stall_points"] = None
++        sc = wd / "res" / "out" / mode / "sweep" / f"{stem}_sweep.json"
++        try:
++            row["stall_points"] = [g.get("stalls") for g in json.loads(sc.read_text())["grid_points"]]
++        except Exception as e:
++            row["stall_points_error"] = f"{type(e).__name__}: {e}"[:200]
+     workdir = Path(raw["workdir"]) if raw and raw.get("workdir") else None
+     if workdir and workdir.exists() and not (out / "config.ini").exists():
+         for ci in workdir.rglob("config.ini"):   # one gem5 config.ini per campaign, for the full_configs.md check
+
+--- run_hosts/cafe1_loosepin_regen/code/STAGE3_gem5/timing/timing_driver.py	2026-11-09 21:27:49
++++ mac:STAGE3_gem5/timing/timing_driver.py	2026-11-10 03:23:32
+@@ -146,6 +146,27 @@
+         row["terms_fired"] = raw.get("terms_fired")
+         row["error"] = (raw.get("error") or "")[:300] or None
+         row["cache_setup"] = raw.get("cache_setup")
++        if raw.get("cache_setup_mode") == "random_all":   # 2026-11-10; random rows unchanged
++            for k in ("cache_setup_mode", "cache_setup_seed", "cache_setup_choices"):
++                row[k] = raw.get(k)
++    if (cfg.get("sweep") or {}).get("timing_grid"):   # 2026-11-10: the whole-test (unresolved, resolved) stall point
++        sys.path.insert(0, str(args.code_root))
++        import pipeline as _pl
++        row["timing_point"] = list(_pl._timing_grid_point(stem, cfg["sweep"]))
++    if (cfg.get("sweep") or {}).get("timing_mix"):   # 2026-11-10: which timing this test drew (pipeline._timing_mode)
++        sys.path.insert(0, str(args.code_root))
++        import pipeline as _pl
++        row["timing_mode"] = _pl._timing_mode(stem, cfg["sweep"])
++    if (cfg.get("sweep") or {}).get("resolved_stall_per_branch") or (cfg.get("sweep") or {}).get("timing_grid"):
++        # firstdet-final 2026-11-10: per-test random timing; record the stalls this test ran with
++        # (one dict per sweep grid point, branch_pc -> resolve_stall_cycles, from the pipeline's
++        # per-stem sweep sidecar). Rows of configs without the key are unchanged.
++        row["stall_points"] = None
++        sc = wd / "res" / "out" / mode / "sweep" / f"{stem}_sweep.json"
++        try:
++            row["stall_points"] = [g.get("stalls") for g in json.loads(sc.read_text())["grid_points"]]
++        except Exception as e:
++            row["stall_points_error"] = f"{type(e).__name__}: {e}"[:200]
+     workdir = Path(raw["workdir"]) if raw and raw.get("workdir") else None
+     if workdir and workdir.exists() and not (out / "config.ini").exists():
+         for ci in workdir.rglob("config.ini"):   # one gem5 config.ini per campaign, for the full_configs.md check
+
+--- run_hosts/cafe1_loosepin_regen/lp/stream_fp.py	2026-11-10 02:06:17
++++ mac:STAGE1_alloy/models/proposed/ultimate/loosepin/stream_fp.py	2026-11-10 02:07:37
+@@ -27,7 +27,8 @@
+ import argparse, datetime as dt, hashlib, json, os, resource, shutil, subprocess, sys, time, traceback
+ from pathlib import Path
+ 
+-B = Path("/tests/simspect_alloy_20261108"); TS = B / "testsets_twostage"; WS = B / "loosepin_regen"
++B = Path("/tests/simspect_alloy_20261108"); TS = B / "testsets_twostage"; WS = B / "loosepin_regen"   # defaults; --ts-dir / --ws override
++STAGE1_LOGS = "stage1/logs/Footprint_6_u_core_ri__*.log"                                                # default; --stage1-logs overrides
+ MODES = ["mispredict_not_taken", "mispredict_taken"]
+ 
+ 
+@@ -80,7 +81,7 @@
+ def stage1_cpu():
+     """Stage-1 partition wall seconds from run_stage1 logs (START/END timestamps)."""
+     out = {}
+-    for lg in sorted((WS / "stage1" / "logs").glob("Footprint_6_u_core_ri__*.log")):
++    for lg in sorted(WS.glob(STAGE1_LOGS)):
+         lines = lg.read_text(errors="replace").splitlines()
+         try:
+             t0 = dt.datetime.fromisoformat(lines[0].split()[0]); t1 = dt.datetime.fromisoformat(lines[-1].split()[0])
+@@ -95,9 +96,16 @@
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--s15", required=True); ap.add_argument("--base-name", required=True); ap.add_argument("--final-name", required=True)
+     ap.add_argument("--cfg", required=True); ap.add_argument("--code", required=True)
++    ap.add_argument("--ts-dir", default=None, help="testset root (default /tests/simspect_alloy_20261108/testsets_twostage)")
++    ap.add_argument("--ws", default=None, help="work dir holding logs/ and stream/ (default .../loosepin_regen)")
++    ap.add_argument("--stage1-logs", default=None, help="glob (relative to --ws) of the Stage-1 partition logs, for the CPU-s record")
++    ap.add_argument("--family-label", default="Footprint_6_u", help="family name written into READY")
+     ap.add_argument("--interval", type=int, default=150); ap.add_argument("--jobs", type=int, default=16)
+     ap.add_argument("--min-batch", type=int, default=50); ap.add_argument("--max-batch", type=int, default=150); ap.add_argument("--git-rev", default="264adea+uncommitted")
+     a = ap.parse_args()
++    global TS, WS, STAGE1_LOGS
++    TS = Path(a.ts_dir) if a.ts_dir else TS; WS = Path(a.ws).resolve() if a.ws else WS; STAGE1_LOGS = a.stage1_logs or STAGE1_LOGS
++    (WS / "logs").mkdir(parents=True, exist_ok=True)
+     s15, code, cfg = Path(a.s15).resolve(), Path(a.code).resolve(), Path(a.cfg).resolve()
+     base, final = TS / a.base_name, TS / a.final_name
+     sd = WS / "stream" / a.final_name; sd.mkdir(parents=True, exist_ok=True); (base / "xml").mkdir(parents=True, exist_ok=True)
+@@ -259,8 +267,8 @@
+                 n_nt = len(list((final / MODES[0] / "asm").glob("*.s"))); n_t = len(list((final / MODES[1] / "asm").glob("*.s")))
+                 summ = json.loads((s15 / "SUMMARY.json").read_text())
+                 (final / "READY").write_text(
+-                    f"READY {now()} regen-lp: {a.final_name} = Footprint_6_u core-pinned loose-pin lpP corpus, streamed.\n"
+-                    f"Stage 1: Footprint_6_u_core_ri (FP-6 block) RI cores, {s15}/cores.json; Stage 1.5: stage15lp.py {s15} "
++                    f"READY {now()} regen-lp: {a.final_name} = {a.family_label} core-pinned loose-pin lpP corpus, streamed.\n"
++                    f"Stage 1: {a.family_label}_core_ri RI cores, {s15}/cores.json; Stage 1.5: stage15lp.py {s15} "
+                     f"(distinct {summ.get('distinct_global')}, jobs {summ.get('jobs')}, exhausted cores {summ.get('exhausted_cores')}/{summ.get('cores')}); "
+                     f"merged into {base}/xml ({st['n']} programs, _stream_map.jsonl).\n"
+                     f"Stage 2: {cfg.name} (stage2_fv3 = E3_STT_6_fv2fp options with fanout OTB off) -> per batch make_rmw_corpus --select eligible "

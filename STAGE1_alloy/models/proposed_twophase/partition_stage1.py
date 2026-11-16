@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """partition_stage1.py — split ONE Stage-1 core run into disjoint, exhaustive sub-runs.
 
-DRAFT TOOLING (2026-11-08, simspect-c8). Purpose: parallelism. A core model's run is
+Purpose: parallelism. A core model's run is
 `for 9 but 6 Instruction, ...` (up to 6 instructions). This writes one copy of the core
 per partition, differing ONLY in (a) the run scope and (b) at most one added fact:
 

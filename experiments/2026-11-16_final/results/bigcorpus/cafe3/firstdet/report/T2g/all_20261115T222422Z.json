@@ -1,0 +1,115 @@
+{
+ "generated_utc": "2026-11-15T22:24:22Z",
+ "corpus_pairs_now": 26550,
+ "seed": 20261109,
+ "gen_cpu_per_test": null,
+ "gen_cpu_source": "PROVENANCE.json unreadable (TypeError: float() argument must be a string or a number, not 'NoneType'); execution only",
+ "defenses": {
+  "cleanupspec": {
+   "dir": "/tests/bigcorpus_20261115/firstdet/T2g_Footprint_6_u_core_lpP_s2A",
+   "N": 72,
+   "rows_mode": "all",
+   "dropped": {},
+   "hits": 4,
+   "unclassified_hits": 0,
+   "status": {
+    "ok": 72
+   },
+   "cache_setups": {
+    "warm": 23,
+    "full": 27,
+    "cold": 22
+   },
+   "total_cpu_s_per_test": 6.605,
+   "gem5_cpu_s_per_test": 2.829,
+   "all_signatures": {
+    "UV3": 1,
+    "UV3_other_actor": 2,
+    "EM_other": 1
+   },
+   "all_corpus_pairs_run": false
+  }
+ },
+ "bugs": {
+  "UV3": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 1,
+   "N": 72,
+   "expected_tests": 36.5,
+   "censored": false,
+   "first_seed_order": 30,
+   "first_seed_stem": "mispredict_not_taken/inst-000347",
+   "first_stream_order": 2,
+   "det_setups": {
+    "cold": 1
+   },
+   "amulet_pooled_programs": 27.1,
+   "amulet_pooled_test_cases": 3794.0,
+   "multiple_tests": 103.9,
+   "simspect_cpu_s_per_test": 6.605,
+   "simspect_expected_cpu_s": 241.1,
+   "simspect_expected_cpu_s_exec_only": 241.1,
+   "amulet_pooled_cpu_s": 105,
+   "multiple_cpu": 0.44
+  },
+  "UV4": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 0,
+   "N": 72,
+   "expected_tests": 73.0,
+   "censored": true,
+   "first_seed_order": null,
+   "first_seed_stem": null,
+   "first_stream_order": null,
+   "det_setups": {},
+   "amulet_pooled_programs": 1600,
+   "amulet_pooled_test_cases": 224000,
+   "multiple_tests": 3068.5,
+   "simspect_cpu_s_per_test": 6.605,
+   "simspect_expected_cpu_s": 482.2,
+   "simspect_expected_cpu_s_exec_only": 482.2,
+   "amulet_pooled_cpu_s": 6171,
+   "multiple_cpu": 12.8
+  },
+  "UV5": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 0,
+   "N": 72,
+   "expected_tests": 73.0,
+   "censored": true,
+   "first_seed_order": null,
+   "first_seed_stem": null,
+   "first_stream_order": null,
+   "det_setups": {},
+   "amulet_pooled_programs": 1600,
+   "amulet_pooled_test_cases": 224000,
+   "multiple_tests": 3068.5,
+   "simspect_cpu_s_per_test": 6.605,
+   "simspect_expected_cpu_s": 482.2,
+   "simspect_expected_cpu_s_exec_only": 482.2,
+   "amulet_pooled_cpu_s": 6171,
+   "multiple_cpu": 12.8
+  }
+ },
+ "minimum": {
+  "bugs_present": [
+   "UV3",
+   "UV4",
+   "UV5"
+  ],
+  "all_5": false,
+  "tests": {
+   "bug": "UV3",
+   "multiple": 103.9,
+   "upper_bound": false
+  },
+  "cpu": {
+   "bug": "UV3",
+   "multiple": 0.44,
+   "upper_bound": false
+  }
+ }
+}

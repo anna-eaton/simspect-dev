@@ -5,8 +5,8 @@ concretized testset by post-processing its .s files. parsexml.py, the
 instruction tables and the source testset are never touched.
 
 Design: wiki/design/VOCAB_TABLES.md, "RMW agent findings (2026-11-08)" route (d)
-and "### RMW disjoint corpus (2026-11-08)" (how to regenerate). Decided by Anna
-2026-11-08: RMW tests are a separate testset that never mixes into STT_6.
+and "### RMW disjoint corpus (2026-11-08)" (how to regenerate). RMW tests are a
+separate testset that never mixes into STT_6 (except via the fanout option below).
 
 Rewrite rule (only rule): for a test whose transmitter kind is `ld`, the single
 instruction inside the transmitter's inline-asm block, right after the marker
@@ -17,7 +17,9 @@ limm; ldst; or; st). The marker label stays on the instruction.
 Gates (a test failing any gate is SKIPPED with a reason, never guessed):
   * xmit kind is ld; the bare annotation (llvm/<stem>.ann.json) and the XML exist;
   * the marker label occurs exactly once and its asm block holds exactly one
-    instruction of the form above;
+    instruction of the form above, or (fv2fp, 2026-11-09) that instruction followed by
+    the value-neutral FP route `movq %R,%xmmN; movq $0,%R; movq %xmmN,%R` on the same
+    R (liveness is then checked after the block);
   * XML: no rf edge leaves the transmitter's outreg (no Alloy-level consumer);
   * asm liveness: the destination register (any alias) is not read on any path
     from the transmitter before being fully overwritten (32/64-bit write, xor
@@ -35,6 +37,30 @@ Annotations are re-resolved with compile_annotate.py (build_binary,
 pc_offsets_from_nm, commit_offsets_from_nm, disassemble_instrs,
 update_annotations), i.e. the exact procedure the asm phase uses: absolute
 post-link addresses from the pc-marker labels via nm + objdump.
+
+Fanout RMW option (RMW tests mixed into the
+regular run): --fraction F --seed S selects a deterministic subset of stems,
+selected iff int(sha256(f"{S}:{stem}").hexdigest()[:16], 16) / 2**64 < F (the same
+stems in every mode). Only selected stems are rewritten (all gates above still
+apply). --complete additionally copies every other stem's .s + .ann.json unchanged
+(not selected, not an ld xmit, or skipped by a gate), so <dst> is a full mixed
+corpus (RMW + plain loads), and symlinks <dst>/xml to <src>/xml. The RMW stems are
+listed in <dst>/rmw_stems.tsv (mode, stem, orig instr, xmit addr). Source XML may be
+Alloy text (<stem>.txt) or Alloy XML (<stem>.xml).
+
+Selection among ELIGIBLE tests (--select eligible, the default):
+the hash draw above happened BEFORE the gates, so a fraction F of all stems was drawn
+and the gates then skipped about 58% of the drawn load-transmitter tests (fv2fp: 13,751
+written of 65,049 ld tests per mode = 21%). With --select eligible every stem is run
+through all the gates first (nothing is written), and then exactly round(F * E) of the E
+eligible stems of a mode are rewritten: the E eligible stems are ranked by
+int(sha256(f"{S}:{stem}").hexdigest()[:16], 16) and the lowest round(F * E) are taken.
+So F is now the share of ELIGIBLE load-transmitter tests that become RMW. Deterministic
+per (seed, eligible set); a stem eligible in both modes gets the same rank in both.
+--select hash keeps the old behaviour (draw over all stems, then gate) byte for byte.
+provenance.json records n_eligible, n_ld_source and the written share of both.
+  python3 make_rmw_corpus.py --repo-root <code> --src testsets_twostage/STT_6_fv2fp_full \
+      --dst testsets_twostage/STT_6_fv2fp_rmw --fraction 0.5 --seed 20261109 --complete --jobs 24
 
 Usage (on cafe2, inside gem5_dev):
   python3 make_rmw_corpus.py --repo-root /tests/simspect_fixed_20261030 \
@@ -87,7 +113,11 @@ KILL_MOVS = {"movq", "movl", "leaq", "leal", "popq", "movabsq", "movzbl", "movzw
              "movzbq", "movzwq", "movsbq", "movswq", "movsbl", "movswl"}
 SAFE_PREFIX = ("mov", "lea", "add", "sub", "and", "or", "xor", "not", "neg", "inc", "dec",
                "test", "cmp", "sh", "sa", "ro", "push", "pop", "mfence", "lfence", "sfence",
-               "nop", "set", "cmov", "bt")
+               "nop", "set", "cmov", "bt",
+               # explicit-operand forms only; imul needs >= 2 operands (below)
+               "imul", "bswap", "pxor", "por", "pand")
+# implicit rax/rdx users (fv2fp division fanout): conservatively a read of rax/rdx
+IMPLICIT_RAX_RDX = {"cqto", "cqo", "cltd", "idivq", "divq", "idivl", "divl"}
 
 
 def _ops(s: str) -> list:
@@ -135,6 +165,8 @@ def classify(mnem: str, ops: list, fam: dict, r64: str) -> str:
         return "read" if r64 == "rax" else "none"
     pat = re.compile(r"%(" + "|".join(sorted(fam, key=len, reverse=True)) + r")\b")
     hits = [i for i, o in enumerate(ops) if pat.search(o)]
+    if mnem in IMPLICIT_RAX_RDX:
+        return "read" if (hits or r64 in ("rax", "rdx")) else "none"
     if mnem.startswith("j"):
         return "none" if not hits else "read"
     if not mnem.startswith(SAFE_PREFIX) or (mnem.startswith("imul") and len(ops) < 2):
@@ -192,6 +224,26 @@ def xml_outreg_consumed(txt: str, atom: str):
         return d
     outreg, rf = rel("outreg"), rel("rf")
     return any(rf.get(o) for o in outreg.get(atom, ()))
+
+
+def xml_outreg_consumed_alloyxml(txt: str, atom: str):
+    """Same check as xml_outreg_consumed, for the Alloy XML instance format
+    (<field label="outreg"> / <field label="rf"> tuples)."""
+    def rel(n):
+        m = re.search(r'<field label="%s"[^>]*>(.*?)</field>' % n, txt, re.S)
+        d = collections.defaultdict(set)
+        if m:
+            for a, b in re.findall(r'<tuple>\s*<atom label="([^"]+)"/>\s*<atom label="([^"]+)"/>\s*</tuple>',
+                                   m.group(1)):
+                d[a].add(b)
+        return d
+    outreg, rf = rel("outreg"), rel("rf")
+    return any(rf.get(o) for o in outreg.get(atom, ()))
+
+
+def selected(stem: str, seed: int, fraction: float) -> bool:
+    h = int(hashlib.sha256(f"{seed}:{stem}".encode()).hexdigest()[:16], 16)
+    return h / 2.0 ** 64 < fraction
 
 
 def addr_fields(obj, path=""):
@@ -264,7 +316,11 @@ def resolve_ann(s_text: str, stem: str, bare_ann: Path) -> tuple:
 
 
 def process(args: tuple) -> dict:
+    """args = (stem, src_mode, dst_mode, xml_dir[, write]). write=False (--select eligible)
+    runs every gate and returns the rewritten text/annotation in the result instead of
+    writing them (keys new_text, new_ann)."""
     stem, src_mode, dst_mode, xml_dir = (args[0], Path(args[1]), Path(args[2]), Path(args[3]))
+    write = args[4] if len(args) > 4 else True
     try:
         ann_p = src_mode / "ann" / f"{stem}.ann.json"
         s_p = src_mode / "asm" / f"{stem}.s"
@@ -278,9 +334,12 @@ def process(args: tuple) -> dict:
         bare = json.loads(bare_p.read_text())
         atom = (bare.get("xmit") or {}).get("atom")
         xml_txt = xml_dir / f"{stem}.txt"
-        if not atom or not xml_txt.exists():
+        xml_xml = xml_dir / f"{stem}.xml"
+        if not atom or not (xml_txt.exists() or xml_xml.exists()):
             return dict(stem=stem, skip="no_xml_or_atom")
-        if xml_outreg_consumed(xml_txt.read_text(), atom):
+        consumed = (xml_outreg_consumed(xml_txt.read_text(), atom) if xml_txt.exists()
+                    else xml_outreg_consumed_alloyxml(xml_xml.read_text(), atom))
+        if consumed:
             return dict(stem=stem, skip="xml_outreg_consumed")
         text = s_p.read_text()
         lines = text.split("\n")
@@ -296,7 +355,21 @@ def process(args: tuple) -> dict:
                 break
             if st:
                 body.append((k, st))
-        if len(body) != 1:
+        fp_route = False
+        if len(body) == 4:
+            # fv2fp FP route on the transmitter's result, in the same asm block:
+            #   movq <mem>, %R ; movq %R, %xmmN ; movq $0, %R ; movq %xmmN, %R
+            # The last three only move R's value through xmmN and back (value-neutral for
+            # R), so after the rewrite R keeps its pre-xmit value; liveness of R is then
+            # checked after the whole block.
+            m0 = XMIT_RE.match(body[0][1])
+            if m0:
+                R = m0.group(2)
+                m1 = re.fullmatch(r"movq\s+%" + R + r",\s*%(xmm\d+)", body[1][1])
+                if (m1 and re.fullmatch(r"movq\s+\$0,\s*%" + R, body[2][1])
+                        and re.fullmatch(r"movq\s+%" + m1.group(1) + r",\s*%" + R, body[3][1])):
+                    fp_route = True
+        if len(body) != 1 and not fp_route:
             return dict(stem=stem, skip="xmit_block_not_single_instr")
         xl, xs = body[0]
         m = XMIT_RE.match(xs)
@@ -311,7 +384,7 @@ def process(args: tuple) -> dict:
         if fstart is None or fend is None:
             return dict(stem=stem, skip="function_bounds_not_found")
         instrs, labels = parse_func(lines[fstart + 1:fend])
-        xi = [i for i, (ln, _, _) in enumerate(instrs) if ln == xl - fstart - 1]
+        xi = [i for i, (ln, _, _) in enumerate(instrs) if ln == body[-1][0] - fstart - 1]
         if len(xi) != 1:
             return dict(stem=stem, skip="xmit_not_in_cfg")
         live = dst_live_after(instrs, labels, xi[0], dst)
@@ -342,12 +415,30 @@ def process(args: tuple) -> dict:
         deltas = {fn[p] - fo[p] for p in fo if fo[p] > xa_old}
         if len(deltas) > 1 or any(fn[p] != fo[p] for p in fo if fo[p] <= xa_old):
             return dict(stem=stem, skip="addr_shift_irregular")
-        (dst_mode / "asm" / f"{stem}.s").write_text(new_text)
-        (dst_mode / "ann" / f"{stem}.ann.json").write_text(json.dumps(new_ann, indent=2) + "\n")
-        return dict(stem=stem, ok=True, mem=mem, dst=dst, delta=(deltas.pop() if deltas else 0),
-                    orig=xs, xmit_addr=hex(xa_new))
+        out = dict(stem=stem, ok=True, mem=mem, dst=dst, delta=(deltas.pop() if deltas else 0),
+                   orig=xs + (" +fp_route" if fp_route else ""), xmit_addr=hex(xa_new))
+        if write:
+            write_rmw(dst_mode, stem, new_text, new_ann)
+        else:
+            out.update(new_text=new_text, new_ann=new_ann)
+        return out
     except Exception:
         return dict(stem=stem, skip="exception", tb=traceback.format_exc())
+
+
+def write_rmw(dst_mode: Path, stem: str, new_text: str, new_ann: dict) -> None:
+    (dst_mode / "asm" / f"{stem}.s").write_text(new_text)
+    (dst_mode / "ann" / f"{stem}.ann.json").write_text(json.dumps(new_ann, indent=2) + "\n")
+
+
+def hash_rank(stem: str, seed: int) -> int:
+    return int(hashlib.sha256(f"{seed}:{stem}".encode()).hexdigest()[:16], 16)
+
+
+def choose_eligible(eligible: list, seed: int, fraction: float) -> list:
+    """--select eligible: the round(fraction * E) eligible stems with the lowest sha256 rank."""
+    k = int(round(fraction * len(eligible)))
+    return sorted(sorted(eligible, key=lambda s: (hash_rank(s, seed), s))[:k])
 
 
 def md5(p: Path) -> str:
@@ -363,6 +454,14 @@ def main():
     ap.add_argument("--jobs", type=int, default=16)
     ap.add_argument("--limit", type=int, default=0, help="first N stems per mode (testing)")
     ap.add_argument("--git-rev", default="unknown", help="Mac repo HEAD the script came from")
+    ap.add_argument("--fraction", type=float, default=1.0,
+                    help="rewrite only stems with sha256(seed:stem) < fraction (default 1.0 = all)")
+    ap.add_argument("--seed", type=int, default=0, help="selection seed for --fraction")
+    ap.add_argument("--select", choices=["eligible", "hash"], default="eligible",
+                    help="eligible (default, 2026-11-09): gate every stem, then rewrite round(fraction*E) "
+                         "of the E eligible ones; hash: the old draw over all stems before the gates")
+    ap.add_argument("--complete", action="store_true",
+                    help="also copy every non-rewritten stem unchanged, so dst is a full mixed corpus")
     a = ap.parse_args()
     root = Path(a.repo_root)
     src = Path(a.src) if Path(a.src).is_absolute() else root / a.src
@@ -375,13 +474,20 @@ def main():
         print(line, flush=True); log.write(line + "\n"); log.flush()
 
     me = Path(__file__).resolve()
-    L(f"START src={src} dst={dst} modes={a.modes} jobs={a.jobs} limit={a.limit} script_md5={md5(me)}")
+    L(f"START src={src} dst={dst} modes={a.modes} jobs={a.jobs} limit={a.limit} fraction={a.fraction} "
+      f"seed={a.seed} select={a.select} complete={a.complete} script_md5={md5(me)}")
+    rmw_rows = []
     prov = dict(created=time.strftime("%Y-%m-%dT%H:%M:%S"), host=socket.gethostname(),
                 source_testset=str(src), dest_testset=str(dst), rule=RULE,
                 script=str(me), script_md5=md5(me), script_git_rev_mac=a.git_rev,
                 compile_annotate_md5=md5(root / "STAGE2_compilation" / "compile_annotate.py"),
                 note="no .o files are written (the checkers build from .s); xml/ is not copied, "
-                     "use the source testset's xml/ (same stems)", modes={})
+                     "use the source testset's xml/ (same stems)",
+                fraction=a.fraction, seed=a.seed, complete=a.complete, select=a.select,
+                selection=('int(sha256(f"{seed}:{stem}").hexdigest()[:16],16)/2**64 < fraction'
+                           if a.select == "hash" else
+                           'all gates on every stem; then the round(fraction*E) eligible stems with the lowest '
+                           'int(sha256(f"{seed}:{stem}").hexdigest()[:16],16)'), modes={})
     for mode in a.modes:
         sm, dm = src / mode, dst / mode
         for d in ("asm", "ann"):
@@ -391,7 +497,13 @@ def main():
         if a.limit:
             stems = stems[: a.limit]
         L(f"mode {mode}: {len(stems)} source stems")
-        work = [(s, str(sm), str(dm), str(src / "xml")) for s in stems]
+        if a.select == "hash":
+            sel = [s for s in stems if selected(s, a.seed, a.fraction)]
+            L(f"mode {mode}: {len(sel)} selected by fraction={a.fraction} seed={a.seed}")
+        else:
+            sel = stems
+            L(f"mode {mode}: gating all {len(sel)} stems (select=eligible)")
+        work = [(s, str(sm), str(dm), str(src / "xml"), a.select == "hash") for s in sel]
         res = []
         with ProcessPoolExecutor(a.jobs, initializer=_init, initargs=(str(root),)) as ex:
             for i, r in enumerate(ex.map(process, work, chunksize=64)):
@@ -400,16 +512,51 @@ def main():
                     L(f"ERROR {mode}/{r['stem']}:\n{r['tb']}")
                 if (i + 1) % 10000 == 0:
                     L(f"  {mode}: {i + 1}/{len(work)}")
+        n_eligible = sum(1 for r in res if r.get("ok"))
+        if a.select == "eligible":
+            chosen = set(choose_eligible([r["stem"] for r in res if r.get("ok")], a.seed, a.fraction))
+            for r in res:
+                if r.get("ok") and r["stem"] in chosen:
+                    write_rmw(dm, r["stem"], r.pop("new_text"), r.pop("new_ann"))
+                elif r.get("ok"):
+                    r.pop("new_text"); r.pop("new_ann")
+                    r.pop("ok"); r["skip"] = "eligible_not_chosen"
+            L(f"mode {mode}: {n_eligible} eligible, {len(chosen)} chosen (round({a.fraction} * {n_eligible}))")
         ok = [r for r in res if r.get("ok")]
+        okset = {r["stem"] for r in ok}
+        n_copied = 0
+        if a.complete:
+            for s in stems:
+                if s in okset:
+                    continue
+                shutil.copy2(sm / "asm" / f"{s}.s", dm / "asm" / f"{s}.s")
+                shutil.copy2(sm / "ann" / f"{s}.ann.json", dm / "ann" / f"{s}.ann.json")
+                n_copied += 1
+            L(f"mode {mode}: copied {n_copied} non-RMW stems unchanged")
+        rmw_rows += [(mode, r["stem"], r["orig"], r["xmit_addr"]) for r in sorted(ok, key=lambda r: r["stem"])]
         skips = collections.Counter(r["skip"] for r in res if "skip" in r)
+        n_ld = sum(1 for s in stems
+                   if (json.loads((sm / "ann" / f"{s}.ann.json").read_text()).get("xmit") or {}).get("kind") == "ld")
         prov["modes"][mode] = dict(
-            n_source=len(stems), n_written=len(ok), skip_counts=dict(skips),
+            n_source=len(stems), n_selected=len(sel), n_ld_source=n_ld, n_written=len(ok),
+            n_eligible=(n_eligible if a.select == "eligible" else None),
+            share_of_eligible=(round(len(ok) / n_eligible, 4) if a.select == "eligible" and n_eligible else None),
+            share_of_ld=(round(len(ok) / n_ld, 4) if n_ld else None),
+            n_copied_unchanged=n_copied, skip_counts=dict(skips),
             delta_bytes=dict(collections.Counter(r["delta"] for r in ok)),
             orig_forms=dict(collections.Counter(re.sub(r"%\w+", "%R", r["orig"]) for r in ok)),
             skipped={k: sorted(r["stem"] for r in res if r.get("skip") == k)
-                     for k in skips if k != "xmit_kind_not_ld"},
+                     for k in skips if k not in ("xmit_kind_not_ld", "eligible_not_chosen")},
             skipped_not_ld_count=skips.get("xmit_kind_not_ld", 0))
         L(f"mode {mode}: written={len(ok)} skips={dict(skips)}")
+    if a.complete and not (dst / "xml").exists():
+        (dst / "xml").symlink_to(src / "xml")
+    if a.fraction < 1.0 or a.complete:
+        with open(dst / "rmw_stems.tsv", "w") as f:
+            f.write("mode\tstem\torig_instr\txmit_addr\n")
+            for row in rmw_rows:
+                f.write("\t".join(row) + "\n")
+        L(f"rmw_stems.tsv: {len(rmw_rows)} (mode, stem) RMW tests")
     (dst / "provenance.json").write_text(json.dumps(prov, indent=2) + "\n")
     L(f"END provenance={dst / 'provenance.json'}")
 

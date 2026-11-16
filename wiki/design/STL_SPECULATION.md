@@ -1,6 +1,6 @@
 # Store-to-load (STL) speculation: model, concretization, gem5 hooks, window check
 
-*Living doc, overwrite-in-place. Written 2026-10-28, updated 2026-10-30 (hooks built + tested) and 2026-11-08 (STL for every main model; manifest handoff). This is the one place for everything known about STL in SimSpect. Paper table row: [`SPEC_PRIMITIVE_INSTANCES.md`](SPEC_PRIMITIVE_INSTANCES.md) (h, i).*
+*Living doc, overwrite-in-place. Written 2026-10-28, updated 2026-10-30 (hooks built + tested), 2026-11-08 (STL for every main model; manifest handoff) and 2026-11-09 (port to the three AMuLeT builds). This is the one place for everything known about STL in SimSpect. Paper table row: [`SPEC_PRIMITIVE_INSTANCES.md`](SPEC_PRIMITIVE_INSTANCES.md) (h, i).*
 
 ## Manifest handoff (2026-11-08): the active STL builds, models and experiments
 
@@ -14,8 +14,9 @@ For the agent writing the manifest of active builds, models and experiments. Eve
 
 | Build | STL hooks? | Status | Notes |
 |---|---|---|---|
-| `/work/gem5-recon-stl` (cafe2) | **yes, the only one** | active, but **stale** | Copy of `gem5-recon-modded` taken before the 2026-10-30 resolve hooks: no BR lines, old-style branch force, no CPU-wake fix (`wiki/findings/audits/2026-11-07/HOOK_AUDIT.md`, verdict BORDERLINE). `gem5.opt` md5 `9ac3ac66…`. Flags `--stl-ann-file`, `--stl-store-stall-cycles N`, `--stl-alias-pred {no_alias,alias,off}`. Schemes as recon-modded: 0 Unsafe, 1 Delay/NDA-like, 2 STT, 3 DoM. Registry: `specs/gem5_builds.json` id `gem5-recon-stl`. |
-| every other build (`/work/stt`, `gem5-recon-modded`, `gem5-spt`, the three amulet builds, amulet-STT) | no | port needed to run STL | Port = `gem5-hooks/stl/apply_stl_hooks.py <gem5_root>` (anchor-based, idempotent, refuses unless every anchor matches once) + rebuild. `stl_hooks_vs_gem5_v22.0.0.2.diff` is an older upstream reference, before the 2026-10-30 barrier/alias fixes. Rebuilds need Anna's OK (DECIDE). |
+| `/work/gem5-recon-stl` (cafe2) | yes | active, but **stale** | Copy of `gem5-recon-modded` taken before the 2026-10-30 resolve hooks: no BR lines, old-style branch force, no CPU-wake fix (`wiki/findings/audits/2026-11-07/HOOK_AUDIT.md`, verdict BORDERLINE). `gem5.opt` md5 `9ac3ac66…`. Flags `--stl-ann-file`, `--stl-store-stall-cycles N`, `--stl-alias-pred {no_alias,alias,off}`. Schemes as recon-modded: 0 Unsafe, 1 Delay/NDA-like, 2 STT, 3 DoM. Registry: `specs/gem5_builds.json` id `gem5-recon-stl`. |
+| `/work/amulet/hooks_stl_work/{InvisiSpec,CleanupSpec,SpecLFB}` (cafe2, copies of the three AMuLeT hooks-v2 trees, built 2026-11-09) | **yes** | built and verified; no run config points at them yet | Same flags and `STL:` lines as recon-stl; with no STL flag the trace is byte-identical to the in-place binary. md5 InvisiSpec `376198d5…`, CleanupSpec `c7989d25…`, SpecLFB `f2e3e9fe…`. Registry ids `amulet-<Build>-stl`. Section "Port to the AMuLeT builds (2026-11-09)". The in-place amulet trees are unchanged and have no STL hooks. |
+| every other build (`/work/stt`, `gem5-recon-modded`, `gem5-spt`, the in-place amulet trees, amulet-STT) | no | port needed to run STL | Port = `gem5-hooks/stl/apply_stl_hooks.py <gem5_root>` (anchor-based, idempotent, refuses unless every anchor matches once) + rebuild. `stl_hooks_vs_gem5_v22.0.0.2.diff` is an older upstream reference, before the 2026-10-30 barrier/alias fixes. Rebuilds need Anna's OK (DECIDE). |
 
 ### Which defenses have STL in their threat model
 
@@ -24,10 +25,10 @@ For the agent writing the manifest of active builds, models and experiments. Eve
 | 1 STT-Spectre, `/work/stt` | **no**: STT-Spectre casts no store shadow (`rob_impl.hh:444-495`); a bypass leak there is expected by design | (`STT_6_stl` only as a labelled control) | no hooks |
 | 2 Recon-STT, recon scheme 2 | yes (`decode.cc:686-695` inserts stores into the shadow tracker) | `STT_6_stl` | **yes**, on `gem5-recon-stl` |
 | 3 SPT-Fence (Spectre configs), `gem5-spt` | no (branch-only visibility point) | — | no hooks |
-| 4 SpecLFB, amulet | yes (memory-order MUSLs, SpecLFB Sec. 5) | `STT_6_stl` as stimulus | no hooks |
+| 4 SpecLFB, amulet | yes (memory-order MUSLs, SpecLFB Sec. 5) | `STT_6_stl` as stimulus | on the STL copy (2026-11-09, Port section) |
 | 5 ReCon, recon-modded | yes (same shadow tracker) | `Recon_6_stl` (draft) | partly: `gem5-recon-stl` has the hooks; ReCon mode there not verified |
-| 6 InvisiSpec, amulet | Futuristic mode only (InvisiSpec Sec. IV Table I) | `STT_6_stl` as stimulus | no hooks |
-| 7 CleanupSpec, amulet | yes (every transient instruction unsafe, Sec. 2.1) | `STT_6_stl` as stimulus | no hooks |
+| 6 InvisiSpec, amulet | Futuristic mode only (InvisiSpec Sec. IV Table I) | `STT_6_stl` as stimulus | on the STL copy (2026-11-09, Port section) |
+| 7 CleanupSpec, amulet | yes (every transient instruction unsafe, Sec. 2.1) | `STT_6_stl` as stimulus | on the STL copy (2026-11-09, Port section) |
 | 8 ReCon OTB | n/a (two-source merge shape) | — | — |
 | 9 STT on SPT's sub-implementation | no | — | no hooks |
 | 10 SPT variants, `FuturisticSafe*` configs | yes | `SPT_6_oneLP_stl` (draft, **generates nothing** yet) | no hooks |
@@ -58,7 +59,7 @@ Tools: `STAGE1_alloy/models/proposed/derive_stl.py` (main model → STL draft; r
 | Full `STT_6_stl` testset + sweep (Recon-STT, unit 2) | **planned, blocked** | needs the STL window checker (not written; `check_ld`/`check_br` verdicts are not meaningful for STL tests: no `lc`, `fnc` = the store) and, ideally, a refreshed `gem5-recon-stl`. Until then score with `gem5-hooks/stl/stl_hooktest.py` |
 | `Recon_6_stl` on `gem5-recon-stl` (unit 5) | planned | needs the draft approved; ReCon mode on that build unverified |
 | `STT_6_stl` on schemes 1 and 3 (units 11, 12) | planned | untested; shadow-tracker sharing across schemes not verified |
-| STL on amulet ×3 and `gem5-spt` (units 4, 6, 7, 10) | not started | needs the hook port + rebuilds (DECIDE) |
+| STL on amulet ×3 (units 4, 6, 7) | **hooks built, controls done** 2026-11-09 | 60 `STT_6_stl` tests per build, in copies of the trees; section "Port to the AMuLeT builds (2026-11-09)". `gem5-spt` (unit 10) not started |
 | SPT STL generation | blocked | RS DECIDE |
 | Stage-1 STL cores | 1 done (STT, 306), 1 running (Recon), 1 blocked (SPT) | see Models |
 
@@ -93,7 +94,7 @@ Tools: `STAGE1_alloy/models/proposed/derive_stl.py` (main model → STL draft; r
 | Model `STAGE1_alloy/models/STT_6_stl.als` | written (Anna approved new `.als` files), SAT, 500 instances enumerated locally in a few seconds |
 | Concretization, branch mode `stl_bypass` | written + tested: 500/500 instances concretize and compile to x86; the existing modes are byte-identical before/after (120/120 STT_6 `.ll` + `.ann.json`). 2026-10-30: every true-alias load is annotated, not only the first (2/60 tests gain a second one) |
 | Harness flags (`gem5.stl_*` → `SIMSPECT_STL_*` → `--stl-*`) | written; off unless a config sets `gem5.stl_ann_enable` |
-| gem5 hooks `gem5-hooks/stl/` | **built** into `/work/gem5-recon-stl` (copy of gem5-recon-modded, 2026-10-30); two hook bugs found and fixed by the controls; all controls pass on 60 tests (see Hook test) |
+| gem5 hooks `gem5-hooks/stl/` | **built** into `/work/gem5-recon-stl` (copy of gem5-recon-modded, 2026-10-30); two hook bugs found and fixed by the controls; all controls pass on 60 tests (see Hook test). 2026-11-09: ported to copies of the three AMuLeT builds, controls pass there too (Port section) |
 | Window checker | proposed below, **still not written** (2026-11-08) |
 | STL models for the other main models (2026-11-08) | drafts `proposed/Recon_6_stl.als`, `proposed/SPT_6_oneLP_stl.als` via `proposed/derive_stl.py`; split cores in `proposed_twophase/`. Recon works; SPT generates nothing yet (see "STL for every main model") |
 
@@ -232,7 +233,7 @@ Per test: S, L and the xmit X are known by address from the ann. All times come 
 - **Answered:** build = copy `/work/gem5-recon-stl` (Anna, 2026-10-30); threat model = control + store shadows (above).
 - **Window checker** still to write (above), then a full STT_6_stl testset + sweep. The 60-test result already says STT holds on these shapes.
 - **Contract granularity.** Is "everything after an unresolved store" right for STT Futuristic, or only loads that may alias it? See Generation.
-- **Other defenses.** Drafted 2026-11-08 (next section). The hooks still port by re-running `apply_stl_hooks.py` on each tree; only `/work/gem5-recon-stl` has them today.
+- **Other defenses.** Drafted 2026-11-08 (next section). The hooks still port by re-running `apply_stl_hooks.py` on each tree; `/work/gem5-recon-stl` and, since 2026-11-09, the copies `/work/amulet/hooks_stl_work/<Build>` of the three AMuLeT builds have them (Port section).
 
 ## STL for every main model (2026-11-08)
 
@@ -249,4 +250,105 @@ The drafts use the atom-based alias (`--alias atom`, default): every unresolved 
 
 **Why SPT generates nothing.** SPT's protection seed protects every operand except unfed register/address inputs (`SPT_6_oneLP.als:341`), so a speculative load's output is protected whatever location it reads. The aliased `Mem_s` is then never necessary for the leak, and state-minimality (`all s: State | secure[RS->s]`) rejects every instance in which the store and the load share it, which the alias fact requires. Probes on the ≤3 core: RS off gives 50 instances in 5 s; the alias fact off gives 50 in 16 s; the perturbation-aware seed from the 2026-11-07 SPT probe still gives 0; RS with the alias location exempt (`all s: State - (unresolved & Stores).outmem.opstate | ...`) gives 50 in 8 s, and on the full model 60 in 10 s at exactly 6, of which 59/60 concretize. The one failure is a `parsexml` edge case: `stl_bypass: bypass load address probe+-1 out of bounds` in `_stl_store_retargets` (`parsexml.py:1208`), not investigated. The fix is a generation-predicate choice, so it is a DECIDE in `URGENT_TODO.md`; the draft stays as derived.
 
-**Running STL tests needs the STL hooks** (store-address hold and the forced no-alias prediction), and only `/work/gem5-recon-stl` has them. That build is stale: it predates the 2026-10-30 resolve hooks (`wiki/findings/audits/2026-11-07/HOOK_AUDIT.md`). Which defenses have STL in their threat model, per build: `STAGE1_alloy/models/MANIFEST.md` ("Defenses we test").
+**Running STL tests needs the STL hooks** (store-address hold and the forced no-alias prediction): `/work/gem5-recon-stl`, and since 2026-11-09 the AMuLeT copies in `/work/amulet/hooks_stl_work/` (next section). That build is stale: it predates the 2026-10-30 resolve hooks (`wiki/findings/audits/2026-11-07/HOOK_AUDIT.md`). Which defenses have STL in their threat model, per build: `STAGE1_alloy/models/MANIFEST.md` ("Defenses we test").
+
+## Port to the AMuLeT builds (2026-11-09)
+
+*Session stl-port, Anna's ask of 2026-11-09. Everything here was run on cafe2 (`gem5_dev`) unless a line says "by reading". Work dir `/work/amulet/hooks_stl_work/` (20 GB: tree copies 7.6 + 7.1 + 4.5 GB, run outputs 250 MB; `/work` 157 GB free after). The in-place trees `/work/amulet/amulet-gem5-<Build>_AE-v1.1` were only read; their `gem5.opt` md5s are unchanged (InvisiSpec `f45251db6d580f12e549751b9331a3ca`, CleanupSpec `ec5710cad23e43b265f08657710fcb21`, SpecLFB `a84176e23121db26d8f2f9019d586566`) and no file under their `src/` or `configs/` is newer than the copy.*
+
+### Binaries and flags
+
+| Build | STL binary (copy) | md5 | defense flags (= `runconfigs/footprint/*.jsonc` `extra_args`) | defense off |
+|---|---|---|---|---|
+| InvisiSpec | `/work/amulet/hooks_stl_work/InvisiSpec/build/X86_MESI_Two_Level/gem5.opt` | `376198d5f5f4fd77cb022ba19d5d4924` | `--ruby --scheme=SpectreSafeInvisibleSpec` (or `FuturisticSafeInvisibleSpec`) `--needsTSO=1 --allowSpecBuffHit=1 --l1d_size=1kB --l1d_assoc=2 --l1i_size=32kB --l1i_assoc=4 --l2_size=2MB --l2_assoc=16 --L1_TBEs=2 --L2_TBEs=2 --DC_TBEs=2` | `--scheme=UnsafeBaseline` |
+| CleanupSpec | `/work/amulet/hooks_stl_work/CleanupSpec/build/X86_MESI_Two_Level/gem5.opt` | `c7989d25487c18b5aeec78a1e7108afc` | `--ruby --scheme_invisispec=UnsafeBaseline --scheme_cleanupcache=Cleanup_FOR_L1L2 --needsTSO=0 --l1d_size=2kB --l1d_assoc=4 --l1i_size=32kB --l1i_assoc=4 --l2_size=2MB --l2_assoc=16 --L1_TBEs=8 --L2_TBEs=3 --DC_TBEs=2 --abs-max-tick=3000000000` | `--scheme_cleanupcache=UnsafeBaseline` |
+| SpecLFB | `/work/amulet/hooks_stl_work/SpecLFB/build/X86/gem5.opt` | `f2e3e9fe1419a67d5ce1aba9a51805d8` | `--scheme=Speclfb --l2cache --l1d_size=1kB --l1d_assoc=2 --l1i_size=32kB --l1i_assoc=8 --l2_size=2MB --l2_assoc=16` | `--scheme=unsafebaseline` (the tree's own choice; the defense is on only when the string equals `Speclfb`, `iew.cc:107`, `lsq_unit.cc:287`) |
+
+STL flags: `--stl-ann-file=<test>.ann.json --stl-store-stall-cycles=5000 --stl-alias-pred=no_alias` (D = 0 or `alias` for the controls). The harness (`gem5_common.run_gem5`) adds `--cpu-type=DerivO3CPU --caches --scheme=2 --abs-max-tick=100000000000 --branch-ann-file … --branch-ann-base …` and debug flags `O3PipeView,Commit`; no fnc stall; `TMPDIR=/tmp`. Branch annotations on and no fnc stall are the settings of the 2026-10-30 hook test (cafe2 `results/STT_6_stl_hooktest/run_config.jsonc`, and `stl_hooktest.py` passes `fnc_pc=None`). Registry: `specs/gem5_builds.json` ids `amulet-InvisiSpec-stl`, `amulet-CleanupSpec-stl`, `amulet-SpecLFB-stl`.
+
+### How it was built, and how to re-apply
+
+1. Copy, inside `gem5_dev`: `gem5-hooks/stl/copy_amulet_trees_for_stl.sh` (tar of the whole tree including `build/`, minus the `build/*/gem5.opt.*` backup binaries; log `/work/amulet/hooks_stl_work/copy_trees.log`).
+2. Apply: `python3 gem5-hooks/stl/apply_stl_hooks_amulet.py /work/amulet/hooks_stl_work/<Build> --build <Build> [--dry-run]`. It is anchor-based (every anchor must match exactly once or nothing is written), idempotent (marker `SimSpect-STL`), saves `*.pre-stl` backups, and refuses an in-place `amulet-gem5-*` tree. Equivalent: `patch -p1 < gem5-hooks/amulet-<Build>/stl_hooks.diff` from the copy's root (that diff is the script's `--diff` output after applying). Files: InvisiSpec and CleanupSpec `src/cpu/o3/{O3CPU.py,iew.hh,iew_impl.hh,mem_dep_unit.hh,mem_dep_unit_impl.hh}`; SpecLFB `src/cpu/o3/{BaseO3CPU.py,iew.hh,iew.cc,mem_dep_unit.hh,mem_dep_unit.cc}`; all three `configs/common/Options.py` and `configs/example/se.py`. `lsq_unit*` needed no change (the hold never calls `executeStore`).
+3. Build: `gem5-hooks/stl/build_stl_amulet.sh <Build>` with `J=16` (Ruby trees `python2 /usr/local/bin/scons`, SCons 2.5.1; SpecLFB `python3 /usr/bin/scons --ignore-style`; the same as `gem5-hooks/verify/build_simspect_hooks.sh`). Incremental builds, all rc=0: InvisiSpec 04:50:46–04:52:12 UTC, CleanupSpec 04:52:12–04:53:38, SpecLFB 04:50:46–04:55:12 (2026-11-10 UTC). Logs `/work/amulet/hooks_stl_work/build_<Build>_stl.log`. Each binary contains the 5 `STL:` format strings; the in-place binaries contain none.
+4. Verify: `gem5-hooks/stl/run_stl_off_verify.sh` (check (a)), `gem5-hooks/stl/run_stl_controls_amulet.sh <Build>` (check (a) on STL tests, and (b); driver `gem5-hooks/stl/stl_hooktest_amulet.py`), `gem5-hooks/stl/stl_footprint_offline.py` (d). Outputs on cafe2: `/work/amulet/hooks_stl_work/{verifyoff,stlruns/<Build>,checkerq}/`; each `stlruns/<Build>/run.log` records every config's exact env and flags. The driver imports a copy of the Mac harness in `/work/amulet/hooks_stl_work/harness/` (gem5_common, cache_setup, check_ld, check_footprint, make_rmw_corpus, the three criteria), not `/tests/simspect`, which other sessions run.
+
+### Where the port differs from the recon-stl hooks
+
+- **`mem_order_squash` prints only in a run given `--stl-ann-file` with at least one pair** (IEW member `stlTraceOn`); recon-stl prints it in every run. Otherwise a run without STL flags would print an extra line at every memory-order violation and could not be byte-identical to the in-place hooks-v2 binary. In an STL run it still prints for every violation, annotated or not.
+- **InvisiSpec and CleanupSpec keep one memory-dependence producer per instruction** (`producing_store`), where gem5 v22 keeps a list. In `alias` mode with a load barrier in flight, the load waits on the younger of the barrier and the paired store. A paired store younger than the barrier itself waits on a barrier (`insertBarrier` sets `storeBarrier` together with `loadBarrier`), and an older one commits before the barrier executes, so the load still waits for both. 52/60 tests take this path (`via=barrier` lines), and both `alias` controls still give 0 bypasses.
+- **Old-gem5 syntax only** in InvisiSpec and CleanupSpec: `params->`, `DynInstPtr &`, `Impl::MaxThreads`, optparse `add_option`, `options.` in `se.py`, and a non-const copy of the instruction captured by the release event. CleanupSpec's `iew_impl.hh` is re-indented (2 spaces), so its anchors carry that indentation.
+- **SpecLFB:** the violation site is `squashDueToMemOrder(inst,violator, tid)` (SpecLFB added the store argument). Every other edit is the recon-stl text verbatim; the script imports it from `apply_stl_hooks.py`.
+- **Unchanged from recon-stl:** the hold is the same issue-and-bounce through `rescheduleMemInst`/`replayMemInst`, so HOOK_AUDIT's BORDERLINE notes (a) and (b) apply unchanged; the release event wakes the CPU; the forced prediction touches only the memory-dependence unit; no defense file is edited. By reading: SpecLFB keys "store resolved" on `effAddrValid()` (`rob.cc` `preStoreResolved`), which stays false during the hold because `executeStore` is not called.
+
+### (a) Hooks off: identical to the in-place binary
+
+| check | InvisiSpec | CleanupSpec | SpecLFB |
+|---|---|---|---|
+| hooks-v2 verify cases, no STL flag: sim ticks and every line of the debug file (`run_stl_off_verify.sh`, `verify_simspect_hooks.py --ref-se`) | inv_uv1 5691000, inv_fut 5699500, inv_014986 5699500: 3/3 identical | cln_uv4align 1252000, cln_uv4split 1251500, cln_uv5clean 1378000, cln_inst002014 6383500: 4/4 identical | lfb_uv6x 1110500, lfb_uv6dep 1109500, lfb_inst002014 6227500: 3/3 identical |
+| 60 STT_6_stl tests, no STL flag, defense on: whole trace and ticks | 60/60 identical | 60/60 | 60/60 |
+| 60 STT_6_stl tests, `--stl-ann-file` + D = 0 + `off`, against the in-place binary with no flag: trace without `STL:` lines, and ticks | 60/60 identical | 60/60 | 60/60 |
+
+The ticks equal the 2026-11-08 table in [`SIMSPECT_HOOKS.md`](SIMSPECT_HOOKS.md) "How to verify" (the work dir path has the same length as that run's), and `check_v2_trace.py` passes all hard checks on the 10 new traces. Log `/work/amulet/hooks_stl_work/verifyoff/run_stl_off_verify.log`; STL-test comparisons `stlruns/<Build>/compare_*.json`.
+
+### (b) Controls on the 60 STT_6_stl tests
+
+Same 60 tests as the recon hook test (cafe2 `/tests/simspect/testsets/STT_6_stl/stl_bypass`: 28 load transmitters, 32 branch transmitters), warm cache unless marked. "valid" = an `stl_hold` for S, the forced `pred_no_alias` for L, L's first instance issued (`LSQ:issue`) before `stl_release`, and a `mem_order_squash` caused by S that names L's first instance; "relaxed" also accepts a squash of an instance between S and L (16-byte violation granularity). "x" = the load transmitter's first instance.
+
+| config | InvisiSpec | CleanupSpec | SpecLFB | recon-stl 2026-10-30 |
+|---|---|---|---|---|
+| B: defense off, `no_alias`, D = 5000 | valid 58/60 (relaxed 60/60); x issued in [hold, release) 28/28 | 58/60 (60/60); 28/28 | 58/60 (60/60); 28/28 | 58/60; 28/28 sent |
+| E: defense off, `alias` | 0 bypasses; 2 squashes of an older neighbour (inst-000020, -023) | same | same | 0/60 |
+| F: defense off, `no_alias`, D = 0 | 0 holds, 0 valid | same | same | 0 |
+| A: defense on, `no_alias`, D = 5000 | Spectre 58/60 (60/60); Futuristic 58/60 (60/60) | 58/60 (60/60) | 58/60 (60/60) | STT 58/60 |
+| C: defense on, `alias` | Spectre and Futuristic: 0 bypasses; the same 2 neighbour squashes | 0; same 2 | 0; same 2 | 0/60 |
+| A with the sandbox out of L1D (InvisiSpec `full`, the others `cold`) | Spectre 58/60, Futuristic 58/60 | 51/53 (7 of 60 panic, below) | 56/58 (2 do not bypass, below) | — |
+
+The primitive works on all three builds as on recon-stl, the `alias` and D = 0 controls never bypass, and the two non-valid tests are the same two as on recon (`inst-000020`, `-023`).
+
+**What each defense does to the bypass load L and its dependents.** These are observations, not verdicts. "Litmus" means the first instance of an Alloy instruction that the store's squash removes. Two kinds of harness instance are left out of the counts: the epilogue loads, and the wrong-path re-fetch of the test function. The re-fetch happens because `_start` falls through past its exit `syscall` into the function again; it sits behind that pass's `mfence`.
+
+| defense | defense off (B) | defense on (A) |
+|---|---|---|
+| InvisiSpec Spectre (STL is outside its threat model, table above) | x issues as `ld` and misses, fills and evicts in L1D inside the hold in 27/28; litmus L1D fills stay | the same: x `ld`, 27/28 miss + fill + evict, fills stay. 15/60 L issue as `specld`, then become safe (`LSQ:safe why=prev_brs_resolved`) and are exposed. Nothing hides the bypass, as expected for IS-Spectre. |
+| InvisiSpec Futuristic | — | every L and x issue as `specld` (60/60, 28/28); no litmus L1D fill; every spec-buffer entry is released at the squash (`SB:buf_release`, 60/60 tests). But a squashed `specld` evicts an L1D line inside the hold in 30/60 tests (x in 27/28): the **UV1** signature (`BUGS.md` "UV1", `L1D:evict req=specld ev=L1_Replacement`; e.g. inst-000006, x seq 572 evicts 0x3980 at 3220500, hold 3173500–5674000). Same with `full`. |
+| CleanupSpec, warm | x hits L1D in 28/28; litmus L1D fills in 26 tests, none removed | x hits L1D; litmus L1D fills in 17 tests, 17/17 removed by `cleanup_inv` with a rollback restore; hits need no undo (`cleanup_skip`) |
+| CleanupSpec, cold | x misses and fills L1D and L2 in 27/28; litmus fills in 59 tests, none removed | 7/60 panic (below). In the 53 that run, litmus loads fill L1D and L2 in 52; 66/69 L1D and 66/69 L2 fills are removed by `cleanup_inv`. The 3 kept (inst-000017, -018, -019) were in M when `Inv_CLEANUP` arrived (`cleanup_skip st=M`, the skip CleanupSpec takes for an M line), on the aliasing store's own line; not traced further. Today's balance checker reports 0 leaks there (below). |
+| SpecLFB, warm | x misses and fills in 27/28; fills stay | x misses, fills and evicts in 24/28; fills stay. At translation 25/28 x print `musl=1 prevnounsafe=1 reallyunsafe=0 unsafe=0`; the 3 with `unsafe=1` do not fill. L is the load-queue head (`lqhead=1`) and is never marked `musl` (54/60). Mechanism (inst-000006): the ROB walk sets the sticky `PrevNoUnsafe` on x at 3711500, before the LSQ walk sets x's `musl` at 3712000, and the LSQ walk skips the head load, so no older load is ever unsafe. This is the known head-skip + sticky-`PrevNoUnsafe` mechanism ([`hooks_speclfb_and_uv6.md`](../findings/audits/2026-10-28/hooks_speclfb_and_uv6.md), `lsq_unit.cc:817`, `rob.cc:464`), here on SpecLFB's memory-order USLs instead of its control USLs. |
+| SpecLFB, cold | x fills in 27/28 | x is `unsafe=1` in 19/26 and fills in only 5/26. L, the first unsafe load, still fills (57 tests): the published UV6 first-load exemption. In 2 tests (inst-000041, -042) L is not the head; it is `unsafe=1`, its access is bounced, and it gets S's value by forwarding after the release, so there is no bypass. That is the defense working. |
+
+**CleanupSpec cold panics.** 7/60 (inst-000006, -013, -016, -040, -044, -052, -054) end in `panic: Runtime Error at MESI_Two_Level-L2cache.sm:308: Invalid L1 forwarded request type`. That is CleanupSpec's own cleanup (in inst-000006 the store's squash sends 4 cleanup requests in one tick), the same class SIMSPECT_HOOKS.md "Cache setup strategies" records for cold at `L2_TBEs=2`. With D = 0 (no squash) inst-000006 runs. With `--L2_TBEs=4` or `8` all 7 run (cafe2 `diag/one_cleanupspec_cold.py`). So the footprint config's `L2_TBEs=3`, crash-free for STT_6, is not crash-free for STL cold (DECIDE STL-2).
+
+### (d) Can `check_footprint.py` score an `stl_bypass` test today? (report only; nothing changed)
+
+**By reading: it runs and returns a verdict, but not an STL verdict.**
+
+- **Window.** For these tests `commit_boundary` has no `last_committed` (59/60), `first_noncommitted` is the store S, and there is no unresolved non-transmitter branch. So `lc_fnc_unresolved` gives the window [0, S's retire). S retires after the memory-order squash (60/60), so this is a superset of the STL window [stl_hold, mem_order_squash].
+- **Actors.** In `spec` mode every squashed instruction is an actor. That includes the litmus transients, but also the harness instances the same squash removes and anything squashed by a branch transmitter's mispredict. InvisiSpec's `futuristic` mode (`before_visibility_point`) ignores the window altogether.
+- **No validity gate.** Nothing checks that the primitive fired (hold, forced prediction, L issued before release, a squash caused by S). A run where it did not fire (no hooks, a missing flag, `alias`, D = 0) is scored as an ordinary run, with no warning.
+- **CleanupSpec's balance** keys on each squash's `cleanup_done`, which works for the store's squash as for a branch squash.
+
+**Measured.** `stl_footprint_offline.py` runs the unchanged `evaluate_trace` on the kept traces, with the inputs `process_one` would pass (cafe2 `checkerq/`):
+
+| run | leak | leaks with a litmus event inside [hold, squash] | leaks only from other instances |
+|---|---|---|---|
+| SpecLFB off / on, warm | 30 / 27 | 30 / 27 | 0 / 0 |
+| SpecLFB off / on, cold | 60 / 57 | 60 / 57 | 0 / 0 |
+| CleanupSpec off / on, warm | 32 / 0 | 26 / 0 | 6 / 0 |
+| CleanupSpec off / on, cold (53 ran with cleanup on) | 43 / 0 | 27 / 0 | 16 / 0 |
+| InvisiSpec off / Spectre / Futuristic, warm | 60 / 60 / 60 | 60 / 60 / 60 | 0 |
+| InvisiSpec off / Spectre / Futuristic, `full` | 60 / 60 / 60 | 60 / 60 / 60 | 0 |
+
+Under Futuristic most offending events are outside the STL window (9,587, against 223 litmus events inside it, warm). The litmus events inside it are `DTLB:repl_touch` (60/60 tests), the UV1 `L1D:evict` (30), `L2:coh` (30), `DIR:coh` (27) and `L2:fill` (17). Ruby L2 events are attributed through the per-line most-recent-cause map (SIMSPECT_HOOKS.md "Attribution"); the `L2:fill` lines were not checked further.
+
+**Minimal addition (a design for Anna, not built).** One shared `stl_window(trace, ann)` in `gem5_common.py`, as in "Proposed window check" above, returning the validity gates and the window [t(stl_hold), t(mem_order_squash)]. Then, in `check_footprint.evaluate`, when the ann has `stl_annotations`:
+
+1. a record that fails a gate gets `status: stl_invalid`, like `execution_validity`;
+2. `in_W` uses that window instead of `lc_fnc_unresolved`;
+3. actors are only the instructions squashed by the `ROB:squash` that follows the `mem_order_squash`, and ideally only litmus PCs (first instances of `__litmus_<stem>_pc<N>`), so harness instructions do not count.
+
+The window would be declared in each criterion JSON (e.g. `window.footprint_stl` with `impl: stl_hold_squash`), so the JSON stays the source of truth. Whether Futuristic's window-free actor rule should also be clipped to the STL window for STL tests is part of the same decision (DECIDE STL-1).
+
+### Open
+
+DECIDE items STL-1 to STL-4 in `URGENT_TODO.md`: (1) the STL window and actor rule in `check_footprint` (above); (2) CleanupSpec STL cold: `L2_TBEs` 3 → 4; (3) SpecLFB: count the store-bypass head-skip leak with the existing UV6 / walk-order item or separately; (4) whether and how campaigns use the STL copies (no run config points at them; the in-place trees, which other campaigns run, stay as they are).

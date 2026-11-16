@@ -1,5 +1,5 @@
 #!/bin/bash
-# CleanupSpec cold-crash TBE sweep (2026-11-09, cache-random session). Run on cafe2 gem5_dev from the tree root
+# CleanupSpec cold-crash TBE sweep. Run on cafe2 gem5_dev from the tree root
 # /tests/simspect_fixed_20261030. Question: smallest --L2_TBEs (DC_TBEs if needed) at which the cold control
 # (plain STT_6, the 590 stems of results/STT_6_rmwstems_cleanupspec_footprint_ctrl_cold/ts) runs without the
 # `MESI_Two_Level-L2cache.sm:308` panic (326/590 at L2_TBEs=2), and whether warm hit counts change (UV4 depends on

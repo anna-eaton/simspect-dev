@@ -1,0 +1,82 @@
+"""Prune ops for STAGE2_compilation/parsexml.py (see prune.py). Removed: the debug IR dumps of passes 1-4
+(write_out), the store-bypass (stl_bypass) concretization (pass2_6 + helpers; no make target generates
+stl_bypass tests), the vocab exclude-tags filter, the no-STLF store-separation variant, the targeted OTB injector
+(fanout_v2.otb), the table-level br_cmp / jmp_direct forms (absent from fv4_vocab), and the module __main__ demo.
+Kept: chain interleaving (pass_interleave, off by default, described in the paper)."""
+OPS = [
+    ("drop_if", None, "__name__ == '__main__'", "else", 1),
+    ("del_def", "llvm_escape"),
+    ("del_def", "pass2_6_specify_stl"),
+    ("del_def", "_specified_physical"),
+    ("del_def", "_stl_pairs"),
+    ("del_def", "_to_signed64"),
+    ("del_def", "_mem_addr_of"),
+    ("del_def", "_stl_arch_values"),
+    ("del_def", "_stl_store_retargets"),
+    ("del_def", "_stl_alias_load_matches"),
+    ("del_def", "_fv4_alu_eval"),
+    ("del_stmt", None, "_PROBE_MEM_BYTES = ", 1),
+    ("drop_if", "pass1_specify_state_a", "write_out", "else", 1),
+    ("drop_if", "pass2_specify_instructions", "write_out", "else", 1),
+    ("drop_if", "pass2_5_specify_branches", "write_out", "else", 1),
+    ("drop_if", "pass3_assign_operands", "write_out", "else", 1),
+    ("drop_if", "pass4_ssa", "write_out", "else", 1),
+    ("drop_if", "pass5_emit_llvm", "write_out", "body", 1),
+    ("drop_if", "emit_branch_annotations", "write_out", "body", 1),
+    ("drop_if", "pass2_specify_instructions", "_excl", "else", 1),
+    ("del_stmt", "pass2_specify_instructions", "_excl = ", 1),
+    ("drop_if", "pass2_5_specify_branches", "branch_mode == 'stl_bypass'", "else", 1),
+    ("text", '    if branch_mode not in ("mispredict_not_taken", "mispredict_taken", "stl_bypass"):',
+             '    if branch_mode not in ("mispredict_not_taken", "mispredict_taken"):', 1),
+    ("drop_if", "pass5_emit_llvm", "_stsep_on", "else", 1),
+    ("drop_if", "pass5_emit_llvm", "_stsep_on and _stsep_pcs", "else", 1),
+    ("del_stmt", "pass5_emit_llvm", "_stsep_on = ", 1),
+    ("del_stmt", "pass5_emit_llvm", "_stsep_pcs: Set[int] = ", 1),
+    ("del_stmt", "pass5_emit_llvm", "_stsep_kept: List[int] = ", 1),
+    ("text", '_st_base = "%probe_st" if pc in _stsep_pcs else "%probe_mem"', '_st_base = "%probe_mem"', 1),
+    ("del_stmt", "pass5_emit_llvm", "stl_retarget: Dict[int, Dict[str, Any]] = ", 1),
+    ("drop_if", "pass5_emit_llvm", "concrete == 'store' and pc in stl_retarget", "else", 1),
+    ("drop_if", "pass5_emit_llvm", "_otb_cfg.get('enabled') and _xm is not None and (_fv2_rng.random() < float(_otb_cfg.get('p', 1.0)))", "else", 1),
+    ("del_stmt", "pass5_emit_llvm", "_otb_cfg = ", 1),
+    ("drop_if", "pass5_emit_llvm", "_otb and _otb.get('applied')", "else", 2),
+    ("del_stmt", "pass5_emit_llvm", "_otb = ", 1),
+    ("del_stmt", "pass5_emit_llvm", "_otb_l2: List[str] = ", 1),
+    ("drop_if", "pass5_emit_llvm", "_jmp_p > 0", "else", 1),
+    ("del_stmt", "pass5_emit_llvm", "_jmp_p = ", 1),
+    ("del_stmt", "emit_branch_annotations", "stl = _stl_pairs(", 1),
+    ("drop_if", "emit_branch_annotations", "stl", "else", 1),
+    ("drop_if", "emit_branch_annotations", "result.get('store_separation') is not None", "else", 1),
+]
+OPS += [
+    ("text", '    out_path: Optional[str] = "alloy-out/spo_program.ir",\n    write_out: bool = True,\n', "", 1),
+    ("text", "    out_path: Optional[str] = None,\n    write_out: bool = False,\n    vocab_rj", "    vocab_rj", 1),
+    ("text", "    exclude_tags: Optional[List[str]] = None,\n", "", 1),
+    ("text", '    branch_mode: str = "mispredict_not_taken",\n    out_path: Optional[str] = None,\n    write_out: bool = False,\n',
+             '    branch_mode: str = "mispredict_not_taken",\n', 1),
+    ("text", "    pass25_result: Dict[str, Any],\n    out_path: Optional[str] = None,\n    write_out: bool = False,\n    reg_naming",
+             "    pass25_result: Dict[str, Any],\n    reg_naming", 1),
+    ("text", "    pass3_result: Dict[str, Any],\n    out_path: Optional[str] = None,\n    write_out: bool = False,\n",
+             "    pass3_result: Dict[str, Any],\n", 1),
+    ("text", '    func_name: str = "test",\n    out_path: Optional[str] = None,\n    write_out: bool = False,\n',
+             '    func_name: str = "test",\n    out_path: Optional[str] = None,\n', 1),
+    ("text", "    stsep_cfg: Optional[Dict[str, Any]] = None,\n", "", 1),
+    ("text", "    result: Dict[str, Any],\n    out_path: Optional[str] = None,\n    write_out: bool = False,\n",
+             "    result: Dict[str, Any],\n    out_path: Optional[str] = None,\n", 1),
+    ("del_stmt", "pass3_assign_operands", "n_free_regs = ", 1),
+]
+OPS += [
+    ("text", 'Path(__file__).parent / "instruction_tables" / "instructions.json"', 'Path(__file__).parent / "instruction_tables" / "fv4_vocab.json"', 2),
+]
+OPS += [
+    ("text", 'raise ValueError("out_path must not be None when write_out=True")', 'raise ValueError("out_path is required")', 2),
+]
+OPS += [
+    ("del_stmt", "pass1_specify_state_a", "lines: List[str] = []", 1),
+    ("del_stmt", "pass1_specify_state_a", "lines.append(", None),
+    ("del_stmt", "pass1_specify_state_a", "fields: List[str] = []", 1),
+    ("del_stmt", "pass1_specify_state_a", "fields.extend(", 5),
+    ("del_stmt", "pass1_specify_state_a", "line = f", 1),
+    ("del_stmt", "pass1_specify_state_a", "resolved = 'true' if resolved_bool else 'false'", 1),
+    ("del_stmt", "pass1_specify_state_a", "committed = 'true' if committed_bool else 'false'", 1),
+    ("del_def", "_format_slots"),
+]

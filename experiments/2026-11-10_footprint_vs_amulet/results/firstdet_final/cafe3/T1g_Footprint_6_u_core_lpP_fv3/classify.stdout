@@ -1,0 +1,93 @@
+{
+ "defense": "invisispec",
+ "N_prefix": 4000,
+ "n_rows": 4000,
+ "status": {
+  "ok": 4000
+ },
+ "hits": 4000,
+ "gem5_cpu_s_total": 5234.87,
+ "total_cpu_s_total": 25643.6,
+ "gem5_cpu_s_per_test": 1.309,
+ "total_cpu_s_per_test": 6.411,
+ "signatures": {
+  "UV1": {
+   "first_idx": 0,
+   "tests_to_first": 1,
+   "stem": "inst-013156",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 1.67,
+   "cum_total_cpu_s": 8.89,
+   "K": 2002,
+   "N": 4000,
+   "expected_tests_to_first": 2.0,
+   "expected_gem5_cpu_s_to_first": 2.61,
+   "expected_total_cpu_s_to_first": 12.81
+  },
+  "UV1_transient": {
+   "first_idx": 0,
+   "tests_to_first": 1,
+   "stem": "inst-013156",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 1.67,
+   "cum_total_cpu_s": 8.89,
+   "K": 2002,
+   "N": 4000,
+   "expected_tests_to_first": 2.0,
+   "expected_gem5_cpu_s_to_first": 2.61,
+   "expected_total_cpu_s_to_first": 12.81
+  },
+  "other_DIR": {
+   "first_idx": 3,
+   "tests_to_first": 4,
+   "stem": "inst-016093",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 5.8,
+   "cum_total_cpu_s": 29.27,
+   "K": 1988,
+   "N": 4000,
+   "expected_tests_to_first": 2.01,
+   "expected_gem5_cpu_s_to_first": 2.63,
+   "expected_total_cpu_s_to_first": 12.9
+  },
+  "other_DTLB": {
+   "first_idx": 3,
+   "tests_to_first": 4,
+   "stem": "inst-016093",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 5.8,
+   "cum_total_cpu_s": 29.27,
+   "K": 1998,
+   "N": 4000,
+   "expected_tests_to_first": 2.0,
+   "expected_gem5_cpu_s_to_first": 2.62,
+   "expected_total_cpu_s_to_first": 12.83
+  },
+  "other_L1D": {
+   "first_idx": 3,
+   "tests_to_first": 4,
+   "stem": "inst-016093",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 5.8,
+   "cum_total_cpu_s": 29.27,
+   "K": 1998,
+   "N": 4000,
+   "expected_tests_to_first": 2.0,
+   "expected_gem5_cpu_s_to_first": 2.62,
+   "expected_total_cpu_s_to_first": 12.83
+  },
+  "other_L2": {
+   "first_idx": 3,
+   "tests_to_first": 4,
+   "stem": "inst-016093",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 5.8,
+   "cum_total_cpu_s": 29.27,
+   "K": 1988,
+   "N": 4000,
+   "expected_tests_to_first": 2.01,
+   "expected_gem5_cpu_s_to_first": 2.63,
+   "expected_total_cpu_s_to_first": 12.9
+  }
+ }
+}

@@ -1,0 +1,81 @@
+# sha256[:12] of each pipeline file in each frozen run-host tree vs the Mac working tree at snapshot time (2026-11-10)
+file	cafe3_firstdet_final	cafe1_firstdet_final	cafe1_recipe_v3	cafe1_loosepin_regen	mac	status
+pipeline.py	a5c097902a30	a5c097902a30	f9280c4826f8	f7ab101b2328	a5c097902a30	host-variants(mac=one)
+testsetgen.py	f0a57fe1ffe3	f0a57fe1ffe3	-	0efee402b62f	0efee402b62f	host-variants(mac=one)
+twostage_lp.py	-	-	-	4cb1efc5f409	4cb1efc5f409	same
+alloy_solver_order.py	-	-	-	a02bef7360d0	a02bef7360d0	same
+STAGE1_alloy/a6RandomModels.java	-	-	-	a9c01dcd9ec0	a9c01dcd9ec0	same
+STAGE2_compilation/parsexml.py	6e5c5238972f	6e5c5238972f	6e5c5238972f	6e5c5238972f	6e5c5238972f	same
+STAGE2_compilation/batch_generate.py	3fc8a94fb411	3fc8a94fb411	3fc8a94fb411	3fc8a94fb411	3fc8a94fb411	same
+STAGE2_compilation/compile_annotate.py	1e63219e501d	1e63219e501d	1e63219e501d	1e63219e501d	1e63219e501d	same
+STAGE2_compilation/make_rmw_corpus.py	213d9a025386	213d9a025386	213d9a025386	213d9a025386	213d9a025386	same
+STAGE2_compilation/make_jmp_corpus.py	6be3573e468e	6be3573e468e	6be3573e468e	6be3573e468e	6be3573e468e	same
+STAGE2_compilation/instruction_tables/instructions.jsonc	28e77a1d3746	28e77a1d3746	28e77a1d3746	28e77a1d3746	28e77a1d3746	same
+STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc	5bc245b58cbc	5bc245b58cbc	5bc245b58cbc	5bc245b58cbc	5bc245b58cbc	same
+STAGE3_gem5/gem5_common.py	68b65175ce12	68b65175ce12	68b65175ce12	54de95d0688f	68b65175ce12	host-variants(mac=one)
+STAGE3_gem5/cache_setup.py	1831b6d6ae24	1831b6d6ae24	1831b6d6ae24	2cb833ba37df	1831b6d6ae24	host-variants(mac=one)
+STAGE3_gem5/check_footprint.py	4d14f62577ae	4d14f62577ae	4d14f62577ae	4d14f62577ae	4d14f62577ae	same
+STAGE3_gem5/check_ld.py	2640e5d68a7a	2640e5d68a7a	2640e5d68a7a	2640e5d68a7a	2640e5d68a7a	same
+STAGE3_gem5/triage/diag/_fv2_slice.py	5cf0ddc42679	5cf0ddc42679	-	5cf0ddc42679	5cf0ddc42679	same
+specs/leakage/invisispec.json	205c8d369be0	205c8d369be0	205c8d369be0	205c8d369be0	205c8d369be0	same
+specs/leakage/cleanupspec.json	3098124c5bc3	3098124c5bc3	3098124c5bc3	3098124c5bc3	3098124c5bc3	same
+specs/leakage/speclfb.json	0b2d3242af53	0b2d3242af53	0b2d3242af53	0b2d3242af53	0b2d3242af53	same
+STAGE3_gem5/timing/classify_cs_rmw.py	c91489022156	c91489022156	c91489022156	c91489022156	c91489022156	same
+STAGE3_gem5/timing/classify_hits.py	0fa4aebf32ff	0fa4aebf32ff	c3a85f96075e	c3a85f96075e	0fa4aebf32ff	host-variants(mac=one)
+STAGE3_gem5/timing/cleanupspec_skip_evidence.py	fb57410171a8	fb57410171a8	fb57410171a8	fb57410171a8	fb57410171a8	same
+STAGE3_gem5/timing/firstdet_cs_launch.sh	73646035bab8	73646035bab8	73646035bab8	73646035bab8	73646035bab8	same
+STAGE3_gem5/timing/firstdet_final_launch.sh	ce5c7328c561	ce5c7328c561	-	-	ce5c7328c561	same
+STAGE3_gem5/timing/firstdet_full_launch.sh	8f9ecea873dd	8f9ecea873dd	8f9ecea873dd	8f9ecea873dd	8f9ecea873dd	same
+STAGE3_gem5/timing/firstdet_launch_T3_T4.sh	0b3c457e3b83	0b3c457e3b83	0b3c457e3b83	0b3c457e3b83	0b3c457e3b83	same
+STAGE3_gem5/timing/firstdet_launch_rows.sh	e57eb191556c	e57eb191556c	e57eb191556c	e57eb191556c	e57eb191556c	same
+STAGE3_gem5/timing/firstdet_merge.py	f0c0e82a2a7d	f0c0e82a2a7d	-	-	f0c0e82a2a7d	same
+STAGE3_gem5/timing/firstdet_report.py	03f920e83d77	b4c544d412a4	-	-	03f920e83d77	host-variants(mac=one)
+STAGE3_gem5/timing/firstdet_stream.py	644493ee5cad	644493ee5cad	-	-	644493ee5cad	same
+STAGE3_gem5/timing/firstdet_sync_cafe1.sh	946fcfb1eb2e	946fcfb1eb2e	-	-	946fcfb1eb2e	same
+STAGE3_gem5/timing/full_smoke_check.py	499eea4c1e73	499eea4c1e73	499eea4c1e73	499eea4c1e73	499eea4c1e73	same
+STAGE3_gem5/timing/make_firstdet_fig_v2.py	dcae647a42c5	dcae647a42c5	-	-	dcae647a42c5	same
+STAGE3_gem5/timing/speclfb_analyze.py	aa1715ddddb3	aa1715ddddb3	aa1715ddddb3	aa1715ddddb3	aa1715ddddb3	same
+STAGE3_gem5/timing/timing_driver.py	a864d7d3cf8f	a864d7d3cf8f	5cd2ef5f78eb	11bc4422c1ab	a864d7d3cf8f	host-variants(mac=one)
+runconfigs/firstdet_final_20261110/T1g_Footprint_6_u_core_lpP_fv3.jsonc	91a590328267	91a590328267	-	-	91a590328267	same
+runconfigs/firstdet_final_20261110/T1rt_Footprint_6_u_core_lpP_fv3.jsonc	0be27178cb96	0be27178cb96	-	-	0be27178cb96	same
+runconfigs/firstdet_final_20261110/T2g_Footprint_6_u_core_lpP_fv3.jsonc	6a9a1be79199	6a9a1be79199	-	-	6a9a1be79199	same
+runconfigs/firstdet_final_20261110/T2rt_Footprint_6_u_core_lpP_fv3.jsonc	2a492fffaff9	2a492fffaff9	-	-	2a492fffaff9	same
+runconfigs/firstdet_final_20261110/T2u5_Footprint_6_u_core_lpP_fv3.jsonc	e98473fc07f5	e98473fc07f5	-	-	e98473fc07f5	same
+runconfigs/firstdet_final_20261110/T3g_Footprint_6_u_core_lpP_fv3.jsonc	b0b84ebe9a18	b0b84ebe9a18	-	-	b0b84ebe9a18	same
+runconfigs/firstdet_final_20261110/T3rt_Footprint_6_u_core_lpP_fv3.jsonc	dc5b90da9d85	dc5b90da9d85	-	-	dc5b90da9d85	same
+runconfigs/regen_lp_20261110/T1ra_Footprint_6_u_lp_fv3.jsonc	c698860e0f8e	c698860e0f8e	c698860e0f8e	-	c698860e0f8e	same
+runconfigs/regen_lp_20261110/T2ra_Footprint_6_u_lp_fv3.jsonc	5c2c662ec317	5c2c662ec317	5c2c662ec317	-	5c2c662ec317	same
+runconfigs/regen_lp_20261110/T3ra_Footprint_6_u_lp_fv3.jsonc	1b634c4535be	1b634c4535be	1b634c4535be	-	1b634c4535be	same
+runconfigs/regen_lp_20261110/stage2_Footprint_6_u_lp_fv2fp.jsonc	fcfe98111d86	fcfe98111d86	fcfe98111d86	fcfe98111d86	fcfe98111d86	same
+runconfigs/regen_lp_20261110/stage2_Recon_6_u_lp_fv2fp.jsonc	72abe262a23f	72abe262a23f	72abe262a23f	72abe262a23f	72abe262a23f	same
+runconfigs/regen_lp_20261110/stage2_STT_6_u_lp_fv2fp.jsonc	83ff41aca9a0	83ff41aca9a0	83ff41aca9a0	83ff41aca9a0	83ff41aca9a0	same
+runconfigs/regen_lp_20261110/stage2_fv3.jsonc	1c24c5e87f9b	1c24c5e87f9b	1c24c5e87f9b	1c24c5e87f9b	1c24c5e87f9b	same
+runconfigs/regen_lp_20261110/xml_Footprint_6_u_lpA_b2.jsonc	12829f7b7218	12829f7b7218	12829f7b7218	12829f7b7218	12829f7b7218	same
+runconfigs/regen_lp_20261110/xml_Footprint_6_u_lpA_b2g.jsonc	804f1d8e8b46	804f1d8e8b46	804f1d8e8b46	804f1d8e8b46	804f1d8e8b46	same
+runconfigs/regen_lp_20261110/xml_Footprint_6_u_lpP.jsonc	66c3c863bb69	66c3c863bb69	66c3c863bb69	66c3c863bb69	66c3c863bb69	same
+runconfigs/regen_lp_20261110/xml_Recon_6_u_lpA_b2.jsonc	673912678f08	673912678f08	673912678f08	673912678f08	673912678f08	same
+runconfigs/regen_lp_20261110/xml_Recon_6_u_lpA_b2g.jsonc	cddac162ec82	cddac162ec82	cddac162ec82	cddac162ec82	cddac162ec82	same
+runconfigs/regen_lp_20261110/xml_Recon_6_u_lpA_b2g_short.jsonc	4740e3413349	4740e3413349	4740e3413349	4740e3413349	4740e3413349	same
+runconfigs/regen_lp_20261110/xml_Recon_6_u_lpP.jsonc	ba5178f3a0d6	ba5178f3a0d6	ba5178f3a0d6	ba5178f3a0d6	ba5178f3a0d6	same
+runconfigs/regen_lp_20261110/xml_STT_6_u_lpA_b2.jsonc	01f34eefd611	01f34eefd611	01f34eefd611	01f34eefd611	01f34eefd611	same
+runconfigs/regen_lp_20261110/xml_STT_6_u_lpA_b2g.jsonc	f33096ae23c8	f33096ae23c8	f33096ae23c8	f33096ae23c8	f33096ae23c8	same
+runconfigs/regen_lp_20261110/xml_STT_6_u_lpA_b2g_short.jsonc	081cd54114c4	081cd54114c4	081cd54114c4	081cd54114c4	081cd54114c4	same
+runconfigs/regen_lp_20261110/xml_STT_6_u_lpP.jsonc	474759ff3732	474759ff3732	474759ff3732	474759ff3732	474759ff3732	same
+runconfigs/twostage_lp/Footprint_6_u.jsonc	-	-	-	-	9c6d58d03c71	mac-only
+loosepin/stage15lp.py	-	-	-	c0b64f1cd74e (lp/)	c0b64f1cd74e	same
+loosepin/make_loosepin.py	-	-	-	2a113d8e19db (lp/)	2a113d8e19db	same
+loosepin/stream_fp.py	-	-	-	6c0d692eba30 (lp/)	cd58f3a5e9ab	DIFF-mac
+loosepin/relay_cafe3.sh	-	-	-	- (lp/)	a63b549161dd	mac-only
+loosepin/merge_lp.py	-	-	-	22eef4057756 (lp/)	22eef4057756	same
+loosepin/census_lp.py	-	-	-	ba3aea040472 (lp/)	ba3aea040472	same
+amulet_t5/analyse_ipc_violation_t5.py	-	-	-	9de09ba2825d (cafe1 timing/amulet_t5)	-	host-only
+amulet_t5/benchmark_t5.py	-	-	-	176df74cf87c (cafe1 timing/amulet_t5)	-	host-only
+amulet_t5/chain.sh	-	-	-	9c7d44cc0336 (cafe1 timing/amulet_t5)	9c7d44cc0336	same
+amulet_t5/chain_main.sh	-	-	-	ffe3be01006c (cafe1 timing/amulet_t5)	-	host-only
+amulet_t5/classify_t5.py	-	-	-	9efcdf35a03e (cafe1 timing/amulet_t5)	9efcdf35a03e	same
+amulet_t5/make_benchmark_t5.py	-	-	-	9bc6af11d27d (cafe1 timing/amulet_t5)	9bc6af11d27d	same
+amulet_t5/perbug/cs_nonexclusive_t5.py	-	-	-	c8cb5b3270fc (cafe1 timing/amulet_t5)	c8cb5b3270fc	same
+amulet_t5/perbug/perbug_replay.sh	-	-	-	907a08e15e25 (cafe1 timing/amulet_t5)	907a08e15e25	same
+amulet_t5/perbug/perbug_t5.py	-	-	-	ea568ba6a53d (cafe1 timing/amulet_t5)	ea568ba6a53d	same
+amulet_t5/run_t5.sh	-	-	-	51039e756b83 (cafe1 timing/amulet_t5)	51039e756b83	same
+amulet_t5/summarize_t5.py	-	-	-	fadd80ac917d (cafe1 timing/amulet_t5)	fadd80ac917d	same

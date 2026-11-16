@@ -100,6 +100,59 @@ Noted only so that nobody reads `requsl=1` as "protected" on a split load (`lsq.
 - **Why it is probably not a leak:** with random L1 replacement (`configs/common/Scheme.py:81`), the store in a non-speculative run would also have evicted a uniformly random line of the same set (set 3, fixed by a non-secret, architecturally accessed address). So the victim's identity carries no information. This is an argument, not a measurement.
 - **Decision for Anna:** see round 2 (CS-1) below.
 
+#### CS-1 sole-cause check (2026-11-09, bug-investigate-cs1)
+
+**Answer first.** CS-1 is the **only** cause in every hit where it appears. No hit has it together with UV3, UV4, UV5, CS-EM, H-PAD or H-STK. That makes 18 hit records in 5 runs: 7 stem-mode pairs, 5 distinct tests. It is **not a defense bug**: the code does what CleanupSpec §3.4 p7 says ("corresponding invalidations / restorations are skipped"). The only thing flagged is the victim that our own ownership rule leaves charged to the squashed load. So among the three options, it is **(c): an artifact of our criterion, not of the pipeline or of gem5**. It stays "explained, pending" until Anna answers the existing CS-1 DECIDE (un-charge the victim on random-replacement builds). If she keeps the victim charge, these become sole-cause hits of a behavior the paper intends, still not a deviation from the paper. **No gem5 rerun was needed:** every trace below is the campaign's own kept trace (keep_tmp, TMPDIR `/tmp`), so H-STK does not apply. Nothing was written to `/tmp`.
+
+**Hits covered** (cafe2, under `/tests/simspect_fixed_20261030/results/`):
+
+| run | stems (mode) | S → victim V, upgrader U |
+|---|---|---|
+| E13 `STT_6_cleanupspec_v2hooks__20261107/main_tbe8` | taken inst-101824, inst-102050 | S=574 / 572 fills 0x34c0, V=0x3cc0, U=562 |
+| warm RMW `STT_6_rmw_cleanupspec_footprint__20261109_002545` | nt inst-043313, -072476, -074723; t inst-072476, -074723 | V=0x3980 / 0x3980 / 0x3d80; 0x3d80 / 0x3780 |
+| warm control `STT_6_rmwstems_cleanupspec_footprint_ctrl_warm__20261109_060609` | same 5, same seqs and lines | same |
+| random RMW `STT_6_rmw_cleanupspec_footprint_random__20261109_094026` | nt inst-043313, -072476; t inst-072476 | same lines (from round 4's `bugwork/cleanupspec_em/em_evidence.json`) |
+| random control `STT_6_rmwstems_cleanupspec_footprint_random__20261109_094026` | same 3 | same |
+
+The BUGS.md count "12 tests in 3 runs" missed the 6 random-run records, which round 4 had already attributed as CS-1.
+
+**What was verified, on the 12 E13 + warm traces** (the 6 random-run records rest on round 4's evidence file, each with the single cause `CS1_older_store_upgrade` and a single victim item; I did not re-scan their traces) (`bugwork/cs1/cs1_check.py`, which reuses `judge()` from `STAGE3_gem5/triage/cleanupspec_skip_evidence.py`; output `bugwork/cs1/cs1_check_12.out`):
+
+1. **The CS-1 chain is complete:** fill by S, then E→M store hit by U, then `cleanup_skip … ev=Inv_CLEANUP:st=M`, and no `cleanup_restore` of V.
+2. **U is an older, committed instruction of the generated test,** not H-PAD. U's pc is inside the function, U is older than the squashing branch, and U committed. For example, E13 inst-101824's U is `pc1: movq %rax, 8(%rsi)` (rsp+0x30), and warm inst-043313's U is `pc2/last_committed: movq %rdi,(%rsi,%rax)` (rsp+0x3f, a line-crossing store).
+3. **No other known signature is anywhere in the trace:** 0 `cleanup_skip why=split` (UV4), 0 `why=nohitinfo` (UV3 / padding RMW), 0 `cleanup_inv` (UV5), and U committed (so not CS-EM).
+4. **The hit has only the victim item under today's criterion.** The E13 `triage.json` records came from the checker as it was before the ownership rule, and they also list the install line 0x34c0. Re-running today's `check_footprint` + `specs/leakage/cleanupspec.json` on the kept traces (`bugwork/cs1/reeval_e13.py`, output `reeval_e13.out`, no gem5) gives `issued_in_window=true`, `terms_fired=[under_clean]`, `offending=[L1D 0x3cc0]` for both stems. The 16 RMW-campaign records were already evaluated with the ownership rule, each with a single `under_clean` victim item.
+
+**Trace lines** (E13 inst-101824, `main_tbe8/kept/mispredict_taken/inst-101824.pipeview.txt.gz`):
+
+- `3854000 LSQ:issue line=0x34c0 seq=574 pc=0x401c6c addr=0x34e8 … vaddr=0x7fffffffe4e8`
+- `3862500 L1D:evict line=0x34c0 seq=574 victim=0x3cc0 … set=3:way=0:ev=L1_Replacement_OnInstall:st=M:nst=M_I`, plus the `L1D:fill` (DATA_EXCLUSIVE)
+- `3863000 L1D:hit line=0x34c0 seq=562 pc=0x401c53 req=st addr=0x34f0 … st=E:nst=M`
+- `6352500 ROB:squash seq=572 sq=4`
+- `6353000 L1D:cleanup_req line=0x34c0 seq=574 … rb=0x3cc0`
+- `6353500 L1D:cleanup_skip line=0x34c0 seq=574 … ev=Inv_CLEANUP:st=M:nst=M`
+
+The warm and control stems show the same shape on line 0x3580 / set 6 (round 3 has the lines).
+
+**Context that bears on the DECIDE, not on attribution:**
+
+1. **In all 7 stem-modes the squashed load S is the access load `movq (%rsi),%rax` at a constant stack slot.** Its vaddr is always 0x7fffffffe4e8 or 0x7fffffffe5a8 (rsp+0x28), and it never depends on a speculative value. U's line is architectural. So in these tests, the line and set involved carry no speculative data.
+2. **U and S share a line only because of Stage-2 stack layout.** Alloy's distinct memory slots are placed at adjacent 8-byte offsets in one 64 B line: rsp+0x28 and +0x30, or a store at rsp+0x3f.
+3. **The L1D uses random replacement:** `type=RandomReplacementPolicy`, assoc 4, 2 kB (E13 `inst-101824.config.ini:1047-1049`). All five runs use `Cleanup_FOR_L1L2`.
+4. **The round-1/2 argument therefore holds for these hits:**
+   - Without speculation, U would miss L, install it, and evict a uniformly random way of the same set.
+   - Under speculation, S did exactly that, and U then hit.
+   - That argument is still analysis, not a measurement. A measurement would mean comparing victim distributions over seeds, which I did not run.
+
+**What I did not do:**
+
+- No gem5 rerun.
+- No check of the E13 tbe2 arm, where the same two stems do not hit: `lc_retire` there is about 2000 ticks later.
+- `reeval_e13.py` rebuilt the unresolved-branch list from the ann as empty (the stall comes from the sweep), so its window check ran without the branch-unresolved condition. Its `lc_retire` and `fnc_retire` match the campaign record exactly.
+- No new diagnostic: `diag_cs1_store_upgrade.py` is already deployed in both warm runs. It is not deployed in E13 (different layout) or in the random runs, which need a `cleanupspec_skip_evidence.json`.
+
+**Scratch:** cafe2 `/tests/simspect_alloy_20261108/bugwork/cs1/` (60 kB: 2 scripts, the builder copy, 2 outputs). I unzipped two trace copies for the re-evaluation and then deleted them.
+
 ### CS-2 (A, speculative). Skipped cleanups are retried after older ones, which breaks reverse order
 
 - **Code:**
@@ -351,3 +404,144 @@ Neither (a) nor (b) is reachable by a config knob on this build: the TBE knob do
 **Does it matter?** (1) It is not a gem5 bug, and it is not Ruby nondeterminism to report: gem5 is deterministic for a fixed argv. (2) It does matter for our methodology. Results depend on a hidden input (the workdir path length), so a test's stack lines, its L1 set conflicts and, on the 2 kB/4-way L1D, its hit/no-hit can change with where the run happens. Hit counts are stable as a population, but the per-stem attribution of E13 (and E12a; inst-042604's 196 vs 207 events is very likely the same cause, not checked) needs reruns at the campaign's path length. (3) Fix for triage now: rerun with a TMPDIR whose path length equals the campaign's (`/tmp`, or a symlink of the same length). Fix for the harness: a DECIDE (URGENT_TODO), e.g. pass a fixed-length `--cmd` (a short fixed symlink or a cwd-relative `./t`).
 
 **What I did not do.** I did not trace the 11 padding NOREPRO stems or the 6 probable-UV4 stems (the keep_tmp limit), and I deployed no diagnostic. A `diag_padding_rmw` (offending line touched by an actor pc ≥ `.text` end; PHASE disqualifier, category "harness actor") is drafted only as the classifier above. The decision is Anna's: a disqualifier (artifact) or credit as UV3/CS-EM. Scratch: cafe2 `/tests/simspect_alloy_20261108/bugwork/e13new/` (1.4 MB; 3 cited traces in `runs/` + `traces/`); cafe3 `…/bugwork/e13new/` (classifier output). The 4 gem5 workdirs I created were deleted (listed in each `runs/*/created_workdirs.txt`).
+
+## UV5 count (2026-11-09, bug-investigate-uv5)
+
+**Answer first.** UV5 occurs **0 times** in the four E13 CleanupSpec campaigns at the 2% sample (STT_6_fv2, STT_6_fv2fp, STT_6_u_fv2, STT_6_u_fv2fp; 14,900 ok records, 384 hits). It occurs exactly once in each of the four 590-stem STT_6 CleanupSpec runs where round 3 found it (not_taken inst-039102, sole cause), and 0 times in the cold RMW run and the cold TBE control. So UV5 stays at **1 test** (1 stem, 4 runs). The E13 count needed no rerun: the campaigns' raw check_footprint records already carry the exact signature for every test (hits and non-hits), and the scan finds no test in which an older non-squashed access ever claimed a squashed load's line (0 claims of any kind, so also 0 CS-1). A conservative one-cause diagnostic is drafted, not deployed.
+
+**UV5 signature, from the source and from inst-039102's trace.**
+
+- A squashed load S (younger than the squashing branch) misses L1D and installs line L in E, evicting V: `3869500 L1D:evict line=0x3580 seq=564 victim=0x3d80`, `L1D:fill line=0x3580 seq=564 … st=NP:nst=IS`.
+- An older load U (seq < S, older than the branch, never squashed, committed) then hits L: `3870000 L1D:hit line=0x3580 seq=557 req=ld … st=E:nst=E` (U = the last-committed split load, retire 3871500).
+- After the squash, S's own cleanup invalidates L anyway and restores V: `6362000 L1D:cleanup_req line=0x3580 seq=564 … rb=0x3d80`, `6362500 L1D:cleanup_inv line=0x3580 seq=564 … ev=Inv_CLEANUP:st=E:nst=M_I`, `6375500 L1D:cleanup_restore line=0x3d80 seq=564`. The removed line is one S installed, but a committed load used it, so by CleanupSpec §3.4 p7 the invalidation must be skipped. The cleanup message that over-cleans is S's `Inv_CLEANUP` (`MESI_Two_Level-L1cache.sm:2692-2699`, unconditional at E); the build has no LQ-SEFE check (`Sequencer.cc:1300-1346`, `lsq_unit_impl.hh:2510-2600`).
+- Footprint: L ends absent though committed U used it (without speculation U would have missed and installed L). In check_footprint's record (ownership rule, `specs/leakage/cleanupspec.json` "ownership") the line's `per_line` entry has `claimed_by_older ≥ 1` (claim `actor_seq` 564, `owner_seq` 557), `invalidated ≥ 1`, `d_install < 0`, `d_victim = 0`, and the offending item is `over_clean`. inst-039102: L1D 0x3580 only (L2 keeps the line: the L1 invalidate sends PUTX). The record is `inconsistent` (replay puts L outside W because S's fill precedes lc_retire, U being the lc): the open DECIDE "UV5 / over_clean window".
+
+**What distinguishes it.** UV5 is the only cause whose offending item is `over_clean` (a line removed that should stay); every other CleanupSpec cause leaves something behind (`under_clean`):
+
+| cause | actor and path | what the cleanup does | record shape |
+|---|---|---|---|
+| **UV5** | squashed load installs L; an older committed **load** hits L | S's `Inv_CLEANUP` at E invalidates L (should be skipped) | claim + invalidation on L → `over_clean` on L |
+| CS-1 | squashed load installs L; an older committed **store** hits L (E→M) | S's cleanup skips at M; V never restored | claim, no invalidation; victim `under_clean` |
+| UV3 | speculative store/RMW miss-installs L | `cleanup_skip why=nohitinfo` | L `under_clean` (L1D + L2) |
+| UV4 | squashed split load | `cleanup_skip why=split` | L + victim `under_clean` |
+| CS-EM | squashed RMW hits S's E line (E→M) | S's cleanup skips at M | S's line (+ victim) `under_clean`, no claim (U squashed) |
+| H-PAD | padding `add %al,(%rax)` past `.text` (harness actor) | then UV3 or CS-EM | `under_clean`; actor pc ≥ `.text` end |
+| H-STK | TMPDIR-length stack shift in reruns | n/a | reproducibility artifact; this count reads the campaigns' own records, so it does not apply |
+
+**Method.** `uv5_scan.py` (cafe2 `/tests/simspect_alloy_20261108/bugwork/uv5/`, copies on cafe3 and cafe1) reads every `<mode>/_sweep_raw/*.json` record of a campaign (latest batch wins) and counts: records with any claim, the UV5 shape (claim + invalidation + `d_install < 0`), `over_clean` offending or outside-window items, any negative-balance line, `inconsistent` records, and lines that the net-state replay finds absent versus the reference but that are not offending. Positive control: on the four 590-stem runs it returns inst-039102 and nothing else. The hook emits the `hit` events the claim needs in this configuration (238 `L1D:hit` lines, parsed as kind `hit` by `code_20261109/STAGE3_gem5/gem5_common.py`, in the e13new trace `bugwork/e13new/traces/fv2_taken_inst-029763…`), and the campaigns' criterion copy has the ownership rule. Output: `scan_<campaign>_<host>.json`. No gem5 was run; no `/tmp` dirs were created.
+
+| campaign (host, `code_20261109/results/E13_STT_6_<t>__latest`) | mode | records (ok / error) | hits | records with any claim | UV5 matches | UV5 as sole cause |
+|---|---|---|---|---|---|---|
+| fv2 (cafe2) | not_taken | 1864 / 8 | 31 | 0 | 0 | 0 |
+| fv2 (cafe2) | taken | 1864 / 8 | 60 | 0 | 0 | 0 |
+| fv2fp (cafe3) | not_taken | 1864 / 8 | 31 | 0 | 0 | 0 |
+| fv2fp (cafe3) | taken | 1864 / 8 | 60 | 0 | 0 | 0 |
+| u_fv2 (cafe3) | not_taken | 1861 / 13 | 37 | 0 | 0 | 0 |
+| u_fv2 (cafe3) | taken | 1861 / 13 | 59 | 0 | 0 | 0 |
+| u_fv2fp (cafe1) | not_taken | 1861 / 13 | 37 | 0 | 0 | 0 |
+| u_fv2fp (cafe1) | taken | 1861 / 13 | 69 | 0 | 0 | 0 |
+| 590-stem warm control, warm RMW, random control, random RMW (cafe2 `/tests/simspect_fixed_20261030/results/`) | not_taken | 294 each | 6 / 11 / 7 / 133 | 3-4 | 1 each (inst-039102) | 1 each |
+| same four runs | taken | 296 each | 7 / 12 / 7 / 134 | 2 | 0 | 0 |
+| cold RMW, cold TBE control | both | 294 / 296 | 242+247 / 4+6 | 1 per mode | 0 | 0 |
+
+There are no `over_clean` items at all in the E13 records, inside or outside the window, and no negative-balance line. The only replay-vs-reference absences that are not offending (21, 17, 35 and 25 records, all `mispredict_taken`) are actor-evicted victims outside the window (`under_clean_outside_window`, checked item by item), not over-cleaning.
+
+**Draft diagnostic (not deployed).** cafe2 `/tests/simspect_alloy_20261108/bugwork/uv5/diag_draft/diag_cleanupspec_uv5.{py,md}` (`PHASE real_bug`, `CATEGORY UV5`, `ORDER 23`, kinds ld/br_x/other_x, `NEEDS_GEM5 False`). It reads the run's own raw record and buckets a hit only when every offending item is `over_clean` with a claim by an older access (`owner_seq < actor_seq`), `invalidated ≥ 1`, `d_install < 0` and `d_victim ≥ 0`; mixed hits stay NEW. Self-test (`python3 diag_cleanupspec_uv5.py <run_dir>…`, log `diag_draft/selftest_cafe2.log`): exactly inst-039102 in the four 590-stem runs, 0 in the cold runs and all four E13 campaigns. Deployed to the warm control it would take that run's NEW from 1 to 0 and the warm RMW run's from 11 to 10 (the CS-EM stems).
+
+**What I verified and what I did not.** Verified: the record-level signature on the four runs where the trace chain was proven (round 3), the E13 counts over every ok record, that the claim machinery and the `hit` events are live in the E13 code and config. Not verified: the 8-13 error records per mode (no footprint record), whether "non-squashed" always means "committed" outside inst-039102 (holds in an `ok` run; trace-checked only there), and why the fanout-v2 corpora never produce an older access that touches a squashed load's line after its fill (0 claims, also no CS-1). A UV5 variant without U's own `hit` event (U fed by S's fill) would be invisible to this signature; it was not observed, and the Ruby Sequencer rejects a load to a line with a pending load as `Aliased` (`mem/ruby/system/Sequencer.cc:311-318`), so the LSQ retries it and it then hits.
+
+## Why the fanout corpus never produces UV5 (2026-11-09, uv5-shape)
+
+**Answer first.** UV5 needs an older committed load U whose address becomes ready *after* a younger squashed load S to the same line has missed. In the fanout corpus `STT_6_fv2fp_rmw` no committed load ever has a computed address: 0 of 93,041 not_taken tests, against 1.7% of the old flat STT_6. Nothing in the model forbids it. Two-stage generation loses it through the Stage-1.5 solver order. The 2-ALU address chain that made inst-039102 work fires only on warm caches. One committed load in U's address chain makes UV5 fire on warm and cold caches (hand variant inst-939102). So the missing precondition is a **committed load with a late address**. The proposal below adds that generally, at Stage 2. Old-corpus UV5 rate: **1 in 590** (warm), 0 in 590 (cold).
+
+**1. What UV5 needs (inst-039102 traces, the code, AMuLeT Table 9).**
+
+- Program shape: an older load U that commits, a mispredicted branch, and a younger load S on the squashed path. U and S touch the same 64-byte line. In inst-039102, U is pc2 `movq (%rsi,%rax),%rdi` at rsp+63 (the lc, a split load), and S is pc4 `movq (%rsi),%rax` at rsp+40, line 0x3580.
+- Cache state: S must miss L1D and install the line. Warm runs use the shrunk 2 kB L1D, where the prologue zero-fill evicts the lowest frame lines, so 0x3580 is absent (evicted at 3709500 by fill seq 534). Cold runs flush every frame line.
+- Timing: S's request must reach L1D before U's. Then U is held, because a load to a line with a pending miss is retried (`Sequencer.cc:311-318`), and U hits S's fill. Warm trace: S issues at 3861000 (address from `leaq 40(%rsp)`) and misses. U's address sits behind `mov; not; lea`, so U issues 1 cycle later (3861500), is retried at 3862500-3868000, and hits at 3870000 after S's fill at 3869500.
+- Then CleanupSpec invalidates the line anyway (`cleanup_inv … Inv_CLEANUP st=E`, `MESI_Two_Level-L1cache.sm:2692-2699`).
+- AMuLeT Table 9 (`fu-2025-amulet.pdf` p12) has the same shape with a much larger gap. The NSL at PC 0x40113c, older than the SL at 0x40114d, executes at cycle 1423, 273 cycles after the SL (1150). That is consistent with an NSL whose address waits on a memory access. AMuLeT's own campaign also finds UV5 rarely: 4 of 32 instances (PB-2).
+
+**Cold rerun of inst-039102 (cafe3, same CleanupSpec footprint config, `--L2_TBEs=3`, `TMPDIR=/tmp`): no UV5.**
+
+- Warm reproduces the hit (`claimed_by_older` 1, over_clean).
+- Cold: U issues first (17222500), misses and fills. S issues after U's data (17443500), hits, and its cleanup is skipped (`cleanup_skip why=l1hit`).
+- The cause: during the long clflush+mfence prologue, the 2-ALU chain finishes before any load may issue, so the older U wins.
+- So a short ALU chain is not enough in general; U's address must wait on something that cannot finish before the barrier, such as a load.
+
+**Hand variant inst-939102.** It is inst-039102 plus two committed instructions after pc1: `movq 1024(%rsp),%rcx; addq %rcx,%rax`. The change is value-neutral (the slot is zero-filled and rcx is otherwise unused). Annotation addresses at or after pc2 were shifted by +11, checked with clang+nm. Result: **UV5 in both warm and cold**. Cold trace: S misses at 17287500 and fills at 17491500; U issues at 17492000 and hits; `cleanup_inv` at 19789000.
+
+Files on cafe3 under `/tests/simspect_alloy_20261108/bugwork/uv5shape/`: configs `cfg*_{warm,cold}.json`, logs `run*_*.log`, traces `traces/*.pipeview.txt.gz`, and `inst-939102_v1.README`. Own `/tmp` dirs were deleted.
+
+**2. Measuring each precondition in the corpus.** Tools: `STAGE3_gem5/triage/uv5_shape/uv5_timing_scan.py` (asm + ann, not_taken, static dataflow depth: ALU 1, load 4, div 20) and `committed_rf_scan.py` (XML).
+
+| precondition (not_taken) | old flat STT_6 (20,000 random of 100k) | STT_6_fv2fp_rmw (all 93,041) |
+|---|---|---|
+| any committed instruction | 56% | 11.4% |
+| a committed load U | 3,963 (19.8%) | 2,052 (2.2%) |
+| U and a squashed load S on the same line (static) | 3,548 (17.7%) | 1,797 (1.9%) |
+| U's address needs a producer | 348 (1.7%) | **0** |
+| same line and U's address ready after S's | 317 (1.6%) | **0** |
+| same, U later by ≥3 (behind a load or div) | 170 (0.85%) | 0 |
+
+The 590-stem sample (294 not_taken stems) has 8 stems with the last row's shape (U's address ready after S's). One of them is inst-039102, the UV5 hit (warm). Its other claimed stems (inst-043313, -072476, -074723) are CS-1, where U is a store.
+
+**XML level: is the gap in Stage 1.5 or in Stage 2?** It is in Stage 1.5. Stage-1.5 XML (`STT_6_fv2fp_full/xml`, 20,000 random) has **0 rf edges into any committed instruction** and 0 committed loads with an rf-fed `inaddr`.
+
+| source | rf edge into a committed instruction | committed load with rf-fed address |
+|---|---|---|
+| old STT_6 XML (9,931) | 7.4% | 1.0% |
+| today's `STT_6.als`, flat (`results/dedup_audit_2026-11-09/randprobe/flat_{default,seed11,seed12}`, 1,999 each) | 6.6-9.6% | 0.8-1.6% |
+| Stage 1.5 on one core, default order (600) | 0 (and only 2 of 600 have any committed instruction) | 0 |
+| Stage 1.5 on the same core, seeded random order (`out_seed1`, 600) | 4 (299 have committed instructions) | 1 |
+
+So the model allows the shape, and Stage 1.5's capped default-order runs (2,326 per core) fill the cap with programs that put all 3 added instructions in the speculative region. Minimality is not the cause. Stage 2 cannot add it either: fv2 fillers are register-only and may not touch memory (`parsexml.py:2025-2045`, rules 1-3, 6), and splices only re-route edges that already exist.
+
+**3. Proposal (for Anna; nothing implemented).**
+
+- **(A) Randomized Stage-1.5 order (the existing DA-3).** This keeps the corpus model-exact and fills the committed region (50% of tests in the one-core probe). But rf-fed committed loads stay rare (1/600), and the chains it produces are ALU chains, which fire UV5 only on warm caches. Necessary for coverage in general, not sufficient for UV5.
+- **(B, recommended) A Stage-2 "committed access" fanout option.**
+  - What it adds: with probability p per test, one read-only committed load L from a slot drawn uniformly from the test's own Mem pool, placed before the lc.
+  - What it changes: with probability q, the value of L (0, because sandbox slots are zero-filled) is added value-neutrally into the address index of one existing committed access, so that access's address waits on a load.
+  - Where it lives: in `parsexml.py` pass 5 fv2, as a new filler class (this relaxes fv2 rule "no memory" only before the window). Or, with less risk to the existing pipeline, as a post-pass like `make_rmw_corpus.py` (asm rewrite + verified annotation re-resolution) producing a new corpus `STT_6_fv2fp_rmw_ca`.
+  - Why it is general: it adds "older non-speculative memory traffic that races the window's accesses", which every load defense orders against. That covers CleanupSpec's missing LQ-SEFE check (UV5, and CS-1 if a store variant is allowed), InvisiSpec expose/validate ordering, and SpecLFB's first-speculative-load rule. It is also the missing precondition of ReCon R-SA-6: 0/3,746 E6 tests have a committed pair.
+  - What else it changes:
+    - (i) More committed loads delay lc_retire, so the window starts later. The inconsistent inst-039102 record comes from exactly this (the open "UV5 / over_clean window" DECIDE).
+    - (ii) For STT the inserted instructions are committed and value-neutral, so they do not change the model's leak claim. For ReCon and SPT, a new committed load can reveal or declassify, which can remove a model-predicted leak (fewer hits, never invented ones). The test then no longer matches its Alloy instance exactly. Record it in the ann (`fanout_v2.committed_access`) so it can be excluded or bucketed.
+    - (iii) Every PC shifts, so this means a new corpus build (Stage 2 only, no Alloy).
+  - Tuning risk: moderate. The motivation is UV5, but the knob never looks at S's line or the defense. The slot is uniform over the test's own pool, and those slots share S's line about 88% of the time only because Alloy's memory atoms live in 1-2 frame lines. Keep p and q in provenance, and before adopting, measure on a 1,000-test sample how every defense's hit buckets move, not only UV5.
+- **(C) An Alloy forcing partition** ("a committed load whose `inaddr` is rf-fed"). This is model-checked but targeted, and a model-side change. Not recommended.
+
+**4. UV5 rate in the old corpus, honestly.** 1 test in the 590-stem warm sample (294 not_taken + 296 taken), so 1/590. The 95% Poisson interval is about 1/23,000 to 1/106. The sample is the RMW-eligible ld-transmitter subset, not a uniform draw. The same stem repeats in the 4 warm or random runs, but that is one observation. Cold: 0/590, explained above. Static check: in the full old corpus 1.6% of not_taken tests have the shape, and 1 of the sample's 8 such stems fired, which is consistent with roughly 1 in 600-1,000 not_taken warm tests. With the shape absent, the expected count in the 12,000+ fanout tests is 0, which matches what was observed. (If the fanout had the old rate of the shape, about 12 UV5 hits would be expected.)
+
+## UV5 on the footprint corpus (uv5-footprint, 2026-11-10)
+
+**Answer first.** The D shape does fire on the new corpus. Footprint D stem **inst-010868** (not_taken) gives a UV5 under `cold` with the same mechanism as old inst-048191: it fires at unresolved stall 2500, 5000 and 10000 and under the old fixed timing, and does not fire under `warm` or `full`. firstdet-final drew `warm` for it (random_all). Per cold D-shaped test the two corpora have the same rate: old 2/211 (0.9%, all 211 old D stems run cold: exactly the known inst-048191 and inst-039460), footprint 1/180 (0.6%; 1/150 + 0/30, run cold under T2rt's random timing). The "about 3%" expectation was too high. At about 0.8%, the 152 cold D tests firstdet-final ran should give about 1.2 hits, so 0 has p of about 0.3. Hypothesis 1 (timing randomization) is rejected and hypothesis 3 (`full`) cannot fire. The rest is chance plus dilution: random_all puts only a third of tests in `cold`, the only setup that can fire.
+
+**Rerun evidence** (cafe2 `/tests/simspect_alloy_20261108/bugwork/uv5_footprint/`, TMPDIR=/tmp, configs in `cfg/` derived by `mkcfg.py`, which changes only testset_dir, results_name and, where named, cache_setup or the sweep block):
+- inst-048191 and inst-039460 reproduce under the old T2r config with both the old (cafe3 oldfanout) and the new (firstdet_final) code (E1/E2). Under the new T2rt sweep with cold forced, both fire at every unresolved stall {2500, 5000, 10000} × resolved {0, 500, 2500} tried (E3). The resolved stall never applies: these tests have no resolved Alloy branch, and neither do 323 of the 338 D rows firstdet-final had finished. Neither fires under warm, full (T2rt or old timing) or a 4×L1D full sweep.
+- inst-010868: cold old timing hit; cold u2500/u5000/u10000 hit; warm (its random_all draw), full, verbatim T2rt: no hit (E7).
+- Old D 211 cold: 2 hits; footprint D 150 cold: 1 hit; footprint D 30 cold and 30 full: 0 (E5/E6).
+
+**Mechanism (all three firing tests)**, from `uv5_race.py` over the kept traces. The chain head H is a committed load to line A that misses to memory. U's address waits on H's data. U is the committed load to line B. S is a squashed load to B whose address does not depend on H (in all three it comes from a store-forwarded speculative load). S is fetch-bound behind the cold code's L1I misses, so it issues its miss to B before H's data returns. U is then held behind S's outstanding miss and hits S's install 500 ticks after S's fill, and CleanupSpec's cleanup invalidates the line U owns.
+
+| test | H (line A) issue → data | S (line B) fetch / issue / fill | U (line B) issue, result |
+|---|---|---|---|
+| old inst-048191 | 3123 (0x7580) 17233000 → 17453501 | 3156: 17419500 / 17424000 / 17507000 | 3130 17507500, L1 hit on S's install |
+| old inst-039460 | 3124 (0x7580) 17224000 → 17404501 | 3164: – / 17407500 / 17477500 | 3134 17478000, L1 hit on S's install |
+| footprint inst-010868 | 3124 (0x7580) 17234500 → 17455001 | 3187: – / 17426000 / 17509000 | 3134 17509500, L1 hit on S's install |
+
+**Why most D tests do not fire (both corpora): the static proxy is loose.** For the S that touches U's line first, the race needs S's issue to come before H's data. That held in 2/97 old D tests with a same-line pair and in 1/119 footprint D tests (0/21 in the D30 sample). Three patterns block it. Each is shown below against inst-048191.
+- **S's address depends on the committed chain** (register-sourced shape). In footprint inst-002726, the xmit address `rsi` is `r10`, the output of committed pc1. S is fetched at 17411500 but issues only at 17530500, after H's data (17444501) and after U (17449500, which misses and installs B). S then hits. About 40% of the footprint D30 S's wait over 100k ticks between fetch and issue like this.
+- **The chain head is on S's line**, so the line is installed by a committed load before S exists. In footprint inst-000229, H (3117) is `(rsp+64+r8)` = line 0x75c0 itself: it misses at 17222000 and its data arrives at 17407501. S is fetched at 17413500 and hits. With zero-filled memory every indexed address equals its base, and the bases rsp+40..64 cover only two lines, so this is common.
+- **U is store-forwarded** (no cache access). In footprint inst-008227, pc1 stores to `(r9,rax)` and U = pc2 loads the same address (stlf at 17410500). This pattern appears in 26/150 footprint D tests.
+- **Where the static proxy falls short:** the D scan's "U's address later" counts ALU ops as 1, so U being 1-2 ALU ops later is invisible against a ~180k-tick memory miss. Its same-line test uses |Δoff| < 64 whenever an index register is present, so it is a "maybe". Dynamically, what matters is the memory-miss chain head and S's fetch time.
+- **The firing race is narrow.** In inst-048191, H's miss took 220k ticks against about 185k in the D30 footprint tests, consistent with queueing behind the cold setup's last clflush writeback (0x7e00, MEMORY_WB 17252500) and the ifetch misses. S's fetch (about 17.41-17.42M) and H's data (about 17.40-17.46M) are within tens of thousands of ticks in most tests.
+
+**`full`.** It cannot produce this UV5, for two reasons. (1) On the CleanupSpec build the L1D uses `RandomReplacementPolicy` (run `config.ini` `[system.ruby.l1_cntrl0.L1Dcache.replacement_policy]`). A sweep of exactly the L1D size (8 lines per set) therefore evicts each set's resident frame line with probability of only about 1/8, and the frame lines stay in L1D: in the D30 full sample, litmus committed loads were 59 hits against 6 misses (cold: 29 hits, 37 misses). In inst-048191's full trace, frame line 0xd580 survives in set 22 while sweep line 0x2580 is evicted. `cache_setup.py`'s docstring ("the prologue zero-fill's sandbox lines are evicted from L1D by the sweep") holds only for LRU. (2) Even with a 4×L1D sweep (`cache_setup_fill_bytes=131072`; U loads then miss L1D, 40 misses against 27 hits), 0/33 fire: H's data comes back from L2 long before S is fetched, so U always goes first.
+
+**Verdict and general fixes.** This is not a corpus or model regression: the footprint corpus contains the shape, it fires at about the same rate, and the zero is sampling. No timing knob is implicated. General, non-targeted options, for Anna to DECIDE:
+- (a) Accept it. UV5 of this shape is a cold-only event in about 1% of D-shaped tests, and it will appear with more cold samples.
+- (b) Make `full` match its documented intent on random-replacement builds. Use a sweep of several L1D sizes (a config-only knob, `gem5.cache_setup_fill_bytes`), or fix the docstring. This matters for every CleanupSpec `full` result, not for UV5.
+- (c) Fanout diversity. More squashed loads whose address comes from a non-cache source independent of the committed chain (stlf, constant) would raise the precondition rate. That is a property of the corpus, not a forcing.
+- Recommendation: (a) for UV5 plus (b) as a separate cleanup.

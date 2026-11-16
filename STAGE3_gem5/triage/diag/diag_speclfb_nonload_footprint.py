@@ -3,7 +3,7 @@
 diag_speclfb_nonload_footprint.py: DISQUALIFIER (out of SpecLFB's scope / checker artifact): none of
 the hit's in-window footprint events was made by a load (`req` is never `ld`: stores, ifetch,
 writebacks). SpecLFB protects speculative loads only (L1D+L2 presence of load fills, §1 p632, §7 p640;
-AMULET_BUGS_DETECTION_ACCOUNTING.md scope list), and the 2026-11-07 SpecLFB triage dropped
+AMULET_BUGS_DETECTION_ACCOUNTING.md scope list), and the SpecLFB triage dropped
 non-load events the same way (helpers/triage.py; classify_hits.py `disq_non_load_footprint`).
 
 Signature: diagnostics/speclfb_evidence.json, usable rerun, and the set of req=ld cause tags is empty

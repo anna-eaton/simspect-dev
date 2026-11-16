@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """derive_core.py — derive a Stage-1 "core" model from a production Alloy model.
 
-DRAFT TOOLING (2026-11-03, two-phase models task). Output drafts are UNAPPROVED:
+Draft tooling. Output drafts are UNAPPROVED:
 they must not feed any production testset until Anna signs off
 (wiki/design/TWO_PHASE_MODELS.md).
 

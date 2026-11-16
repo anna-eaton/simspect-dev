@@ -12,8 +12,40 @@ Dated, grouped. Refreshed by `/session-log`. Newest context at top of each group
   ⚠️ During recovery, make sure the container's untracked June work is preserved — esp. the `.als`
   models `STAGE1_alloy/models/STT_6_core.als`, `STT_6_multisource.als` (approval-only; see
   `wiki/state/SYNC_DIVERGENCE.md`).
+  - **Looks resolved (checked read-only 2026-11-09 21:15, resolve-hooks):** `git ls-files` = 9,397, `main` tracks `origin/main` with nothing unpushed, and regular `make sync` commits since 11-08 (latest 264adea). Anna: confirm and delete this item.
 - **The `GIT WRITE LOCK`** is now in `CLAUDE.md` (top), `~/Documents/CLAUDE.md`, and memory
   (`git-write-lock`). Claude hands git-write commands to Anna; never runs them.
+
+## 2026-11-09 — resolve-hooks (SPT v2, hit triage) — pickup
+
+Findings: [`../findings/audits/2026-11-08/SPT_V2_AND_HIT_TRIAGE.md`](../findings/audits/2026-11-08/SPT_V2_AND_HIT_TRIAGE.md). Nothing from this session is running; the cafe2 lost check finished (inconclusive).
+
+**Questions for Anna**
+
+- **SPT store transmitters (E11 `str`): score them, drop them, or leave them on the fallback?** No store checker exists; `check_ld`'s fallback scores the store's complete tick. Round 4 had 134 `str` hit tests, every one with a public address under SPT's rules. Your 11-08 decision puts speculative-store transmitters out of scope for KV3 (STT, D-TLB); it doesn't say whether that covers SPT. Options:
+  - (a) Write a store criterion before the final batch. Pick the observable event first (address translation, or the write-intent fill at execute).
+  - (b) Report E11 `str` as unscored and list it as a known gap.
+  - (c) Keep the fallback and classify with the slicer.
+  - Recommendation: (b) for the final batch, if the KV3 decision extends to SPT. Otherwise (a).
+- **The v2 "lost" check never finished. Does it still matter?** All three runs timed out. The 8 h cafe2 run never got past CNF translation (findings §6.3). Only v2-4 can lose an old test. If DA-8 picks v3, which rewrites v2-4's clause, the question moves to v3. Options:
+  - (a) Drop it: v2-4 errs toward more protection, your conservative direction.
+  - (b) A check that finishes: enumerate about 300 old-useful instances (`results/spt_v2_20261108/differential/old_only_check.als`, uncapped) and evaluate the chosen model's `useful_new` on each fixed instance.
+  - (c) Rerun `lost` at `exactly 5`.
+  - Recommendation: (b), on whichever model DA-8 picks.
+- **`resolved_before_signal`:** same call as URGENT_TODO "DECIDE (sharper now)". Evidence in findings §8.3.
+- **45 `.als` header comments point at the deleted `wiki/design/MANIFEST_BRIEF_SPT_v2.md`** (v2, its cores, v3_core_ri, and the `proposed/ultimate/` SPT queries copied the header). The edit is comment-only, but they're `.als` files, so it's your call. If OK: `cd ~/trippel/simspect && grep -rlI "MANIFEST_BRIEF_SPT_v2.md" STAGE1_alloy --include='*.als' | xargs sed -i '' 's#wiki/design/MANIFEST_BRIEF_SPT_v2.md#wiki/state/EVAL_MANIFEST.md (SPT v2 section)#'`. That changes each file's sha256 (v2's acb1f2e2 included), so the manifest's hashes would need refreshing. Recommendation: leave them; the findings page explains it.
+
+**TODOs (future sessions)**
+
+- Slicer-based `diag_*` for SPT ld/str/br_x (call `spt_cond_slice.py`, bucket constant vs declassified), deployed as each E11 campaign's `diagnostics/`. Then `bucket_hits.py` classifies SPT without hand runs. Needed before anyone reads the final batch's E11.
+- Final-batch configs: `runconfigs/fixed_20261030/*_fixed_latest.jsonc` are validation templates with `sample_fraction` 0.02 (also in EVAL_MANIFEST's pipeline list).
+- P5 (the skeleton-wide unfed-read fact, all models) is still undecided (EVAL_MANIFEST decisions list). P3 is folded into the DA-8 / "which SPT model" DECIDEs (`P3_const` bucket).
+- `STT_6_interleave` in the fixed dir was built from the 05-19 XML of the old STT_6. Regenerate it from the current STT_6 before any interleave campaign means anything.
+- Not understood, low priority (findings §8):
+  - why gem5-spt keeps committed stores' DynInsts alive;
+  - inst-043417's re-fetch loop;
+  - the gem5-spt `--trackInstsFile` off-by-one (`regfile.hh:280`).
+- cafe2 `/tests/simspect_fixed_20261030/triage/` is this session's evidence (small JSONs and logs). Keep it while the findings page cites it.
 
 ## Infra follow-ups
 - **`make mini-clone`** (after `make mini-bootstrap`) — give the Mac mini the driver-harness clone
@@ -41,9 +73,7 @@ Dated, grouped. Refreshed by `/session-log`. Newest context at top of each group
     the edits so we pay the regen once. Nothing applied yet — show Anna the diff and wait.
 
 ## Research (carried forward — pre-dates this session)
-- **24 `str` (store-addr) hits untriaged** (from 2026-06-10 `sptDiscrepancy`): they fall through to
-  `check_ld` (wrong criterion) and `bucket_hits.py` is ld-only. Needs a **store-transmitter
-  checker/diag**. See `claudelog.md` (06-10 entries) + `wiki/state/SYNC_DIVERGENCE.md`.
+- **SPT `str` (store-address) hits: classified, but still no store checker** (updated 2026-11-09, resolve-hooks). The June `str` hits are superseded by round 4: all 134 `str` hit tests slice to a public address under SPT's rules (95 constant, 39 declassified; `wiki/findings/audits/2026-11-08/SPT_V2_AND_HIT_TRIAGE.md` §4). `bucket_hits.py` is now multi-kind. They still fall through to `check_ld`'s fallback (wrong criterion); the scoring question is in the resolve-hooks group above.
 - **Next experiments** (none launched this session — "decide after seeing state"): branch-hit
   sweeps / resolved-br windows, and the natural + short-timing sweeps, per Anna's TODO in `STATUS.md`.
 

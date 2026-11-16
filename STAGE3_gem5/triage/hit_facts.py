@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Per-hit facts for a fixed-harness campaign (2026-11-07).
+"""Per-hit facts for a fixed-harness campaign.
 
 Reads every raw per-record file of a testrun.py campaign
 (results/<name>__<ts>/<mode>/_sweep_raw/*.json), keeps the hit records

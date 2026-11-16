@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+# launch_gem5.sh -- X3 of the overnight plan: gem5 campaigns on the X2b corpora, recipe A first, then recipe B, per row.
+# Run FROM THE MAC. Usage: scripts/overnight_20261111/launch_gem5.sh <node> [row ...]   (rows E3 E2 E11 on cafe3, E6 on cafe1;
+# default = every row of runconfigs/overnight_20261111/campaigns_overnight.json whose node is <node>).
+# Preflight on the node (logged; refuses the row on failure): the gem5 binary exists; for full-cache setup the se.py default
+#   --l1d_size of E2/E3/E11's tree equals the config's gem5.cache_setup_fill_bytes (64kB) (grep configs/common/Options.py).
+# Each row = tmux session ovn_gem5, window <row>: testrun.py A (waits for the A corpus to stream in, exits when the corpus is
+#   complete) then testrun.py B. TMPDIR=/tmp (H-STK). testrun.py writes <OUT>/code/results/<results_name>__<ts>/ (it ignores
+#   paths.results_dir). Logs: <OUT>/logs/gem5_<row>.out, launcher ~/Library/Logs/simspect/overnight_gem5_<node>.log.
+# Resume: rerun with RESUME=1 (testrun --resume continues the __latest campaign).
+set -euo pipefail
+NODE=${1:?node}; shift || true
+REPO=$(cd "$(dirname "$0")/../.." && pwd); O=${OUT:-/tests/overnight_20261111}
+mkdir -p ~/Library/Logs/simspect; LOG=~/Library/Logs/simspect/overnight_gem5_${NODE}.log
+log(){ echo "$(date -u '+%F %T') [$NODE] $*" | tee -a "$LOG"; }
+trap 'log "ERROR line $LINENO (exit $?)"' ERR
+SSH="ssh -o BatchMode=yes -o ConnectTimeout=20"
+rx(){ $SSH "$NODE" "docker exec -i gem5_dev bash -lc $(printf %q "$1")"; }
+rows=$(python3 - "$NODE" "$@" <<'PY'
+import json, sys
+node, want = sys.argv[1], set(sys.argv[2:])
+c = json.load(open("runconfigs/overnight_20261111/campaigns_overnight.json"))
+for r in sorted({x["row"] for x in c if x["node"] == node and (not want or x["row"] in want)}):
+    a = next(x for x in c if x["row"] == r and x["recipe"] == "A"); b = next(x for x in c if x["row"] == r and x["recipe"] == "B")
+    print(r, a["config"], a["model"], b["config"], b["model"])
+PY
+)
+cd "$REPO"
+log "START rows: $(echo "$rows" | awk '{print $1}' | tr '\n' ' ')"
+rx "tmux has-session -t ovn_gem5 2>/dev/null || tmux new-session -d -s ovn_gem5 -n ctl"
+while read -r ROW CA MA CB MB; do
+  [ -n "$ROW" ] || continue
+  BIN=$(python3 -c "import json,re,sys;print(json.loads(re.sub(r'//[^\n]*','',open('$CA').read()))['gem5']['binary'])")
+  rx "test -x $BIN" || { log "SKIP $ROW: $BIN missing on $NODE"; continue; }
+  case "$ROW" in E2|E3|E11)
+    T=${BIN%/build/*}; d=$(rx "grep -o 'l1d_size\", type=\"string\", default=\"[0-9a-zA-Z]*\"' $T/configs/common/Options.py | grep -o 'default=\"[^\"]*' | cut -d'\"' -f2" || true)
+    log "$ROW se.py default l1d_size on node: '$d' (config fill 64kB)"
+    [ "$d" = 64kB ] || { log "SKIP $ROW: default L1D '$d' != 64kB; fix gem5.cache_setup_fill_bytes in $CA/$CB"; continue; };;
+  esac
+  if rx "tmux list-windows -t ovn_gem5 -F '#W' | grep -qx $ROW"; then log "skip $ROW (window exists)"; continue; fi
+  R=${RESUME:+--resume}
+  rx "tmux new-window -d -t ovn_gem5 -n $ROW 'cd $O/code && export TMPDIR=/tmp && for p in \"$CA $MA\" \"$CB $MB\"; do set -- \$p; echo START \$1 \$(date -u) >> $O/logs/gem5_$ROW.out; python3 -u testrun.py --config \$1 --model \$2 --interval 300 --max-new 2000 $R >> $O/logs/gem5_$ROW.out 2>&1; echo EXIT \$1 rc=\$? \$(date -u) >> $O/logs/gem5_$ROW.out; done'"
+  log "LAUNCHED $ROW: $MA then $MB"
+done <<< "$rows"
+log "END"

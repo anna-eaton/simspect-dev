@@ -1,0 +1,41 @@
+// bigcorpus 2026-11-15 (agent bigcorpus): copy of runconfigs/twostage_lp/Footprint_6_u.jsonc written by scripts/bigcorpus_20261115/make_configs.py.
+// Changed ONLY: paths.testset_dir, corpus, stage2_config (final recipe A), stage2_postpasses false (RMW/jmp from vocab_rj), stage1 = reuse the 1,411 regen-lp cores (k2 11 + k3 1,400, from experiments/2026-11-10_footprint_vs_amulet data tarball; body sha256 e99079eb of Footprint_6_u_core_ri.als), stage15 + stream blocks = the overnight STT_6_u final-recipe values (target_distinct 60000, budget 9000 s, cap 100, 600 s jobs, 28 slots, shuffle seed 20261115)
+// Docs: wiki/state/RUNNING.md 'Big corpus 2026-11-15'; results -> wiki/state/EVAL_MANIFEST.md 'Big corpus bug coverage (2026-11-15)'.
+{
+  "paths": {
+    "testset_dir": "/tests/bigcorpus_20261115/testsets"
+  },
+  "twostage_lp": {
+    "family": "Footprint_6_u",
+    "core_model": "Footprint_6_u_core_ri",
+    "lp_model": "Footprint_6_u_lpP",
+    "corpus": "Footprint_6_u_core_lpP_s2A",
+    "stage2_config": "runconfigs/bigcorpus_20261115/stage2_final_A.jsonc",
+    "stage1": {
+      "reuse_cores": [
+        "/tests/bigcorpus_20261115/cores/Footprint_6_u_core_ri/k2/stage1_xml",
+        "/tests/bigcorpus_20261115/cores/Footprint_6_u_core_ri/k3/stage1_xml"
+      ],
+      "reuse_sha256": "e99079ebd7c4d32ccc5e1120e036b41241bf02d6a08db8236d251b958b3b41fc"
+    },
+    "stage15": {
+      "slots": 28,
+      "job_timeout": 600,
+      "budget_s": 9000,
+      "cap": 100,
+      "walk_p": 0.05,
+      "shuffle_seed": 20261115,
+      "spread": 2,
+      "dedup_level": "seed",
+      "xmx": "4g",
+      "target_distinct": 60000
+    },
+    "stream": {
+      "interval": 120,
+      "jobs": 24,
+      "min_batch": 200,
+      "max_batch": 1500
+    },
+    "stage2_postpasses": false
+  }
+}

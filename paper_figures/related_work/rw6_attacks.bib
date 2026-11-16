@@ -1,0 +1,154 @@
+% RW6: transient-execution attacks + STL / memory-dependence literature. Verified 2026-11-10 via Crossref API (DOI records) and official USENIX pages. Already in ISCA-27 references.bib (NOT redefined here): spectre, canella2019systematic, horn2018ssb, behnia2021interference, chakraborty2022timed, hu2021sok, cauligi2022sok, mcilroy2019spectre.
+@inproceedings{lipp2018meltdown,
+  author = {Moritz Lipp and Michael Schwarz and Daniel Gruss and Thomas Prescher and Werner Haas and Anders Fogh and Jann Horn and Stefan Mangard and Paul Kocher and Daniel Genkin and Yuval Yarom and Mike Hamburg},
+  title = {Meltdown: Reading Kernel Memory from User Space},
+  booktitle = {27th USENIX Security Symposium (USENIX Security 18)},
+  pages = {973--990}, year = {2018}}
+@inproceedings{vanbulck2018foreshadow,
+  author = {Jo Van Bulck and Marina Minkin and Ofir Weisse and Daniel Genkin and Baris Kasikci and Frank Piessens and Mark Silberstein and Thomas F. Wenisch and Yuval Yarom and Raoul Strackx},
+  title = {Foreshadow: Extracting the Keys to the {Intel} {SGX} Kingdom with Transient Out-of-Order Execution},
+  booktitle = {27th USENIX Security Symposium (USENIX Security 18)},
+  pages = {991--1008}, year = {2018}}
+@inproceedings{vanschaik2019ridl,
+  author = {Stephan van Schaik and Alyssa Milburn and Sebastian {\"O}sterlund and Pietro Frigo and Giorgi Maisuradze and Kaveh Razavi and Herbert Bos and Cristiano Giuffrida},
+  title = {{RIDL}: Rogue In-Flight Data Load},
+  booktitle = {2019 IEEE Symposium on Security and Privacy (SP)},
+  pages = {88--105}, year = {2019}, doi = {10.1109/SP.2019.00087}}
+@inproceedings{schwarz2019zombieload,
+  author = {Michael Schwarz and Moritz Lipp and Daniel Moghimi and Jo Van Bulck and Julian Stecklina and Thomas Prescher and Daniel Gruss},
+  title = {{ZombieLoad}: Cross-Privilege-Boundary Data Sampling},
+  booktitle = {Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  pages = {753--768}, year = {2019}, doi = {10.1145/3319535.3354252}}
+@inproceedings{canella2019fallout,
+  author = {Claudio Canella and Daniel Genkin and Lukas Giner and Daniel Gruss and Moritz Lipp and Marina Minkin and Daniel Moghimi and Frank Piessens and Michael Schwarz and Berk Sunar and Jo Van Bulck and Yuval Yarom},
+  title = {Fallout: Leaking Data on Meltdown-resistant {CPUs}},
+  booktitle = {Proceedings of the 2019 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  pages = {769--784}, year = {2019}, doi = {10.1145/3319535.3363219}}
+@inproceedings{maisuradze2018ret2spec,
+  author = {Giorgi Maisuradze and Christian Rossow},
+  title = {ret2spec: Speculative Execution Using Return Stack Buffers},
+  booktitle = {Proceedings of the 2018 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  pages = {2109--2122}, year = {2018}, doi = {10.1145/3243734.3243761}}
+@inproceedings{koruyeh2018spectrersb,
+  author = {Esmaeil Mohammadian Koruyeh and Khaled N. Khasawneh and Chengyu Song and Nael Abu-Ghazaleh},
+  title = {Spectre Returns! Speculation Attacks using the Return Stack Buffer},
+  booktitle = {12th USENIX Workshop on Offensive Technologies (WOOT 18)},
+  year = {2018}}
+@inproceedings{barberis2022bhi,
+  author = {Enrico Barberis and Pietro Frigo and Marius Muench and Herbert Bos and Cristiano Giuffrida},
+  title = {Branch History Injection: On the Effectiveness of Hardware Mitigations Against Cross-Privilege {Spectre-v2} Attacks},
+  booktitle = {31st USENIX Security Symposium (USENIX Security 22)},
+  pages = {971--988}, year = {2022}}
+@inproceedings{vanbulck2020lvi,
+  author = {Jo Van Bulck and Daniel Moghimi and Michael Schwarz and Moritz Lipp and Marina Minkin and Daniel Genkin and Yuval Yarom and Berk Sunar and Daniel Gruss and Frank Piessens},
+  title = {{LVI}: Hijacking Transient Execution through Microarchitectural Load Value Injection},
+  booktitle = {2020 IEEE Symposium on Security and Privacy (SP)},
+  pages = {54--72}, year = {2020}, doi = {10.1109/SP40000.2020.00089}}
+@inproceedings{wikner2022retbleed,
+  author = {Johannes Wikner and Kaveh Razavi},
+  title = {{RETBLEED}: Arbitrary Speculative Code Execution with Return Instructions},
+  booktitle = {31st USENIX Security Symposium (USENIX Security 22)},
+  pages = {3825--3842}, year = {2022}}
+@inproceedings{trujillo2023inception,
+  author = {Dani{\"e}l Trujillo and Johannes Wikner and Kaveh Razavi},
+  title = {Inception: Exposing New Attack Surfaces with Training in Transient Execution},
+  booktitle = {32nd USENIX Security Symposium (USENIX Security 23)},
+  pages = {7303--7320}, year = {2023}}
+@inproceedings{wikner2023phantom,
+  author = {Johannes Wikner and Dani{\"e}l Trujillo and Kaveh Razavi},
+  title = {Phantom: Exploiting Decoder-detectable Mispredictions},
+  booktitle = {56th Annual IEEE/ACM International Symposium on Microarchitecture (MICRO)},
+  pages = {49--61}, year = {2023}, doi = {10.1145/3613424.3614275}}
+@inproceedings{moghimi2023downfall,
+  author = {Daniel Moghimi},
+  title = {Downfall: Exploiting Speculative Data Gathering},
+  booktitle = {32nd USENIX Security Symposium (USENIX Security 23)},
+  pages = {7179--7193}, year = {2023}}
+@misc{ormandy2023zenbleed,
+  author = {Tavis Ormandy},
+  title = {Zenbleed ({CVE}-2023-20593)},
+  howpublished = {\url{https://lock.cmpxchg8b.com/zenbleed.html}},
+  year = {2023}}
+@inproceedings{ragab2024ghostrace,
+  author = {Hany Ragab and Andrea Mambretti and Anil Kurmus and Cristiano Giuffrida},
+  title = {{GhostRace}: Exploiting and Mitigating Speculative Race Conditions},
+  booktitle = {33rd USENIX Security Symposium (USENIX Security 24)},
+  pages = {6185--6202}, year = {2024}}
+@inproceedings{li2024indirector,
+  author = {Luyi Li and Hosein Yavarzadeh and Dean Tullsen},
+  title = {Indirector: High-Precision Branch Target Injection Attacks Exploiting the Indirect Branch Predictor},
+  booktitle = {33rd USENIX Security Symposium (USENIX Security 24)},
+  pages = {2137--2154}, year = {2024}}
+@inproceedings{kim2025slap,
+  author = {Jason Kim and Daniel Genkin and Yuval Yarom},
+  title = {{SLAP}: Data Speculation Attacks via Load Address Prediction on {Apple} Silicon},
+  booktitle = {2025 IEEE Symposium on Security and Privacy (SP)},
+  pages = {3549--3566}, year = {2025}, doi = {10.1109/SP61157.2025.00098}}
+@inproceedings{kim2025flop,
+  author = {Jason Kim and Jalen Chuang and Daniel Genkin and Yuval Yarom},
+  title = {{FLOP}: Breaking the {Apple} {M3} {CPU} via False Load Output Predictions},
+  booktitle = {34th USENIX Security Symposium (USENIX Security 25)},
+  pages = {2595--2614}, year = {2025}}
+@inproceedings{kim2025tiktag,
+  author = {Juhee Kim and Jinbum Park and Sihyeon Roh and Jaeyoung Chung and Youngjoo Lee and Taesoo Kim and Byoungyoung Lee},
+  title = {{TikTag}: Breaking {ARM}'s Memory Tagging Extension with Speculative Execution},
+  booktitle = {2025 IEEE Symposium on Security and Privacy (SP)},
+  pages = {4063--4081}, year = {2025}, doi = {10.1109/SP61157.2025.00039}}
+@article{xiong2021survey,
+  author = {Wenjie Xiong and Jakub Szefer},
+  title = {Survey of Transient Execution Attacks and Their Mitigations},
+  journal = {ACM Computing Surveys}, volume = {54}, number = {3}, pages = {1--36}, year = {2021}, doi = {10.1145/3442479}}
+@article{fiolhais2023transient,
+  author = {Lu{\'i}s Fiolhais and Leonel Sousa},
+  title = {Transient-Execution Attacks: A Computer Architect Perspective},
+  journal = {ACM Computing Surveys}, volume = {56}, number = {3}, pages = {1--38}, year = {2023}, doi = {10.1145/3603619}}
+@inproceedings{sanchezvicarte2021pandora,
+  author = {Jose Rodrigo Sanchez Vicarte and Pradyumna Shome and Nandeeka Nayak and Caroline Trippel and Adam Morrison and David Kohlbrenner and Christopher W. Fletcher},
+  title = {Opening {Pandora's} Box: A Systematic Study of New Ways Microarchitecture Can Leak Private Data},
+  booktitle = {2021 ACM/IEEE 48th Annual International Symposium on Computer Architecture (ISCA)},
+  pages = {347--360}, year = {2021}, doi = {10.1109/ISCA52012.2021.00035}}
+@inproceedings{moshovos1997dynamic,
+  author = {Andreas Moshovos and Scott E. Breach and T. N. Vijaykumar and Gurindar S. Sohi},
+  title = {Dynamic Speculation and Synchronization of Data Dependences},
+  booktitle = {Proceedings of the 24th Annual International Symposium on Computer Architecture (ISCA)},
+  pages = {181--193}, year = {1997}, doi = {10.1145/264107.264189}}
+@inproceedings{chrysos1998storesets,
+  author = {George Z. Chrysos and Joel S. Emer},
+  title = {Memory Dependence Prediction using Store Sets},
+  booktitle = {Proceedings of the 25th Annual International Symposium on Computer Architecture (ISCA)},
+  pages = {142--153}, year = {1998}, doi = {10.1109/ISCA.1998.694770}}
+@inproceedings{islam2019spoiler,
+  author = {Saad Islam and Ahmad Moghimi and Ida Bruhns and Moritz Krebbel and Berk Gulmezoglu and Thomas Eisenbarth and Berk Sunar},
+  title = {{SPOILER}: Speculative Load Hazards Boost Rowhammer and Cache Attacks},
+  booktitle = {28th USENIX Security Symposium (USENIX Security 19)},
+  pages = {621--637}, year = {2019}}
+@misc{amd2021psf,
+  author = {{Advanced Micro Devices}},
+  title = {Security Analysis of {AMD} Predictive Store Forwarding},
+  howpublished = {White paper, \url{https://www.amd.com/system/files/documents/security-analysis-predictive-store-forwarding.pdf}},
+  month = apr, year = {2021}}
+@inproceedings{liu2024amdpredictors,
+  author = {Chang Liu and Dongsheng Wang and Yongqiang Lyu and Pengfei Qiu and Yu Jin and Zhuoyuan Lu and Yinqian Zhang and Gang Qu},
+  title = {Uncovering and Exploiting {AMD} Speculative Memory Access Predictors for Fun and Profit},
+  booktitle = {2024 IEEE International Symposium on High-Performance Computer Architecture (HPCA)},
+  pages = {31--45}, year = {2024}}
+@inproceedings{liu2025mdpeek,
+  author = {Chang Liu and Shuaihu Feng and Yuan Li and Dongsheng Wang and Wenjian He and Yongqiang Lyu and Trevor E. Carlson},
+  title = {{MDPeek}: Breaking Balanced Branches in {SGX} with Memory Disambiguation Unit Side Channels},
+  booktitle = {Proceedings of the 30th ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS), Volume 2},
+  pages = {622--638}, year = {2025}, doi = {10.1145/3676641.3716004}}
+@inproceedings{liu2026ssbleed,
+  author = {Chang Liu and Hongpei Zheng and Xin Zhang and Dapeng Ju and Dongsheng Wang and Yinqian Zhang and Trevor E. Carlson},
+  title = {{SSBleed}: Non-Speculative Side-Channel Attacks via Speculative Store Bypass on {Armv9} {CPUs}},
+  booktitle = {2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)},
+  pages = {1--15}, year = {2026}, doi = {10.1109/HPCA68181.2026.11408465}}
+@inproceedings{liu2026ssbench,
+  author = {Chang Liu and Yu Jin and Yuchen Fan and Tianrui Xiao and Lingfeng Yin and Trevor E. Carlson and Shuwen Deng and Dongsheng Wang},
+  title = {{SSBench}: Automated Characterization of Memory Dependence Predictors on Modern {CPUs}},
+  booktitle = {2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)},
+  pages = {1750--1765}, year = {2026}, doi = {10.1109/ISCA66397.2026.00127}}
+@incollection{liu2026pitfall,
+  author = {Chang Liu and Xin Zhang and Dapeng Ju and Yongqiang Lyu and Dongsheng Wang},
+  title = {Pitfall: Uncovering and Exploiting the Store Forwarding Predictor on {Intel} {CPUs}},
+  booktitle = {Lecture Notes in Computer Science (host conference TODO, UNVERIFIED)},
+  pages = {467--482}, year = {2026}, doi = {10.1007/978-981-92-4805-6_31}}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Re-run hit tests on gem5-spt and read SPT's own taint decisions (2026-11-07).
+"""Re-run hit tests on gem5-spt and read SPT's own taint decisions.
 
 Reproduces each hit exactly as its campaign ran it (the campaign's run_config
 env, sweep grid point 0 = resolved stalls 0 and unresolved stall from the

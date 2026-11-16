@@ -1,6 +1,6 @@
 {
  "_doc": "Curated annotations for each Alloy model, keyed by .als stem. Merged with the auto-parsed model_inventory (defense family, instr scope, transmitters, xml count) to drive the dashboard Utilities > Alloy models table. 'tier' groups the table: production (latestmodels/), variant, bugsynth-probe, legacy. 'summary' = what the model encodes; 'intention' = why we run it. Source: wiki/design/MODELS_AND_BUILDS.md. Do NOT edit any .als without Anna's per-change sign-off (CLAUDE.md).",
- "_last_reviewed": "2026-10-21",
+ "_last_reviewed": "2026-11-10 (regen-lp: Footprint_6_u_core_ri, Footprint_6_u_lpP added)",
  "tiers": {
   "production": "latest / production models (latestmodels/) — primary enumeration targets",
   "variant": "variant of a production model (different defense-contract or generation driver)",
@@ -165,6 +165,22 @@
    "tier": "legacy",
    "summary": "Leak-point-only STT_3 variant.",
    "intention": "Superseded."
+  },
+  "Footprint_6_u_core_ri": {
+   "tier": "production",
+   "summary": "Stage-1 skeleton model for the footprint family (InvisiSpec / CleanupSpec / SpecLFB): RI-minimal cores of Footprint_6_u = ultimate skeleton (STT_6_u's Operand-typed protection set) + footprint v2 defense block (contract = STT_6's branch shadow; protection set = all memory + every register the test never writes, never untainted; leakage = load addresses). No IX symmetry breaking, 'but 6' instructions.",
+   "intention": "Skeleton enumeration (Anna 2026-11-10: skeletons come from the first round of Alloy enumeration). Run by twostage_lp.py Stage 1; 2026-11-10: 1,411 cores (k2 11, k3 1,400), 771 distinct exact, 363 distinct at the pin level.",
+   "caveat": "k6 partitions take hours and were not waited for (STT found 0 there).",
+   "source": "proposed/ultimate/Footprint_6_u_core_ri.als (derive_core.py --minimality ri on Footprint_6_u.als, make_footprint_u.py)",
+   "since": "2026-11-10"
+  },
+  "Footprint_6_u_lpP": {
+   "tier": "production",
+   "summary": "Stage-1.5 loose-pin footprint model: Footprint_6_u at 'but 8 Instruction, 16 Operand, 6 Int', prefix IX symmetry breaking, protection fold 8 deep, committed region required (lp_committed), no-junk rule (lp_connected, no operand-free padding), production minimality (RR + boundary + RS), run = gen_useful_litmus + lp_committed + seed_core. seed_core is NOT in the file: twostage_lp.py / stage15lp.py append one Stage-1 core per run, every core rf edge relaxed to an rf/ddi path (make_s15_model.py --pin b).",
+   "intention": "Production generator of the footprint corpus for the SimSpect-vs-AMuLeT number (EVAL_MANIFEST 'Footprint model: the unified AMuLeT-comparison experiment'). Corpus 2026-11-10: testsets_twostage/Footprint_6_u_core_lpP_fv3.",
+   "caveat": "Not runnable alone (needs a seed_core). Defense block reads the unperturbed Instruction.outreg in its seed (kept verbatim from the approved v2 block; flagged in URGENT_TODO).",
+   "source": "proposed/ultimate/loosepin/Footprint_6_u_lpPc.als (make_loosepin.py --minimality prod --committed required --pin core)",
+   "since": "2026-11-10"
   }
  }
 }

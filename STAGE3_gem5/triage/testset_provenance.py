@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Which generation is each testset? (2026-11-07)
+"""Which generation is each testset?
 
 For every testset dir given, read provenance.tar.gz and print the sha256 of each
 archived file (the .als, parsexml.py, configs), plus the xml/asm/ann counts and
 mtimes. Compare the hashes against git history with the companion step in
-wiki/state/TESTSET_GENERATIONS (see claudelog 2026-11-07).
+wiki/state/TESTSET_GENERATIONS.
 
     python3 testset_provenance.py <testset_dir> [...] --out prov.json
 """

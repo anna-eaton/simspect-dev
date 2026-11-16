@@ -1,0 +1,140 @@
+{
+ "generated_utc": "2026-11-11T03:23:57Z",
+ "corpus_pairs_now": 50232,
+ "seed": 20261111,
+ "gen_cpu_per_test": 3.0216794075489726,
+ "gen_cpu_source": "PROVENANCE.json 2026-11-10T10:48:30+00:00: alloy 117498 CPU-s / (2 x 25116 programs) + stage2+postpasses 34287 CPU-s / 50232 pairs",
+ "defenses": {
+  "cleanupspec": {
+   "dir": "/tests/simspect_alloy_20261108/firstdet_replicate/T2gr_Footprint_6_u_core_lpP_fv3_merged",
+   "N": 50232,
+   "rows_mode": "prefix",
+   "dropped": {
+    "pending_classification": 0,
+    "outside_seed_prefix": 0
+   },
+   "hits": 3046,
+   "unclassified_hits": 0,
+   "status": {
+    "ok": 50232
+   },
+   "cache_setups": {
+    "warm": 16492,
+    "cold": 16930,
+    "full": 16810
+   },
+   "total_cpu_s_per_test": 6.297,
+   "gem5_cpu_s_per_test": 2.33,
+   "all_signatures": {
+    "UV3": 1902,
+    "UV4": 597,
+    "UV3_padding": 37,
+    "unattributed": 91,
+    "EM_rmw": 488,
+    "EM_padding": 13,
+    "UV5": 5,
+    "CS1": 4
+   },
+   "all_corpus_pairs_run": true
+  }
+ },
+ "bugs": {
+  "UV3": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 1902,
+   "N": 50232,
+   "expected_tests": 26.4,
+   "censored": false,
+   "first_seed_order": 46,
+   "first_seed_stem": "mispredict_not_taken/inst-016227",
+   "first_stream_order": 34,
+   "det_setups": {
+    "cold": 1814,
+    "full": 88
+   },
+   "amulet_pooled_programs": 27.1,
+   "amulet_pooled_test_cases": 3794.0,
+   "multiple_tests": 143.7,
+   "simspect_cpu_s_per_test": 9.318,
+   "simspect_expected_cpu_s": 246.0,
+   "simspect_expected_cpu_s_exec_only": 166.2,
+   "amulet_pooled_cpu_s": 105,
+   "multiple_cpu": 0.43
+  },
+  "UV4": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 597,
+   "N": 50232,
+   "expected_tests": 84.0,
+   "censored": false,
+   "first_seed_order": 203,
+   "first_seed_stem": "mispredict_taken/inst-011062",
+   "first_stream_order": 98,
+   "det_setups": {
+    "cold": 235,
+    "full": 170,
+    "warm": 192
+   },
+   "amulet_pooled_programs": 1600,
+   "amulet_pooled_test_cases": 224000,
+   "multiple_tests": 2666.6,
+   "simspect_cpu_s_per_test": 9.318,
+   "simspect_expected_cpu_s": 782.7,
+   "simspect_expected_cpu_s_exec_only": 528.9,
+   "amulet_pooled_cpu_s": 6171,
+   "multiple_cpu": 7.88
+  },
+  "UV5": {
+   "defense": "cleanupspec",
+   "known_amulet_bug": true,
+   "K": 5,
+   "N": 50232,
+   "expected_tests": 8372.17,
+   "censored": false,
+   "first_seed_order": 19927,
+   "first_seed_stem": "mispredict_not_taken/inst-003149",
+   "first_stream_order": 11082,
+   "det_setups": {
+    "cold": 5
+   },
+   "amulet_pooled_programs": 1600,
+   "amulet_pooled_test_cases": 224000,
+   "multiple_tests": 26.8,
+   "simspect_cpu_s_per_test": 9.318,
+   "simspect_expected_cpu_s": 78014.0,
+   "simspect_expected_cpu_s_exec_only": 52716.0,
+   "amulet_pooled_cpu_s": 6171,
+   "multiple_cpu": 0.08
+  }
+ },
+ "minimum": {
+  "bugs_present": [
+   "UV3",
+   "UV4",
+   "UV5"
+  ],
+  "all_5": false,
+  "tests": {
+   "bug": "UV5",
+   "multiple": 26.8,
+   "upper_bound": false
+  },
+  "cpu": {
+   "bug": "UV5",
+   "multiple": 0.08,
+   "upper_bound": false
+  }
+ }
+}
+**Rows: seed-20261109 order prefix of the full corpus (final semantics), longest fully run and classified prefix per defense.** Report 2026-11-11T03:23:57Z; N per defense: cleanupspec 50232
+
+| bug | defense | K/N | expected tests (N+1)/(K+1) | first (seed order / stream) | setups of detecting tests | AMuLeT pooled test cases | multiple (tests) | SimSpect exp. CPU-s (incl. gen) | AMuLeT pooled CPU-s | multiple (CPU) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| UV3 | cleanupspec | 1902/50232 | 26.4 | 46 / 34 | {'cold': 1814, 'full': 88} | 3,794.0 | 143.7x | 246.0 | 105 | 0.43x |
+| UV4 | cleanupspec | 597/50232 | 84.0 | 203 / 98 | {'cold': 235, 'full': 170, 'warm': 192} | 224,000 | 2666.6x | 782.7 | 6171 | 7.88x |
+| UV5 | cleanupspec | 5/50232 | 8372.17 | 19927 / 11082 | {'cold': 5} | 224,000 | 26.8x | 78014.0 | 6171 | 0.08x |
+
+Minimum over known bugs present (UV3, UV4, UV5): tests 26.8x (UV5); CPU 0.08x (UV5).
+rc=0

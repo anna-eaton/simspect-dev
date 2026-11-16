@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """usage_pace.py — is this 5-hour usage window being used at a linear pace?
 
-(simspect-c8, 2026-11-09, Anna: "check if the usage is too low for the linear of the window
-remaining".) There is no usage API Claude can read, so this is a local proxy built from the Claude
+There is no usage API to read, so this is a local proxy built from the Claude
 Code transcripts on this Mac (~/.claude/projects/**/*.jsonl; other machines' sessions are not seen).
 
 - Usage = every assistant message's `usage` (deduplicated by message id), weighted roughly by
@@ -12,7 +11,7 @@ Code transcripts on this Mac (~/.claude/projects/**/*.jsonl; other machines' ses
   window that hit the limit is a sample of the cap; CAP = median of those samples.
 - The current window starts at the first message after the last known window end (chained forward
   in 5 h steps), so `elapsed` and `remaining` are exact when the chain is right.
-- Verdict: expected = CAP * elapsed / 5 h. UNDER if used < 0.8 * expected (room to spend, so the
+- CAP = median of the 3 most recent limit-hit samples (the cap changes with account/plan). Verdict: expected = CAP * elapsed / 5 h; first 5% of a window: OVER only if used > 0.1 CAP. UNDER if used < 0.8 * expected (room to spend, so the
   pace cron may launch work), OVER if used > 1.0 * expected, else ON_PACE.
 
 Prints one JSON object; appends one line per run to ~/Library/Logs/simspect/usage_pace.log.
@@ -88,7 +87,9 @@ def main():
         return sum(w for t, w in events if lo <= t < hi)
 
     samples = [{"end": r.isoformat(), "weighted": round(used(r - WIN, r))} for r in sorted(resets)]
-    cap = statistics.median([s["weighted"] for s in samples]) if samples else None
+    # Cap = median of the 3 most recent limit-hit windows: the cap changes with the account/plan, and the
+    # all-days median overshot it by ~1.6x on 2026-11-12 (limit hit at 27M while the estimate was 44M).
+    cap = statistics.median([s["weighted"] for s in samples[-3:]]) if samples else None
     # current window: chain forward from the last known end
     anchor = max([r for r in resets if r <= now], default=None)
     start = None
@@ -111,7 +112,11 @@ def main():
         elapsed = (now - start).total_seconds() / WIN.total_seconds()
         u = used(start, now)
         exp = cap * elapsed
-        verdict = "UNDER" if u < 0.8 * exp else ("OVER" if u > exp else "ON_PACE")
+        if elapsed < 0.05:
+            # window start: expected ~ 0, so any use would read as OVER
+            verdict = "OVER" if u > 0.1 * cap else "ON_PACE"
+        else:
+            verdict = "UNDER" if u < 0.8 * exp else ("OVER" if u > exp else "ON_PACE")
         out.update({"window_start": start.astimezone(PT).isoformat(timespec="minutes"),
                     "window_end": end.astimezone(PT).isoformat(timespec="minutes"),
                     "elapsed_frac": round(elapsed, 3), "used": round(u), "expected_linear": round(exp),

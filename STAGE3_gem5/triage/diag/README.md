@@ -65,6 +65,10 @@ Buckets a hit only when every offending item is the victim of a squashed load wh
 - **Cache setup:** the textbook chain needs a cold RMW line (`gem5.cache_setup` cold, or the cold half of `random`, the CleanupSpec/SpecLFB default since 2026-11-09). The reason names the cache_setup; `bucket_hits.py` adds a `by_cache_setup` split to `buckets/summary.json` when any test did not run warm.
 - **Verdict:** real gem5 defense bug, already known (AMuLeT UV3); Anna 2026-11-09: counts as found. Bug note: `diag_uv3_rmw.md` in each campaign's `diagnostics/`.
 
+## diag_rmw_limm_artifact.py (gem5-recon-ruby3 / gem5-recon-modded scheme 2, ld, RMW transmitters) — disqualifier, check_ld artifact RL-10 (2026-11-12, rl10-diag)
+
+Buckets an `orq $imm,<mem>` (OR_M_I) transmitter hit only when every hitting raw record is `store_forward` with `0 < xmit_complete <= xmit_execute` (the completion is the leading `limm`'s) and the campaign's `recon_stlf_evidence.json` rerun shows the xmit tainted, not forwarded and never ready (the `ldst` sat in ReCon's delay unit). No evidence → NEW. STT/stt-master builds are out of scope: there the same artifact is an ungated `never_executed` hit. Write-up: `diag_rmw_limm_artifact.md`.
+
 ## diag_cleanupspec_em.py (CleanupSpec, ld, RMW corpus) — real bug, UV3 family (E→M path), not deployed (2026-11-09, bug-investigate-em)
 
 Buckets a hit only when every offending item is the install (L1D/L2) or victim of a squashed load S whose E line the squashed RMW transmitter U upgraded to M (`L1D:hit st=E nst=M req=st` at the xmit pc), with U's cleanup `why=l1hit` and S's cleanup `cleanup_skip ev=Inv_CLEANUP st=M` (`MESI_Two_Level-L1cache.sm:2294-2298` then `:2701-2705`). Evidence: `../cleanupspec_em_evidence.py <campaign> [--out-dir DIR]` → `cleanupspec_em_evidence.json` (reuses `cleanupspec_skip_evidence.py` and adds a strict re-check). Write-up: `diag_cleanupspec_em.md`. 2026-11-09 counts: cold 72/82 NEW, random 44/58 NEW, warm 10/11 NEW; plain-load controls 0. Not installed in any campaign (count-as-new-bug vs UV3 variant is Anna's DECIDE).

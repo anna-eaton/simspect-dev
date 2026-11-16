@@ -1,0 +1,7 @@
+2026-11-10T10:10:51Z q_A_and_not_B.als rc=0 secs=507 
+# 02:11 PST: A_and_not_B (negated seed) still translating after 9 min on the Mac; deferred (deferred/), running pinned_A and not_pinned_A first
+2026-11-10T10:10:58Z q_B_and_not_A.als rc=0 secs=7 
+2026-11-10T10:22:43Z pin_contains.py runs15/Footprint_6_u_lpPc --cores 12 --per-core 10 (cafe1): 120/120 instances contain their own core; 115/1,320 (8.7%) contain another sampled core -> the path-style core pin is satisfied by every generated instance and is not vacuous
+2026-11-10T10:41:11Z q_not_pinned_A.als rc=0 secs=1801 
+2026-11-10T10:41:13Z q_pinned_A.als rc=0 secs=2 CMD pinned_A SAT 1696
+# note: q_not_pinned_A hit the 1,800 s timeout (rc shows the echo, not java); the 'not seed_core' form is too expensive to translate at but 8. pinned_A is SAT. Non-vacuity is shown empirically by pin_contains.py above.

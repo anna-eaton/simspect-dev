@@ -1,0 +1,93 @@
+%% ISCA 2027 submission sample — ACM acmart (sigconf), following ISCA 2025 practice.
+%% \documentclass[sigconf, screen, review]{acmart}
+\documentclass[sigconf, screen, review]{acmart}
+
+%% Submission helpers (ISCA 2025): page numbers + confidentiality banner
+\settopmatter{printfolios=true}
+
+%% Rights block suppressed for anonymous review submission
+\setcopyright{none}
+\acmConference[ISCA '27]{54th IEEE/ACM International Symposium on Computer Architecture}{June 5--9, 2027}{Atlanta, Georgia, USA}
+\acmYear{2027}
+\acmISBN{978-x-xxxx-xxxx-x/YY/MM}
+\acmDOI{XXXXXXX.XXXXXXX}
+\settopmatter{printacmref=false}
+
+%%%%%%%%%%%---SETME-----%%%%%%%%%%%%%
+\newcommand{\iscasubmissionnumber}{443}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Rightsform / CCS can be filled for camera-ready; omit CCS for this sample
+\keywords{Do, Not, Us, This, Code, Put, the, Correct, Terms, for, Your, Paper}
+
+% anna packages
+\usepackage{xspace}
+\newcommand{\toolname}{SimSpect\xspace}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, calc, bending}
+\usepackage{array}
+\usetikzlibrary{fit,backgrounds,shapes.geometric}
+\usetikzlibrary{shapes.symbols,shapes.misc,decorations.pathmorphing}% pipeline figures: load globally (loading inside a figure's group breaks a second figure)
+\usepackage{colortbl}
+\input{tikz/sscolors}% figure palette (2026-11-03): blue = defense-specific, tan = speculative, lavender = protection set, red = transmitter/bug; delete this line for grayscale figures
+\definecolor{ctarget}{gray}{0}% legacy B&W colors (2026-11-02), used only by hidden content: the old bug table under \iffalse in results.tex, sections/pendingfigures.tex and unused tikz files; new figures use tikz/sscolors; was HTML B3322C
+\definecolor{copen}{gray}{0.35}% legacy B&W (unused by live figures); was HTML 8E5A9B
+\definecolor{calloy}{gray}{0.3}% legacy B&W (unused by live figures); was HTML 2C5AA0
+\definecolor{camulet}{gray}{0.62}% legacy B&W (unused by live figures); was HTML 8C6D4B
+\definecolor{cclean}{gray}{0.15}% legacy B&W (unused by live figures); was HTML 2E8B57
+\definecolor{cpipe}{gray}{0.45}% legacy B&W (unused by live figures); was HTML B8860B
+\newcommand{\anna}[1]{\textcolor{violet}{\footnotesize[Anna: #1]}}
+\newcommand{\caroline}[1]{\textcolor{blue}{\footnotesize[Caroline: #1]}}
+\newcommand{\todo}[1]{\textcolor{orange}{\footnotesize[todo: #1]}}
+\definecolor{cfigtodo}{HTML}{C2185B}% figure TODOs (new figures, 2026-11-02)
+\newcommand{\figtodo}[1]{\textcolor{cfigtodo}{\footnotesize[fig todo: #1]}}
+\newcommand{\reviewnote}[1]{\textcolor{red}{\footnotesize\textbf{[Note]} #1}}% review notes: suggested cuts, rewords and checks
+\newcommand{\reviewtag}[1]{\textcolor{red}{#1}}% red [TODO: ...] tags marking text that was changed and should be checked
+\definecolor{caufact}{HTML}{1565C0}\definecolor{cauclaim}{HTML}{00897B}\definecolor{cauterm}{HTML}{8E24AA}\definecolor{caufig}{HTML}{2E7D32}\definecolor{cauwrite}{HTML}{6D4C41}\definecolor{caucite}{HTML}{9E9D24}\definecolor{caudefense}{HTML}{D84315}\definecolor{curgent}{HTML}{FF1744}%
+\DeclareRobustCommand{\auditnote}[3]{\textcolor{cau#1}{\footnotesize\textbf{[#2]} #3}}% fine-grained audit notes (2026-11-03), one color per audit: blue fact, teal claim, green figure, brown writing, olive cite (purple term and orange defense are defined but unused; vocabulary findings are the VOCAB urgent notes)
+\DeclareRobustCommand{\labnote}[1]{\textcolor{gray}{\footnotesize\itshape[Note: #1]}}% visible note for lab readers (2026-11-03)
+\newcommand{\notebr}{\par\noindent}% review mode: each note in body text on its own line (2026-11-03); empty when notes are hidden
+\DeclareRobustCommand{\urgentnote}[1]{\textcolor{curgent}{\footnotesize\textbf{
+[URGENT]} #1}}% big concerns to fix before sending (2026-11-03)
+\newcommand{\urgentbr}{\par\noindent}\newcommand{\labbr}{\par\noindent}% urgent and lab notes each start on their own line even when review notes are hidden; emptied by switches (3) and (4)
+% ===== NOTE SWITCHES: each line below HIDES one group of notes. Put % at the start of a line to SHOW that group again; remove the % to hide it. =====
+\renewcommand{\todo}[1]{\unskip}\renewcommand{\todo}[1]{\unskip}\renewcommand{\figtodo}[1]{\unskip}% (1) hides your notes: [Anna: ...], [todo: ...], [fig todo: ...]
+% \renewcommand{\anna}[1]{\unskip}\renewcommand{\todo}[1]{\unskip}\renewcommand{\figtodo}[1]{\unskip}% (1) hides your notes: [Anna: ...], [todo: ...], [fig todo: ...]
+\renewcommand{\reviewnote}[1]{\unskip}\renewcommand{\reviewtag}[1]{\unskip}\renewcommand{\auditnote}[3]{\unskip}\renewcommand{\notebr}{}% (2) hides review notes: red [Note] notes, red [TODO: ...] tags, and the colored audit notes
+% \renewcommand{\urgentnote}[1]{\unskip}\renewcommand{\caroline}[1]{\unskip}\renewcommand{\urgentbr}{}% (3) hides urgent notes ([URGENT], including VOCAB) and Caroline notes
+% \renewcommand{\labnote}[1]{\unskip}\renewcommand{\labbr}{}% (4) uncomment to also hide the gray [Note: ...] notes meant for lab readers
+
+
+
+
+\begin{document}
+
+\title{SimSpect: Automated and Thorough Litmus Testing of  Simulated Spectre Defenses}
+
+%% Banner in author position (double-blind); same pattern as ISCA 2025 sample
+\author{ISCA 2027 Submission
+  \textbf{\#\iscasubmissionnumber} -- Confidential Draft -- Do NOT Distribute!!}
+\renewcommand{\shortauthors}{ISCA 2027 Submission \#\iscasubmissionnumber}
+
+\begin{abstract}
+\input{sections/abstract}
+\end{abstract}
+
+\maketitle
+
+\input{sections/intro}
+\input{sections/background}
+\input{sections/methodology}
+\input{sections/results}
+\input{sections/related}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\begin{acks}
+This document is derived from previous conferences, in particular ISCA 2025.
+\end{acks}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sections/references}
+
+\end{document}

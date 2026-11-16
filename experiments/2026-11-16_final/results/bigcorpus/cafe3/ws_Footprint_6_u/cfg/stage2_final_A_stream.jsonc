@@ -1,0 +1,153 @@
+// bigcorpus 2026-11-15 (agent bigcorpus): copy of runconfigs/overnight_20261111/stage2_final_A.jsonc written by scripts/bigcorpus_20261115/make_configs.py.
+// Changed ONLY: paths.testset_dir, paths.results_name
+// Docs: wiki/state/RUNNING.md 'Big corpus 2026-11-15'; results -> wiki/state/EVAL_MANIFEST.md 'Big corpus bug coverage (2026-11-15)'.
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv4_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/bigcorpus_20261115/testsets",
+    "results_dir": "results",
+    "results_name": "bc_stage2_final_A"
+  },
+  "alloy": {
+    "max_instances": 93041,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/stt-master/build/X86/gem5.opt",
+    "config_script": "/work/stt-master/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type": "DerivO3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 24,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "sample_fraction": 0.02
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0,
+      500,
+      2500
+    ],
+    "unresolved_stall_cycles": 5000,
+    "unresolved_stall_per_branch": {
+      "mode": "random",
+      "choices": [
+        2500,
+        5000,
+        10000
+      ],
+      "seed": 0
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "vocab_rj": {
+      "rmw": true,
+      "jmp": true
+    },
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    },
+    "interleave_only": {
+      "enabled": true,
+      "table": "STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc"
+    }
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "fpr": {
+    "enabled": true,
+    "loads": "consumed",
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  }
+}

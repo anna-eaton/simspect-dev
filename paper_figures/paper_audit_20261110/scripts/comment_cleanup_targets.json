@@ -1,0 +1,672 @@
+[
+[
+"abstract.tex",
+5,
+"% We propose \\textbf{SimSpect}, a rigorous, targeted, and automated approach for validating early-st"
+],
+[
+"abstract.tex",
+6,
+"% Applying SimSpect to all accessible simulator prototypes of state-of-the-art defenses, we replicat"
+],
+[
+"abstract.tex",
+7,
+"% (1) STT mistakenly fails to taint one register, "
+],
+[
+"abstract.tex",
+8,
+"% ReCon's underlying implementation of STT (2) skips a taint check on store-to-load forwarding and ("
+],
+[
+"abstract.tex",
+9,
+"% SpecLFB (4) misimplements its ROB walk order and (5) fails to protect under the shadow of a jmp in"
+],
+[
+"abstract.tex",
+10,
+"% (6) there is a visibility-point/squash timing race shared by STT and SPT."
+],
+[
+"abstract.tex",
+11,
+"% Compared to prior work, SimSpect decreases the number of tests needed to find known bugs on averag"
+],
+[
+"abstract.tex",
+14,
+"% find a bug in STT where it fails to taint an FPR, uncover a previously unknown visibility-point/sq"
+],
+[
+"abstract.tex",
+18,
+"% Hardware side-channel attacks pass secrets to instructions with data-dependent optimizations that "
+],
+[
+"abstract.tex",
+19,
+"% Many hardware defenses have been proposed to mitigate the dangers posed by side-channel attacks, p"
+],
+[
+"abstract.tex",
+22,
+"% security bugs \\anna{that violate their defense's proposed security guarantees} as well as \\textit{"
+],
+[
+"abstract.tex",
+23,
+"% \\urgentbr"
+],
+[
+"abstract.tex",
+24,
+"% \\urgentnote{``All known security bugs'' needs its scope and count. AMuLeT reports nine bugs on the"
+],
+[
+"abstract.tex",
+25,
+"% \\notebr"
+],
+[
+"intro.tex",
+2,
+"% \\textit{What is a hardware side channel, why are they bad, what is spectre in particular}"
+],
+[
+"intro.tex",
+5,
+"% \\textit{HSCDs exist for HSCAs }"
+],
+[
+"intro.tex",
+14,
+"% \\todo{cite the spectre benchmarks}"
+],
+[
+"intro.tex",
+16,
+"% First, there is a lack of formal specification to describe the security guarantees a particular de"
+],
+[
+"intro.tex",
+18,
+"% \\anna{it's important to note this is early in the design process => validation not verification, w"
+],
+[
+"intro.tex",
+24,
+"% When generating a set of litmus tests to validate some"
+],
+[
+"intro.tex",
+25,
+"% - we need litmus test suite"
+],
+[
+"intro.tex",
+26,
+"% - security different than functional correctness, because edge case could be very niche and that i"
+],
+[
+"intro.tex",
+27,
+"% - people have done this with randomized test generation, but it does not target potentially violat"
+],
+[
+"intro.tex",
+28,
+"% - people have benchmarks of tests that trigger spectre attacks, but they are not specialized to th"
+],
+[
+"intro.tex",
+35,
+"\\anna{I think maybe drop the security property vs leakage predicate discussion here, and pick that u"
+],
+[
+"intro.tex",
+44,
+"% \\toolname enables validation of the hardware implementation Spectre defense against a defense secu"
+],
+[
+"intro.tex",
+45,
+"% \\notebr"
+],
+[
+"intro.tex",
+65,
+"% We have run the \\toolname{} testing pipeline with an instruction bound of six on the gem5 implemen"
+],
+[
+"intro.tex",
+79,
+"% NO"
+],
+[
+"intro.tex",
+81,
+"% Because the leakage predicate is formal, it can be related to the end-to-end properties. A bounded"
+],
+[
+"background.tex",
+37,
+"% A similar such axiomatic definition of side channel leakage would allow generation of a similar te"
+],
+[
+"model.tex",
+16,
+"% \\textbf{1. Leakage contract}"
+],
+[
+"model.tex",
+17,
+"% A leakage contract is the set of pairs of \\textit{transmitters} (instructions that leak one or mor"
+],
+[
+"model.tex",
+18,
+"% \\textbf{2. Execution contract}"
+],
+[
+"model.tex",
+19,
+"% An execution contract characterizes what speculative control- and data-flow is allowed on the micr"
+],
+[
+"model.tex",
+20,
+"% \\textbf{3. Protection set}"
+],
+[
+"model.tex",
+21,
+"% A protection set is the set of architectural state (memory and registers) that the defense promise"
+],
+[
+"model.tex",
+22,
+"% todo these components sufficient for now etc etc "
+],
+[
+"model.tex",
+27,
+"\\auditnote{fact}{fact}{\\textbf{About the caption of Table~\\ref{tab:execvocab}:} The vocabulary is sh"
+],
+[
+"model.tex",
+28,
+"\\notebr"
+],
+[
+"model.tex",
+32,
+"% \\figtodo{cite the basic execution-graph example, Fig.~\\ref{fig:ddi-rf} (the dataflow figure, redra"
+],
+[
+"model.tex",
+38,
+"\\urgentbr"
+],
+[
+"model.tex",
+39,
+"\\urgentnote{\\textbf{VOCAB}: \\textbf{ADD DEFINITION} (new text, insert here): \\emph{resolved} (a bran"
+],
+[
+"model.tex",
+55,
+"% \\figtodo{new vocabulary table, Table~\\ref{tab:execvocab}: reference it here; the prose above can s"
+],
+[
+"model.tex",
+71,
+"\\auditnote{fig}{figure}{\\textbf{About the caption of Fig.~\\ref{fig:pipeline}:} 'Non-invasive' (also "
+],
+[
+"model.tex",
+72,
+"\\notebr"
+],
+[
+"model.tex",
+75,
+"\\auditnote{fig}{figure, high}{\\textbf{About the caption of Fig.~\\ref{fig:pipeline}:} No evaluated en"
+],
+[
+"model.tex",
+76,
+"\\notebr"
+],
+[
+"model.tex",
+79,
+"\\auditnote{fig}{figure, high}{\\textbf{About the caption of Fig.~\\ref{fig:pipeline}:} The caption cal"
+],
+[
+"model.tex",
+80,
+"\\notebr"
+],
+[
+"model.tex",
+93,
+"% scope of the types of defenses we can represent"
+],
+[
+"model.tex",
+103,
+"% STT's leakage function is (load, load address), (branch, input register), and (reg-op transmitter,"
+],
+[
+"model.tex",
+105,
+"% \\subsection{Execution contracts in practice}"
+],
+[
+"model.tex",
+106,
+"% \\subsection{Scope of defenses}"
+],
+[
+"model.tex",
+107,
+"% \\begin{wrapfigure}{r}{.5\\textwidth}"
+],
+[
+"model.tex",
+108,
+"%   \\begin{center}"
+],
+[
+"model.tex",
+109,
+"%     \\includegraphics[width=.5\\textwidth]{images/examplefigure.png}"
+],
+[
+"model.tex",
+110,
+"%   \\end{center}"
+],
+[
+"model.tex",
+111,
+"%   \\caption{We generate a test from STT using our pipeline.}"
+],
+[
+"model.tex",
+112,
+""
+],
+[
+"model.tex",
+113,
+"%   \\label{fig:pipeline}"
+],
+[
+"model.tex",
+114,
+"  "
+],
+[
+"model.tex",
+115,
+"% \\end{wrapfigure}"
+],
+[
+"model.tex",
+116,
+"% \\begin{figure}[h]"
+],
+[
+"model.tex",
+117,
+"%   \\centering"
+],
+[
+"model.tex",
+118,
+"%   \\includegraphics[width=0.4\\textwidth]{images/examplefigure.png}"
+],
+[
+"model.tex",
+119,
+"%   \\caption{We generate a test from STT using our pipeline.}"
+],
+[
+"model.tex",
+120,
+"%   \\label{fig:pipeline}"
+],
+[
+"model.tex",
+121,
+"% \\end{figure}"
+],
+[
+"pipeline.tex",
+4,
+"\\anna{delete commented i think:}"
+],
+[
+"pipeline.tex",
+5,
+"% We designate the design dimensions we identify as either \\textbf{1. comprehensively enumerated, 2."
+],
+[
+"pipeline.tex",
+16,
+"% \\input{tikz/pipeline_full}"
+],
+[
+"pipeline.tex",
+17,
+"\\anna{define leakage backbones}"
+],
+[
+"pipeline.tex",
+20,
+"% Once we have a formal model of a defense's security guarantee, we can use this specification as in"
+],
+[
+"pipeline.tex",
+41,
+"% The model describes a space of executions partitioned by the leakage predicate, which allows us to"
+],
+[
+"pipeline.tex",
+48,
+" % and make claims about fundamental bounds on leakage backbone size and quntity"
+],
+[
+"pipeline.tex",
+49,
+"% . We want to group executions that exhibit the same form of leakage, to allow us to reason about t"
+],
+[
+"pipeline.tex",
+50,
+"% For this reason we follow MCM work~\\cite{lustig} to define a minimality criterion restricts synthe"
+],
+[
+"pipeline.tex",
+93,
+"% Figure~\\ref{fig:statetable} shows the types of instructions and state enumerated in each phase. To"
+],
+[
+"pipeline.tex",
+125,
+"% \\urgentnote{\\textbf{VOCAB}: In Fig.~\\ref{fig:resolutiontiming} the graph is a violation under both"
+],
+[
+"pipeline.tex",
+168,
+"% \\paragraph{Directives passed from concretization.}"
+],
+[
+"pipeline.tex",
+249,
+"   % This data-obtained gate is essential: store-to-load forwarding lets a speculative load complete"
+],
+[
+"pipeline.tex",
+257,
+"  % ; a speculative divide fault is promoted to a leak, which is what makes a guard such as the \\tex"
+],
+[
+"pipeline.tex",
+269,
+"% , and (for a \\emph{demonstrable} leak rather than a dataflow signal) optionally with a data-taint "
+],
+[
+"pipeline.tex",
+274,
+"% --- is fixed, while every knob that \\emph{probes} it, from the window stalls to the micro-architec"
+],
+[
+"results.tex",
+1,
+"% (leakage-prompting knobs: written up as a subsection in the Test Generation Pipeline section, sect"
+],
+[
+"results.tex",
+34,
+"\\urgentbr"
+],
+[
+"results.tex",
+65,
+"% [new subsubsection]. (2026-11-10: marker moved to a comment)"
+],
+[
+"results.tex",
+85,
+"% The older table below, under \\iffalse, is superseded by bugtable_v3_8pt."
+],
+[
+"results.tex",
+87,
+"\\iffalse"
+],
+[
+"results.tex",
+88,
+"\\begin{table*}[t]\\centering\\small"
+],
+[
+"results.tex",
+89,
+"\\setlength{\\tabcolsep}{5pt}\\renewcommand{\\arraystretch}{1.2}"
+],
+[
+"results.tex",
+90,
+"\\begin{tabular}{@{}p{2.3cm}p{4.7cm}p{3.0cm}p{3.1cm}cl@{}}"
+],
+[
+"results.tex",
+91,
+"\\toprule"
+],
+[
+"results.tex",
+92,
+"\\textbf{Defense} & \\textbf{Bug} & \\textbf{First known from} & \\textbf{Found by} & \\textbf{In scope?}"
+],
+[
+"results.tex",
+93,
+"\\midrule"
+],
+[
+"results.tex",
+94,
+"\\multicolumn{6}{@{}l}{\\textbf{STT}}\\\\"
+],
+[
+"results.tex",
+95,
+"& Visibility-point\\,$\\leftrightarrow$\\,squash race (load channel) & This work & \\textcolor{cclean}{\\"
+],
+[
+"results.tex",
+96,
+"& Pending-squash race --- secret-dependent squash signal & N.~Mosier (\\texttt{cwfletcher/stt}\\,@18e3"
+],
+[
+"results.tex",
+97,
+"& Tainted spec \\emph{store} $\\to$ D-TLB entry (KV3) & DOLMA; via AMuLeT & \\textcolor{camulet}{AMuLeT"
+],
+[
+"results.tex",
+98,
+"\\addlinespace[2pt]"
+],
+[
+"results.tex",
+99,
+"\\multicolumn{6}{@{}l}{\\textbf{SPT-Fence}}\\\\"
+],
+[
+"results.tex",
+100,
+"& Same visibility-point\\,$\\leftrightarrow$\\,squash race (= STT) & This work & \\textcolor{cclean}{\\to"
+],
+[
+"results.tex",
+101,
+"\\addlinespace[2pt]"
+],
+[
+"results.tex",
+102,
+"\\multicolumn{6}{@{}l}{\\textcolor{gray}{\\textbf{InvisiSpec \\& CleanupSpec} \\,{\\footnotesize\\itshape c"
+],
+[
+"results.tex",
+103,
+"& \\textcolor{gray}{UV1, UV2, KV1 --- L1D eviction / MSHR contention / L1I spec-fetch} & \\textcolor{g"
+],
+[
+"results.tex",
+104,
+"& \\textcolor{gray}{UV3--UV5 --- post-squash L1D residue / over-clean evicts non-spec line} & \\textco"
+],
+[
+"results.tex",
+105,
+"\\addlinespace[2pt]"
+],
+[
+"results.tex",
+106,
+"\\multicolumn{6}{@{}l}{\\textbf{SpecLFB}}\\\\"
+],
+[
+"results.tex",
+107,
+"& First speculative load left unprotected (UV6) & AMuLeT & \\textbf{Both} (\\textcolor{camulet}{AMuLeT"
+],
+[
+"results.tex",
+108,
+"\\bottomrule"
+],
+[
+"results.tex",
+109,
+"\\end{tabular}"
+],
+[
+"results.tex",
+110,
+"\\caption{Speculative-execution defense bugs, grouped by defense: where each was first"
+],
+[
+"results.tex",
+111,
+"known, which tool exhibits it (\\textcolor{cclean}{\\toolname{}} / \\textcolor{camulet}{AMuLeT}"
+],
+[
+"results.tex",
+112,
+"/ Both / neither), whether it falls in \\toolname{}'s leakage model, and the verdict. The"
+],
+[
+"results.tex",
+113,
+"pending-squash race (a secret-dependent squash signal, fixed upstream by Mosier) is a real STT bug"
+],
+[
+"results.tex",
+114,
+"that \\emph{neither} automated tool found. $^{1}$not a bug: a tainted-store$\\to$TLB leak is consisten"
+],
+[
+"results.tex",
+115,
+"specification, which does not recognize store transmitters, so it is outside the property STT claims"
+],
+[
+"results.tex",
+116,
+"enforce. The visibility-point\\,$\\leftrightarrow$\\,squash race is a genuine logic bug: STT and SPT"
+],
+[
+"results.tex",
+117,
+"release the transmitter's protection on the branch-resolution signal but do \\emph{not} wait for the"
+],
+[
+"results.tex",
+118,
+"squash to \\emph{complete}, so the wrong-path transmitter reaches the cache in the gap before it is"
+],
+[
+"results.tex",
+119,
+"killed.}"
+],
+[
+"results.tex",
+120,
+"\\label{tab:bugs}"
+],
+[
+"results.tex",
+121,
+"\\end{table*}"
+],
+[
+"results.tex",
+122,
+"\\fi"
+],
+[
+"results.tex",
+180,
+"\\labbr"
+],
+[
+"results.tex",
+181,
+"\\labnote{InvisiSpec, SpecLFB and CleanupSpec results still to be inserted here.}"
+],
+[
+"results.tex",
+182,
+"\\notebr"
+],
+[
+"results.tex",
+184,
+"\\iffalse % LAB-REVIEW CUT (2026-11-03): placeholder subsubsection, not written yet"
+],
+[
+"results.tex",
+185,
+"\\subsubsection{Defenses with their own load transmission mechanisms}\\label{sec:bug-loadmech}"
+],
+[
+"results.tex",
+186,
+"\\reviewtag{[TODO placeholder: InvisiSpec, SpecLFB (UV6) and CleanupSpec hide or undo a speculative l"
+],
+[
+"results.tex",
+187,
+"\\fi"
+],
+[
+"related.tex",
+94,
+"% \\todo{add other contract/SNI works}"
+],
+[
+"related.tex",
+211,
+"% \\todo{add Spectre litmus benchmark + fuzzing cites}"
+]
+]

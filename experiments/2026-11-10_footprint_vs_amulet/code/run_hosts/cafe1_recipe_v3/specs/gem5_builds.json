@@ -1,0 +1,421 @@
+{
+  "_doc": "Canonical registry of every gem5 build SimSpect runs against. ONE entry per distinct build tree. Each build = a different defense implementation; gem5 is ground truth. 'timing_hooks' records whether the build carries the two window-realizing hooks SimSpect needs: branch_force (--branch-ann-file BTB override + per-branch resolve-stall) and fnc_commit_stall (hold the first-not-committed insn at the ROB head, 150 cyc). 'status' summarizes hook coverage. 'resolve_hooks' (2026-10-30) = the BR resolve lines + forced-not-taken (wiki/design/RESOLUTION_HOOKS.md). Source: wiki/design/MODELS_AND_BUILDS.md + METHODS_INSTRUMENTATION.md + gem5-hooks/README.md + AMULET_BUGS_DETECTION_ACCOUNTING.md. Viewed in the dashboard Utilities > gem5 builds tab.",
+  "_last_reviewed": "2026-11-09",
+  "timing_hook_legend": {
+    "branch_force": "--branch-ann-file BTB override (force branch direction) + per-branch resolve-stall. Realizes the modeled mispredict + holds the branch unresolved. Vanilla builds reject --branch-ann-file.",
+    "fnc_commit_stall": "fncCommitStallPC/Cycles \u2014 stalls commit of the first-not-committed insn at the ROB head (recon/STT use 150 cyc), widening the speculative window so the slow VP/squash cases land in-window.",
+    "status_values": "full = both hooks present; base-control = intentionally un-hooked baseline; none = not instrumented"
+  },
+  "builds": [
+    {
+      "id": "gem5-recon-modded",
+      "path": "/work/gem5-recon-modded",
+      "repo": "no git (change over /work/gem5-recon)",
+      "cpu": "X86 / X86O3CPU",
+      "config_script": "configs/example/se.py",
+      "defense": "Recon / STT",
+      "scheme": "0=Unsafe 1=NDA (code enum Delay) 2=STT 3=DoM",
+      "variants": "--branch-ann-file BTB override",
+      "intention": "PRIMARY build + the 9-site hook reference template. Runs STT_6 / STT_all / Recon_6. Where the recon OTB (getOldestTaint) and STL/SLF bypass bugs reproduced.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/gem5-recon-modded/",
+      "flags": [
+        "primary",
+        "reference-hooks"
+      ],
+      "threat_model": "Recon-STT (scheme 2): control + store shadows, i.e. speculative while an older cond branch is unresolved OR an older store has no address (decode.cc:686-695, shadow_tracker.cc). No threat-model switch. Not the same as /work/stt. wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "gem5-recon-stl",
+      "path": "/work/gem5-recon-stl",
+      "repo": "no git (copy of /work/gem5-recon-modded taken 2026-10-30 19:23 UTC, binary of May 21, i.e. WITHOUT the 2026-10-30 resolve hooks; ARM build, m5out*, runs, workdir excluded)",
+      "cpu": "X86 / X86O3CPU",
+      "config_script": "configs/example/se.py",
+      "defense": "Recon / STT (same as gem5-recon-modded) + SimSpect-STL hooks",
+      "scheme": "0=Unsafe 1=NDA (code enum Delay) 2=STT 3=DoM",
+      "variants": "--branch-ann-file BTB override; --stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred",
+      "intention": "STL (store-to-load) speculation testing: STT_6_stl testsets. Threat model of the STT scheme here = control + store shadows (Recon paper Sec. 3/6; decode.cc:686-695, shadow_tracker.cc freeStores), so STL is in scope.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "gem5-hooks/stl/apply_stl_hooks.py applied 2026-10-30, built with /usr/bin/scons (SCons 3.1.2; /usr/local/bin/scons 2.5.1 fails under py3.8). Applied diff gem5-hooks/stl/stl_hooks_vs_gem5-recon-modded.diff; backups *.pre-stl next to each file. gem5.opt md5 9ac3ac66a4c239450f0c2e84c24a172d. Controls passed (wiki/design/STL_SPECULATION.md)."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/stl/",
+      "flags": [
+        "stl"
+      ],
+      "threat_model": "Recon-STT (scheme 2): control + store shadows, i.e. speculative while an older cond branch is unresolved OR an older store has no address (decode.cc:686-695, shadow_tracker.cc). No threat-model switch. Not the same as /work/stt. wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "gem5-recon-ruby3",
+      "path": "/work/gem5-recon-ruby3",
+      "repo": "no git (copy of /work/gem5-recon-modded src/configs taken 2026-11-09 02:38 UTC, build/ and m5out* excluded; src and configs 0 diff vs recon-modded; src/mem/ruby 0 diff vs ruby-versions/ruby-singlecore)",
+      "cpu": "X86 / X86O3CPU, Ruby PROTOCOL = 'MESI_Three_Level' (build/X86/gem5.build/variables)",
+      "config_script": "configs/example/se_ruby.py (= se.py with line 56 'from ruby import Ruby' uncommented; the authors ship it commented, so se.py --ruby raises NameError). APPROVED by Anna 2026-11-08 (#11)",
+      "defense": "ReCon (STT + ReCon reveal), the authors' setup",
+      "scheme": "0=Unsafe 1=NDA 2=STT 3=DoM; ReCon = --scheme=2 --allow_leaked --ruby",
+      "variants": "--branch-ann-file BTB override (recon-modded hooks)",
+      "intention": "E6 ReCon exactly as its authors prescribe (documentation/docs/Files/email.txt: ruby-singlecore in src/mem/ruby, PROTOCOL=MESI_Three_Level, --scheme 2 --allow_leaked with --ruby). Built with /usr/bin/scons build/X86/gem5.opt PROTOCOL=MESI_Three_Level -j 24 (build_ruby3.sh, log build_ruby3.log, EXIT=0). gem5.opt instead of the authors' gem5.fast so the checker DPRINTFs exist.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "inherited from gem5-recon-modded's 2026-10-30 tree (resolve lines + forced not-taken + wake edit); hooks are CPU-side only. Validation 2026-11-08: 484 Ruby records, br_resolve_source=observed on all, 0 validity failures (wiki/state/EVAL_MANIFEST.md 'ReCon under the authors' setup')."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/gem5-recon-modded/ (same hooks)",
+      "flags": [
+        "recon",
+        "ruby"
+      ],
+      "threat_model": "Recon-STT shadows (control + store, decode.cc:686-695) + ReCon reveal under --allow_leaked. Reveal verified to reach L0 at the right address (ProtocolTrace); it never untaints in the current Recon_6 tests (EVAL_MANIFEST E6)."
+    },
+    {
+      "id": "gem5-recon",
+      "path": "/work/gem5-recon",
+      "repo": "no git (treated as the BASE)",
+      "cpu": "X86 / X86O3CPU",
+      "config_script": "configs/example/se.py",
+      "defense": "Recon / STT (unmodded)",
+      "scheme": "0=Unsafe 1=NDA (code enum Delay) 2=STT 3=DoM",
+      "variants": "none (no branch-ann)",
+      "intention": "Baseline control \u2014 the un-modded recon, to confirm a hit is not an artifact of the BTB hook.",
+      "timing_hooks": {
+        "branch_force": false,
+        "fnc_commit_stall": false,
+        "status": "base-control",
+        "resolve_hooks": false
+      },
+      "git_tracked": false,
+      "hooks_backup": "(it IS the reference base \u2014 not captured)",
+      "flags": [
+        "control"
+      ],
+      "threat_model": "Recon-STT (scheme 2): control + store shadows, i.e. speculative while an older cond branch is unresolved OR an older store has no address (decode.cc:686-695, shadow_tracker.cc). No threat-model switch. Not the same as /work/stt. wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "stt",
+      "path": "/work/stt",
+      "repo": "git cwfletcher/stt @ e3283b9",
+      "cpu": "X86 / X86O3CPU",
+      "config_script": "configs/example/se.py",
+      "defense": "STT (upstream)",
+      "scheme": "0-3",
+      "variants": "se_exp.py / se_slowcomm.py; configs/example/se_futuristic.py = se.py with threatModel 'Futuristic' for scheme 2 (added 2026-11-07, copy in gem5-hooks/stt/se_futuristic.py; Futuristic parked 2026-11-07)",
+      "intention": "Upstream STT build \u2014 cross-check STT_6 against recon-scheme2. STT_6_sttbuild -> 0 ld leaks (model holds).",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": true,
+      "hooks_backup": "gem5-hooks/stt/",
+      "flags": [],
+      "threat_model": "STT-Spectre by default (--threatModel=Spectre, pinned by gem5-hooks/stt/se_exp.py:332): a load is speculative only while an older control inst is unresolved (rob_impl.hh:444-495). Futuristic (all older insts completed) via config_script /work/stt/configs/example/se_futuristic.py (rob_impl.hh:493-512). STL tests are OUT of scope under Spectre. wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "stt-master",
+      "path": "/work/stt-master",
+      "repo": "cwfletcher/stt @ 5bf41109477e1c9c5822674afa4103e6eb16ff09 (2025-12-14; includes 18e304f 'fix pending squash bug'), from the GitHub tarball (sha256 aa2281adff4d394e67a1618acdce9a3a7d64c9866f936ee5352433044604cc1c) in /work/stt-master-src/; not a git checkout",
+      "cpu": "X86 / DerivO3CPU (X86O3CPU in run configs), classic caches",
+      "config_script": "configs/example/se.py (SimSpect glue, same as /work/stt)",
+      "defense": "STT (upstream master)",
+      "scheme": "0-3 (same glue as /work/stt)",
+      "variants": "se_exp.py / se_slowcomm.py / se_futuristic.py, copied unchanged from /work/stt",
+      "intention": "E3 = SimSpect's STT results from 2026-11-08 on. /work/stt (e3283b9) stays for old results and the A3c bug. Hooks = /work/stt's full working-tree diff vs e3283b9 (/work/stt-master-src/stt_worktree_vs_e3283b9.diff: stt.patch + resolve hooks + wake edit) applied with patch -p1, all hunks exact; tree differs from /work/stt only in iew_impl.hh (the upstream fix). Built python2 scons-2.5.1 build/X86/gem5.opt -j16 (build_stt_master.sh / .log, EXIT=0), gem5.opt sha256 ca7259637a59c3f2b798e217281c59009d1244fefa1c81d66781e7add95c5d1e.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "same hook code as /work/stt. hook_audit 2026-11-08 (12 tests, seed 0): identical check dicts to /work/stt, including ticks. Open DECIDE: the resolve-stall deferred release copies the pre-fix squash code, so a stalled mispredicted TAINTED branch bypasses upstream's new pending squash."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/stt/ (+ /work/stt-master-src/stt_worktree_vs_e3283b9.diff)",
+      "flags": [
+        "primary-stt"
+      ],
+      "threat_model": "STT-Spectre (same glue as /work/stt). Upstream fix: a tainted mispredicted branch is marked pending-squash in IEW instead of squashing (iew_impl.hh executeInsts)."
+    },
+    {
+      "id": "stt-dbg",
+      "path": "/work/stt-dbg",
+      "repo": "git cwfletcher/stt @ e3283b9 (debug)",
+      "cpu": "X86 / X86O3CPU",
+      "config_script": "configs/example/se.py",
+      "defense": "STT (upstream, debug)",
+      "scheme": "0-3",
+      "variants": "se_exp.py / se_slowcomm.py",
+      "intention": "Debug/trace variant of /work/stt for diagnosing specific records (slower, fuller logging).",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": true,
+      "hooks_backup": "gem5-hooks/stt-dbg/",
+      "flags": [
+        "debug"
+      ],
+      "threat_model": "same as stt (STT-Spectre by default). wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "gem5-spt",
+      "path": "/work/gem5-spt",
+      "repo": "git FPSG-UIUC/SPT @ 0d2be0f",
+      "cpu": "DerivO3CPU / X86_MESI_Two_Level",
+      "config_script": "configs/example/se.py",
+      "defense": "SPT",
+      "scheme": "2 -> SpectreSafeFence (string scheme)",
+      "variants": "--scheme=SpectreSafeInvisibleSpec | Futuristic* ; --configImpFlow=Lazy ; --applyDDIFT/--fwdUntaint/--bwdUntaint/--disableUntaint",
+      "intention": "SPT build. Runs SPT_6 / SPT_6_oneLP across fence, invisible-spec, and untaint variants. Where the freeParam=0 untaint-inert config bug was found.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": true,
+      "hooks_backup": "gem5-hooks/gem5-spt/",
+      "flags": []
+    },
+    {
+      "id": "amulet-InvisiSpec",
+      "path": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1",
+      "repo": "no git (AMuLeT AE artifact)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level (--ruby)",
+      "config_script": "configs/example/se.py",
+      "defense": "InvisiSpec",
+      "scheme": "SpectreSafeInvisibleSpec",
+      "variants": "checker: check_ld_invisispec_compound.py",
+      "intention": "InvisiSpec load-defense campaigns. UV1 confirmed (11/12 strict window); UV2 MSHR surface only (timing channel, out of event-based scope). Needs --ruby in extra_args: gem5_common.py always passes --caches, which is inert under --ruby, but WITHOUT --ruby se.py silently builds classic caches and the InvisiSpec cache defense (Ruby .sm) is inactive (that is what STT_6_invisispec ran). Full configs: results/STT_6_invisispec_full_{spectre,futuristic}. (2026-10-28 scope-table: replaced the earlier 'caches:true is fatal' note, which applies to amulet-STT, AUDIT.md #1.)",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "note": "fnc-stall ported (7 sites) + rebuilt; se.py BTB-target +base fix",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030",
+        "broken_since": "2026-10-30 21:27: every run panics 'Invalid range for type MachineType' (even without annotations). The rebuild compiled the concurrent hooks-v2 session's unverified Ruby edits (19:38-19:48). Last good binary: build/X86_MESI_Two_Level/gem5.opt.simspect-hooks-v1-resolve-20261030."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-InvisiSpec/simspect_hooks.diff (SimSpect cache-event hooks only; the earlier branch-force/fnc-stall hooks are still uncaptured)",
+      "flags": [
+        "amulet",
+        "ruby-only"
+      ],
+      "observation_hooks": {
+        "simspect_cache_events": "added 2026-10-28 (print-only, O3PipeView:simspect lines; wiki/design/SIMSPECT_HOOKS.md)",
+        "pre_hook_binary": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt.pre-simspect-hooks-20261028",
+        "pristine_sources": "/work/amulet/backups/InvisiSpec-pre-simspect-hooks-20261028.tgz"
+      }
+    },
+    {
+      "id": "amulet-InvisiSpec-stl",
+      "path": "/work/amulet/hooks_stl_work/InvisiSpec",
+      "repo": "no git (copy of /work/amulet/amulet-gem5-InvisiSpec_AE-v1.1 incl. build/, taken 2026-11-10 04:04 UTC, backup gem5.opt.* binaries excluded)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level (--ruby)",
+      "config_script": "configs/example/se.py",
+      "defense": "InvisiSpec (same as amulet-InvisiSpec) + SimSpect-STL hooks",
+      "scheme": "UnsafeBaseline | SpectreSafeInvisibleSpec | FuturisticSafeInvisibleSpec (pipeline --scheme=2 -> SpectreSafeInvisibleSpec)",
+      "variants": "--stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred; everything amulet-InvisiSpec has",
+      "intention": "STL (store bypass) on InvisiSpec. In scope only for FuturisticSafeInvisibleSpec (InvisiSpec Sec. IV Table I); SpectreSafeInvisibleSpec is the out-of-threat-model control.",
+      "binary": "/work/amulet/hooks_stl_work/InvisiSpec/build/X86_MESI_Two_Level/gem5.opt",
+      "md5": "376198d5f5f4fd77cb022ba19d5d4924",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "resolve_hooks": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "Built 2026-11-09 (session stl-port) in a COPY of the in-place tree, /work/amulet/hooks_stl_work/InvisiSpec (the in-place tree and binary are untouched, other campaigns use them). Hooks = the recon-stl STL hooks (same flags, same print lines), applied by gem5-hooks/stl/apply_stl_hooks_amulet.py --build InvisiSpec, rebuilt by gem5-hooks/stl/build_stl_amulet.sh (log /work/amulet/hooks_stl_work/build_InvisiSpec_stl.log, rc=0); applied diff gem5-hooks/amulet-InvisiSpec/stl_hooks.diff (patch -p1 from the tree root); backups *.pre-stl next to each file. Port differences from recon-stl: mem_order_squash prints only in a run given --stl-ann-file (stlTraceOn), so a run without STL flags is byte-identical to the in-place hooks-v2 binary; old trees keep one memory-dependence producer per instruction (alias mode with a load barrier in flight waits on the younger of barrier and paired store). Verification (wiki/design/STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'): hooks off = in-place binary on the 10 hooks-v2 verify cases (every trace line, sim ticks) and on the 60 STT_6_stl tests; STL controls on the 60 STT_6_stl tests."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-InvisiSpec/stl_hooks.diff (on top of simspect_hooks.diff + resolve_hooks.diff + hooks_v2_vs_v1resolve.diff)",
+      "flags": [
+        "amulet",
+        "ruby-only",
+        "stl"
+      ]
+    },
+    {
+      "id": "amulet-SpecLFB",
+      "path": "/work/amulet/amulet-gem5-SpecLFB_AE-v1.1",
+      "repo": "no git (AMuLeT AE artifact)",
+      "cpu": "DerivO3CPU / X86, classic caches (no Ruby protocol)",
+      "config_script": "configs/example/se.py",
+      "defense": "SpecLFB",
+      "scheme": "\"2\" -> Speclfb",
+      "variants": "checker: check_ld_speclfb.py",
+      "intention": "SpecLFB load-defense. UV6 (first spec load unprotected) demonstrated (11/12 strict). The one AMuLeT load bug squarely in SimSpect's scope.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "note": "fnc-stall ported + rebuilt; newer base: --branch-ann-base hex-parse fix + parse_lsq memaccess_tick",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-SpecLFB/simspect_hooks.diff (SimSpect cache-event hooks only; the earlier branch-force/fnc-stall hooks are still uncaptured)",
+      "flags": [
+        "amulet"
+      ],
+      "observation_hooks": {
+        "simspect_cache_events": "added 2026-10-28 (print-only, O3PipeView:simspect lines; wiki/design/SIMSPECT_HOOKS.md)",
+        "pre_hook_binary": "/work/amulet/amulet-gem5-SpecLFB_AE-v1.1/build/X86/gem5.opt.pre-simspect-hooks-20261028",
+        "pristine_sources": "/work/amulet/backups/SpecLFB-pre-simspect-hooks-20261028.tgz"
+      }
+    },
+    {
+      "id": "amulet-SpecLFB-stl",
+      "path": "/work/amulet/hooks_stl_work/SpecLFB",
+      "repo": "no git (copy of /work/amulet/amulet-gem5-SpecLFB_AE-v1.1 incl. build/, taken 2026-11-10 04:04 UTC, backup gem5.opt.* binaries excluded)",
+      "cpu": "DerivO3CPU / X86, classic caches (no Ruby protocol)",
+      "config_script": "configs/example/se.py",
+      "defense": "SpecLFB (same as amulet-SpecLFB) + SimSpect-STL hooks",
+      "scheme": "Speclfb | unsafebaseline (pipeline --scheme=2 -> Speclfb)",
+      "variants": "--stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred; everything amulet-SpecLFB has",
+      "intention": "STL (store bypass) on SpecLFB: memory-order MUSLs (SpecLFB Sec. 5; lsq_unit.cc setmUSL, rob.cc preStoreResolved).",
+      "binary": "/work/amulet/hooks_stl_work/SpecLFB/build/X86/gem5.opt",
+      "md5": "f2e3e9fe1419a67d5ce1aba9a51805d8",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "resolve_hooks": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "Built 2026-11-09 (session stl-port) in a COPY of the in-place tree, /work/amulet/hooks_stl_work/SpecLFB (the in-place tree and binary are untouched, other campaigns use them). Hooks = the recon-stl STL hooks (same flags, same print lines), applied by gem5-hooks/stl/apply_stl_hooks_amulet.py --build SpecLFB, rebuilt by gem5-hooks/stl/build_stl_amulet.sh (log /work/amulet/hooks_stl_work/build_SpecLFB_stl.log, rc=0); applied diff gem5-hooks/amulet-SpecLFB/stl_hooks.diff (patch -p1 from the tree root); backups *.pre-stl next to each file. Port differences from recon-stl: mem_order_squash prints only in a run given --stl-ann-file (stlTraceOn), so a run without STL flags is byte-identical to the in-place hooks-v2 binary; old trees keep one memory-dependence producer per instruction (alias mode with a load barrier in flight waits on the younger of barrier and paired store). Verification (wiki/design/STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'): hooks off = in-place binary on the 10 hooks-v2 verify cases (every trace line, sim ticks) and on the 60 STT_6_stl tests; STL controls on the 60 STT_6_stl tests."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-SpecLFB/stl_hooks.diff (on top of simspect_hooks.diff + resolve_hooks.diff + hooks_v2_vs_v1resolve.diff)",
+      "flags": [
+        "amulet",
+        "stl"
+      ]
+    },
+    {
+      "id": "amulet-CleanupSpec",
+      "path": "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1",
+      "repo": "no git (AMuLeT AE artifact)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level (--ruby)",
+      "config_script": "configs/example/se.py",
+      "defense": "CleanupSpec",
+      "scheme": "passthrough --scheme",
+      "variants": "checker: check_ld_cleanupspec.py",
+      "intention": "CleanupSpec load-defense. unXpec / UV4-UV5 are post-squash RESIDUE (final-state), not in-window touches; detectable only by install<->cleanup event correlation. Residue watcher not yet fully built. Needs --ruby in extra_args (the auto --caches is inert under --ruby; without --ruby no cleanup logic runs). Full config: results/STT_6_cleanupspec_full. (2026-10-28 scope-table: replaced the earlier 'caches:true is fatal' note.)",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "note": "fnc-stall ported + passthrough --scheme glue; residue correlator still TODO",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-CleanupSpec/simspect_hooks.diff (SimSpect cache-event hooks only; the earlier branch-force/fnc-stall hooks are still uncaptured)",
+      "flags": [
+        "amulet",
+        "ruby-only"
+      ],
+      "observation_hooks": {
+        "simspect_cache_events": "added 2026-10-28 (print-only, O3PipeView:simspect lines; wiki/design/SIMSPECT_HOOKS.md)",
+        "pre_hook_binary": "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt.pre-simspect-hooks-20261028",
+        "pristine_sources": "/work/amulet/backups/CleanupSpec-pre-simspect-hooks-20261028.tgz"
+      }
+    },
+    {
+      "id": "amulet-CleanupSpec-stl",
+      "path": "/work/amulet/hooks_stl_work/CleanupSpec",
+      "repo": "no git (copy of /work/amulet/amulet-gem5-CleanupSpec_AE-v1.1 incl. build/, taken 2026-11-10 04:04 UTC, backup gem5.opt.* binaries excluded)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level (--ruby)",
+      "config_script": "configs/example/se.py",
+      "defense": "CleanupSpec (same as amulet-CleanupSpec) + SimSpect-STL hooks",
+      "scheme": "--scheme_invisispec=UnsafeBaseline --scheme_cleanupcache=Cleanup_FOR_L1L2 (baseline: --scheme_cleanupcache=UnsafeBaseline); --scheme accepted and ignored",
+      "variants": "--stl-ann-file / --stl-store-stall-cycles / --stl-alias-pred; everything amulet-CleanupSpec has",
+      "intention": "STL (store bypass) on CleanupSpec: every transient instruction is unsafe (Sec. 2.1), so a store-bypass squash must be cleaned like a branch squash.",
+      "binary": "/work/amulet/hooks_stl_work/CleanupSpec/build/X86_MESI_Two_Level/gem5.opt",
+      "md5": "c7989d25487c18b5aeec78a1e7108afc",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "resolve_hooks": true,
+        "stl_hooks": true,
+        "status": "stl",
+        "stl_note": "Built 2026-11-09 (session stl-port) in a COPY of the in-place tree, /work/amulet/hooks_stl_work/CleanupSpec (the in-place tree and binary are untouched, other campaigns use them). Hooks = the recon-stl STL hooks (same flags, same print lines), applied by gem5-hooks/stl/apply_stl_hooks_amulet.py --build CleanupSpec, rebuilt by gem5-hooks/stl/build_stl_amulet.sh (log /work/amulet/hooks_stl_work/build_CleanupSpec_stl.log, rc=0); applied diff gem5-hooks/amulet-CleanupSpec/stl_hooks.diff (patch -p1 from the tree root); backups *.pre-stl next to each file. Port differences from recon-stl: mem_order_squash prints only in a run given --stl-ann-file (stlTraceOn), so a run without STL flags is byte-identical to the in-place hooks-v2 binary; old trees keep one memory-dependence producer per instruction (alias mode with a load barrier in flight waits on the younger of barrier and paired store). Verification (wiki/design/STL_SPECULATION.md 'Port to the AMuLeT builds (2026-11-09)'): hooks off = in-place binary on the 10 hooks-v2 verify cases (every trace line, sim ticks) and on the 60 STT_6_stl tests; STL controls on the 60 STT_6_stl tests."
+      },
+      "git_tracked": false,
+      "hooks_backup": "gem5-hooks/amulet-CleanupSpec/stl_hooks.diff (on top of simspect_hooks.diff + resolve_hooks.diff + hooks_v2_vs_v1resolve.diff)",
+      "flags": [
+        "amulet",
+        "ruby-only",
+        "stl"
+      ]
+    },
+    {
+      "id": "amulet-STT",
+      "path": "/work/amulet/amulet-gem5-STT_AE-v1.1",
+      "repo": "no git (AMuLeT AE artifact)",
+      "cpu": "Ruby MESI / X86_MESI_Two_Level",
+      "config_script": "configs/example/se.py",
+      "defense": "STT (AMuLeT's)",
+      "scheme": "--scheme",
+      "variants": "cross-build l1d_assoc comparison vs /work/stt",
+      "intention": "AMuLeT's own STT build \u2014 used for the l1d_assoc (assoc 2 vs 8) cross-build artifact comparison vs /work/stt. Not a primary campaign target.",
+      "timing_hooks": {
+        "branch_force": true,
+        "fnc_commit_stall": true,
+        "status": "full",
+        "note": "fnc-stall IS present (commit_impl.hh:1209-1222, se.py:351-352; RESOLUTION_HOOKS_SURVEY.md) and its effect was measured by hook_audit 2026-10-30 (fnc retire +150 cycles, 12/12). The earlier 'not confirmed' note was stale.",
+        "resolve_hooks": true,
+        "resolve_hooks_note": "2026-10-30: BR resolve lines (predict_force, resolve_hold/drop/release/bcast, resolve_visible) + forced target 1 = predict not-taken; rebuilt in place, pre-hook binary build/<ISA>/gem5.opt.pre-resolve-hooks-20261030, sources /work/simspect_backups/resolve-hooks-20261030/, diff gem5-hooks/<build>/resolve_hooks.diff; verified print-only + hooks effective by STAGE3_gem5/hook_audit.py (wiki/design/RESOLUTION_HOOKS.md); 2026-10-30 21:27-21:42 rebuilt again with edit 4 (deferred release wakes the CPU: fixes runs frozen to --abs-max-tick); edits 1-3 binary kept as .resolve-print-only-20261030"
+      },
+      "git_tracked": false,
+      "hooks_backup": "(hooks in /work/amulet; not separately captured)",
+      "flags": [
+        "amulet",
+        "ruby-only",
+        "verify-hooks"
+      ],
+      "threat_model": "NOT CHECKED: do not group with stt or Recon-STT until its code is read. wiki/design/STT_VS_RECON_STT.md"
+    },
+    {
+      "id": "sdo",
+      "path": "/work/sdo",
+      "repo": "git cwfletcher/sdo @ 5d058fd (clean)",
+      "cpu": "Speculative Data-Oblivious",
+      "config_script": "(not wired)",
+      "defense": "SDO",
+      "scheme": "n/a",
+      "variants": "none",
+      "intention": "Speculative Data-Oblivious \u2014 present but little/no runs. Scope decision open (whether SDO is in scope for the paper). NOT instrumented.",
+      "timing_hooks": {
+        "branch_force": false,
+        "fnc_commit_stall": false,
+        "status": "none",
+        "resolve_hooks": false
+      },
+      "git_tracked": true,
+      "hooks_backup": "(clean \u2014 no hooks)",
+      "flags": [
+        "out-of-scope?"
+      ]
+    }
+  ]
+}

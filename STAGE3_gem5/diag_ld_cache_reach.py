@@ -36,9 +36,8 @@ exist across the recon / STT / SPT builds.
 
 This is the cross-cutting counterpart to the per-results `diagnostics/` scripts:
 because the check_ld over-count is a *checker* artifact (not defense-specific),
-EVERY check_ld consumer should run its hits through this before trusting the
-count. See claudelog 2026-06-02 (reconbugs check_ld false positive; designconsultant
-inst-047231 real cache access).
+every check_ld consumer should run its hits through this before trusting the
+count.
 
 USAGE
 -----

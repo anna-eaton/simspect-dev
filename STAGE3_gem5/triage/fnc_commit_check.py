@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hits whose fnc never shows an O3PipeView retire: recover fnc's commit tick (2026-11-07).
+"""Hits whose fnc never shows an O3PipeView retire: recover fnc's commit tick.
 
 On gem5-spt a committed store's O3PipeView record can be missing (the run ends
 before it is dumped), so the checkers read fnc_retire = 0 and before_fnc passes

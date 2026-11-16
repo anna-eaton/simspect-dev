@@ -1,0 +1,3036 @@
+{
+ "defense": "SpecLFB",
+ "run": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z",
+ "selection": "first_per_instance",
+ "counts": {
+  "unsafe_load_resent_after_LFB_stall": 5,
+  "squashed_load_not_flagged_speculative": 4,
+  "UV6": 23
+ },
+ "violations": [
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-26secs",
+   "round": 0,
+   "elapsed": 26,
+   "class": "unsafe_load_resent_after_LFB_stall",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3e80"
+      ],
+      "primer_only": [
+       "0x3c80"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3e80"
+      ],
+      "primer_only": [
+       "0x3c80"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3e80",
+      "pc": "0x4021c2",
+      "sn": 22635,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c2",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3e80",
+      "pc": "0x4021c2",
+      "sn": 22635,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c2",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3e80",
+      "pc": "0x4021c2",
+      "sn": 22635,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c2",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3e80",
+      "pc": "0x4021c2",
+      "sn": 22635,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c2",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-11secs",
+   "round": 1,
+   "elapsed": 71,
+   "class": "squashed_load_not_flagged_speculative",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3980"
+      ],
+      "primer_only": [
+       "0x3900"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3980"
+      ],
+      "primer_only": [
+       "0x3900"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3980",
+      "pc": "0x40219e",
+      "sn": 29175,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40219e",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3980",
+      "pc": "0x40219e",
+      "sn": 29175,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40219e",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3900",
+      "pc": "0x40219e",
+      "sn": 29175,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40219e",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3900",
+      "pc": "0x40219e",
+      "sn": 29175,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40219e",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-06secs",
+   "round": 2,
+   "elapsed": 66,
+   "class": "unsafe_load_resent_after_LFB_stall",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3dc0"
+      ],
+      "primer_only": [
+       "0x3900"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3dc0"
+      ],
+      "primer_only": [
+       "0x3900"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3dc0",
+      "pc": "0x4021ab",
+      "sn": 57096,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ab",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3dc0",
+      "pc": "0x4021ab",
+      "sn": 57096,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ab",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3dc0",
+      "pc": "0x4021ab",
+      "sn": 57096,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ab",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3dc0",
+      "pc": "0x4021ab",
+      "sn": 57096,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ab",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-10secs",
+   "round": 3,
+   "elapsed": 70,
+   "class": "squashed_load_not_flagged_speculative",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x35c0"
+      ],
+      "primer_only": [
+       "0x3100"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x35c0"
+      ],
+      "primer_only": [
+       "0x3100"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x35c0",
+      "pc": "0x4021c3",
+      "sn": 44123,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c3",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x35c0",
+      "pc": "0x4021c3",
+      "sn": 44123,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c3",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3100",
+      "pc": "0x4021c3",
+      "sn": 44123,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c3",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3100",
+      "pc": "0x4021c3",
+      "sn": 44123,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021c3",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-03secs",
+   "round": 4,
+   "elapsed": 3,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3f00"
+      ],
+      "primer_only": [
+       "0x3c00"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3f00"
+      ],
+      "primer_only": [
+       "0x3c00"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3f00",
+      "pc": "0x402157",
+      "sn": 33133,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402157",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3f00",
+      "pc": "0x402157",
+      "sn": 33133,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402157",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3c00",
+      "pc": "0x402157",
+      "sn": 33133,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402157",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3c00",
+      "pc": "0x402157",
+      "sn": 33133,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402157",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-42secs",
+   "round": 5,
+   "elapsed": 42,
+   "class": "unsafe_load_resent_after_LFB_stall",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3740"
+      ],
+      "primer_only": [
+       "0x3680"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3740"
+      ],
+      "primer_only": [
+       "0x3680"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3740",
+      "pc": "0x4021dd",
+      "sn": 15271,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021dd",
+        0,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3740",
+      "pc": "0x4021dd",
+      "sn": 15271,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021dd",
+        0,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3740",
+      "pc": "0x4021dd",
+      "sn": 15271,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021dd",
+        0,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3740",
+      "pc": "0x4021dd",
+      "sn": 15271,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021dd",
+        0,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-26secs",
+   "round": 6,
+   "elapsed": 86,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3dc0"
+      ],
+      "primer_only": [
+       "0x3800"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3dc0"
+      ],
+      "primer_only": [
+       "0x3800"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3dc0",
+      "pc": "0x402163",
+      "sn": 11785,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402163",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3dc0",
+      "pc": "0x402163",
+      "sn": 11785,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402163",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3800",
+      "pc": "0x402163",
+      "sn": 11785,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402163",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3800",
+      "pc": "0x402163",
+      "sn": 11785,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402163",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-02mins-06secs",
+   "round": 7,
+   "elapsed": 126,
+   "class": "unsafe_load_resent_after_LFB_stall",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3880"
+      ],
+      "primer_only": [
+       "0x3280"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3880"
+      ],
+      "primer_only": [
+       "0x3280"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3880",
+      "pc": "0x402159",
+      "sn": 35795,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402159",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3880",
+      "pc": "0x402159",
+      "sn": 35795,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402159",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3880",
+      "pc": "0x402159",
+      "sn": 35795,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402159",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3880",
+      "pc": "0x402159",
+      "sn": 35795,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402159",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-05secs",
+   "round": 8,
+   "elapsed": 5,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3d40"
+      ],
+      "primer_only": [
+       "0x3200"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3d40"
+      ],
+      "primer_only": [
+       "0x3200"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3d40",
+      "pc": "0x4021de",
+      "sn": 5679,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021de",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3d40",
+      "pc": "0x4021de",
+      "sn": 5679,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021de",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3200",
+      "pc": "0x4021de",
+      "sn": 5679,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021de",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3200",
+      "pc": "0x4021de",
+      "sn": 5679,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021de",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-25secs",
+   "round": 9,
+   "elapsed": 25,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3040"
+      ],
+      "primer_only": [
+       "0x3900"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3040"
+      ],
+      "primer_only": [
+       "0x3900"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3040",
+      "pc": "0x40215b",
+      "sn": 44743,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215b",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3040",
+      "pc": "0x40215b",
+      "sn": 44743,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215b",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3900",
+      "pc": "0x40215b",
+      "sn": 44743,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215b",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3900",
+      "pc": "0x40215b",
+      "sn": 44743,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215b",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-12secs",
+   "round": 10,
+   "elapsed": 12,
+   "class": "unsafe_load_resent_after_LFB_stall",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x30c0"
+      ],
+      "primer_only": [
+       "0x3c00"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x30c0"
+      ],
+      "primer_only": [
+       "0x3c00"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x30c0",
+      "pc": "0x402146",
+      "sn": 16538,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402146",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x30c0",
+      "pc": "0x402146",
+      "sn": 16538,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402146",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x30c0",
+      "pc": "0x402146",
+      "sn": 16538,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402146",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x30c0",
+      "pc": "0x402146",
+      "sn": 16538,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402146",
+        1,
+        1,
+        0,
+        1,
+        1
+       ]
+      ],
+      "n_sent": 2
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-42secs-990560us",
+   "round": 11,
+   "elapsed": 42.99056,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3740"
+      ],
+      "primer_only": [
+       "0x3800"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3740"
+      ],
+      "primer_only": [
+       "0x3800"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3740",
+      "pc": "0x402174",
+      "sn": 50285,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3740",
+      "pc": "0x402174",
+      "sn": 50285,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3800",
+      "pc": "0x402174",
+      "sn": 50285,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3800",
+      "pc": "0x402174",
+      "sn": 50285,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-02mins-08secs",
+   "round": 12,
+   "elapsed": 128,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3000",
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3600",
+       "0x3e80"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3000",
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3600",
+       "0x3e80"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3000",
+      "pc": "0x40214a",
+      "sn": 16891,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40214a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3cc0",
+      "pc": "0x40213d",
+      "sn": 16886,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40213d",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3000",
+      "pc": "0x40214a",
+      "sn": 16891,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40214a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3cc0",
+      "pc": "0x40213d",
+      "sn": 16886,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40213d",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-07secs",
+   "round": 13,
+   "elapsed": 7,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3b00"
+      ],
+      "primer_only": [
+       "0x3380"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3b00"
+      ],
+      "primer_only": [
+       "0x3380"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3b00",
+      "pc": "0x402193",
+      "sn": 27263,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402193",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3b00",
+      "pc": "0x402193",
+      "sn": 27263,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402193",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3380",
+      "pc": "0x402193",
+      "sn": 27263,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402193",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3380",
+      "pc": "0x402193",
+      "sn": 27263,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402193",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-02mins-13secs",
+   "round": 14,
+   "elapsed": 133,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3840"
+      ],
+      "primer_only": []
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3840"
+      ],
+      "primer_only": []
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3840",
+      "pc": "0x402180",
+      "sn": 19844,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402180",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3840",
+      "pc": "0x402180",
+      "sn": 19844,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402180",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-11secs",
+   "round": 15,
+   "elapsed": 11,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3b40"
+      ],
+      "primer_only": [
+       "0x3d80"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3b40"
+      ],
+      "primer_only": [
+       "0x3d80"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3b40",
+      "pc": "0x402160",
+      "sn": 2122,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402160",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3b40",
+      "pc": "0x402160",
+      "sn": 2122,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402160",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3d80",
+      "pc": "0x402160",
+      "sn": 2122,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402160",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3d80",
+      "pc": "0x402160",
+      "sn": 2122,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402160",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-54secs",
+   "round": 16,
+   "elapsed": 54,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3900"
+      ],
+      "primer_only": [
+       "0x3d00"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3900"
+      ],
+      "primer_only": [
+       "0x3d00"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3900",
+      "pc": "0x402148",
+      "sn": 47452,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402148",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3900",
+      "pc": "0x402148",
+      "sn": 47452,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402148",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3d00",
+      "pc": "0x402148",
+      "sn": 47452,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402148",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3d00",
+      "pc": "0x402148",
+      "sn": 47452,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402148",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-51secs",
+   "round": 17,
+   "elapsed": 111,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3c80"
+      ],
+      "primer_only": []
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3c80"
+      ],
+      "primer_only": []
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3c80",
+      "pc": "0x4021ae",
+      "sn": 4520,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ae",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3c80",
+      "pc": "0x4021ae",
+      "sn": 4520,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ae",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-06secs",
+   "round": 18,
+   "elapsed": 6,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3f80"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3f80"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3cc0",
+      "pc": "0x402152",
+      "sn": 19525,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402152",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3cc0",
+      "pc": "0x402152",
+      "sn": 19525,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402152",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3f80",
+      "pc": "0x402152",
+      "sn": 19525,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402152",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3f80",
+      "pc": "0x402152",
+      "sn": 19525,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402152",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-21secs",
+   "round": 19,
+   "elapsed": 21,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3d80"
+      ],
+      "primer_only": [
+       "0x3180"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3d80"
+      ],
+      "primer_only": [
+       "0x3180"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3d80",
+      "pc": "0x40215f",
+      "sn": 37188,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215f",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3d80",
+      "pc": "0x40215f",
+      "sn": 37188,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215f",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3180",
+      "pc": "0x40215f",
+      "sn": 37188,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215f",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3180",
+      "pc": "0x40215f",
+      "sn": 37188,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215f",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-46secs-648798us",
+   "round": 20,
+   "elapsed": 106.648798,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3980"
+      ],
+      "primer_only": [
+       "0x37c0"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3980"
+      ],
+      "primer_only": [
+       "0x37c0"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3980",
+      "pc": "0x402145",
+      "sn": 19895,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402145",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3980",
+      "pc": "0x402145",
+      "sn": 19895,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402145",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x37c0",
+      "pc": "0x402145",
+      "sn": 19895,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402145",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x37c0",
+      "pc": "0x402145",
+      "sn": 19895,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402145",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-05secs-487844us",
+   "round": 21,
+   "elapsed": 5.487844,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3780"
+      ],
+      "primer_only": []
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3780"
+      ],
+      "primer_only": []
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3780",
+      "pc": "0x40216a",
+      "sn": 41659,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40216a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3780",
+      "pc": "0x40216a",
+      "sn": 41659,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40216a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-01mins-29secs",
+   "round": 22,
+   "elapsed": 89,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3740"
+      ],
+      "primer_only": [
+       "0x31c0"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3740"
+      ],
+      "primer_only": [
+       "0x31c0"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3740",
+      "pc": "0x40216a",
+      "sn": 51470,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40216a",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3740",
+      "pc": "0x40216a",
+      "sn": 51470,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40216a",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x31c0",
+      "pc": "0x40216a",
+      "sn": 51470,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40216a",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x31c0",
+      "pc": "0x40216a",
+      "sn": 51470,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40216a",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-28secs",
+   "round": 23,
+   "elapsed": 28,
+   "class": "squashed_load_not_flagged_speculative",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3d00"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3d00"
+      ]
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3cc0",
+      "pc": "0x402179",
+      "sn": 47808,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402179",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3cc0",
+      "pc": "0x402179",
+      "sn": 47808,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402179",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3d00",
+      "pc": "0x402179",
+      "sn": 47808,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402179",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3d00",
+      "pc": "0x402179",
+      "sn": 47808,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402179",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-36secs",
+   "round": 24,
+   "elapsed": 36,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x35c0"
+      ],
+      "primer_only": [
+       "0x3e80"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x35c0"
+      ],
+      "primer_only": [
+       "0x3e80"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x35c0",
+      "pc": "0x40215d",
+      "sn": 41529,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215d",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x35c0",
+      "pc": "0x40215d",
+      "sn": 41529,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215d",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3e80",
+      "pc": "0x40215d",
+      "sn": 41529,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215d",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3e80",
+      "pc": "0x40215d",
+      "sn": 41529,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40215d",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-51secs",
+   "round": 25,
+   "elapsed": 51,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3440"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3cc0"
+      ],
+      "primer_only": [
+       "0x3440"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3cc0",
+      "pc": "0x402191",
+      "sn": 20440,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402191",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3cc0",
+      "pc": "0x402191",
+      "sn": 20440,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402191",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3440",
+      "pc": "0x402191",
+      "sn": 20440,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402191",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3440",
+      "pc": "0x402191",
+      "sn": 20440,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402191",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-02secs",
+   "round": 26,
+   "elapsed": 2,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3640"
+      ],
+      "primer_only": [
+       "0x3c40"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3640"
+      ],
+      "primer_only": [
+       "0x3c40"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3640",
+      "pc": "0x40212a",
+      "sn": 3244,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40212a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3640",
+      "pc": "0x40212a",
+      "sn": 3244,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40212a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3c40",
+      "pc": "0x40212a",
+      "sn": 3244,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40212a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3c40",
+      "pc": "0x40212a",
+      "sn": 3244,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "40212a",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-08secs",
+   "round": 27,
+   "elapsed": 8,
+   "class": "squashed_load_not_flagged_speculative",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3ac0"
+      ],
+      "primer_only": []
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3ac0"
+      ],
+      "primer_only": []
+     }
+    },
+    "loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3ac0",
+      "pc": "0x4021ec",
+      "sn": 10182,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ec",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3ac0",
+      "pc": "0x4021ec",
+      "sn": 10182,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021ec",
+        0,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-56secs-501305us",
+   "round": 28,
+   "elapsed": 56.501305,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3600"
+      ],
+      "primer_only": [
+       "0x33c0"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3600"
+      ],
+      "primer_only": [
+       "0x33c0"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3600",
+      "pc": "0x402174",
+      "sn": 907,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3600",
+      "pc": "0x402174",
+      "sn": 907,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x33c0",
+      "pc": "0x402174",
+      "sn": 907,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x33c0",
+      "pc": "0x402174",
+      "sn": 907,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402174",
+        0,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-02mins-58secs-914605us",
+   "round": 29,
+   "elapsed": 178.914605,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x36c0"
+      ],
+      "primer_only": [
+       "0x3800"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x36c0"
+      ],
+      "primer_only": [
+       "0x3800"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x36c0",
+      "pc": "0x4021d0",
+      "sn": 48450,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021d0",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x36c0",
+      "pc": "0x4021d0",
+      "sn": 48450,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021d0",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3800",
+      "pc": "0x4021d0",
+      "sn": 48450,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021d0",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3800",
+      "pc": "0x4021d0",
+      "sn": 48450,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "4021d0",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-39secs",
+   "round": 30,
+   "elapsed": 39,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [],
+      "primer_only": [
+       "0x3140"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [],
+      "primer_only": [
+       "0x3140"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3140",
+      "pc": "0x402153",
+      "sn": 21672,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402153",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3140",
+      "pc": "0x402153",
+      "sn": 21672,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402153",
+        1,
+        0,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/SpecLFB_20261110T012205Z/benchmark-out-SpecLFB/config0results/0hrs-00mins-19secs",
+   "round": 31,
+   "elapsed": 19,
+   "class": "UV6",
+   "evidence": {
+    "diffs": {
+     "[system.cpu.dcache]": {
+      "ref_only": [
+       "0x3e00"
+      ],
+      "primer_only": [
+       "0x3540"
+      ]
+     },
+     "[system.l2]": {
+      "ref_only": [
+       "0x3e00"
+      ],
+      "primer_only": [
+       "0x3540"
+      ]
+     }
+    },
+    "uv6_loads": [
+     {
+      "run": "reference",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3e00",
+      "pc": "0x402161",
+      "sn": 29522,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402161",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "reference",
+      "cache": "[system.l2]",
+      "line": "0x3e00",
+      "pc": "0x402161",
+      "sn": 29522,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402161",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.cpu.dcache]",
+      "line": "0x3540",
+      "pc": "0x402161",
+      "sn": 29522,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402161",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     },
+     {
+      "run": "primer",
+      "cache": "[system.l2]",
+      "line": "0x3540",
+      "pc": "0x402161",
+      "sn": 29522,
+      "squashed": true,
+      "flags(spc,isCUSL,ismUSL,isStore,isUnsafe,isreallyUnsafe)": [
+       [
+        "402161",
+        1,
+        1,
+        0,
+        0,
+        0
+       ]
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

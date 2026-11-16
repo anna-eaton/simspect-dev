@@ -1,0 +1,1076 @@
+command line: $'python3.11' 'cli.py' 'fuzz' '-s' '/tests/timing_20261115/amulet/amulet-repo/src/x86/isa_spec/base.json' '-i' '70' '-n' '201' '-c' '/tests/timing_20261115/amulet/runs/CleanupSpec_r14_n200_20261115T232904Z/docker_gem5_v1_final_cache_ipc.yaml' '-p' 'bench_time1CleanupSpec_config0_round3' '--no-save-stats' '--result-dir=/tests/timing_20261115/amulet/runs/CleanupSpec_r14_n200_20261115T232904Z/benchmark-out-CleanupSpec/config0' '--ruby' '--CleanupSpec' '--nonstop'
+
+[2026-11-15 23:29:06]
+Logging mode list: ['info', 'fuzzer_debug']
+
+INFO: [fuzzer] Starting at 23:29:06
+DBG: [fuzzer] Using 1 pages in main region
+Progress: 0|0%, > Normal execution              
+
+
+[2026-11-15 23:29:09]
+Progress: 1|1%, EfCl:68.0, AlCl:72.0, In:140.0, Cov:0, Prim:0, PErr:0, Viol:0, > Normal execution              
+
+
+[2026-11-15 23:29:11]
+Progress: 1|1%, EfCl:68.0, AlCl:72.0, In:140.0, Cov:0, Prim:0, PErr:0, Viol:0, > Priming:4           
+[2026-11-15 23:29:12]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x39b080003d04c0  
+RBX: 0x15360000157a00  
+RCX: 0x2f7fc0001a0880  
+RDX: 0x3cccc00021a800  
+RSI: 0x3171000009df40  
+RDI: 0x388e4000003940  
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x4c0             
+RBX: 0xa00             
+RCX: 0x33              
+RDX: 0x3cccc00021a800  
+RSI: 0xf40             
+RDI: 0xd40             
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x39b080003d04c0  
+RBX: 0x15360000157a00  
+RCX: 0x2f7fc0001a0880  
+RDX: 0x22810000097d40  
+RSI: 0x3171000009df40  
+RDI: 0x388e4000003940  
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x4c0             
+RBX: 0xa00             
+RCX: 0x33              
+RDX: 0x22810000097d00  
+RSI: 0xf40             
+RDI: 0xd40             
+RSP: +0xff8            
+EFLAGS=000001000110
+
+Progress: 2|1%, EfCl:69.0, AlCl:71.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:13]
+Progress: 3|2%, EfCl:69.3, AlCl:70.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:15]
+Progress: 4|2%, EfCl:69.5, AlCl:70.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:17]
+Progress: 5|3%, EfCl:69.6, AlCl:70.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:20]
+
+WARNING: [executor] Gem5 crashed!!
+A buggy test was found
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 6|3%, EfCl:58.0, AlCl:58.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:22]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 7|4%, EfCl:49.7, AlCl:50.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:24]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 8|4%, EfCl:43.5, AlCl:44.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:26]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 9|5%, EfCl:38.7, AlCl:39.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:28]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 10|5%, EfCl:34.8, AlCl:35.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:30]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 11|6%, EfCl:31.6, AlCl:32.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:32]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 12|6%, EfCl:29.0, AlCl:29.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:34]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 13|7%, EfCl:26.8, AlCl:27.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:36]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 14|7%, EfCl:24.9, AlCl:25.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:38]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 15|8%, EfCl:23.2, AlCl:23.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:40]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 16|8%, EfCl:21.8, AlCl:22.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:42]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 17|9%, EfCl:20.5, AlCl:20.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:44]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 18|9%, EfCl:19.3, AlCl:19.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:46]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 19|10%, EfCl:18.3, AlCl:18.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:48]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 20|10%, EfCl:17.4, AlCl:17.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:50]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 21|11%, EfCl:16.6, AlCl:16.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:52]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 22|11%, EfCl:15.8, AlCl:16.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:54]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 23|12%, EfCl:15.1, AlCl:15.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:56]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 24|12%, EfCl:14.5, AlCl:14.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:29:58]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 25|13%, EfCl:13.9, AlCl:14.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:00]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 26|13%, EfCl:13.4, AlCl:13.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:02]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 27|14%, EfCl:12.9, AlCl:13.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:04]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 28|14%, EfCl:12.4, AlCl:12.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:06]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 29|15%, EfCl:12.0, AlCl:12.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:08]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 30|15%, EfCl:11.6, AlCl:11.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:10]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 31|16%, EfCl:11.2, AlCl:11.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:12]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 32|16%, EfCl:10.9, AlCl:11.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:14]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 33|17%, EfCl:10.5, AlCl:10.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:16]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 34|17%, EfCl:10.2, AlCl:10.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:18]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 35|18%, EfCl:9.9, AlCl:10.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:20]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 36|18%, EfCl:9.7, AlCl:9.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:22]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 37|19%, EfCl:9.4, AlCl:9.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:24]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 38|19%, EfCl:9.2, AlCl:9.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:26]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 39|20%, EfCl:8.9, AlCl:9.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:28]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 40|20%, EfCl:8.7, AlCl:8.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:30]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 41|21%, EfCl:8.5, AlCl:8.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:32]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 42|21%, EfCl:8.3, AlCl:8.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:34]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 43|22%, EfCl:8.1, AlCl:8.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:36]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 44|22%, EfCl:7.9, AlCl:8.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:38]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 45|23%, EfCl:7.7, AlCl:7.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:40]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 46|23%, EfCl:7.6, AlCl:7.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:42]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 47|24%, EfCl:7.4, AlCl:7.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:44]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 48|24%, EfCl:7.2, AlCl:7.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:46]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 49|25%, EfCl:7.1, AlCl:7.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:49]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 50|25%, EfCl:7.0, AlCl:7.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:51]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 51|26%, EfCl:6.8, AlCl:6.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:53]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 52|26%, EfCl:6.7, AlCl:6.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:55]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 53|27%, EfCl:6.6, AlCl:6.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:57]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 54|27%, EfCl:6.4, AlCl:6.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:30:59]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 55|28%, EfCl:6.3, AlCl:6.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:01]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 56|28%, EfCl:6.2, AlCl:6.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:03]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 57|29%, EfCl:6.1, AlCl:6.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:05]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 58|29%, EfCl:6.0, AlCl:6.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:07]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 59|30%, EfCl:5.9, AlCl:6.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:09]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 60|30%, EfCl:5.8, AlCl:5.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:11]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 61|31%, EfCl:5.7, AlCl:5.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:13]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 62|31%, EfCl:5.6, AlCl:5.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:15]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 63|32%, EfCl:5.5, AlCl:5.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:17]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 64|32%, EfCl:5.4, AlCl:5.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:19]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 65|33%, EfCl:5.4, AlCl:5.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:21]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 66|33%, EfCl:5.3, AlCl:5.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:23]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 67|34%, EfCl:5.2, AlCl:5.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:25]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 68|34%, EfCl:5.1, AlCl:5.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:27]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 69|35%, EfCl:5.0, AlCl:5.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:29]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 70|35%, EfCl:5.0, AlCl:5.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:31]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 71|36%, EfCl:4.9, AlCl:5.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:33]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 72|36%, EfCl:4.8, AlCl:4.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:35]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 73|37%, EfCl:4.8, AlCl:4.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:37]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 74|37%, EfCl:4.7, AlCl:4.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:39]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 75|38%, EfCl:4.6, AlCl:4.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:41]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 76|38%, EfCl:4.6, AlCl:4.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:43]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 77|39%, EfCl:4.5, AlCl:4.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:45]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 78|39%, EfCl:4.5, AlCl:4.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:47]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 79|40%, EfCl:4.4, AlCl:4.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:49]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 80|40%, EfCl:4.3, AlCl:4.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:51]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 81|41%, EfCl:4.3, AlCl:4.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:53]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 82|41%, EfCl:4.2, AlCl:4.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:55]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 83|42%, EfCl:4.2, AlCl:4.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:57]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 84|42%, EfCl:4.1, AlCl:4.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:31:59]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 85|43%, EfCl:4.1, AlCl:4.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:01]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 86|43%, EfCl:4.0, AlCl:4.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:03]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 87|44%, EfCl:4.0, AlCl:4.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:06]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 88|44%, EfCl:4.0, AlCl:4.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:08]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 89|45%, EfCl:3.9, AlCl:4.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:10]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 90|45%, EfCl:3.9, AlCl:3.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:12]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 91|46%, EfCl:3.8, AlCl:3.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:14]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 92|46%, EfCl:3.8, AlCl:3.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:16]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 93|47%, EfCl:3.7, AlCl:3.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:18]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 94|47%, EfCl:3.7, AlCl:3.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:20]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 95|48%, EfCl:3.7, AlCl:3.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:22]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 96|48%, EfCl:3.6, AlCl:3.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:24]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 97|49%, EfCl:3.6, AlCl:3.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:26]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 98|49%, EfCl:3.6, AlCl:3.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:28]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 99|50%, EfCl:3.5, AlCl:3.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:30]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 100|50%, EfCl:3.5, AlCl:3.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:32]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 101|51%, EfCl:3.4, AlCl:3.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:34]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 102|51%, EfCl:3.4, AlCl:3.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:36]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 103|52%, EfCl:3.4, AlCl:3.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:38]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 104|52%, EfCl:3.3, AlCl:3.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:40]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 105|53%, EfCl:3.3, AlCl:3.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:42]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 106|53%, EfCl:3.3, AlCl:3.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:44]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 107|54%, EfCl:3.3, AlCl:3.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:46]
+
+WARNING: [executor] Gem5 crashed!!
+A buggy test was found
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 108|54%, EfCl:3.2, AlCl:3.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:48]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 109|55%, EfCl:3.2, AlCl:3.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:50]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 110|55%, EfCl:3.2, AlCl:3.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:52]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 111|56%, EfCl:3.1, AlCl:3.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:54]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 112|56%, EfCl:3.1, AlCl:3.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:56]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 113|57%, EfCl:3.1, AlCl:3.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:32:58]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 114|57%, EfCl:3.1, AlCl:3.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:00]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 115|58%, EfCl:3.0, AlCl:3.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:02]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 116|58%, EfCl:3.0, AlCl:3.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:04]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 117|59%, EfCl:3.0, AlCl:3.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:06]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 118|59%, EfCl:2.9, AlCl:3.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:08]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 119|60%, EfCl:2.9, AlCl:3.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:11]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 120|60%, EfCl:2.9, AlCl:2.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:12]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 121|61%, EfCl:2.9, AlCl:2.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:15]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 122|61%, EfCl:2.9, AlCl:2.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:16]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 123|62%, EfCl:2.8, AlCl:2.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:19]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 124|62%, EfCl:2.8, AlCl:2.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:21]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 125|63%, EfCl:2.8, AlCl:2.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:23]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 126|63%, EfCl:2.8, AlCl:2.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:25]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 127|64%, EfCl:2.7, AlCl:2.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:27]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 128|64%, EfCl:2.7, AlCl:2.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:29]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 129|65%, EfCl:2.7, AlCl:2.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:31]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 130|65%, EfCl:2.7, AlCl:2.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:33]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 131|66%, EfCl:2.7, AlCl:2.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:35]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 132|66%, EfCl:2.6, AlCl:2.7, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:38]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 133|67%, EfCl:2.6, AlCl:2.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:40]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 134|67%, EfCl:2.6, AlCl:2.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:42]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 135|68%, EfCl:2.6, AlCl:2.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:44]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 136|68%, EfCl:2.6, AlCl:2.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:46]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 137|69%, EfCl:2.5, AlCl:2.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:48]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 138|69%, EfCl:2.5, AlCl:2.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:50]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 139|70%, EfCl:2.5, AlCl:2.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:52]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 140|70%, EfCl:2.5, AlCl:2.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:54]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 141|71%, EfCl:2.5, AlCl:2.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:56]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 142|71%, EfCl:2.5, AlCl:2.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:33:58]
+
+WARNING: [executor] Gem5 crashed!!
+A buggy test was found
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 143|72%, EfCl:2.4, AlCl:2.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:00]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 144|72%, EfCl:2.4, AlCl:2.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:03]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 145|73%, EfCl:2.4, AlCl:2.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:05]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 146|73%, EfCl:2.4, AlCl:2.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:07]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 147|74%, EfCl:2.4, AlCl:2.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:09]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 148|74%, EfCl:2.4, AlCl:2.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:12]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 149|75%, EfCl:2.3, AlCl:2.4, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:14]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 150|75%, EfCl:2.3, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:16]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 151|76%, EfCl:2.3, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:18]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 152|76%, EfCl:2.3, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:20]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 153|77%, EfCl:2.3, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:22]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 154|77%, EfCl:2.3, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:24]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 155|78%, EfCl:2.2, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:26]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 156|78%, EfCl:2.2, AlCl:2.3, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:28]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 157|79%, EfCl:2.2, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:30]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 158|79%, EfCl:2.2, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:32]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 159|80%, EfCl:2.2, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:34]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 160|80%, EfCl:2.2, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:36]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 161|81%, EfCl:2.2, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:38]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 162|81%, EfCl:2.1, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:40]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 163|82%, EfCl:2.1, AlCl:2.2, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:42]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 164|82%, EfCl:2.1, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:44]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 165|83%, EfCl:2.1, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:47]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 166|83%, EfCl:2.1, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:49]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 167|84%, EfCl:2.1, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:51]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 168|84%, EfCl:2.1, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:53]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 169|85%, EfCl:2.1, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:55]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 170|85%, EfCl:2.0, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:57]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 171|86%, EfCl:2.0, AlCl:2.1, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:34:59]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 172|86%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:01]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 173|87%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:03]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 174|87%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:05]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 175|88%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:07]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 176|88%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:09]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 177|89%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:11]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 178|89%, EfCl:2.0, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:13]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 179|90%, EfCl:1.9, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:15]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 180|90%, EfCl:1.9, AlCl:2.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:18]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 181|91%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:20]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 182|91%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:22]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 183|92%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:24]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 184|92%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:26]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 185|93%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:28]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 186|93%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:30]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 187|94%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:32]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 188|94%, EfCl:1.9, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:35]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 189|95%, EfCl:1.8, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:37]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 190|95%, EfCl:1.8, AlCl:1.9, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:39]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 191|96%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:41]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 192|96%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:43]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 193|97%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:45]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 194|97%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:47]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 195|98%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:49]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 196|98%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:51]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 197|99%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:54]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 198|99%, EfCl:1.8, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:56]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 199|100%, EfCl:1.7, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:35:58]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+Progress: 200|100%, EfCl:1.7, AlCl:1.8, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-15 23:36:00]
+Buggy test case detected for process bench_time1CleanupSpec_config0_round3!
+
+Duration Elapsed: 0hrs-6mins-53secs
+Finished at 23:36:00
+1 violations found
+
+[2026-11-15 23:36:00]

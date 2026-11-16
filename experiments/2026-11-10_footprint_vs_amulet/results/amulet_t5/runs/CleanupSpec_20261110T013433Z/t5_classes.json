@@ -1,0 +1,592 @@
+{
+ "defense": "CleanupSpec",
+ "run": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z",
+ "selection": "first_per_instance",
+ "counts": {
+  "UV3": 31
+ },
+ "violations": [
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-16secs",
+   "round": 0,
+   "elapsed": 16,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-16secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2b40"
+      ],
+      "primer_only": [
+       "0x2f80"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-55secs",
+   "round": 1,
+   "elapsed": 115,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-55secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x22c0"
+      ],
+      "primer_only": [
+       "0x2e80"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-48secs",
+   "round": 2,
+   "elapsed": 48,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-48secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [],
+      "primer_only": [
+       "0x28c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-16secs-797883us",
+   "round": 3,
+   "elapsed": 16.797883,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-16secs-797883us/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2480"
+      ],
+      "primer_only": [
+       "0x2880"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-25secs",
+   "round": 5,
+   "elapsed": 25,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-25secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2940"
+      ],
+      "primer_only": [
+       "0x2bc0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-11secs",
+   "round": 6,
+   "elapsed": 11,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-11secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2880"
+      ],
+      "primer_only": []
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-02mins-35secs",
+   "round": 7,
+   "elapsed": 155,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-02mins-35secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [],
+      "primer_only": [
+       "0x2040"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-13secs-923754us",
+   "round": 8,
+   "elapsed": 73.923754,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-13secs-923754us/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2bc0"
+      ],
+      "primer_only": [
+       "0x21c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-41secs",
+   "round": 9,
+   "elapsed": 41,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-41secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2d40"
+      ],
+      "primer_only": [
+       "0x2340"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-03mins-45secs",
+   "round": 10,
+   "elapsed": 225,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-03mins-45secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x27c0"
+      ],
+      "primer_only": [
+       "0x26c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-15secs",
+   "round": 11,
+   "elapsed": 15,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-15secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x28c0"
+      ],
+      "primer_only": [
+       "0x2780"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-52secs",
+   "round": 12,
+   "elapsed": 112,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-52secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2480"
+      ],
+      "primer_only": [
+       "0x2400"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-01secs",
+   "round": 13,
+   "elapsed": 61,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-01secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2300"
+      ],
+      "primer_only": [
+       "0x2500"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-59secs",
+   "round": 14,
+   "elapsed": 59,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-59secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2600"
+      ],
+      "primer_only": [
+       "0x2b80"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-15secs-276396us",
+   "round": 15,
+   "elapsed": 15.276396,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-15secs-276396us/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2a40"
+      ],
+      "primer_only": []
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-04secs",
+   "round": 16,
+   "elapsed": 4,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-04secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x22c0"
+      ],
+      "primer_only": [
+       "0x2540"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-02mins-05secs",
+   "round": 17,
+   "elapsed": 125,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-02mins-05secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2200",
+       "0x22c0"
+      ],
+      "primer_only": [
+       "0x2640",
+       "0x2b80"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-54secs",
+   "round": 18,
+   "elapsed": 114,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-54secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2880"
+      ],
+      "primer_only": [
+       "0x2040",
+       "0x2080"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-44secs",
+   "round": 19,
+   "elapsed": 104,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-44secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2980"
+      ],
+      "primer_only": [
+       "0x2900"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-35secs",
+   "round": 20,
+   "elapsed": 95,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-35secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2940"
+      ],
+      "primer_only": [
+       "0x2a40"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-03secs",
+   "round": 21,
+   "elapsed": 63,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-03secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2cc0"
+      ],
+      "primer_only": []
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-44secs-739184us",
+   "round": 22,
+   "elapsed": 104.739184,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-44secs-739184us/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2f80"
+      ],
+      "primer_only": [
+       "0x2340"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-26secs",
+   "round": 23,
+   "elapsed": 86,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-26secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2e80"
+      ],
+      "primer_only": [
+       "0x21c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-09secs",
+   "round": 24,
+   "elapsed": 69,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-09secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2180"
+      ],
+      "primer_only": [
+       "0x2740"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-10secs",
+   "round": 25,
+   "elapsed": 10,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-10secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2080"
+      ],
+      "primer_only": [
+       "0x29c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-03mins-09secs-998048us",
+   "round": 26,
+   "elapsed": 189.998048,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-03mins-09secs-998048us/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2d00"
+      ],
+      "primer_only": [
+       "0x27c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-12secs",
+   "round": 27,
+   "elapsed": 12,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-12secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2d40"
+      ],
+      "primer_only": [
+       "0x2680"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-33secs",
+   "round": 28,
+   "elapsed": 33,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-33secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2a00"
+      ],
+      "primer_only": [
+       "0x22c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-30secs",
+   "round": 29,
+   "elapsed": 30,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-30secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2d80"
+      ],
+      "primer_only": [
+       "0x26c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-53secs",
+   "round": 30,
+   "elapsed": 113,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-01mins-53secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2e80"
+      ],
+      "primer_only": [
+       "0x22c0"
+      ]
+     }
+    }
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-06secs",
+   "round": 31,
+   "elapsed": 6,
+   "class": "UV3",
+   "evidence": {
+    "amulet_classifier_output": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/CleanupSpec_20261110T013433Z/benchmark-out-CleanupSpec/config0results/0hrs-00mins-06secs/cs_classify_t5: Speculative Store Not Cleaned",
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2f00"
+      ],
+      "primer_only": [
+       "0x20c0"
+      ]
+     }
+    }
+   }
+  }
+ ]
+}

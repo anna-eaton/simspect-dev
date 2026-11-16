@@ -296,7 +296,7 @@ def _eval_balance(crit, tm, obs, is_actor, in_W, lc_retire, fnc_retire, lc_seq) 
     k_inst = set(terms["installed"]["kinds"]); k_ev = set(terms["evicted"]["kinds"])
     k_inv = set(terms["invalidated"]["kinds"]); k_rest = set(terms["restored"]["kinds"])
     k_rep = set(terms.get("reported_not_undo", {}).get("kinds", []))
-    # Ownership transfer (CleanupSpec §3.4 p7; Anna 2026-11-08 "count as both"):
+    # Ownership transfer (CleanupSpec §3.4 p7; counted as both):
     # a NON-squashed access A that hits a line a squashed actor S installed, with
     # A.seq < S.seq (older in program order), takes over that line's presence:
     # keeping it is correct, invalidating it in cleanup is over_clean (UV5). S's
@@ -487,7 +487,7 @@ def evaluate_trace(trace_path, crit: dict, lc_pc=None, fnc_pc=None, unresolved=N
     """`by_pc`: the caller's parse_pipeview result. process_one passes the one it
     filled from the Commit trace (gem5_common.fill_retire_from_commit); re-parsing
     here dropped that fill, so a committed lc with no O3PipeView record was
-    disqualified as never retired (114/3000 InvisiSpec tests, 2026-11-08)."""
+    disqualified as never retired."""
     trace_path = Path(trace_path)
     events = parse_simspect_events(trace_path)
     if actor_mode is None:

@@ -1,0 +1,170 @@
+{
+ "_doc": "Curated annotations for each Alloy model, keyed by .als stem. Merged with the auto-parsed model_inventory (defense family, instr scope, transmitters, xml count) to drive the dashboard Utilities > Alloy models table. 'tier' groups the table: production (latestmodels/), variant, bugsynth-probe, legacy. 'summary' = what the model encodes; 'intention' = why we run it. Source: wiki/design/MODELS_AND_BUILDS.md. Do NOT edit any .als without Anna's per-change sign-off (CLAUDE.md).",
+ "_last_reviewed": "2026-10-21",
+ "tiers": {
+  "production": "latest / production models (latestmodels/) — primary enumeration targets",
+  "variant": "variant of a production model (different defense-contract or generation driver)",
+  "bugsynth": "bug-synthesis probe (bugsynth/models/) — targeted at a specific gadget/channel gap",
+  "legacy": "development-history / superseded — park or reference only"
+ },
+ "annotations": {
+  "STT_6": {
+   "tier": "production",
+   "summary": "Canonical STT (Speculative Taint Tracking). Protect at state/memory level (hardware_protection_policy = Mem_s). Transmitters = loads(inaddr)+branches(inreg). Per-branch resolution-minimality.",
+   "intention": "The main STT model — baseline 'does the defense hold?' run against recon/stt builds.",
+   "caveat": "The per-branch minimality clause means it STRUCTURALLY CANNOT emit a two-source (in-degree>=2) merge (~99.6% single-source). See OTB_GENERATION_GAP.md; STT_6_multisource/bugsynth exist to work around this.",
+   "aliases": "STT_6_interleave, STT_all (symlinks); interleave is a config/parsexml knob, not a separate model"
+  },
+  "STT_6_futuristic": {
+   "tier": "variant",
+   "summary": "STT_6 under STT's Futuristic threat model: any older instruction that has not COMPLETED is a speculation source (isresolved = completed, for every kind), not only branches. Contract uncommitted & has_unresolved_any; loads past the VP declassify. Matches /work/stt --threatModel=Futuristic (isPrevInstsCompleted, rob_impl.hh:493-512).",
+   "intention": "Test STT-Futuristic builds (/work/stt with threatModel Futuristic). NOT for gem5-recon*/STT, whose threat model is control+store shadows only.",
+   "caveat": "PARKED 2026-11-07 (Anna): Futuristic is not STT's only mode (the harness runs Spectre), so it is tabled. 2026-10-30: written + SAT (500 instances in 7s), not reviewed by Anna. 2026-11-07: every source kind SAT; branch-only tests run on /work/stt with configs/example/se_futuristic.py (Futuristic 0/60, Unsafe 43/60). Load/ALU sources have no concretization mode (need a completion-hold hook). See wiki/design/FUTURISTIC_MODEL.md."
+  },
+  "STT_6_shadows": {
+   "tier": "draft",
+   "summary": "STT_6 under Recon-STT's threat model: speculation source = an older unresolved conditional branch OR an older store with an unresolved address (Recon paper Sec. 3.1; gem5-recon* decode.cc:686-695). Contract uncommitted & has_unresolved_brs_strs; loads past both shadows declassify. = proposal P1 in wiki/design/MODELS_AND_BUILDS.md PART 7.",
+   "intention": "Judge gem5-recon / -modded / -stl scheme-2 (Recon-STT) results against the threat model those builds implement, instead of branch-only STT_6.",
+   "caveat": "2026-11-07: DRAFT at STAGE1_alloy/models/proposed/STT_6_shadows.als (not approved; the pipeline does not read proposed/). Admits branch-only and store-only sources, not load/ALU (model_source_matrix.py). gem5 on 60 tests/shape: branch-only Recon-STT 1/60 (known SLF gadget) vs Unsafe 49/60; aliasing store-only 0/32 vs 32/32 sent in the hold. Store-only instances WITHOUT a true alias don't concretize (open DECIDE). See wiki/design/STT_VS_RECON_STT.md."
+  },
+  "Recon_6_stl": {
+   "tier": "draft",
+   "summary": "Recon_6 with the speculation source switched from unresolved branches to unresolved-ADDRESS stores (store-to-load speculation); every branch resolved; atom-based true-alias fact (every unresolved store has a younger load at or before the xmit naming the same Mem_s, no store to it in between). Made by STAGE1_alloy/models/proposed/derive_stl.py: the same edits that made STT_6_stl.",
+   "intention": "STL tests for ReCon (unit 5), whose shadow tracker casts store shadows. Run on /work/gem5-recon-stl.",
+   "caveat": "2026-11-08: DRAFT at STAGE1_alloy/models/proposed/Recon_6_stl.als (not approved). SAT, 60 instances in 10 s; 60/60 concretize with stl_bypass. Split core proposed_twophase/Recon_6_stl_core.als (RI-only) SAT at <=3 and <=4; Stage-1 run started 2026-11-08. Whether ReCon mode is enabled on gem5-recon-stl is not verified."
+  },
+  "SPT_6_oneLP_stl": {
+   "tier": "draft",
+   "summary": "SPT_6_oneLP with the speculation source switched to unresolved-ADDRESS stores; every branch resolved; atom-based true-alias fact. Made by derive_stl.py; SPT has no branch-keyed de-protection, so only the contract changed.",
+   "intention": "STL tests for SPT's FuturisticSafe* configs (unit 10). Not in the threat model of SPT's Spectre configs.",
+   "caveat": "2026-11-08: DRAFT, currently generates NOTHING: 0 instances in 900 s at exactly 6; its conservative core is UNSAT at <=3 and <=4. Cause (probes): SPT protects a load's output whatever location it reads, so the aliased Mem_s is never necessary and state-minimality (RS) rejects every aliasing instance. RS off or alias off -> SAT; the perturbation-aware seed does not help. Exempting the alias location from RS -> 60 in 10 s, 59/60 concretize. Decision pending (URGENT_TODO.md)."
+  },
+  "STT_6_stl": {
+   "tier": "variant",
+   "summary": "STT_6 with the speculation source switched from unresolved branches to unresolved-ADDRESS stores (store-to-load / memory-dependence speculation, STT Futuristic visibility point). Control-flow speculation off (all branches resolved). Requires a true alias: a load at or before the xmit reads the Mem_s an older unresolved store writes (false-negative alias prediction).",
+   "intention": "Generate Spectre-v4-style store-bypass tests. Concretize with branch mode stl_bypass; run with the SimSpect-STL gem5 hooks (gem5-hooks/stl/). See wiki/design/STL_SPECULATION.md.",
+   "caveat": "Added 2026-10-28 (Anna approved as a new file). Contract is a structural mirror of STT_6's branch contract; still to be checked against the STT paper. Under STT's Spectre threat model these loads are not protected, so the gem5 run must use a threat model that covers memory-dependence speculation."
+  },
+  "STT_6_commitsplit": {
+   "tier": "variant",
+   "summary": "STT_6 with the commit boundary split in two: C = must be committed (prefix), U = must still be uncommitted (suffix, contains every unresolved instruction), D = don't-care middle. The leak must hold at every commit-head position in D; C and U are each shrunk as far as that allows (laxest leaking boundary). Every unresolved instruction must on its own sustain the leak (MINIMALITY_TAGALONG_FIX.md 3.1 variant 2), so unresolved branches may be several and non-contiguous. Replaces STT_6's per-branch clause (b) and boundary clause (c); defense/contract otherwise identical.",
+   "intention": "Generate tests whose lc/fnc are only as strict as the leak needs, so the harness can enforce them strictly instead of relying on timing to place the commit head. parsexml reads the new isuncommitted field (fnc = first of U). See wiki/design/COMMIT_BOUNDARY.md.",
+   "caveat": "Added 2026-10-29 as a new file at Anna's request (STT_6.als untouched). Not yet reviewed by Anna clause by clause. First 200 instances: C always empty and fnc always the first unresolved branch (commit is not load-bearing in STT's taint rules); 24% have 2-3 unresolved branches, 7% non-contiguous. Multi-branch concretization not yet validated on gem5."
+  },
+  "SPT_6_oneLP": {
+   "tier": "production",
+   "summary": "SPT (Speculative Privacy Tracking), one-leak-point. Operand-granularity protection + untaint flows + STLF de-protection (inaddr too). Transmitters add stores(inaddr). Requires EXACTLY one insecure point.",
+   "intention": "The main SPT model, run against gem5-spt (fence + untaint variants). Store-address transmitters produced the ~24 untriaged str hits (need a store checker)."
+  },
+  "SPT_6_oneLP_v2": {
+   "tier": "production",
+   "summary": "PRODUCTION SPT model (APPROVED by Anna 2026-11-08; replaces SPT_6_oneLP, kept unchanged for provenance): consolidated SPT for the final batch. SPT_6_oneLP + 4 marked changes: [v2-1] rf_from_most_recent_writer (skeleton sync with STT_6), [v2-2] perturbation-aware protection seed (simspect-c8/twophase-spt fix, audited: no instance lost), [v2-3] base clause >=1 insecure transmitter (skeleton form), [v2-4] declassification only of the transmitted value, not its whole backward cone (SPT paper Sec. 6 backward rules untaint less).",
+   "intention": "Recommended SPT model for the final batch (brief consolidated into wiki/state/EVAL_MANIFEST.md). Stage-1 core: proposed_twophase/SPT_6_oneLP_v2_core_ri.als (RI-only, per the 2026-11-08 decision; 546 at but 3); fallback SPT_6_oneLP_v2_core_conservative.als. Evidence: results/spt_v2_20261108/, wiki/state/ALLOY_MODEL_CHANGES.md 2026-11-08."
+  },
+  "Recon_6": {
+   "tier": "production",
+   "summary": "Recon — dynamic/parameterized protection: Mem_s minus state reachable backward through data-dependence from speculative loads. Does NOT carry rf_from_most_recent_writer (grep 2026-11-08; only the STT_6 family has it; proposal P1 in wiki/state/ALLOY_MODEL_CHANGES.md).",
+   "intention": "The Recon defense under test, run against gem5-recon-modded. Where the two real recon bugs reproduced: OTB/getOldestTaint + STL/SLF bypass."
+  },
+  "STT_6_core": {
+   "tier": "variant",
+   "summary": "Staged-enumeration base: idx/IX ordering removed, length 'up to 6', driver turns on EVERY minimality clause (RO+RI) -> maximally-minimized leak cores.",
+   "intention": "Emit minimal cores, then Stage 2 re-seeds each into real STT_6 and lets it grow. See STAGED_ENUMERATION.md."
+  },
+  "STT_6_multisource": {
+   "tier": "variant",
+   "summary": "STT with minimality relaxed per-branch -> aggregate (resolving ALL speculation secures it). Admits in-degree>=2 merges.",
+   "intention": "The dedicated OTB / getOldestTaint two-source-merge enumeration model. Built, not yet enumerated."
+  },
+  "STT_6_pincommit": {
+   "tier": "variant",
+   "summary": "STT_6 + rf_from_most_recent_writer fact (rf must read the most-recent writer of a state — 'Option A').",
+   "intention": "Contract experiment on rf resolution. Never enumerated."
+  },
+  "STT_6_modified_protset": {
+   "tier": "variant",
+   "summary": "STT at OPERAND granularity (not state) + rf_from_most_recent_writer + first_uncommitted fallback to first_instr.",
+   "intention": "Contract experiment: STT-at-operand-granularity. Never enumerated."
+  },
+  "SPT_6": {
+   "tier": "variant",
+   "summary": "Base/full SPT, operand-granularity (hardware_protection_policy = Instruction.operands). No one-leak-point restriction; no store transmitters.",
+   "intention": "The full/base SPT model (SPT_6_full is a symlink to this)."
+  },
+  "SPT_6_full": {
+   "tier": "variant",
+   "summary": "Symlink -> SPT_6.",
+   "intention": "Alias of SPT_6."
+  },
+  "SPT_6_oneLP_noSTLF": {
+   "tier": "variant",
+   "summary": "SPT_6_oneLP minus store-to-load-forwarding paths — leakage back to loads+branches only, inreg-only de-protection.",
+   "intention": "Control: isolates whether STLF is the leak source vs the oneLP STLF additions. Never enumerated."
+  },
+  "STT_6_interleave": {
+   "tier": "variant",
+   "summary": "Symlink -> STT_6. Chain interleaving is applied in parsexml (config knob), not a separate enumeration.",
+   "intention": "Alias of STT_6; interleave campaigns exist (run vs recon + sttbuild)."
+  },
+  "STT_all": {
+   "tier": "variant",
+   "summary": "Symlink -> STT_6.",
+   "intention": "Alias of STT_6 (used for the larger 250k campaign naming)."
+  },
+  "STT_6_alupath": {
+   "tier": "bugsynth",
+   "summary": "General 'ALU-on-address-path' steering (some ALU.outreg feeds xmit.inaddr) + relaxed driver (no per-branch RR).",
+   "intention": "Test whether the OTB 2-load merge appears NATURALLY in that stratum. Not a pinned shape."
+  },
+  "STT_6_otb": {
+   "tier": "bugsynth",
+   "summary": "otb_class predicate: force an ALU to feed the xmit load address so the capped enumeration spends budget there; 2nd tainted load hooked on by parsexml:pass_interleave.",
+   "intention": "Manufacture the getOldestTaint merge generally via interleave (merge not asserted in Alloy)."
+  },
+  "STT_6_otb2": {
+   "tier": "bugsynth",
+   "summary": "Expresses the full 2-load -> 2-input-ALU -> xmit merge DIRECTLY in Alloy (both ALU inputs rf-fed by distinct loads).",
+   "intention": "OTB merge without interleave — the shape stated explicitly."
+  },
+  "STT_6_pendsquash": {
+   "tier": "bugsynth",
+   "summary": "Pending-squash channel (nmosier two-branch coincidence): explicit tainted-operand dataflow + tainted-vs-untainted branch-condition predicates.",
+   "intention": "Probe the pending-squash / two-branch-coincidence channel."
+  },
+  "STT_5": {
+   "tier": "legacy",
+   "summary": "STT development lineage.",
+   "intention": "Superseded by STT_6."
+  },
+  "STT_5_ld_xmit_only": {
+   "tier": "legacy",
+   "summary": "STT_5 with loads-only transmitters.",
+   "intention": "Superseded."
+  },
+  "STT_4": {
+   "tier": "legacy",
+   "summary": "STT development lineage.",
+   "intention": "Superseded by STT_6."
+  },
+  "STT_4_new": {
+   "tier": "legacy",
+   "summary": "STT development lineage.",
+   "intention": "Superseded by STT_6."
+  },
+  "STT_3": {
+   "tier": "legacy",
+   "summary": "STT development lineage.",
+   "intention": "Superseded by STT_6."
+  },
+  "STT_2": {
+   "tier": "legacy",
+   "summary": "STT development lineage.",
+   "intention": "Superseded by STT_6."
+  },
+  "LP-only-STT_3": {
+   "tier": "legacy",
+   "summary": "Leak-point-only STT_3 variant.",
+   "intention": "Superseded."
+  }
+ }
+}

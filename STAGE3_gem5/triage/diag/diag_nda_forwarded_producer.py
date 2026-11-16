@@ -6,7 +6,7 @@ its data by store-to-load forwarding. The forward's WritebackEvent calls writeba
 NDA's delay (lsq_unit.cc:2008-2012, :77-86 vs the delay in completeDataAccess :194-210), so P's value
 wakes the transmitter at once. Real NDA implementation defect; whether it is a security leak (the
 forwarded value is register data from an older in-flight store) is Q6 / R-SA-18
-(wiki/findings/audits/2026-11-08/SOURCE_AUDIT_RECON.md R-SA-18 'gem5 check', bug-investigate-ndastl).
+(wiki/findings/audits/2026-11-08/SOURCE_AUDIT_RECON.md R-SA-18 'gem5 check').
 
 Signature (diagnostics/nda_fwd_evidence.json, rerun_hits_evidence.py --analyzer nda_fwd, faithful rerun):
 the rerun reproduced the hit; the transmitter's static slice has exactly one producer load P

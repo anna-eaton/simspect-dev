@@ -1,0 +1,163 @@
+Found 6 file(s) in /private/tmp/claude-501/-Users-annaeaton-trippel-simspect/ad61697d-3171-412c-bae9-288ec3d59b8c/scratchpad/stlfail/on/Recon_6_u_stl/xml
+  [err]  inst-000006.xml  (stl_bypass):
+  [err]  inst-000121.xml  (stl_bypass):
+  [err]  inst-000122.xml  (stl_bypass):
+  [err]  inst-000171.xml  (stl_bypass):
+  [err]  inst-000179.xml  (stl_bypass):
+  [err]  inst-000182.xml  (stl_bypass):
+
+Done: 0/6 succeeded, 6/6 failed/skipped.
+Output written to: /private/tmp/claude-501/-Users-annaeaton-trippel-simspect/ad61697d-3171-412c-bae9-288ec3d59b8c/scratchpad/stlfail/on/Recon_6_u_stl/llvm
+
+=====STDERR
+Traceback (most recent call last):
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 216, in process_folder
+    run_pipeline(xml_text, stem, mode_dir, mode, _fns=_fns,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 interleave_cfg=interleave_cfg, fpr_cfg=fpr_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 reg_naming_cfg=reg_naming_cfg, fv2_cfg=fv2_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 stsep_cfg=stsep_cfg, brcond_cfg=brcond_cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 148, in run_pipeline
+    pass5(r4, func_name=vstem, out_path=str(ll_path), write_out=True,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          fpr_cfg=fpr_cfg or None, fv2_cfg=fv2_cfg or None,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          stsep_cfg=stsep_cfg or None, brcond_cfg=brcond_cfg or None)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 2454, in pass5_emit_llvm
+    _stl_store_retargets(pass4_result)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1272, in _stl_store_retargets
+    vals = _stl_arch_values(instructions, l["pc"], alloca_n, {**override, s["pc"]: None})
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1235, in _stl_arch_values
+    raise ValueError(f"stl_bypass: can't evaluate {c!r} at pc={rec['pc']}")
+ValueError: stl_bypass: can't evaluate 'cmov_rr' at pc=0
+Traceback (most recent call last):
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 216, in process_folder
+    run_pipeline(xml_text, stem, mode_dir, mode, _fns=_fns,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 interleave_cfg=interleave_cfg, fpr_cfg=fpr_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 reg_naming_cfg=reg_naming_cfg, fv2_cfg=fv2_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 stsep_cfg=stsep_cfg, brcond_cfg=brcond_cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 148, in run_pipeline
+    pass5(r4, func_name=vstem, out_path=str(ll_path), write_out=True,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          fpr_cfg=fpr_cfg or None, fv2_cfg=fv2_cfg or None,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          stsep_cfg=stsep_cfg or None, brcond_cfg=brcond_cfg or None)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 2454, in pass5_emit_llvm
+    _stl_store_retargets(pass4_result)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1272, in _stl_store_retargets
+    vals = _stl_arch_values(instructions, l["pc"], alloca_n, {**override, s["pc"]: None})
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1235, in _stl_arch_values
+    raise ValueError(f"stl_bypass: can't evaluate {c!r} at pc={rec['pc']}")
+ValueError: stl_bypass: can't evaluate 'cmov_rr' at pc=2
+Traceback (most recent call last):
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 216, in process_folder
+    run_pipeline(xml_text, stem, mode_dir, mode, _fns=_fns,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 interleave_cfg=interleave_cfg, fpr_cfg=fpr_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 reg_naming_cfg=reg_naming_cfg, fv2_cfg=fv2_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 stsep_cfg=stsep_cfg, brcond_cfg=brcond_cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 148, in run_pipeline
+    pass5(r4, func_name=vstem, out_path=str(ll_path), write_out=True,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          fpr_cfg=fpr_cfg or None, fv2_cfg=fv2_cfg or None,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          stsep_cfg=stsep_cfg or None, brcond_cfg=brcond_cfg or None)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 2454, in pass5_emit_llvm
+    _stl_store_retargets(pass4_result)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1272, in _stl_store_retargets
+    vals = _stl_arch_values(instructions, l["pc"], alloca_n, {**override, s["pc"]: None})
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1196, in _stl_arch_values
+    check(space, off)
+    ~~~~~^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1188, in check
+    raise ValueError(f"stl_bypass: access {space}+{off} out of bounds")
+ValueError: stl_bypass: access probe+-1 out of bounds
+Traceback (most recent call last):
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 216, in process_folder
+    run_pipeline(xml_text, stem, mode_dir, mode, _fns=_fns,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 interleave_cfg=interleave_cfg, fpr_cfg=fpr_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 reg_naming_cfg=reg_naming_cfg, fv2_cfg=fv2_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 stsep_cfg=stsep_cfg, brcond_cfg=brcond_cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 148, in run_pipeline
+    pass5(r4, func_name=vstem, out_path=str(ll_path), write_out=True,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          fpr_cfg=fpr_cfg or None, fv2_cfg=fv2_cfg or None,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          stsep_cfg=stsep_cfg or None, brcond_cfg=brcond_cfg or None)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 2454, in pass5_emit_llvm
+    _stl_store_retargets(pass4_result)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1272, in _stl_store_retargets
+    vals = _stl_arch_values(instructions, l["pc"], alloca_n, {**override, s["pc"]: None})
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1235, in _stl_arch_values
+    raise ValueError(f"stl_bypass: can't evaluate {c!r} at pc={rec['pc']}")
+ValueError: stl_bypass: can't evaluate 'cmov_rr' at pc=1
+Traceback (most recent call last):
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 216, in process_folder
+    run_pipeline(xml_text, stem, mode_dir, mode, _fns=_fns,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 interleave_cfg=interleave_cfg, fpr_cfg=fpr_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 reg_naming_cfg=reg_naming_cfg, fv2_cfg=fv2_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 stsep_cfg=stsep_cfg, brcond_cfg=brcond_cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 148, in run_pipeline
+    pass5(r4, func_name=vstem, out_path=str(ll_path), write_out=True,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          fpr_cfg=fpr_cfg or None, fv2_cfg=fv2_cfg or None,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          stsep_cfg=stsep_cfg or None, brcond_cfg=brcond_cfg or None)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 2454, in pass5_emit_llvm
+    _stl_store_retargets(pass4_result)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1275, in _stl_store_retargets
+    raise ValueError(f"stl_bypass: bypass load pc={l['pc']} address {l_space}+{l_addr} out of bounds")
+ValueError: stl_bypass: bypass load pc=5 address probe+-1 out of bounds
+Traceback (most recent call last):
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 216, in process_folder
+    run_pipeline(xml_text, stem, mode_dir, mode, _fns=_fns,
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 interleave_cfg=interleave_cfg, fpr_cfg=fpr_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 reg_naming_cfg=reg_naming_cfg, fv2_cfg=fv2_cfg,
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                 stsep_cfg=stsep_cfg, brcond_cfg=brcond_cfg)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/batch_generate.py", line 148, in run_pipeline
+    pass5(r4, func_name=vstem, out_path=str(ll_path), write_out=True,
+    ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          fpr_cfg=fpr_cfg or None, fv2_cfg=fv2_cfg or None,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          stsep_cfg=stsep_cfg or None, brcond_cfg=brcond_cfg or None)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 2454, in pass5_emit_llvm
+    _stl_store_retargets(pass4_result)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1272, in _stl_store_retargets
+    vals = _stl_arch_values(instructions, l["pc"], alloca_n, {**override, s["pc"]: None})
+  File "/Users/annaeaton/trippel/simspect/STAGE2_compilation/parsexml.py", line 1235, in _stl_arch_values
+    raise ValueError(f"stl_bypass: can't evaluate {c!r} at pc={rec['pc']}")
+ValueError: stl_bypass: can't evaluate 'cmov_rr' at pc=3

@@ -1,0 +1,53 @@
+// regen-lp 2026-11-10 (HELD until Anna decides TA-4; minimality coneg = no relevance exemption): XML phase ONLY (pipeline.py xml) for the UNAPPROVED loose-pin draft Footprint_6_u_lpA_b2g.als (Anna approved the regeneration, LP-1/LP-2/LP-5 as decided 2026-11-10).
+// 16 random seeds + default order, parallel, 10,000 cap and 7,200 s per seed, walk_p 0.05, cross-seed fingerprint dedup (alloy_solver_order.py).
+// The family corpus is the merge of _lpP and _lpA_b2 (loosepin/merge_lp.py). Docs: wiki/design/TWO_PHASE_MODELS.md '2026-11-10 — Loose-pin regeneration (regen-lp)'.
+{
+  "paths": {
+    "alloy_stage": "/tests/simspect_alloy_20261108/loosepin_regen/code/STAGE1_alloy",
+    "models_dir": "/tests/simspect_alloy_20261108/loosepin_regen/models",
+    "stage2_dir": "/tests/simspect_alloy_20261108/loosepin_regen/code/STAGE2_compilation",
+    "instruction_tables": "/tests/simspect_alloy_20261108/loosepin_regen/code/STAGE2_compilation/instruction_tables/instructions.jsonc",
+    "stage3_dir": "/tests/simspect_alloy_20261108/loosepin_regen/code/STAGE3_gem5",
+    "testset_dir": "/tests/simspect_alloy_20261108/loosepin_regen/runs",
+    "results_dir": "/tests/simspect_alloy_20261108/loosepin_regen/results_unused",
+    "results_name": "Footprint_6_u_lpA_b2g"
+  },
+  "alloy": {
+    "max_instances": 10000,
+    "solver_order": {
+      "mode": "random",
+      "seeds": [
+        "default",
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ],
+      "walk_p": 0.05,
+      "parallel": true,
+      "timeout_s": 7200,
+      "xmx": "5g",
+      "keep_raw": true
+    }
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  }
+}

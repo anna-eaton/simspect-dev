@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 rerun_hits_evidence.py: faithful batched rerun of a testrun.py campaign's hits with traces kept only
-for the length of one batch, feeding one evidence analyzer (bucket-fv2, 2026-11-09).
+for the length of one batch, feeding one evidence analyzer.
 
 Why: the fanout-v2 campaigns ran with keep_tmp=false, so trace-based diagnostics (recon STLF bypass,
 CleanupSpec skip causes, SpecLFB UV6 tags, InvisiSpec UV1 req) need a rerun. Disk stays bounded:

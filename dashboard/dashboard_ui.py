@@ -929,11 +929,7 @@ function renderPipelineTimelineSvg(d) {
   return caption + svg + legend;
 }
 
-// ====== Legacy main-tab renderers (superseded by the Pipeline tab, kept for reuse) ======
-// renderGeneration()/renderFanout() predate the unified /api/pipeline view; the
-// Pipeline tab below folds in everything they showed (xml progress, per-mode
-// fanout counts, gem5 hits, jobs). Preserved rather than deleted in case a future
-// narrower view wants them again.
+// ====== Legacy main-tab renderers (superseded by the Pipeline tab) ======
 
 async function renderGeneration() {
   const data = await apiCall('/api/generation');
@@ -1039,12 +1035,7 @@ async function renderFanout() {
   return html;
 }
 
-// ====== Corpus drill-down (reused inside the Pipeline inspector modal) ======
-// These render functions used to live under a top-level "Corpora" tab; that tab
-// is gone (Pipeline/Status/Utilities replace it), but the XML and PROGRAMS boxes
-// on the Pipeline tab open these same views inside the inspector modal — see
-// refreshInspectorBody() below. Their internal navigation targets the modal
-// (refreshInspectorBody) instead of the old full-page main tab.
+// ====== Corpus drill-down (rendered inside the Pipeline inspector modal via refreshInspectorBody) ======
 
 async function renderCorpora() {
   if (state.selectedTest) {
@@ -1375,7 +1366,7 @@ async function openXmlInspector(model, pl, inv) {
 }
 
 // Instances section: a dropdown of the first N generated XML-instance stems
-// for this model, so Anna can inspect one right from the XML-card inspector.
+// for this model.
 async function loadXmlInstancesList(model) {
   const target = document.getElementById('xmlInstancesBody');
   if (!target) return;
@@ -1462,10 +1453,8 @@ function openProgramInspector(m, p) {
   }
 }
 
-// Minimal fallback when /api/run has no data for this campaign (e.g. running
-// on a checkout with no results/ — the rich viewer only has data once deployed
-// on the box that ran the sweep). Falls back to the summary pipeline_graph()
-// already gave us for this gem5 node.
+// Fallback when /api/run has no data for this campaign (no results/ on this host):
+// show the pipeline_graph() summary for this gem5 node.
 function renderGem5FallbackHtml(g, errMsg) {
   let rows = '';
   for (const mo of (g.modes || [])) {
@@ -1518,7 +1507,7 @@ function buildRunDetailHtml(data) {
     <span class="${totHits > 0 ? 'run-tot-hit' : ''}">${totHits} hits</span> / ${data.total_records || 0} records
   </div>`;
 
-  // Hits by mode × kind — the old run-monitor table.
+  // Hits by mode × kind.
   const modes = data.modes || [];
   const kindsSet = new Set();
   for (const m of modes) for (const k of (m.kinds || [])) kindsSet.add(k.kind || '-');
@@ -1571,10 +1560,8 @@ function buildRunDetailHtml(data) {
   return html;
 }
 
-// bucket drill-in: /api/run_hits now returns stems as {stem, mode} objects
-// (not bare strings) — each row is clickable and shows that test's program.
-// verdict is threaded through so the program panel knows whether to surface
-// "which transmitter check fired" (real_bug / NEW — the ones Anna cares about).
+// Bucket drill-in: /api/run_hits returns {stem, mode} rows; clicking one shows its program.
+// verdict is passed through so real_bug / NEW hits also show which transmitter check fired.
 async function loadRunHits(name, bucket, model, verdict) {
   const target = document.getElementById('runHitsBody');
   if (!target) return;
@@ -1602,7 +1589,7 @@ async function loadRunHits(name, bucket, model, verdict) {
 }
 
 // Stem click → the PROGRAM (clean body by default, toggle to full .s), the
-// REAL execution-graph overlay (no longer a stub), and — for real_bug / NEW
+// execution-graph overlay, and — for real_bug / NEW
 // buckets only — which transmitter check this hit fired against.
 async function loadRunStemProgram(model, mode, stem, verdict, resultsName) {
   const target = document.getElementById('runProgramBody');
@@ -2172,9 +2159,7 @@ async function renderAnnotationChecker() {
   return html;
 }
 
-// The detailed "did it actually leak" definition per transmitter kind (the
-// CLAUDE.md "Leak criteria" work), plus each defense's transmitter set —
-// surfaced here since it's the natural extension of "checkers by kind" above.
+// The "did it actually leak" definition per transmitter kind, plus each defense's transmitter set.
 function renderTransmitterCriteria(data) {
   if (!data || data.error) {
     return `<p class="err" style="margin-top:16px">Transmitter criteria unavailable${data && data.error ? ': ' + esc(data.error) : ''}</p>`;
@@ -2364,7 +2349,7 @@ async function renderXmlGraphUtil() {
     <button class="primary" onclick="loadXmlGraphUtil()">Render graph</button>
     <div id="xmlGraphBody" style="margin-top:14px"></div>
   `;
-  // Auto-render the default (STT_6 / inst-000001) so it's zero-click "for fun".
+  // Auto-render the default (STT_6 / inst-000001).
   setTimeout(() => { if (document.getElementById('xvStem')) loadXmlGraphUtil(); }, 60);
   return html;
 }
@@ -2415,8 +2400,7 @@ async function renderProgramUtil() {
     <button class="primary" onclick="loadProgramUtil()">Show program</button>
     <div id="programUtilBody" style="margin-top:14px"></div>
   `;
-  // Auto-render the default (STT_6 / mispredict_not_taken / inst-000001), same
-  // zero-click convenience as the XML-graph util.
+  // Auto-render the default (STT_6 / mispredict_not_taken / inst-000001).
   setTimeout(() => { if (document.getElementById('pgStem')) loadProgramUtil(); }, 60);
   return html;
 }
@@ -2584,9 +2568,7 @@ function buildExecGraphView(data) {
 function ensureEgModal() {
   let m = document.getElementById('egModal');
   if (m) return m;
-  // .eg-modal/.eg-legend/etc. live in the page's main <style> now (so the
-  // Utilities "XML graph" inline viewer is styled even if this modal is
-  // never opened); this function just creates the modal element itself.
+  // .eg-modal/.eg-legend styles live in the main <style>; this only creates the modal element.
   m = document.createElement('div');
   m.id = 'egModal';
   m.className = 'eg-modal';
@@ -2978,16 +2960,13 @@ async function showUtilSection(id) {
   stamp();
 }
 
-// Backward-compatible alias: legacy renderFanout()'s "Launch new fanout" button
-// calls showUtilTab('launch'); keep it working by routing through the new
-// Utilities tab + section.
+// Alias used by legacy renderFanout()'s "Launch new fanout" button.
 function showUtilTab(id) {
   switchMainTab('utilities');
   showUtilSection(id);
 }
 
-// ====== Eval manifest tab (Anna 2026-11-08: "make sure that this dashboard (add a page)
-// has the official experiment manifest and the statuses") ======
+// ====== Eval manifest tab ======
 // The official experiment list = wiki/state/EVAL_MANIFEST.md + its machine copy
 // specs/defense_units.json (unit.eval rows, T rows, C rows), plus the live status of
 // every run registered in specs/eval_runs.json (each points at a status JSON its

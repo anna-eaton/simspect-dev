@@ -1,0 +1,9 @@
+[2026-11-16 02:48:33] STREAM START config=/tests/bigcorpus_20261115/code/runconfigs/bigcorpus_20261115/T2g_Footprint_6_u_core_lpP_s2A.jsonc model=Footprint_6_u_core_lpP_s2A testset=/tests/bigcorpus_20261115/testsets/Footprint_6_u_core_lpP_s2A seed=20261109 parallel=1 poll=5s n_max=0 sample_frac=1.0 TMPDIR=/tmp cache_setup=random_all sweep={'enabled': True, 'points': [0], 'unresolved_stall_cycles': 5000, 'timing_grid': {'unresolved': [2500, 5000, 10000], 'resolved': [0, 500, 2500], 'seed': 'tgrid-v1'}} pid=4169947 loadavg=(60.15, 77.11, 81.49)
+[2026-11-16 02:48:33] only-file: 1 pairs
+[2026-11-16 02:48:33] resume: 0 done, next idx 0, partition=all, excluded (run elsewhere)=0
+[2026-11-16 02:48:37] producer READY: seed order of 124104 pairs written (order_seed.tsv); queue now runs in seed order
+[2026-11-16 02:48:37] poll: 124104 complete pairs, 1 new, queue 1, inflight 0, done 0, skipped_provenance_new=0 (total 0), producer_ready=True, loadavg=(59.58, 76.7, 81.34)
+[2026-11-16 02:48:44] idx=0 mispredict_not_taken/inst-061878 status=ok hit=True kind=ld setup=cold gem5_cpu=2.275s total_cpu=6.322s terms=['over_clean']
+[2026-11-16 02:48:46] poll: 124104 complete pairs, 0 new, queue 0, inflight 0, done 1, skipped_provenance_new=0 (total 0), producer_ready=True, loadavg=(57.87, 75.78, 80.98)
+[2026-11-16 02:48:46] stopping (producer READY and nothing left); waiting for 0 in-flight tests
+[2026-11-16 02:48:46] STREAM END reason=producer READY and nothing left ran_this_session=1 total_done=1 loadavg=(57.87, 75.78, 80.98)

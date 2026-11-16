@@ -1,0 +1,1309 @@
+{
+ "family": "STT",
+ "agent": "singlestage-stt",
+ "date": "2026-11-09/10",
+ "cafe2_workspace": "/tests/singlestage_20261109 (gem5_dev container)",
+ "alloy_dir": "/tests/simspect_alloy_20261108/STAGE1_alloy",
+ "run_params": "run_flat.py --seeds default,1,2,3 --cap 10000 --timeout 1500 --jobs 4 (nice 5); census_flat.py --jobs 6",
+ "cores_used_for_V0": {
+  "STT_6": "/tests/simspect_alloy_20261108/out/STT_6_core_ri/k3/stage1_xml (129 inst-*.txt)",
+  "Recon_6": "/tests/simspect_alloy_20261108/out/Recon_6_core_ri (inst-*.txt only under k3/stage1_xml, 129)"
+ },
+ "verification": {
+  "defense_block": "For all 7 drafts: text from the 'Specific defense model' comment to EOF of the base (speculation_contract_p, hardware_protection_policy, leakage_function, prot_set_propagation_p) is a byte-identical prefix of the draft's tail; the only addition after it is 'fact s15_nospacer { all i: Instruction | some i.operands }' in the nospacer variants (checked with cmp, 2026-11-09).",
+  "other_diffs": "diff vs base: IX atoms/idx/idx_surjective/lt_ix regenerated for N, last_committed_protset_p fold regenerated N deep (innermost argument unchanged: hardware_protection_policy for STT_6, hardware_protection_policy[p] for Recon_6), run scope 'exactly N Instruction, 2N Operand, 6 Int' (default 'for 9' kept, so State scope unchanged), and for leak_rs the gen_useful_litmus body reduced to leak + RS (RR on unresolved-minus-boundary and the RC+RR boundary clause removed). Generator anchors matched both bases; no family generator script was needed.",
+  "body_reproducible": "lines 4.. of each draft are byte-identical to a fresh make_s15_model.py output with the command on line 2",
+  "lint": "check_bound_consistency.py OK on all 7 drafts and both bases (locally and on cafe2)",
+  "sha256_cafe2_matches_local": "yes for all 7 drafts and both base copies"
+ },
+ "smoke_runs_2026-11-10 (seeds default,7, cap 40, timeout 400; deleted afterwards)": {
+  "STT_6_flat_n8_prod": "default 40 CAPPED 56s; 7 40 CAPPED 106s",
+  "STT_6_flat_n8_prod_nospacer": "default 40 CAPPED 185s; 7 40 CAPPED 197s",
+  "STT_6_flat_n8_leakrs_nospacer": "default 40 CAPPED 106s; 7 40 CAPPED 128s",
+  "Recon_6_flat_n8_prod": "default 40 CAPPED 137s; 7 19 TIMEOUT 400s",
+  "Recon_6_flat_n8_prod_nospacer": "default 13 TIMEOUT 400s; 7 4 TIMEOUT 400s",
+  "Recon_6_flat_n8_leakrs_nospacer": "default 24 TIMEOUT 400s; 7 18 TIMEOUT 400s"
+ },
+ "node_load_note": "cafe2 load average ~45-63 (shared with 5 other singlestage agents) during V0-V2 and the first half of V3; ~10-25 during the end of V3 and the n10 run. Rates are therefore not directly comparable across variants.",
+ "observations": [
+  "V0 core coverage: every flat exactly-6 program that misses a Stage-1 core under the exact pin is exactly an alu_feeds_xmit program (STT_6 21141-20726=415=alu_feeds_xmit; Recon_6 16775-16383=392=alu_feeds_xmit); all are covered under the path pin.",
+  "At N=8 and N=10 the default SAT4J order produced 0 alu_feeds_xmit programs in every variant (thousands of instances); all ALU-on-path programs come from the seeded random runs (2-10% of their samples).",
+  "Under production minimality (V0, V1, V2, n10) every program has exactly 1 unresolved branch; leak_rs (V3) lets them pile up to 6 (STT_6) / 5 (Recon_6).",
+  "census 'unnecessary' does not count unresolved branches before xm, so V3's extra branches are not in its unnecessary numbers."
+ ],
+ "models": {
+  "Recon_6": {
+   "variant": "V0 n6_prod (base, unchanged)",
+   "base_file": "STAGE1_alloy/models/Recon_6.als",
+   "base_sha256": "6f30619586f1c2483c09f5b0d2b2d85557614f96593154b7e844cd769446c5ab",
+   "generator_command": null,
+   "base_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/Recon_6",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/base/Recon_6.als",
+   "model_sha256": "6f30619586f1c2483c09f5b0d2b2d85557614f96593154b7e844cd769446c5ab",
+   "scope": "for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/base/Recon_6.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 812,
+     "rc": 0,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/base/Recon_6.als /tests/singlestage_20261109/out/STT/Recon_6/default 10000",
+     "ended": "2026-11-10T01:42:47+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 4566,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/base/Recon_6.als /tests/singlestage_20261109/out/STT/Recon_6/3 10000 3 0.05",
+     "ended": "2026-11-10T01:54:15+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 4411,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/base/Recon_6.als /tests/singlestage_20261109/out/STT/Recon_6/1 10000 1 0.05",
+     "ended": "2026-11-10T01:54:15+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 4155,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/base/Recon_6.als /tests/singlestage_20261109/out/STT/Recon_6/2 10000 2 0.05",
+     "ended": "2026-11-10T01:54:15+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/Recon_6/census.json",
+   "census_UNION": {
+    "instances": 23132,
+    "distinct": 16775,
+    "sizes": {
+     "6": 16775
+    },
+    "kind_sequences": 2871,
+    "xm_kinds": {
+     "TBranchx": 8679,
+     "TLoad": 8096
+    },
+    "alu_feeds_xmit": 392,
+    "two_load_merge": 9,
+    "unnecessary_avg": 2.79,
+    "unnecessary_hist": {
+     "0": 23,
+     "1": 427,
+     "2": 2556,
+     "3": 13769
+    },
+    "bare_avg": 1.72,
+    "unresolved_brs_hist": {
+     "1": 16775
+    },
+    "contain_core_exact_pin": 16383,
+    "contain_core_path_pin": 16775,
+    "no_core_even_path_pin_examples": []
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 1827,
+    "default∩2": 1741,
+    "default∩3": 1891,
+    "1∩2": 1778,
+    "1∩3": 1864,
+    "2∩3": 1826
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 20,
+     "two_load_merge": 0,
+     "unnecessary_avg": 2.97,
+     "unresolved_brs_hist": {
+      "1": 10000
+     },
+     "contain_core_exact_pin": 9980,
+     "contain_core_path_pin": 10000
+    },
+    "1": {
+     "instances": 4411,
+     "distinct": 4411,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 110,
+     "two_load_merge": 4,
+     "unnecessary_avg": 2.71,
+     "unresolved_brs_hist": {
+      "1": 4411
+     },
+     "contain_core_exact_pin": 4301,
+     "contain_core_path_pin": 4411
+    },
+    "2": {
+     "instances": 4155,
+     "distinct": 4155,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 143,
+     "two_load_merge": 5,
+     "unnecessary_avg": 2.71,
+     "unresolved_brs_hist": {
+      "1": 4155
+     },
+     "contain_core_exact_pin": 4012,
+     "contain_core_path_pin": 4155
+    },
+    "3": {
+     "instances": 4566,
+     "distinct": 4566,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 126,
+     "two_load_merge": 0,
+     "unnecessary_avg": 2.71,
+     "unresolved_brs_hist": {
+      "1": 4566
+     },
+     "contain_core_exact_pin": 4440,
+     "contain_core_path_pin": 4566
+    }
+   }
+  },
+  "Recon_6_flat_n8_leakrs_nospacer": {
+   "variant": "V3",
+   "base_file": "STAGE1_alloy/models/Recon_6.als",
+   "base_sha256": "6f30619586f1c2483c09f5b0d2b2d85557614f96593154b7e844cd769446c5ab",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/Recon_6_flat_n8_leakrs_nospacer.als",
+   "draft_sha256": "3147831299371c4c9682eecb3ba1cb2f500ae576f0c7464156b50446d739c32b",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/Recon_6.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --minimality leak_rs --out STAGE1_alloy/models/proposed/singlestage/STT/Recon_6_flat_n8_leakrs_nospacer.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/Recon_6_flat_n8_leakrs_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/Recon_6_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "3147831299371c4c9682eecb3ba1cb2f500ae576f0c7464156b50446d739c32b",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 97,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_leakrs_nospacer/1 10000 1 0.05",
+     "ended": "2026-11-10T03:11:41+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 114,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_leakrs_nospacer/2 10000 2 0.05",
+     "ended": "2026-11-10T03:11:41+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 103,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_leakrs_nospacer/3 10000 3 0.05",
+     "ended": "2026-11-10T03:11:41+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 4704,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_leakrs_nospacer/default 10000",
+     "ended": "2026-11-10T03:11:41+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/Recon_6_flat_n8_leakrs_nospacer/census.json",
+   "census_UNION": {
+    "instances": 5018,
+    "distinct": 5018,
+    "sizes": {
+     "8": 5018
+    },
+    "kind_sequences": 359,
+    "xm_kinds": {
+     "TLoad": 3354,
+     "TBranchx": 1664
+    },
+    "alu_feeds_xmit": 27,
+    "two_load_merge": 1,
+    "unnecessary_avg": 4.0,
+    "unnecessary_hist": {
+     "1": 3,
+     "2": 15,
+     "3": 78,
+     "4": 4816,
+     "5": 106
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 4162,
+     "2": 835,
+     "3": 12,
+     "4": 8,
+     "5": 1
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 0,
+    "default∩2": 0,
+    "default∩3": 0,
+    "1∩2": 0,
+    "1∩3": 0,
+    "2∩3": 0
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 4704,
+     "distinct": 4704,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 0,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.0,
+     "unresolved_brs_hist": {
+      "1": 3924,
+      "2": 780
+     }
+    },
+    "1": {
+     "instances": 97,
+     "distinct": 97,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 11,
+     "two_load_merge": 1,
+     "unnecessary_avg": 3.85,
+     "unresolved_brs_hist": {
+      "1": 72,
+      "2": 19,
+      "3": 3,
+      "4": 3
+     }
+    },
+    "2": {
+     "instances": 114,
+     "distinct": 114,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 7,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.04,
+     "unresolved_brs_hist": {
+      "1": 89,
+      "2": 20,
+      "3": 3,
+      "4": 1,
+      "5": 1
+     }
+    },
+    "3": {
+     "instances": 103,
+     "distinct": 103,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 9,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.0,
+     "unresolved_brs_hist": {
+      "1": 77,
+      "2": 16,
+      "3": 6,
+      "4": 4
+     }
+    }
+   }
+  },
+  "Recon_6_flat_n8_prod": {
+   "variant": "V1",
+   "base_file": "STAGE1_alloy/models/Recon_6.als",
+   "base_sha256": "6f30619586f1c2483c09f5b0d2b2d85557614f96593154b7e844cd769446c5ab",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/Recon_6_flat_n8_prod.als",
+   "draft_sha256": "8e29242bd11a58fbb5b36f4cd3af42efba61a5c8f85d8cee7dbb646440ef755b",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/Recon_6.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/STT/Recon_6_flat_n8_prod.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod.als",
+   "model_sha256": "8e29242bd11a58fbb5b36f4cd3af42efba61a5c8f85d8cee7dbb646440ef755b",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "3",
+     "instances": 156,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod/3 10000 3 0.05",
+     "ended": "2026-11-10T02:20:13+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 135,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod/2 10000 2 0.05",
+     "ended": "2026-11-10T02:20:13+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 345,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod/1 10000 1 0.05",
+     "ended": "2026-11-10T02:20:13+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 2973,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod/default 10000",
+     "ended": "2026-11-10T02:20:13+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod/census.json",
+   "census_UNION": {
+    "instances": 3609,
+    "distinct": 3565,
+    "sizes": {
+     "8": 3565
+    },
+    "kind_sequences": 1412,
+    "xm_kinds": {
+     "TLoad": 2310,
+     "TBranchx": 1255
+    },
+    "alu_feeds_xmit": 38,
+    "two_load_merge": 0,
+    "unnecessary_avg": 4.49,
+    "unnecessary_hist": {
+     "2": 4,
+     "3": 36,
+     "4": 1726,
+     "5": 1799
+    },
+    "bare_avg": 1.77,
+    "unresolved_brs_hist": {
+     "1": 3565
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 29,
+    "default∩2": 2,
+    "default∩3": 9,
+    "1∩2": 2,
+    "1∩3": 2,
+    "2∩3": 2
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 2973,
+     "distinct": 2973,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 0,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.52,
+     "unresolved_brs_hist": {
+      "1": 2973
+     }
+    },
+    "1": {
+     "instances": 345,
+     "distinct": 345,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 20,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.41,
+     "unresolved_brs_hist": {
+      "1": 345
+     }
+    },
+    "2": {
+     "instances": 135,
+     "distinct": 135,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 10,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.39,
+     "unresolved_brs_hist": {
+      "1": 135
+     }
+    },
+    "3": {
+     "instances": 156,
+     "distinct": 156,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 8,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.29,
+     "unresolved_brs_hist": {
+      "1": 156
+     }
+    }
+   }
+  },
+  "Recon_6_flat_n8_prod_nospacer": {
+   "variant": "V2",
+   "base_file": "STAGE1_alloy/models/Recon_6.als",
+   "base_sha256": "6f30619586f1c2483c09f5b0d2b2d85557614f96593154b7e844cd769446c5ab",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/Recon_6_flat_n8_prod_nospacer.als",
+   "draft_sha256": "b0373d4ba825eba72cca3c1b1467e7476649dee2c71ed5a909e314372c38db94",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/Recon_6.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/STT/Recon_6_flat_n8_prod_nospacer.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod_nospacer.als",
+   "model_sha256": "b0373d4ba825eba72cca3c1b1467e7476649dee2c71ed5a909e314372c38db94",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "1",
+     "instances": 71,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod_nospacer/1 10000 1 0.05",
+     "ended": "2026-11-10T02:46:23+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 73,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod_nospacer/3 10000 3 0.05",
+     "ended": "2026-11-10T02:46:23+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 56,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod_nospacer/2 10000 2 0.05",
+     "ended": "2026-11-10T02:46:23+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 1998,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/Recon_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod_nospacer/default 10000",
+     "ended": "2026-11-10T02:46:23+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/Recon_6_flat_n8_prod_nospacer/census.json",
+   "census_UNION": {
+    "instances": 2198,
+    "distinct": 2198,
+    "sizes": {
+     "8": 2198
+    },
+    "kind_sequences": 545,
+    "xm_kinds": {
+     "TBranchx": 756,
+     "TLoad": 1442
+    },
+    "alu_feeds_xmit": 13,
+    "two_load_merge": 0,
+    "unnecessary_avg": 4.51,
+    "unnecessary_hist": {
+     "1": 1,
+     "2": 3,
+     "3": 11,
+     "4": 1043,
+     "5": 1140
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 2198
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 0,
+    "default∩2": 0,
+    "default∩3": 0,
+    "1∩2": 0,
+    "1∩3": 0,
+    "2∩3": 0
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 1998,
+     "distinct": 1998,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 0,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.52,
+     "unresolved_brs_hist": {
+      "1": 1998
+     }
+    },
+    "1": {
+     "instances": 71,
+     "distinct": 71,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 5,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.46,
+     "unresolved_brs_hist": {
+      "1": 71
+     }
+    },
+    "2": {
+     "instances": 56,
+     "distinct": 56,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 2,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.39,
+     "unresolved_brs_hist": {
+      "1": 56
+     }
+    },
+    "3": {
+     "instances": 73,
+     "distinct": 73,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 6,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.49,
+     "unresolved_brs_hist": {
+      "1": 73
+     }
+    }
+   }
+  },
+  "STT_6": {
+   "variant": "V0 n6_prod (base, unchanged)",
+   "base_file": "STAGE1_alloy/models/STT_6.als",
+   "base_sha256": "7a6ac4c0a098c4dc0e24a4a1bbf867f1266c491b64bdd356026ec017d5b4198c",
+   "generator_command": null,
+   "base_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/STT_6",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/base/STT_6.als",
+   "model_sha256": "7a6ac4c0a098c4dc0e24a4a1bbf867f1266c491b64bdd356026ec017d5b4198c",
+   "scope": "for 9 but exactly 6 Instruction, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/base/STT_6.als: fold ok (depth 7 vs N 6); ix ok (6 IX atoms vs exactly 6); int ok ('#' used=True, operand scope 9, Int set=False)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 659,
+     "rc": 0,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/base/STT_6.als /tests/singlestage_20261109/out/STT/STT_6/default 10000",
+     "ended": "2026-11-10T01:40:13+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 8809,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/base/STT_6.als /tests/singlestage_20261109/out/STT/STT_6/2 10000 2 0.05",
+     "ended": "2026-11-10T01:54:14+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 8502,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/base/STT_6.als /tests/singlestage_20261109/out/STT/STT_6/1 10000 1 0.05",
+     "ended": "2026-11-10T01:54:14+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 8546,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/base/STT_6.als /tests/singlestage_20261109/out/STT/STT_6/3 10000 3 0.05",
+     "ended": "2026-11-10T01:54:14+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/STT_6/census.json",
+   "census_UNION": {
+    "instances": 35857,
+    "distinct": 21141,
+    "sizes": {
+     "6": 21141
+    },
+    "kind_sequences": 3133,
+    "xm_kinds": {
+     "TLoad": 10236,
+     "TBranchx": 10905
+    },
+    "alu_feeds_xmit": 415,
+    "two_load_merge": 12,
+    "unnecessary_avg": 2.76,
+    "unnecessary_hist": {
+     "0": 20,
+     "1": 648,
+     "2": 3733,
+     "3": 16740
+    },
+    "bare_avg": 1.64,
+    "unresolved_brs_hist": {
+     "1": 21141
+    },
+    "contain_core_exact_pin": 20726,
+    "contain_core_path_pin": 21141,
+    "no_core_even_path_pin_examples": []
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 3949,
+    "default∩2": 4063,
+    "default∩3": 3927,
+    "1∩2": 4759,
+    "1∩3": 4654,
+    "2∩3": 4766
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 23,
+     "two_load_merge": 0,
+     "unnecessary_avg": 2.97,
+     "unresolved_brs_hist": {
+      "1": 10000
+     },
+     "contain_core_exact_pin": 9977,
+     "contain_core_path_pin": 10000
+    },
+    "1": {
+     "instances": 8502,
+     "distinct": 8502,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 144,
+     "two_load_merge": 3,
+     "unnecessary_avg": 2.75,
+     "unresolved_brs_hist": {
+      "1": 8502
+     },
+     "contain_core_exact_pin": 8358,
+     "contain_core_path_pin": 8502
+    },
+    "2": {
+     "instances": 8809,
+     "distinct": 8809,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 142,
+     "two_load_merge": 6,
+     "unnecessary_avg": 2.75,
+     "unresolved_brs_hist": {
+      "1": 8809
+     },
+     "contain_core_exact_pin": 8667,
+     "contain_core_path_pin": 8809
+    },
+    "3": {
+     "instances": 8546,
+     "distinct": 8546,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 121,
+     "two_load_merge": 3,
+     "unnecessary_avg": 2.75,
+     "unresolved_brs_hist": {
+      "1": 8546
+     },
+     "contain_core_exact_pin": 8425,
+     "contain_core_path_pin": 8546
+    }
+   }
+  },
+  "STT_6_flat_n10_prod_nospacer": {
+   "variant": "extra n10",
+   "base_file": "STAGE1_alloy/models/STT_6.als",
+   "base_sha256": "7a6ac4c0a098c4dc0e24a4a1bbf867f1266c491b64bdd356026ec017d5b4198c",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n10_prod_nospacer.als",
+   "draft_sha256": "4f77df292764b78ec3e72de259353778aef5040ea2a874735139bdb622d00943",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/STT_6.als --pin none --n 10 --operands 20 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n10_prod_nospacer.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/STT_6_flat_n10_prod_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/STT_6_flat_n10_prod_nospacer.als",
+   "model_sha256": "4f77df292764b78ec3e72de259353778aef5040ea2a874735139bdb622d00943",
+   "scope": "for 9 but exactly 10 Instruction, 20 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/STT_6_flat_n10_prod_nospacer.als: fold ok (depth 10 vs N 10); ix ok (10 IX atoms vs exactly 10); int ok ('#' used=True, operand scope 20, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 66,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/STT_6_flat_n10_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n10_prod_nospacer/default 3000",
+     "ended": "2026-11-10T03:36:48+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 163,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n10_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n10_prod_nospacer/2 3000 2 0.05",
+     "ended": "2026-11-10T03:36:48+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 150,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n10_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n10_prod_nospacer/3 3000 3 0.05",
+     "ended": "2026-11-10T03:36:49+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 144,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n10_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n10_prod_nospacer/1 3000 1 0.05",
+     "ended": "2026-11-10T03:36:49+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/STT_6_flat_n10_prod_nospacer/census.json",
+   "census_UNION": {
+    "instances": 523,
+    "distinct": 523,
+    "sizes": {
+     "10": 523
+    },
+    "kind_sequences": 476,
+    "xm_kinds": {
+     "TLoad": 388,
+     "TBranchx": 135
+    },
+    "alu_feeds_xmit": 29,
+    "two_load_merge": 1,
+    "unnecessary_avg": 6.43,
+    "unnecessary_hist": {
+     "3": 1,
+     "4": 13,
+     "5": 49,
+     "6": 155,
+     "7": 305
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 523
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 0,
+    "default∩2": 0,
+    "default∩3": 0,
+    "1∩2": 0,
+    "1∩3": 0,
+    "2∩3": 0
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 66,
+     "distinct": 66,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 2,
+     "two_load_merge": 0,
+     "unnecessary_avg": 6.94,
+     "unresolved_brs_hist": {
+      "1": 66
+     }
+    },
+    "1": {
+     "instances": 144,
+     "distinct": 144,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 12,
+     "two_load_merge": 0,
+     "unnecessary_avg": 6.28,
+     "unresolved_brs_hist": {
+      "1": 144
+     }
+    },
+    "2": {
+     "instances": 163,
+     "distinct": 163,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 7,
+     "two_load_merge": 1,
+     "unnecessary_avg": 6.46,
+     "unresolved_brs_hist": {
+      "1": 163
+     }
+    },
+    "3": {
+     "instances": 150,
+     "distinct": 150,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 8,
+     "two_load_merge": 0,
+     "unnecessary_avg": 6.33,
+     "unresolved_brs_hist": {
+      "1": 150
+     }
+    }
+   }
+  },
+  "STT_6_flat_n8_leakrs_nospacer": {
+   "variant": "V3",
+   "base_file": "STAGE1_alloy/models/STT_6.als",
+   "base_sha256": "7a6ac4c0a098c4dc0e24a4a1bbf867f1266c491b64bdd356026ec017d5b4198c",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_leakrs_nospacer.als",
+   "draft_sha256": "f3361e5eeff4cd2335b700f8098286754e06000d71ec14c8b21aa2fb6cd2458c",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/STT_6.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --minimality leak_rs --out STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_leakrs_nospacer.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/STT_6_flat_n8_leakrs_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/STT_6_flat_n8_leakrs_nospacer.als",
+   "model_sha256": "f3361e5eeff4cd2335b700f8098286754e06000d71ec14c8b21aa2fb6cd2458c",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/STT_6_flat_n8_leakrs_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "default",
+     "instances": 10000,
+     "verdict": "CAPPED",
+     "secs": 1461,
+     "rc": 0,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_leakrs_nospacer/default 10000",
+     "ended": "2026-11-10T03:11:02+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 1072,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_leakrs_nospacer/1 10000 1 0.05",
+     "ended": "2026-11-10T03:11:40+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 973,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_leakrs_nospacer/3 10000 3 0.05",
+     "ended": "2026-11-10T03:11:40+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 859,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_leakrs_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_leakrs_nospacer/2 10000 2 0.05",
+     "ended": "2026-11-10T03:11:40+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/STT_6_flat_n8_leakrs_nospacer/census.json",
+   "census_UNION": {
+    "instances": 12904,
+    "distinct": 12902,
+    "sizes": {
+     "8": 12902
+    },
+    "kind_sequences": 2390,
+    "xm_kinds": {
+     "TBranchx": 4427,
+     "TLoad": 8475
+    },
+    "alu_feeds_xmit": 162,
+    "two_load_merge": 2,
+    "unnecessary_avg": 3.98,
+    "unnecessary_hist": {
+     "0": 2,
+     "1": 50,
+     "2": 154,
+     "3": 531,
+     "4": 11445,
+     "5": 720
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 10368,
+     "2": 2291,
+     "3": 160,
+     "4": 66,
+     "5": 15,
+     "6": 2
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 0,
+    "default∩2": 1,
+    "default∩3": 0,
+    "1∩2": 0,
+    "1∩3": 1,
+    "2∩3": 0
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 10000,
+     "distinct": 10000,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 0,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.0,
+     "unresolved_brs_hist": {
+      "1": 8326,
+      "2": 1674
+     }
+    },
+    "1": {
+     "instances": 1072,
+     "distinct": 1072,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 58,
+     "two_load_merge": 2,
+     "unnecessary_avg": 3.95,
+     "unresolved_brs_hist": {
+      "1": 745,
+      "2": 221,
+      "3": 64,
+      "4": 33,
+      "5": 9
+     }
+    },
+    "2": {
+     "instances": 859,
+     "distinct": 859,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 45,
+     "two_load_merge": 0,
+     "unnecessary_avg": 3.86,
+     "unresolved_brs_hist": {
+      "1": 593,
+      "2": 197,
+      "3": 50,
+      "4": 13,
+      "5": 4,
+      "6": 2
+     }
+    },
+    "3": {
+     "instances": 973,
+     "distinct": 973,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 59,
+     "two_load_merge": 0,
+     "unnecessary_avg": 3.9,
+     "unresolved_brs_hist": {
+      "1": 706,
+      "2": 199,
+      "3": 46,
+      "4": 20,
+      "5": 2
+     }
+    }
+   }
+  },
+  "STT_6_flat_n8_prod": {
+   "variant": "V1",
+   "base_file": "STAGE1_alloy/models/STT_6.als",
+   "base_sha256": "7a6ac4c0a098c4dc0e24a4a1bbf867f1266c491b64bdd356026ec017d5b4198c",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_prod.als",
+   "draft_sha256": "3e5c91c1826b7e589ad1ff542bb2873c0220b6975da3269ebfa416eeed3430eb",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/STT_6.als --pin none --n 8 --operands 16 --intbits 6 --out STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_prod.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod.als",
+   "model_sha256": "3e5c91c1826b7e589ad1ff542bb2873c0220b6975da3269ebfa416eeed3430eb",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "2",
+     "instances": 934,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod/2 10000 2 0.05",
+     "ended": "2026-11-10T02:20:13+00:00"
+    },
+    {
+     "seed": "3",
+     "instances": 730,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod/3 10000 3 0.05",
+     "ended": "2026-11-10T02:20:13+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 1690,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod/1 10000 1 0.05",
+     "ended": "2026-11-10T02:20:13+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 6095,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod/default 10000",
+     "ended": "2026-11-10T02:20:13+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod/census.json",
+   "census_UNION": {
+    "instances": 9449,
+    "distinct": 9028,
+    "sizes": {
+     "8": 9028
+    },
+    "kind_sequences": 3811,
+    "xm_kinds": {
+     "TBranchx": 3359,
+     "TLoad": 5669
+    },
+    "alu_feeds_xmit": 120,
+    "two_load_merge": 2,
+    "unnecessary_avg": 4.48,
+    "unnecessary_hist": {
+     "2": 13,
+     "3": 125,
+     "4": 4362,
+     "5": 4528
+    },
+    "bare_avg": 1.82,
+    "unresolved_brs_hist": {
+     "1": 9028
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 200,
+    "default∩2": 89,
+    "default∩3": 67,
+    "1∩2": 42,
+    "1∩3": 29,
+    "2∩3": 27
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 6095,
+     "distinct": 6095,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 0,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.51,
+     "unresolved_brs_hist": {
+      "1": 6095
+     }
+    },
+    "1": {
+     "instances": 1690,
+     "distinct": 1690,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 37,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.49,
+     "unresolved_brs_hist": {
+      "1": 1690
+     }
+    },
+    "2": {
+     "instances": 934,
+     "distinct": 934,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 38,
+     "two_load_merge": 1,
+     "unnecessary_avg": 4.4,
+     "unresolved_brs_hist": {
+      "1": 934
+     }
+    },
+    "3": {
+     "instances": 730,
+     "distinct": 730,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 45,
+     "two_load_merge": 1,
+     "unnecessary_avg": 4.4,
+     "unresolved_brs_hist": {
+      "1": 730
+     }
+    }
+   }
+  },
+  "STT_6_flat_n8_prod_nospacer": {
+   "variant": "V2",
+   "base_file": "STAGE1_alloy/models/STT_6.als",
+   "base_sha256": "7a6ac4c0a098c4dc0e24a4a1bbf867f1266c491b64bdd356026ec017d5b4198c",
+   "draft_file": "STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_prod_nospacer.als",
+   "draft_sha256": "f68be8e8d4341a4a9bfe35d46aa4b31e9a54de0537d61615be6f8fe772c7d625",
+   "generator_command": "python3 STAGE1_alloy/models/proposed_twophase/stage15_bound/make_s15_model.py --model STAGE1_alloy/models/STT_6.als --pin none --n 8 --operands 16 --intbits 6 --shape nospacer --out STAGE1_alloy/models/proposed/singlestage/STT/STT_6_flat_n8_prod_nospacer.als",
+   "draft_sha256_matches_cafe2": true,
+   "cafe2_out": "/tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod_nospacer",
+   "cafe2_model": "/tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod_nospacer.als",
+   "model_sha256": "f68be8e8d4341a4a9bfe35d46aa4b31e9a54de0537d61615be6f8fe772c7d625",
+   "scope": "for 9 but exactly 8 Instruction, 16 Operand, 6 Int, exactly 1 rBool, exactly 1 cBool, exactly 1 tBool",
+   "lint": [
+    "OK   /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod_nospacer.als: fold ok (depth 8 vs N 8); ix ok (8 IX atoms vs exactly 8); int ok ('#' used=True, operand scope 16, Int set=True)"
+   ],
+   "ended": true,
+   "runs": [
+    {
+     "seed": "3",
+     "instances": 378,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod_nospacer/3 10000 3 0.05",
+     "ended": "2026-11-10T02:46:22+00:00"
+    },
+    {
+     "seed": "1",
+     "instances": 402,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod_nospacer/1 10000 1 0.05",
+     "ended": "2026-11-10T02:46:22+00:00"
+    },
+    {
+     "seed": "2",
+     "instances": 358,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:/tests/singlestage_20261109/classes a6RandomModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod_nospacer/2 10000 2 0.05",
+     "ended": "2026-11-10T02:46:22+00:00"
+    },
+    {
+     "seed": "default",
+     "instances": 6886,
+     "verdict": "TIMEOUT",
+     "secs": 1500,
+     "rc": -9,
+     "cmd": "java -Xmx4g -cp alloy6.jar:. a6CountModels /tests/singlestage_20261109/models/STT/STT_6_flat_n8_prod_nospacer.als /tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod_nospacer/default 10000",
+     "ended": "2026-11-10T02:46:22+00:00"
+    }
+   ],
+   "census_json": "/tests/singlestage_20261109/out/STT/STT_6_flat_n8_prod_nospacer/census.json",
+   "census_UNION": {
+    "instances": 8024,
+    "distinct": 8010,
+    "sizes": {
+     "8": 8010
+    },
+    "kind_sequences": 2197,
+    "xm_kinds": {
+     "TLoad": 5285,
+     "TBranchx": 2725
+    },
+    "alu_feeds_xmit": 47,
+    "two_load_merge": 2,
+    "unnecessary_avg": 4.5,
+    "unnecessary_hist": {
+     "1": 1,
+     "2": 18,
+     "3": 63,
+     "4": 3820,
+     "5": 4108
+    },
+    "bare_avg": 0.0,
+    "unresolved_brs_hist": {
+     "1": 8010
+    }
+   },
+   "census_PAIRWISE_OVERLAP": {
+    "default∩1": 6,
+    "default∩2": 5,
+    "default∩3": 1,
+    "1∩2": 1,
+    "1∩3": 0,
+    "2∩3": 1
+   },
+   "census_per_seed": {
+    "default": {
+     "instances": 6886,
+     "distinct": 6886,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 0,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.5,
+     "unresolved_brs_hist": {
+      "1": 6886
+     }
+    },
+    "1": {
+     "instances": 402,
+     "distinct": 402,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 19,
+     "two_load_merge": 2,
+     "unnecessary_avg": 4.47,
+     "unresolved_brs_hist": {
+      "1": 402
+     }
+    },
+    "2": {
+     "instances": 358,
+     "distinct": 358,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 13,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.49,
+     "unresolved_brs_hist": {
+      "1": 358
+     }
+    },
+    "3": {
+     "instances": 378,
+     "distinct": 378,
+     "parse_errors": 0,
+     "alu_feeds_xmit": 15,
+     "two_load_merge": 0,
+     "unnecessary_avg": 4.48,
+     "unresolved_brs_hist": {
+      "1": 378
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,110 @@
+% Figures whose placement or content is still undecided (2026-11-02). Move into the body when decided.
+\clearpage
+\section*{\figtodo{Pending figures: placement and content still to be decided}}
+\figtodo{figures not yet redesigned in the new visual language (moved here 2026-11-02; their references in the text still resolve here): state table (Fig.~\ref{fig:statetable}), LSQ trace (Fig.~\ref{fig:trace}), test targeting (Fig.~\ref{fig:target}), timing sweeps (Fig.~\ref{fig:timing}), efficiency vs.\ AMuLeT (Fig.~\ref{fig:eff}). The four results plots also need the re-run numbers and 8pt text}
+
+% \input{tikz/alloyviolation}% replaced by tikz/dataflow_8pt in the Execution Syntax section, 2026-11-02
+\input{tikz/statetable}
+
+\begin{figure*}[t]\centering
+\begin{tikzpicture}[font=\ttfamily\scriptsize,
+  L/.style={anchor=west},A/.style={font=\sffamily\scriptsize,anchor=west}]
+\node[L] (a) at (0,0)     {2930000~~Inserting load [sn:571] (0x401c68)};
+\node[L] (b) at (0,-0.40) {2931500~~operands ready, first issue~~(then HELD $\sim$29 cyc, addr tainted)};
+\node[L,text=copen]   (c) at (0,-0.80) {2945500~~branch 0x401c51 RESOLVES};
+\node[L] (d) at (0,-1.20) {2946000~~re-issue load [sn:571]};
+\node[L,text=ctarget] (e) at (0,-1.60) {2946500~~successfully sent out packet(s) [sn:571]};
+\node[L] (f) at (0,-2.00) {2947500~~load [sn:571] squashed};
+\node[A,copen]   at (9.2,-0.80){$\Rightarrow$ \texttt{isPrevBrsResolved}: taint cleared, fence lifts};
+\node[A,ctarget] at (9.2,-1.60){$\leftarrow$ REAL L1 access, in window (2907000,\,3037500)};
+\node[A]         at (9.2,-2.00){$\leftarrow$ squash drains $\sim$2 cyc too late};
+\end{tikzpicture}
+\caption{gem5 \texttt{LSQUnit} trace of the transmitter load in \texttt{inst-047231} (STT, slow-comm).
+The load is held while tainted, is untainted the cycle the controlling branch resolves, and sends a
+real cache packet two cycles before the squash kills it --- inside the speculative window
+\texttt{(lc\_retire,\,fnc\_retire)}.}
+\label{fig:trace}
+\end{figure*}
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}
+\begin{axis}[ybar,width=0.9\columnwidth,height=4.0cm,bar width=12pt,
+  enlarge x limits=0.28,every axis plot/.append style={bar shift=0pt},
+  symbolic x coords={load,branch,either,SimSpect},
+  xtick={load,branch,either,SimSpect},xticklabels={load,branch,either,SimSpect},
+  ymin=0,ymax=112,ylabel={\% tests that can leak},
+  nodes near coords,every node near coord/.append style={font=\scriptsize},
+  tick label style={font=\scriptsize},label style={font=\footnotesize},ymajorgrids]
+\addplot[fill=camulet,draw=black] coordinates {(load,14) (branch,5) (either,17)};
+\addplot[fill=cclean,draw=black]  coordinates {(SimSpect,100)};
+\end{axis}
+\end{tikzpicture}
+\caption{Fraction of generated tests that contain a window-valid transmitter. AMuLeT's random STT
+corpus (brown), by transmitter type: 14\% a leaky load, 5\% a leaky branch, 17\% either; the rest
+cannot leak by construction. \toolname{} (green) places one in every test, so 100\% are targeted.}
+\label{fig:target}
+\end{figure}
+
+\begin{figure}[t]\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=2 by 1,horizontal sep=1.15cm},
+  width=4.0cm,height=3.9cm,grid=major,scaled y ticks=false,
+  tick label style={font=\scriptsize},label style={font=\footnotesize}]
+\nextgroupplot[xtick={1,2,3,4},ymin=-3,ymax=48,xlabel={\texttt{commitToIEWDelay} (cyc)},
+  ylabel={real leaks / 300},
+  legend style={font=\tiny,at={(0.03,0.97)},anchor=north west,draw=none,fill=none},
+  legend cell align=left]
+\addplot[ctarget,thick,mark=*]      coordinates {(1,0)(2,20)(3,41)(4,42)};\addlegendentry{not-taken}
+\addplot[calloy,thick,mark=square*] coordinates {(1,0)(2,0)(3,2)(4,2)};\addlegendentry{taken}
+\draw[densely dashed,gray] (axis cs:1,-3) -- (axis cs:1,48);
+\node[font=\tiny,text=cclean,rotate=90,anchor=south] at (axis cs:1,4){stock: secure};
+\nextgroupplot[symbolic x coords={0,50,250,1000,5000},xtick=data,
+  xticklabel style={rotate=35,anchor=east,font=\tiny},ymin=0,ymax=30,
+  xlabel={$s_U$ stall (cyc)},ylabel={real leaks / 200}]
+\addplot[ctarget,thick,mark=*] coordinates {(0,27)(50,0)(250,0)(1000,0)(5000,0)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Timing sweeps (measured; both bucket-confirmed as the same race). \textbf{(a)} fragility: STT
+is secure at stock squash latency (\texttt{commitToIEWDelay}$=1$, 0 leaks) and leaks from $\geq2$
+($\bullet$ mispredict-not-taken, $\blacksquare$ taken).
+\auditnote{claim}{claim}{The taken-mode series (0/0/2/2 per 300) used the old BTB force, which the 2026-10-30 hook audit found wrong on every build (decode-squashed on gem5-22 builds; on older builds the wrong path starts at the label and skips LLVM-hoisted instructions). So the near-zero taken counts may reflect the force rather than STT; re-run taken mode on the fixed harness or drop the series.  \textit{Source:} STATUS.md:30; project log 2026-10-30 resolve-hooks ('Old BTB force wrong'); wiki/findings/mdsToRead/NEAR\_MISS\_BREAKDOWN.md:88 (frag\_d* on /work/stt); wiki/results/PAPER\_RESULTS.md §7 table}
+\textbf{(b)} of the three stall knobs, only the
+unresolved-branch stall $s_U$ changes the verdict --- and it \emph{masks} the leak (pushes the
+transmitter out of the window at $\geq50$ cyc), never manufactures one.
+\auditnote{claim}{claim, high}{The caption has the same problem. The s\_U points predate the fix to the resolve-stall hook that froze sleeping CPUs, so 'pushes the transmitter out of the window' and 'never manufactures one' are not established, and 'measured; both bucket-confirmed' does not say that both sweeps are pre-fix.  \textit{Source:} project log 2026-10-30 resolve-hooks; paper\_figures/plans/RESULTS\_FIGURES.md §3 and R4}
+}
+\label{fig:timing}
+\end{figure}
+
+\begin{figure*}[t]\centering
+\begin{tikzpicture}
+\begin{groupplot}[group style={group size=3 by 1,horizontal sep=1.9cm},
+  width=0.29\textwidth,height=4.1cm,ybar,
+  symbolic x coords={SimSpect,AMuLeT},xtick={SimSpect,AMuLeT},
+  xticklabels={SimSpect,AMuLeT},enlarge x limits=0.55,
+  every axis plot/.append style={bar shift=0pt},
+  scaled y ticks=false,ymajorgrids,ymin=0,
+  title style={font=\footnotesize\bfseries,yshift=-2pt},
+  label style={font=\footnotesize},tick label style={font=\footnotesize},
+  nodes near coords,every node near coord/.append style={font=\footnotesize}]
+\nextgroupplot[ymax=48,bar width=20pt,title={Tests run to first detection},ylabel={test cases (count)}]
+\addplot[fill=cclean,draw=black]  coordinates {(SimSpect,6)};
+\addplot[fill=camulet,draw=black] coordinates {(AMuLeT,39)};
+\nextgroupplot[ymax=28,bar width=20pt,title={Hit density},ylabel={\% of tests that flag UV6}]
+\addplot[fill=cclean,draw=black]  coordinates {(SimSpect,23)};
+\addplot[fill=camulet,draw=black] coordinates {(AMuLeT,3.3)};
+\nextgroupplot[ymax=0.115,bar width=20pt,ytick={0,0.03,0.06,0.09},title={Pure gem5 cost per test},ylabel={seconds / test}]
+\addplot[fill=cclean,draw=black]  coordinates {(SimSpect,0.092)};
+\addplot[fill=camulet,draw=black] coordinates {(AMuLeT,0.057)};
+\end{groupplot}
+\end{tikzpicture}
+\caption{Efficiency on the SpecLFB build (the one bug both tools find, UV6), measured; \toolname{} in
+green, AMuLeT in brown. \textbf{Left --- tests run to first detection:} \toolname{} reaches the bug in
+$6.5\times$ fewer test cases (6 vs.\ 39). \textbf{Middle --- hit density:} fraction of all tests that
+flag UV6, $\sim$7$\times$ denser for \toolname{} (23\% vs.\ 3.3\%). \textbf{Right --- pure gem5 cost per
+test:} per-test simulation time is \emph{comparable} ($\sim$1.6$\times$) once \toolname{}'s O3PipeView
+trace ($+0.39$\,s) and its per-test gem5 boot ($+0.61$\,s, which AMuLeT amortizes with a persistent
+process) are excluded --- so the raw gem5 work is the same and \toolname{}'s advantage is
+\emph{targeting}: it reaches the bug with $\sim$6.5$\times$ less total simulation.}
+\label{fig:eff}
+\end{figure*}

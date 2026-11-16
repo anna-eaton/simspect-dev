@@ -62,6 +62,11 @@ pipeline:
 	    > pipeline_gen_$(MODEL).log 2>&1 &
 	$(PY) testrun.py --model $(MODEL) --config $(RUNCONFIG)
 
+# ── Two-stage core-pinned loose-pin generation: Stage 1 cores -> Stage 1.5 -> Stage 2 v3, streamed
+#    make twostage-lp CONFIG=runconfigs/twostage_lp/Footprint_6_u.jsonc WS=/tests/<dir>/twostage_lp_Footprint_6_u
+twostage-lp:
+	$(PY) twostage_lp.py --config $(CONFIG) --ws $(WS)
+
 # ── Live dashboard (stdlib-only web UI; forward the port over ssh -L) ─────────
 dashboard:
 	$(PY) dashboard/dashboard.py $(if $(PORT),--port $(PORT),)

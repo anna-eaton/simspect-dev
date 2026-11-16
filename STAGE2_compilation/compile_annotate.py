@@ -70,7 +70,6 @@ def build_binary(s_path: Path, workdir: Path) -> tuple[Path, int]:
     subprocess.run(["as", "-o", str(entry_o), str(entry_s)],   check=True, capture_output=True)
     subprocess.run(["ld", "-static", "-o", str(binary), str(entry_o), str(func_o)],
                    check=True, capture_output=True)
-    # resolve function base from nm on binary
     r = subprocess.run(["nm", "--defined-only", str(binary)],
                        capture_output=True, text=True, check=True)
     func_base = 0
@@ -87,12 +86,8 @@ def compile_to_x86(ll_path: Path, out_dir: Path) -> tuple[Path, Path]:
     """Compile .ll → .s and .o for x86-64. Returns (s_path, o_path)."""
     s_path = out_dir / (ll_path.stem + ".s")
     o_path = out_dir / (ll_path.stem + ".o")
-    # -O2: at -O0, the "fast" register allocator spills every live SSA value
-    # across every basic-block boundary regardless of inline-asm pinning,
-    # which causes spurious LSQ ordering violations on speculative paths.
-    # -O2 honors `={rax}` / `{rax}` constraints and keeps pinned values in
-    # their registers across blocks. `asm sideeffect` blocks are still not
-    # reordered or removed, so markers and instruction order are preserved.
+    # -O2, not -O0: -O0 spills pinned values across blocks (spurious LSQ ordering violations);
+    # -O2 honors `={rax}` constraints and keeps `asm sideeffect` markers/order intact.
     for flag, out in [("-S", s_path), ("-c", o_path)]:
         r = subprocess.run(
             ["clang-15", "--target=x86_64-unknown-linux-gnu", "-O2",
@@ -182,18 +177,15 @@ def disassemble_instrs(binary: Path, func_base: int) -> list[tuple[int, str, str
     instrs: list[tuple[int, str, str]] = []
     in_func = False
     for line in r.stdout.splitlines():
-        # start collecting at the function symbol
         sm = sym_re.match(line)
         if sm:
             sym = sm.group(1)
             if sym == binary.name:
                 in_func = True
                 continue
-            # In-function pc/commit-boundary markers don't end the function;
-            # only a non-litmus symbol does.
+            # __litmus_* markers are inside the function; any other symbol ends it
             if in_func and not (sym.startswith("__litmus_") or sym == binary.name):
                 break
-            # otherwise: still inside the function, skip the label line.
             continue
         if in_func:
             m = line_re.match(line)
@@ -226,16 +218,12 @@ def update_annotations(ann_path: Path, pc_map: dict[int, int],
                         commit_offsets: dict[str, int] | None = None) -> dict:
     """Emit the simplified ann.json schema.
 
-    Every emitted address is **absolute** (post-link x86 PC). Consumers should
-    use these directly without any `+ base` arithmetic. The schema retains
-    Alloy-side cross-reference fields (branch_pc, xmit.pc/.atom, etc.) for
-    debugging but drops the descriptive `*_offset` / `*_taken_addr` /
-    `*_mnemonic` / `*_fallthrough_offset` etc. that had no consumers.
+    Every emitted address is absolute (post-link x86 PC); Alloy-side cross-reference
+    fields (branch_pc, xmit.pc/.atom) are kept for debugging.
     """
     ann = json.loads(ann_path.read_text())
 
-    # Record the function's absolute base for any debug consumer that wants
-    # offset arithmetic. Optional — all functional fields are already absolute.
+    # debug only; every functional field is already absolute
     ann["func_base_addr"]     = func_base
     ann["func_base_addr_hex"] = hex(func_base)
 
@@ -299,8 +287,7 @@ def update_annotations(ann_path: Path, pc_map: dict[int, int],
             entry = cb.get(key)
             if entry is None:
                 continue
-            # keep "atom": it records which Alloy instruction the boundary is
-            # (audited by audit_commit_boundary.py; wiki/design/COMMIT_BOUNDARY.md)
+            # keep "atom" (read by audit_commit_boundary.py)
             alloy_pc = entry.get("pc")
             if alloy_pc in branch_pc_to_jne_abs:
                 entry["addr"]     = branch_pc_to_jne_abs[alloy_pc]

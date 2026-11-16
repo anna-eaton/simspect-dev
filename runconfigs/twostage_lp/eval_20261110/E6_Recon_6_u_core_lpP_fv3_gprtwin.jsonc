@@ -1,0 +1,157 @@
+// GPR twin run for E6 (regen-lp 2026-11-10): E6 config with results_name, no sample_fraction, jobs 16, fpr.enabled false (provenance). Testset Recon_6_u_core_lpP_fv3_gprtwin_e6 (make_gpr_twin.sh). Same gem5 block, cache (warm) and timing grid.
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/simspect_alloy_20261108/testsets_twostage",
+    "results_dir": "/tests/simspect_alloy_20261108/loosepin_regen/eval_results",
+    "results_name": "E6_Recon_6_u_core_lpP_fv3_gprtwin"
+  },
+  "alloy": {
+    "max_instances": 93041,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/gem5-recon-ruby3/build/X86/gem5.opt",
+    "config_script": "/work/gem5-recon-ruby3/configs/example/se_ruby.py",
+    "branch_ann_enable": true,
+    "cpu_type": "X86O3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 16,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "allow_leaked": true,
+    "extra_args": [
+      "--ruby",
+      "--l0d_size=65536",
+      "--l0i_assoc=8",
+      "--l0d_assoc=8",
+      "--l0i_size=65536",
+      "--l1d_size=2MB",
+      "--l1d_assoc=16",
+      "--l2_size=16MB",
+      "--l2_assoc=32",
+      "--cacheline_size=64"
+    ]
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    }
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "fpr": {
+    "enabled": false,
+    "loads": "consumed",
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  }
+}

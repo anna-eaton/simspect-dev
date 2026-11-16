@@ -23,7 +23,7 @@ spt_brx_evidence.json written by STAGE3_gem5/triage/run_spt_brx_triage.sh):
       and VPUntaints == 0 (nothing had to be untainted).
 Missing evidence -> not matched (stays NEW). Counterfactual proof that the rule
 is live: inst-080310 with its constant source replaced by a load of (%rsp) is
-made pending and no longer hits (triage/counterfactual/, 2026-11-07).
+made pending and no longer hits (triage/counterfactual/).
 """
 import json, functools
 from pathlib import Path

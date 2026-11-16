@@ -15,8 +15,7 @@ offending (struct, line, event_ids):
   * that instruction instance (`seq`) never retired (it is the squashed actor);
   * the trace has `L1D:cleanup_skip line=<line> seq=<seq> why=nohitinfo` for it.
 Each variant entry also carries the record's cache_setup (the strategy the test
-actually ran with: warm/cold; for gem5.cache_setup random it differs per test,
-2026-11-09), so diag_uv3_rmw.py can report and split by it.
+actually ran with: warm/cold; for gem5.cache_setup random it differs per test), so diag_uv3_rmw.py can report and split by it.
 It writes <campaign>/diagnostics/uv3_rmw_evidence.json keyed "<mode>/<stem>"
 (one entry per stem; a stem counts as UV3 only if every hitting variant matches),
 gzips each hit's trace to <campaign>/diagnostics/traces/<mode>/<record>.pipeview.txt.gz
@@ -42,7 +41,7 @@ PREFIX = "O3PipeView:simspect:"
 
 
 def _open(trace: Path):
-    """Plain trace, or the gzipped copy this script left in diagnostics/traces/ (2026-11-09)."""
+    """Plain trace, or the gzipped copy this script left in diagnostics/traces/."""
     if trace.suffix == ".gz":
         return gzip.open(trace, "rt", errors="replace")
     return trace.open(errors="replace")

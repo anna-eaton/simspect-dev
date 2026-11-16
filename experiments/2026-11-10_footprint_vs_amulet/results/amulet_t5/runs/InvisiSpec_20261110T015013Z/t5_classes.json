@@ -1,0 +1,1540 @@
+{
+ "defense": "InvisiSpec",
+ "run": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z",
+ "selection": "first_per_instance",
+ "counts": {
+  "UV1": 27,
+  "UV1+other": 1
+ },
+ "violations": [
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-05secs",
+   "round": 0,
+   "elapsed": 185,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x6e640"
+      ],
+      "primer_only": [
+       "0x2e240"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x6e640",
+      "set": 25,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021ce",
+        839193,
+        "0x2668"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x2e240",
+      "set": 9,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021ce",
+        839193,
+        "0x2268"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-53secs",
+   "round": 1,
+   "elapsed": 53,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x564c0"
+      ],
+      "primer_only": [
+       "0xc6bc0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x564c0",
+      "set": 19,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40213c",
+        25872,
+        "0x24f0"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xc6bc0",
+      "set": 47,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40213c",
+        25872,
+        "0x2bf0"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-06mins-12secs",
+   "round": 2,
+   "elapsed": 372,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xcec40"
+      ],
+      "primer_only": [
+       "0xbeb40"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xcec40",
+      "set": 49,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219e",
+        148604,
+        "0x2c7c"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xbeb40",
+      "set": 45,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219e",
+        148604,
+        "0x2b7c"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-45secs",
+   "round": 3,
+   "elapsed": 225,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xf6ec0"
+      ],
+      "primer_only": [
+       "0x867c0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xf6ec0",
+      "set": 59,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021b7",
+        47591,
+        "0x2efc"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x867c0",
+      "set": 31,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021b7",
+        47591,
+        "0x27fc"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-47secs",
+   "round": 4,
+   "elapsed": 47,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x1e140"
+      ],
+      "primer_only": [
+       "0x102f80"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x1e140",
+      "set": 5,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021a3",
+        537935,
+        "0x2164"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x102f80",
+      "set": 62,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021a3",
+        537935,
+        "0x2fa4"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-05mins-26secs",
+   "round": 5,
+   "elapsed": 326,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x8a800"
+      ],
+      "primer_only": [
+       "0xf2e00"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x8a800",
+      "set": 32,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021a8",
+        239238,
+        "0x2814"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xf2e00",
+      "set": 56,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021a8",
+        239238,
+        "0x2e14"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-12secs",
+   "round": 7,
+   "elapsed": 12,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x1a080"
+      ],
+      "primer_only": [
+       "0x9a900"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x1a080",
+      "set": 2,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219d",
+        334969,
+        "0x208c"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x9a900",
+      "set": 36,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219d",
+        334969,
+        "0x290c"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-03secs",
+   "round": 8,
+   "elapsed": 183,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xaea40"
+      ],
+      "primer_only": [
+       "0xdad00"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xaea40",
+      "set": 41,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219a",
+        126157,
+        "0x2a40"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xdad00",
+      "set": 52,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219a",
+        126157,
+        "0x2d00"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-58secs",
+   "round": 10,
+   "elapsed": 58,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xd6c40"
+      ],
+      "primer_only": [
+       "0x10af80"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xd6c40",
+      "set": 49,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40216e",
+        437352,
+        "0x2c40"
+       ],
+       [
+        "0x402176",
+        437356,
+        "0x2c40"
+       ],
+       [
+        "0x402176",
+        437356,
+        "0x2c40"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x10af80",
+      "set": 62,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40216e",
+        437352,
+        "0x2f80"
+       ],
+       [
+        "0x402176",
+        437356,
+        "0x2f80"
+       ],
+       [
+        "0x402176",
+        437356,
+        "0x2f80"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-20secs",
+   "round": 11,
+   "elapsed": 200,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xa69c0",
+       "0xfae80"
+      ],
+      "primer_only": [
+       "0x4e440",
+       "0xc6bc0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xa69c0",
+      "set": 39,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402159",
+        665598,
+        "0x29c0"
+       ]
+      ]
+     },
+     {
+      "absent_in": "primer",
+      "line": "0xfae80",
+      "set": 58,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402165",
+        665602,
+        "0x2e80"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x4e440",
+      "set": 17,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402159",
+        665598,
+        "0x2440"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xc6bc0",
+      "set": 47,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402165",
+        665602,
+        "0x2bc0"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-05mins-39secs",
+   "round": 13,
+   "elapsed": 339,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x72680"
+      ],
+      "primer_only": [
+       "0x8a780"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x72680",
+      "set": 26,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40213e",
+        36869,
+        "0x269c"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x8a780",
+      "set": 30,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40213e",
+        36869,
+        "0x279c"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-02mins-26secs",
+   "round": 14,
+   "elapsed": 146,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x16040",
+       "0xa2980"
+      ],
+      "primer_only": [
+       "0x4a400",
+       "0x9a900"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x16040",
+      "set": 1,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402143",
+        25226,
+        "0x206c"
+       ]
+      ]
+     },
+     {
+      "absent_in": "primer",
+      "line": "0xa2980",
+      "set": 38,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402137",
+        25221,
+        "0x29ac"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x4a400",
+      "set": 16,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402137",
+        25221,
+        "0x242c"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x9a900",
+      "set": 36,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402143",
+        25226,
+        "0x292c"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-34secs",
+   "round": 16,
+   "elapsed": 34,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x22180"
+      ],
+      "primer_only": [
+       "0x160c0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x22180",
+      "set": 6,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021f5",
+        13892,
+        "0x2188"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x160c0",
+      "set": 3,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021f5",
+        13892,
+        "0x20c8"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-55secs",
+   "round": 17,
+   "elapsed": 55,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xf6ec0"
+      ],
+      "primer_only": [
+       "0x9e940"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xf6ec0",
+      "set": 59,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402191",
+        103410,
+        "0x2edc"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x9e940",
+      "set": 37,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402191",
+        103410,
+        "0x295c"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-01mins-22secs",
+   "round": 18,
+   "elapsed": 82,
+   "class": "UV1+other",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x4a400",
+       "0x4e440"
+      ],
+      "primer_only": []
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x4a400",
+      "set": 16,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021f4",
+        239967,
+        "0x243c"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [
+     {
+      "absent_in": "primer",
+      "line": "0x4e440",
+      "set": 17,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": []
+     }
+    ],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-16secs",
+   "round": 19,
+   "elapsed": 196,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xaaa00"
+      ],
+      "primer_only": [
+       "0x2e240"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xaaa00",
+      "set": 40,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021bc",
+        1317161,
+        "0x2a07"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x2e240",
+      "set": 9,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021bc",
+        1317161,
+        "0x2247"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-00mins-12secs-696714us",
+   "round": 20,
+   "elapsed": 12.696714,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x766c0"
+      ],
+      "primer_only": [
+       "0xdad00"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x766c0",
+      "set": 27,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219a",
+        113330,
+        "0x26d4"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xdad00",
+      "set": 52,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40219a",
+        113330,
+        "0x2d14"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-11secs",
+   "round": 21,
+   "elapsed": 191,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2a200"
+      ],
+      "primer_only": [
+       "0xd6cc0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x2a200",
+      "set": 8,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021e0",
+        659723,
+        "0x220c"
+       ],
+       [
+        "0x4021e8",
+        659727,
+        "0x220c"
+       ],
+       [
+        "0x4021e8",
+        659727,
+        "0x220c"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xd6cc0",
+      "set": 51,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021e0",
+        659723,
+        "0x2ccc"
+       ],
+       [
+        "0x4021e8",
+        659727,
+        "0x2ccc"
+       ],
+       [
+        "0x4021e8",
+        659727,
+        "0x2ccc"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-01mins-38secs",
+   "round": 22,
+   "elapsed": 98,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x12080"
+      ],
+      "primer_only": [
+       "0x36240"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x12080",
+      "set": 2,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021dd",
+        859325,
+        "0x20b0"
+       ],
+       [
+        "0x4021dd",
+        859498,
+        "0x20b0"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x36240",
+      "set": 9,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021dd",
+        859325,
+        "0x2270"
+       ],
+       [
+        "0x4021dd",
+        859498,
+        "0x2270"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-05mins-21secs",
+   "round": 23,
+   "elapsed": 321,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x2e240",
+       "0x6a580"
+      ],
+      "primer_only": [
+       "0x5e540",
+       "0xaea40"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x2e240",
+      "set": 9,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40217e",
+        160303,
+        "0x2240"
+       ]
+      ]
+     },
+     {
+      "absent_in": "primer",
+      "line": "0x6a580",
+      "set": 22,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402172",
+        160297,
+        "0x2580"
+       ],
+       [
+        "0x402172",
+        160527,
+        "0x2580"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x5e540",
+      "set": 21,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402172",
+        160297,
+        "0x2540"
+       ],
+       [
+        "0x402172",
+        160527,
+        "0x2540"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xaea40",
+      "set": 41,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40217e",
+        160303,
+        "0x2a40"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-02mins-06secs",
+   "round": 24,
+   "elapsed": 126,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xfaf00"
+      ],
+      "primer_only": [
+       "0x160c0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xfaf00",
+      "set": 60,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021d3",
+        528481,
+        "0x2f08"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x160c0",
+      "set": 3,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021d3",
+        528481,
+        "0x20c8"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-44secs",
+   "round": 25,
+   "elapsed": 224,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x968c0"
+      ],
+      "primer_only": [
+       "0xeee40"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x968c0",
+      "set": 35,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40217c",
+        1139067,
+        "0x28d4"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xeee40",
+      "set": 57,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x40217c",
+        1139067,
+        "0x2e54"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-02mins-13secs",
+   "round": 26,
+   "elapsed": 133,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xded40"
+      ],
+      "primer_only": [
+       "0xb6a40"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xded40",
+      "set": 53,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021c4",
+        260946,
+        "0x2d58"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xb6a40",
+      "set": 41,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021c4",
+        260946,
+        "0x2a58"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-06mins-03secs",
+   "round": 27,
+   "elapsed": 363,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [],
+      "primer_only": [
+       "0xd2c80"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "reference",
+      "line": "0xd2c80",
+      "set": 50,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402150",
+        48530,
+        "0x2cb0"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-02mins-54secs",
+   "round": 28,
+   "elapsed": 174,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xf6ec0"
+      ],
+      "primer_only": [
+       "0xded40"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xf6ec0",
+      "set": 59,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402159",
+        169942,
+        "0x2ed8"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xded40",
+      "set": 53,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402159",
+        169942,
+        "0x2d58"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-03mins-12secs",
+   "round": 29,
+   "elapsed": 192,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x22180",
+       "0xa69c0"
+      ],
+      "primer_only": [
+       "0x7e740",
+       "0x106f40"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x22180",
+      "set": 6,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021a8",
+        302216,
+        "0x2188"
+       ]
+      ]
+     },
+     {
+      "absent_in": "primer",
+      "line": "0xa69c0",
+      "set": 39,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021b7",
+        302224,
+        "0x29c8"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x7e740",
+      "set": 29,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021a8",
+        302216,
+        "0x2748"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x106f40",
+      "set": 61,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021b7",
+        302224,
+        "0x2f48"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-04mins-20secs",
+   "round": 30,
+   "elapsed": 260,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0xe000"
+      ],
+      "primer_only": [
+       "0x106fc0"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0xe000",
+      "set": 0,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402194",
+        93985,
+        "0x2030"
+       ],
+       [
+        "0x40219c",
+        93989,
+        "0x2030"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0x106fc0",
+      "set": 63,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x402194",
+        93985,
+        "0x2ff0"
+       ],
+       [
+        "0x40219c",
+        93989,
+        "0x2ff0"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  },
+  {
+   "dir": "/tests/simspect_alloy_20261108/timing/amulet_t5/runs/InvisiSpec_20261110T015013Z/benchmark-out-InvisiSpec/config0results/0hrs-01mins-50secs",
+   "round": 31,
+   "elapsed": 110,
+   "class": "UV1",
+   "evidence": {
+    "diffs": {
+     "[system.ruby.l1_cntrl0.L1Dcache]": {
+      "ref_only": [
+       "0x8e840",
+       "0xa6940"
+      ],
+      "primer_only": [
+       "0xe000"
+      ]
+     }
+    },
+    "explained_by_spec_eviction": [
+     {
+      "absent_in": "primer",
+      "line": "0x8e840",
+      "set": 33,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021d7",
+        81080,
+        "0x2848"
+       ]
+      ]
+     },
+     {
+      "absent_in": "primer",
+      "line": "0xa6940",
+      "set": 37,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021cb",
+        81075,
+        "0x2948"
+       ],
+       [
+        "0x4021cb",
+        81302,
+        "0x2948"
+       ]
+      ]
+     },
+     {
+      "absent_in": "reference",
+      "line": "0xe000",
+      "set": 0,
+      "L1_Replacement_seen": true,
+      "squashed_loads_same_set": [
+       [
+        "0x4021cb",
+        81075,
+        "0x2008"
+       ],
+       [
+        "0x4021cb",
+        81302,
+        "0x2008"
+       ]
+      ]
+     }
+    ],
+    "unexplained": [],
+    "nonspec_access_to_diff_line": false
+   }
+  }
+ ]
+}

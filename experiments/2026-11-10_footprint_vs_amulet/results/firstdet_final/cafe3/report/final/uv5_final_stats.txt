@@ -1,0 +1,9 @@
+T2g tests run (both hosts): 50232 of 50232; pending-classification hits: 0
+status {'ok': 50232}
+UV5 K = 4 of N = 50232 -> expected 10046.6 multiple 22.3 CI95 rate (2.16970476201099e-05, 0.00020387307702199645)
+C tests run: 10849 of 10849 UV5 in C: 2 | non-C tests run: 39383 UV5 in non-C: 2
+C-assumption estimate: K=2 / N=50232 -> expected 16744, multiple 13.4x, 95% multiple [1.08, 32.2]
+UV5 hits: [('mispredict_not_taken', 'inst-021207', 'cold', [10000, 2500], 'D'), ('mispredict_not_taken', 'inst-007645', 'cold', [2500, 0], 'C'), ('mispredict_taken', 'inst-007645', 'cold', [2500, 0], 'nonC'), ('mispredict_taken', 'inst-021207', 'cold', [10000, 2500], 'nonC')]
+UV3 in T2g (priority order, not a seed prefix): 1861 / 50232
+UV4 in T2g (priority order, not a seed prefix): 599 / 50232
+setups of all T2g tests: {'warm': 16822, 'cold': 16538, 'full': 16872}

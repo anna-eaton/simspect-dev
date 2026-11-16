@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Why is a transmitter's operand public under SPT? x86-level slice (2026-11-07).
+"""Why is a transmitter's operand public under SPT? x86-level slice.
 
 For a test's compiled .s, follows the Alloy-order path (entry, bb_1 ... the xmit
 block) and builds a value graph of every register write. Then it applies
@@ -7,7 +7,7 @@ gem5-spt's taint rules to that graph and reports whether the xmit's leakage
 operand (br_x: the flags its jcc reads; ld, str: its address registers) is public,
 and why.
 
-gem5-spt rules used (source lines read 2026-11-07, /work/gem5-spt/src/cpu/o3):
+gem5-spt rules used (/work/gem5-spt/src/cpu/o3):
   taint     a load's destination is always tainted; any other instruction's
             destination is tainted iff one of its sources is
             (rob_impl.hh:236-250); immediates and xor-zero idioms are clean.

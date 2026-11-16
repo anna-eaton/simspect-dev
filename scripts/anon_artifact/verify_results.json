@@ -1,0 +1,468 @@
+{
+ "comments": {
+  "Makefile": 0,
+  "STAGE1_alloy/a6CountModels.java": 0,
+  "STAGE1_alloy/a6RandomModels.java": 0,
+  "STAGE1_alloy/gen/audit_core_dups.py": 0,
+  "STAGE1_alloy/gen/check_bound_consistency.py": 0,
+  "STAGE1_alloy/gen/dedup_vs_main.py": 0,
+  "STAGE1_alloy/gen/launch_stage1.py": 0,
+  "STAGE1_alloy/gen/make_s15_model.py": 0,
+  "STAGE1_alloy/gen/partition_stage1.py": 0,
+  "STAGE1_alloy/gen/restream.py": 0,
+  "STAGE1_alloy/gen/run_stage1.py": 0,
+  "STAGE1_alloy/gen/stage15lp.py": 0,
+  "STAGE1_alloy/gen/stage2_sharded.py": 0,
+  "STAGE1_alloy/gen/stream_fp.py": 0,
+  "STAGE1_alloy/models/Footprint_6_u_core_ri.als": 0,
+  "STAGE1_alloy/models/Footprint_6_u_lpP.als": 0,
+  "STAGE1_alloy/models/Recon_6_u_core_ri.als": 0,
+  "STAGE1_alloy/models/Recon_6_u_lpP.als": 0,
+  "STAGE1_alloy/models/STT_6_u_core_ri.als": 0,
+  "STAGE1_alloy/models/STT_6_u_lpP.als": 0,
+  "STAGE1_alloy/models/speclfb/SpecLFB_6_u_core_ri.als": 0,
+  "STAGE1_alloy/models/speclfb/SpecLFB_6_u_lpP.als": 0,
+  "STAGE1_alloy/stage_seed.py": 0,
+  "STAGE2_compilation/batch_generate.py": 0,
+  "STAGE2_compilation/compile_annotate.py": 0,
+  "STAGE2_compilation/find_duplicates.py": 0,
+  "STAGE2_compilation/instruction_tables/fv4_vocab.json": 0,
+  "STAGE2_compilation/instruction_tables/interleave_only.json": 0,
+  "STAGE2_compilation/parsexml.py": 0,
+  "STAGE3_gem5/_fv2_slice.py": 0,
+  "STAGE3_gem5/bugs/__init__.py": 0,
+  "STAGE3_gem5/bugs/_dg3.py": 0,
+  "STAGE3_gem5/bugs/_speclfb.py": 0,
+  "STAGE3_gem5/bugs/_trace.py": 0,
+  "STAGE3_gem5/bugs/a_uv1_invisispec.py": 0,
+  "STAGE3_gem5/bugs/a_uv1_transient.py": 0,
+  "STAGE3_gem5/bugs/a_uv3_cleanupspec_rmw.py": 0,
+  "STAGE3_gem5/bugs/a_uv4_cleanupspec_split.py": 0,
+  "STAGE3_gem5/bugs/a_uv5_cleanupspec_overclean.py": 0,
+  "STAGE3_gem5/bugs/a_uv6_speclfb_first_load.py": 0,
+  "STAGE3_gem5/bugs/classify.py": 0,
+  "STAGE3_gem5/bugs/cs1_older_store_upgrade.py": 0,
+  "STAGE3_gem5/bugs/cs_em_other.py": 0,
+  "STAGE3_gem5/bugs/cs_em_rmw.py": 0,
+  "STAGE3_gem5/bugs/cs_em_upgrade.py": 0,
+  "STAGE3_gem5/bugs/cs_uv3_other_actor.py": 0,
+  "STAGE3_gem5/bugs/disq_check_ld_rmw_limm.py": 0,
+  "STAGE3_gem5/bugs/disq_data_obtained.py": 0,
+  "STAGE3_gem5/bugs/disq_hpad_rmw_padding.py": 0,
+  "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py": 0,
+  "STAGE3_gem5/bugs/uv1_stt_xmm4.py": 0,
+  "STAGE3_gem5/bugs/uv2_recon_stlf.py": 0,
+  "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py": 0,
+  "STAGE3_gem5/bugs/uv4_speclfb_walk_order.py": 0,
+  "STAGE3_gem5/bugs/uv5_speclfb_jmp_shadow.py": 0,
+  "STAGE3_gem5/cache_setup.py": 0,
+  "STAGE3_gem5/check_br.py": 0,
+  "STAGE3_gem5/check_footprint.py": 0,
+  "STAGE3_gem5/check_ld.py": 0,
+  "STAGE3_gem5/check_other.py": 0,
+  "STAGE3_gem5/gem5_common.py": 0,
+  "STAGE3_gem5/gem5_fastpath.py": 0,
+  "STAGE3_gem5/timing/compare.py": 0,
+  "STAGE3_gem5/timing/fastpath_worker.py": 0,
+  "STAGE3_gem5/timing/firstdet_report.py": 0,
+  "STAGE3_gem5/timing/firstdet_stream.py": 0,
+  "STAGE3_gem5/timing/make_sample.py": 0,
+  "STAGE3_gem5/timing/numbers.py": 0,
+  "STAGE3_gem5/timing/timing_driver.py": 0,
+  "alloy_solver_order.py": 0,
+  "amulet/classify_t5.py": 0,
+  "amulet/make_analyse_t5.py": 0,
+  "amulet/make_benchmark_t5.py": 0,
+  "amulet/perbug_t5.py": 0,
+  "amulet/run_amulet.sh": 0,
+  "amulet/summarize_t5.py": 0,
+  "jobs_registry.py": 0,
+  "pipeline.py": 0,
+  "runconfigs/eval/E2.json": 0,
+  "runconfigs/eval/E2w.json": 0,
+  "runconfigs/eval/E3.json": 0,
+  "runconfigs/eval/E4.json": 0,
+  "runconfigs/eval/E6.json": 0,
+  "runconfigs/generate/Footprint_6_u_extra.json": 0,
+  "runconfigs/generate/Footprint_6_u_main.json": 0,
+  "runconfigs/generate/Recon_6_u.json": 0,
+  "runconfigs/generate/STT_6_u.json": 0,
+  "runconfigs/hits/T1g.json": 0,
+  "runconfigs/hits/T2g.json": 0,
+  "runconfigs/hits/T3g.json": 0,
+  "runconfigs/stage2_A.json": 0,
+  "runconfigs/timing/T1g.json": 0,
+  "runconfigs/timing/T2g.json": 0,
+  "runconfigs/timing/T3g.json": 0,
+  "simspect.py": 0,
+  "simspect_paths.py": 0,
+  "specs/leakage/cleanupspec.json": 0,
+  "specs/leakage/invisispec.json": 0,
+  "specs/leakage/speclfb.json": 0,
+  "testrun.py": 0,
+  "twostage_lp.py": 0
+ },
+ "identity": {
+  "Makefile": [],
+  "STAGE1_alloy/a6CountModels.java": [],
+  "STAGE1_alloy/a6RandomModels.java": [],
+  "STAGE1_alloy/gen/audit_core_dups.py": [],
+  "STAGE1_alloy/gen/check_bound_consistency.py": [],
+  "STAGE1_alloy/gen/dedup_vs_main.py": [],
+  "STAGE1_alloy/gen/launch_stage1.py": [],
+  "STAGE1_alloy/gen/make_s15_model.py": [],
+  "STAGE1_alloy/gen/partition_stage1.py": [],
+  "STAGE1_alloy/gen/restream.py": [],
+  "STAGE1_alloy/gen/run_stage1.py": [],
+  "STAGE1_alloy/gen/stage15lp.py": [],
+  "STAGE1_alloy/gen/stage2_sharded.py": [],
+  "STAGE1_alloy/gen/stream_fp.py": [],
+  "STAGE1_alloy/models/Footprint_6_u_core_ri.als": [],
+  "STAGE1_alloy/models/Footprint_6_u_lpP.als": [],
+  "STAGE1_alloy/models/Recon_6_u_core_ri.als": [],
+  "STAGE1_alloy/models/Recon_6_u_lpP.als": [],
+  "STAGE1_alloy/models/STT_6_u_core_ri.als": [],
+  "STAGE1_alloy/models/STT_6_u_lpP.als": [],
+  "STAGE1_alloy/models/speclfb/SpecLFB_6_u_core_ri.als": [],
+  "STAGE1_alloy/models/speclfb/SpecLFB_6_u_lpP.als": [],
+  "STAGE1_alloy/stage_seed.py": [],
+  "STAGE2_compilation/batch_generate.py": [],
+  "STAGE2_compilation/compile_annotate.py": [],
+  "STAGE2_compilation/find_duplicates.py": [],
+  "STAGE2_compilation/instruction_tables/fv4_vocab.json": [],
+  "STAGE2_compilation/instruction_tables/interleave_only.json": [],
+  "STAGE2_compilation/parsexml.py": [],
+  "STAGE3_gem5/_fv2_slice.py": [],
+  "STAGE3_gem5/bugs/__init__.py": [],
+  "STAGE3_gem5/bugs/_dg3.py": [],
+  "STAGE3_gem5/bugs/_speclfb.py": [],
+  "STAGE3_gem5/bugs/_trace.py": [],
+  "STAGE3_gem5/bugs/a_uv1_invisispec.py": [],
+  "STAGE3_gem5/bugs/a_uv1_transient.py": [],
+  "STAGE3_gem5/bugs/a_uv3_cleanupspec_rmw.py": [],
+  "STAGE3_gem5/bugs/a_uv4_cleanupspec_split.py": [],
+  "STAGE3_gem5/bugs/a_uv5_cleanupspec_overclean.py": [],
+  "STAGE3_gem5/bugs/a_uv6_speclfb_first_load.py": [],
+  "STAGE3_gem5/bugs/classify.py": [],
+  "STAGE3_gem5/bugs/cs1_older_store_upgrade.py": [],
+  "STAGE3_gem5/bugs/cs_em_other.py": [],
+  "STAGE3_gem5/bugs/cs_em_rmw.py": [],
+  "STAGE3_gem5/bugs/cs_em_upgrade.py": [],
+  "STAGE3_gem5/bugs/cs_uv3_other_actor.py": [],
+  "STAGE3_gem5/bugs/disq_check_ld_rmw_limm.py": [],
+  "STAGE3_gem5/bugs/disq_data_obtained.py": [],
+  "STAGE3_gem5/bugs/disq_hpad_rmw_padding.py": [],
+  "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py": [],
+  "STAGE3_gem5/bugs/uv1_stt_xmm4.py": [],
+  "STAGE3_gem5/bugs/uv2_recon_stlf.py": [],
+  "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py": [],
+  "STAGE3_gem5/bugs/uv4_speclfb_walk_order.py": [],
+  "STAGE3_gem5/bugs/uv5_speclfb_jmp_shadow.py": [],
+  "STAGE3_gem5/cache_setup.py": [],
+  "STAGE3_gem5/check_br.py": [],
+  "STAGE3_gem5/check_footprint.py": [],
+  "STAGE3_gem5/check_ld.py": [],
+  "STAGE3_gem5/check_other.py": [],
+  "STAGE3_gem5/gem5_common.py": [],
+  "STAGE3_gem5/gem5_fastpath.py": [],
+  "STAGE3_gem5/timing/compare.py": [],
+  "STAGE3_gem5/timing/fastpath_worker.py": [],
+  "STAGE3_gem5/timing/firstdet_report.py": [],
+  "STAGE3_gem5/timing/firstdet_stream.py": [],
+  "STAGE3_gem5/timing/make_sample.py": [],
+  "STAGE3_gem5/timing/numbers.py": [],
+  "STAGE3_gem5/timing/timing_driver.py": [],
+  "alloy_solver_order.py": [],
+  "amulet/classify_t5.py": [],
+  "amulet/make_analyse_t5.py": [],
+  "amulet/make_benchmark_t5.py": [],
+  "amulet/perbug_t5.py": [],
+  "amulet/run_amulet.sh": [],
+  "amulet/summarize_t5.py": [],
+  "jobs_registry.py": [],
+  "pipeline.py": [],
+  "runconfigs/eval/E2.json": [],
+  "runconfigs/eval/E2w.json": [],
+  "runconfigs/eval/E3.json": [],
+  "runconfigs/eval/E4.json": [],
+  "runconfigs/eval/E6.json": [],
+  "runconfigs/generate/Footprint_6_u_extra.json": [],
+  "runconfigs/generate/Footprint_6_u_main.json": [],
+  "runconfigs/generate/Recon_6_u.json": [],
+  "runconfigs/generate/STT_6_u.json": [],
+  "runconfigs/hits/T1g.json": [],
+  "runconfigs/hits/T2g.json": [],
+  "runconfigs/hits/T3g.json": [],
+  "runconfigs/stage2_A.json": [],
+  "runconfigs/timing/T1g.json": [],
+  "runconfigs/timing/T2g.json": [],
+  "runconfigs/timing/T3g.json": [],
+  "simspect.py": [],
+  "simspect_paths.py": [],
+  "specs/leakage/cleanupspec.json": [],
+  "specs/leakage/invisispec.json": [],
+  "specs/leakage/speclfb.json": [],
+  "testrun.py": [],
+  "twostage_lp.py": []
+ },
+ "ast": {
+  "testrun.py": true,
+  "jobs_registry.py": true,
+  "STAGE1_alloy/gen/launch_stage1.py": true,
+  "STAGE1_alloy/gen/audit_core_dups.py": true,
+  "STAGE1_alloy/gen/check_bound_consistency.py": true,
+  "STAGE1_alloy/gen/dedup_vs_main.py": true,
+  "STAGE2_compilation/compile_annotate.py": true,
+  "STAGE3_gem5/gem5_fastpath.py": true,
+  "STAGE3_gem5/check_ld.py": true,
+  "STAGE3_gem5/check_br.py": true,
+  "STAGE3_gem5/check_other.py": true,
+  "STAGE3_gem5/check_footprint.py": true,
+  "STAGE3_gem5/_fv2_slice.py": true,
+  "STAGE3_gem5/timing/fastpath_worker.py": true,
+  "STAGE3_gem5/timing/make_sample.py": true,
+  "amulet/classify_t5.py": true,
+  "amulet/perbug_t5.py": true,
+  "amulet/summarize_t5.py": true,
+  "STAGE3_gem5/bugs/_speclfb.py": true,
+  "STAGE3_gem5/bugs/_trace.py": true
+ },
+ "string_changes": {
+  "STAGE1_alloy/gen/launch_stage1.py": [
+   [
+    "STAGE1_alloy/models/proposed_twophase/run_stage1.py",
+    "STAGE1_alloy/gen/run_stage1.py"
+   ]
+  ],
+  "STAGE3_gem5/check_footprint.py": [
+   [
+    "no O3PipeView:simspect lines in the trace: this gem5 build lacks the SimSpect hooks (wiki/design/SIMSPECT_HOOKS.md); cannot decide",
+    "no O3PipeView:simspect lines in the trace: this gem5 build lacks the SimSpect hooks; cannot decide"
+   ]
+  ],
+  "amulet/classify_t5.py": [
+   [
+    "/tests/simspect_alloy_20261108/timing/amulet_t5",
+    "AMULET_T5"
+   ]
+  ]
+ },
+ "json_ok": {
+  "STAGE2_compilation/instruction_tables/fv4_vocab.json": true,
+  "STAGE2_compilation/instruction_tables/interleave_only.json": true,
+  "runconfigs/eval/E2.json": true,
+  "runconfigs/eval/E2w.json": true,
+  "runconfigs/eval/E3.json": true,
+  "runconfigs/eval/E4.json": true,
+  "runconfigs/eval/E6.json": true,
+  "runconfigs/generate/Footprint_6_u_extra.json": true,
+  "runconfigs/generate/Footprint_6_u_main.json": true,
+  "runconfigs/generate/Recon_6_u.json": true,
+  "runconfigs/generate/STT_6_u.json": true,
+  "runconfigs/hits/T1g.json": true,
+  "runconfigs/hits/T2g.json": true,
+  "runconfigs/hits/T3g.json": true,
+  "runconfigs/stage2_A.json": true,
+  "runconfigs/timing/T1g.json": true,
+  "runconfigs/timing/T2g.json": true,
+  "runconfigs/timing/T3g.json": true,
+  "specs/leakage/cleanupspec.json": true,
+  "specs/leakage/invisispec.json": true,
+  "specs/leakage/speclfb.json": true
+ },
+ "other": [],
+ "pruned": {
+  "twostage_lp.py": [
+   114,
+   113
+  ],
+  "pipeline.py": [
+   1220,
+   696
+  ],
+  "simspect_paths.py": [
+   23,
+   23
+  ],
+  "alloy_solver_order.py": [
+   238,
+   238
+  ],
+  "STAGE1_alloy/stage_seed.py": [
+   107,
+   106
+  ],
+  "STAGE1_alloy/gen/partition_stage1.py": [
+   62,
+   60
+  ],
+  "STAGE1_alloy/gen/run_stage1.py": [
+   130,
+   128
+  ],
+  "STAGE1_alloy/gen/stage2_sharded.py": [
+   103,
+   90
+  ],
+  "STAGE1_alloy/gen/make_s15_model.py": [
+   303,
+   23
+  ],
+  "STAGE1_alloy/gen/stage15lp.py": [
+   236,
+   177
+  ],
+  "STAGE1_alloy/gen/stream_fp.py": [
+   344,
+   279
+  ],
+  "STAGE1_alloy/gen/restream.py": [
+   129,
+   129
+  ],
+  "STAGE2_compilation/parsexml.py": [
+   2666,
+   2054
+  ],
+  "STAGE2_compilation/find_duplicates.py": [
+   136,
+   69
+  ],
+  "STAGE3_gem5/gem5_common.py": [
+   1059,
+   1051
+  ],
+  "STAGE3_gem5/cache_setup.py": [
+   481,
+   477
+  ],
+  "STAGE3_gem5/timing/firstdet_stream.py": [
+   293,
+   288
+  ],
+  "STAGE3_gem5/timing/timing_driver.py": [
+   323,
+   322
+  ],
+  "STAGE3_gem5/timing/firstdet_report.py": [
+   230,
+   191
+  ],
+  "amulet/make_benchmark_t5.py": [
+   123,
+   118
+  ],
+  "STAGE3_gem5/bugs/_dg3.py": [
+   28,
+   28
+  ],
+  "STAGE3_gem5/bugs/a_uv1_invisispec.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/a_uv1_transient.py": [
+   14,
+   6
+  ],
+  "STAGE3_gem5/bugs/a_uv3_cleanupspec_rmw.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/a_uv4_cleanupspec_split.py": [
+   28,
+   20
+  ],
+  "STAGE3_gem5/bugs/a_uv5_cleanupspec_overclean.py": [
+   32,
+   24
+  ],
+  "STAGE3_gem5/bugs/a_uv6_speclfb_first_load.py": [
+   17,
+   9
+  ],
+  "STAGE3_gem5/bugs/classify.py": [
+   600,
+   545
+  ],
+  "STAGE3_gem5/bugs/cs1_older_store_upgrade.py": [
+   22,
+   14
+  ],
+  "STAGE3_gem5/bugs/cs_em_other.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/cs_em_rmw.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/cs_em_upgrade.py": [
+   37,
+   29
+  ],
+  "STAGE3_gem5/bugs/cs_uv3_other_actor.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/disq_check_ld_rmw_limm.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/disq_data_obtained.py": [
+   15,
+   7
+  ],
+  "STAGE3_gem5/bugs/disq_hpad_rmw_padding.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/r_sa13_recon_sse_load.py": [
+   22,
+   14
+  ],
+  "STAGE3_gem5/bugs/uv1_stt_xmm4.py": [
+   13,
+   5
+  ],
+  "STAGE3_gem5/bugs/uv2_recon_stlf.py": [
+   14,
+   6
+  ],
+  "STAGE3_gem5/bugs/uv3_recon_oldest_taint.py": [
+   17,
+   9
+  ],
+  "STAGE3_gem5/bugs/uv4_speclfb_walk_order.py": [
+   17,
+   9
+  ],
+  "STAGE3_gem5/bugs/uv5_speclfb_jmp_shadow.py": [
+   19,
+   11
+  ]
+ },
+ "code_edits": {
+  "testrun.py": [
+   [
+    ".get(\"fast_path\") is True",
+    ".get(\"fast_path\", True) is True"
+   ]
+  ],
+  "amulet/classify_t5.py": [
+   [
+    "T5 = '/tests/simspect_alloy_20261108/timing/amulet_t5'",
+    "T5 = os.environ.get('AMULET_T5', os.getcwd())"
+   ]
+  ]
+ },
+ "summary": {
+  "files": 101,
+  "comment_total": 0,
+  "identity_total": 0,
+  "ast_identical": 20,
+  "ast_checked": 20,
+  "pruned_files": 42,
+  "json_bad": [],
+  "other": []
+ }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""bench_grid.py — run the Stage-1.5 bound/pin measurement grid (stage15-bound session, 2026-11-08).
+"""bench_grid.py — run the Stage-1.5 bound/pin measurement grid.
 
 For each job: make_s15_model.py builds a scratch model (production model + core seed + scope/IX/fold
 edits), then a6Bench.java measures parse / Kodkod translation / CNF size / first instance /
@@ -71,7 +71,7 @@ def jobs_for(which):
         add("SPT_k3_ld", 8, "none", ops=16, query="fold_trunc", fold="keep", enum=30)
         add("Recon_6_ld", 10, "none", ops=20, query="fold_trunc", fold="keep", enum=30)
     elif which == "shapes":
-        # s4-variant's S4 / A3c shapes under the Stage-1.5 designs (coordinator request 2026-11-08)
+        # s4-variant's S4 / A3c shapes under the Stage-1.5 designs
         for mini in ("prod", "leak_rs"):
             for n, ops in ((6, 0), (8, 16), (10, 20)):
                 add("STT_6_ld", n, "b", ops=ops, query="s4_shape", enum=30, mini=mini)

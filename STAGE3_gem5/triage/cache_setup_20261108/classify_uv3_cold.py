@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-classify_uv3_cold.py: bucket CleanupSpec footprint hits per offending line (2026-11-08, cache-setup session).
+classify_uv3_cold.py: bucket CleanupSpec footprint hits per offending line.
 
 Input: testrun.py campaign dirs run with pipeline.keep_tmp=true (raw records in
 <campaign>/<mode>/_sweep_raw/*.json carry `workdir`, `offending`, `terms_fired`,

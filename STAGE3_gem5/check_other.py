@@ -29,7 +29,7 @@ def check_other(by_pc, xmit_pc, lc_pc, fnc_pc, unresolved, ticks_per_cycle, lsq_
     fnc_retire    = fnc_rec["retire"]    if fnc_rec  else 0
     fnc_complete  = fnc_rec["complete"]  if fnc_rec  else 0
 
-    # Mirror check_ld (2026-10-30): a specified last-committed predecessor must
+    # Mirror check_ld: a specified last-committed predecessor must
     # actually retire, else the run is not the execution the model describes.
     lc_unretired_but_specified = (lc_pc is not None) and (lc_retire == 0)
 

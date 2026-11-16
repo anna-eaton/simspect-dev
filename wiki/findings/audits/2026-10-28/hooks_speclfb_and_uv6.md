@@ -4,6 +4,43 @@
 
 
 **Update 2026-11-07 (hooks v2 trace):** on `lfb_uv6x` the mechanism is the order of the two walks, not the load-queue-head skip: the ROB walk set the sticky `PrevNoUnsafe` on both speculative loads (seq 28, 29) at tick 92500, one cycle before the LSQ walk set `cusl` on seq 28, and neither load was the LQ head (`LSQ:unsafe ... lqhead=0`). Trace and lines: `wiki/design/SIMSPECT_HOOKS.md` "What the v2 trace already showed".
+## Update 2026-11-09: AMuLeT's own UV6 patch would close walk-order, so it does not stand as a separate bug
+
+**For Anna, the answer first.** Yes, AMuLeT's UV6 fix would close the walk-order leak. Every walk-order load in the 3000-test campaign is already flagged as speculative (CUSL or mUSL) and is treated as safe only because `reallyUnsafe` is 0, and AMuLeT's patch removes exactly that term. This is a prediction from recorded flags plus a code reading. No patched build was run.
+
+**What AMuLeT's UV6 fix is (primary sources).**
+- **The paper has no gem5 patch for UV6.** AMuLeT says a vulnerability that was "fundamental to a defense and hard to patch" was filtered with a contract instead, and "this approach worked for KV1 and UV6 in InvisiSpec and SpecLFB" (`amulet.pdf` §3.3(b), p7). For UV6 specifically: "We validate that these violations disappear when we expose this leakage of register values in the contract (ARCH-SEQ)" (§4.7, p12).
+- **The repo has one.** `sith-lab/amulet-gem5`, branch `speclfb`, commit `5f9ac78` "Reverting accidental isreallyUnsafe() patch" (Brian Fu, 2025-02-06) reverts a two-file patch that had been committed by accident. The diff is saved at `wiki/reference/amulet_gem5/5f9ac78_reverting_accidental_isreallyUnsafe_patch.patch` (fetched 2026-11-09 from `https://github.com/sith-lab/amulet-gem5/commit/5f9ac78ebb9f72b8aafcea962f177776e4515635.patch`). The patched state was:
+  - `dyn_inst.hh`: `isUnsafe()` returns `!isSquashed() && ((isCUSL() || ismUSL()))`, with `&& isreallyUnsafe()` commented out;
+  - `lsq_unit.cc`, `LSQUnit::updateSafeState`: the loop is `while ((iter != loadQueue.end()) && iter->instruction())` with `iter++` at the end, so the load-queue head is walked too.
+- The leftovers of that patch are still in the AE tree we run: the commented `//while ( (iter != loadQueue.end()) && iter->instruction()) {` and `//iter++;` in `~/trippel/defense_src/amulet-SpecLFB_AE-v1.1/src/cpu/o3/lsq_unit.cc:878,981`.
+- **Upstream SpecLFB:** no fix found. The `gitee.com/chip-security/SpecLFB` page shows 9 commits on `main`, the latest "attack_update", none mentioning a fix (dates not visible on the page).
+
+**Why the patch closes walk-order (code, hooked local copy `~/trippel/defense_src/amulet-SpecLFB_AE-v1.1/src/cpu/o3/`).**
+- The walk-order race only touches `PrevNoUnsafe`. The ROB walk sets it (`rob.cc:488-490`), it is never cleared, and its only effect is to clear `reallyUnsafe` (`rob.cc:494-495`, `lsq_unit.cc:961-965`).
+- `reallyUnsafe` is read in one place, the last term of `isUnsafe()` (`dyn_inst.hh:640-642`). With that term gone, `PrevNoUnsafe` and the order of the two walks no longer matter.
+- CUSL does not depend on the race. The LSQ walk sets it on every walked load whose older branches are unresolved (`lsq_unit.cc:905-917`), and in an IEW cycle `dispatch` runs before `ldstQueue.updateSafeState()` (`iew.cc:1567-1571`), so a load is flagged in the cycle it enters the load queue, before it can translate.
+- The request is tagged unsafe from `isUnsafe()` at translation (`lsq.cc:1049-1051`), so a load with CUSL set is held.
+- The recorded demo shows the flags directly: both `lfb_uv6x` loads print `LSQ:unsafe unsafe=0 cusl=1 prevnounsafe=1 reallyunsafe=0 lqhead=0` at translation (`wiki/design/SIMSPECT_HOOKS.md` "What the v2 trace already showed").
+
+**At scale (hooks-v2 campaign, 3000 STT_6 tests; `STAGE3_gem5/triage/speclfb_uv6_patch_prediction.py` over cafe2 `…/STT_6_speclfb_v2hooks__20261107/triage/triage.json`).** Each offending load is classed by its flags at its last translation: A = not the load-queue head, CUSL or mUSL set, safe only through `reallyunsafe=0` (the patch makes it unsafe); B = load-queue head with `cusl=0` (the patch walks it); C = not the head, `cusl=0 musl=0` (the jmp shadow, unchanged by the patch); U = already `unsafe=1` (replayed after it became safe, unchanged).
+
+| mode | walk-order offending loads | class A | walk-order-only hits | all offenders class A | still a hit after the patch, and why |
+|---|---|---|---|---|---|
+| mispredict_not_taken | 2664 | 2664 | 157 | 157 | 0 |
+| mispredict_taken | 2074 | 2074 | 162 | 56 | 106: 104 through jmp-shadow loads (class C), 2 through loads replayed after they became safe (class U) |
+
+- All 4,738 walk-order offending loads are class A. None is left unprotected by the patch.
+- The first-load events are mostly class B (2,261 and 2,268 load-queue heads) with 88 and 90 class A. The patch covers both, which is why it has two parts.
+- In mispredict_not_taken every one of the 1,300 hits has only class A and B offenders, so the patch is predicted to close all of them. In mispredict_taken the hits that remain all go through the jmp shadow.
+- The model's transmitter is a class A offender in 141 of the 157 and 155 of the 162 walk-order-only hits.
+
+**What this means for the bug count.** The test Anna set in the paper note (`ISCA-27/sections/results.tex:55`: "a fix to the first-load exemption need not fix it [check this against the SpecLFB fix before claiming it]") fails: AMuLeT's fix to the first-load exemption does fix it. Walk-order and A-UV6 share one root cause, the `reallyUnsafe` exemption, and one fix. What SimSpect adds is scope: AMuLeT describes a leak of a register secret through a single first load (§4.7, p12), and the same exemption also frees later loads, including the transmitter of a two-load chain.
+
+**Not checked.**
+- No patched build was run. A direct A/B needs a copy of the SpecLFB tree with the two-file patch, a rebuild, and a rerun of the 319 walk-order stems plus `uv6x`/`uv6dep`. That is a gem5 source change outside the hooks, so it needs Anna's approval (DECIDE in `URGENT_TODO.md`).
+- Whether AMuLeT's paper-level handling (the ARCH-SEQ filter) would also hide walk-order hits was not run. By reading, ARCH-SEQ exposes only values loaded on architectural paths (`amulet.pdf` §2, p3), so a transmitter whose address comes from a squashed load would still differ between inputs. That argues for "wider than AMuLeT reports", not for a separate bug.
+
 ## Update 2026-11-08: STT_6 sample through hooks v2, a NEW candidate bug ("jmp-shadow"), and the walk-order (c) evidence
 
 **For Anna, read this first.** A 3000-test STT_6 run (testsets_latest, current STT_6.als, fixed seed 20261107, 1500 ld-kind tests per branch mode) on the v2 SpecLFB binary, scored by `check_footprint.py` + `specs/leakage/speclfb.json` (L1D/L2 fill or evict by a squashed load inside the lc/fnc window), ran with 0 errors: **1300/1500 hits in mispredict_not_taken, 1452/1500 in mispredict_taken.** The run mirrors the `results/STT_6_speclfb_full` config (1 kB/2-way L1D, `--l2cache` 2 MB/16, resolve stall 5000; gem5 argv, staged ann and `config.ini` in `proof/`). Every in-window footprint is a `req=ld` fill; no model artifacts or checker false positives were found. Everything is on cafe2 in `/tests/simspect_fixed_20261030/results/STT_6_speclfb_v2hooks__20261107/` (`README.md`, `triage/`, `pipeviews/` of every hit).

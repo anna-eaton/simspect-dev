@@ -1,0 +1,82 @@
+{
+ "defense": "cleanupspec",
+ "N_prefix": 10326,
+ "n_rows": 10328,
+ "status": {
+  "ok": 10326
+ },
+ "hits": 424,
+ "gem5_cpu_s_total": 26092.74,
+ "total_cpu_s_total": 67121.49,
+ "gem5_cpu_s_per_test": 2.527,
+ "total_cpu_s_per_test": 6.5,
+ "signatures": {
+  "CS1": {
+   "first_idx": 7460,
+   "tests_to_first": 7461,
+   "stem": "inst-021206",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 18901.02,
+   "cum_total_cpu_s": 48506.8,
+   "K": 1,
+   "N": 10326,
+   "expected_tests_to_first": 5163.5,
+   "expected_gem5_cpu_s_to_first": 13047.63,
+   "expected_total_cpu_s_to_first": 33563.99
+  },
+  "EM_upgrade": {
+   "first_idx": 21,
+   "tests_to_first": 22,
+   "stem": "inst-011775",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 56.12,
+   "cum_total_cpu_s": 150.42,
+   "K": 87,
+   "N": 10326,
+   "expected_tests_to_first": 117.35,
+   "expected_gem5_cpu_s_to_first": 296.54,
+   "expected_total_cpu_s_to_first": 762.82
+  },
+  "UV3": {
+   "K": 0,
+   "N": 10326,
+   "expected_tests_to_first": 10327.0,
+   "expected_gem5_cpu_s_to_first": 26095.27,
+   "expected_total_cpu_s_to_first": 67127.99
+  },
+  "UV4": {
+   "first_idx": 120,
+   "tests_to_first": 121,
+   "stem": "inst-006608",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 318.13,
+   "cum_total_cpu_s": 814.49,
+   "K": 32,
+   "N": 10326,
+   "expected_tests_to_first": 312.94,
+   "expected_gem5_cpu_s_to_first": 790.77,
+   "expected_total_cpu_s_to_first": 2034.18
+  },
+  "UV5": {
+   "K": 0,
+   "N": 10326,
+   "expected_tests_to_first": 10327.0,
+   "expected_gem5_cpu_s_to_first": 26095.27,
+   "expected_total_cpu_s_to_first": 67127.99
+  },
+  "unattributed": {
+   "first_idx": 78,
+   "tests_to_first": 79,
+   "stem": "inst-011123",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 208.35,
+   "cum_total_cpu_s": 539.24,
+   "K": 305,
+   "N": 10326,
+   "expected_tests_to_first": 33.75,
+   "expected_gem5_cpu_s_to_first": 85.28,
+   "expected_total_cpu_s_to_first": 219.37
+  }
+ }
+}
+rc=0

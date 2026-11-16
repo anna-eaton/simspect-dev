@@ -1,0 +1,81 @@
+// T2g_ext = T2g (final protocol: 3x3 grid timing + random_all, AMuLeT CleanupSpec parity) on the regen-lp ext corpus Footprint_6_u_core_lpP_fv3_ext (ALL new tests, streamed, run D then C then the rest via ext_priority.py); ONLY results_name changed (firstdet-final, 2026-11-10, Anna: UV5 number).
+// T2g = FINAL protocol run (firstdet-final, 2026-11-10): T2rt with the sweep block replaced by the 3x3 whole-test timing grid (below); everything else identical (AMuLeT parity flags, cache_setup random_all).
+// T2rt = unified AMuLeT-comparison first detection (firstdet-final, 2026-11-10; EVAL_MANIFEST "Footprint model: the unified AMuLeT-comparison experiment"). Copy of runconfigs/regen_lp_20261110/T2ra_Footprint_6_u_lp_fv3.jsonc (= AMuLeT parity T2c + cache_setup random_all) with ONLY results_name changed and the sweep block made per-test random timing (below). Run with timing_driver.py --model Footprint_6_u_core_lpP_fv3 --seed 20261109 --xmit-kinds all, TMPDIR=/tmp.
+// T2ra = CleanupSpec first detection for the regenerated loose-pin corpus (recipe-v3, 2026-11-10; Anna TA-6: one cache policy for every defense, per-test random over ALL setups, "prime all the state just like we do for the timing"; no best-setup reporting).
+// Copy of runconfigs/amulet_parity_fv2/T2c_STT_6_fv2fp_rmw.jsonc with ONLY gem5.cache_setup (cold -> random_all; on this build each test runs one of warm/cold/full) and paths (results_name, paths.model = the corpus family Footprint_6_u) changed. Testset: the fv3-recipe corpus regen-lp builds from Footprint_6_u (pass its name as the model/testset to the launcher). Every record carries cache_setup, cache_setup_mode random_all, cache_setup_seed, cache_setup_choices.
+// T2c (cold) for the RMW fanout corpus STT_6_fv2fp_rmw (firstdet-cleanupspec, 2026-11-09): copy of T2c_STT_6_fv2.jsonc with ONLY results_name changed. THIS IS THE PARITY RUN: AMuLeT's CleanupSpec AE base (cafe2 /work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/configs/revizor/ipc_base_x86.s:49-57) clflushes every sandbox line before each input, then (:59-67) loads one word per sandbox page for the TLB, and has no L1D thrash loop (the InvisiSpec/SpecLFB/STT AE bases do). cache_setup "cold" flushes the whole test frame (cache_setup.py), so it matches except that AMuLeT's TLB loop re-warms the first line of each sandbox page.
+// T2c = T2 plus ONE non-path change (timing-amulet, 2026-11-09): gem5.cache_setup "cold" (paced clflush of the test frame, STAGE3_gem5/cache_setup.py), because AMuLeT starts CleanupSpec/SpecLFB tests from a clean cache (sandbox lines flushed; fu-2025-amulet.pdf p9 "they start from a clean cache state (which only requires flushes to the sandbox addresses)"). Everything else is the T2 parity config, which is a path-only copy of runconfigs/amulet_parity/.
+{
+  // CleanupSpec, AMuLeT-PARITY configuration (2026-11-08). Anna 2026-11-08: AMuLeT comparisons (speed, throughput,
+  // head-to-head) use AMuLeT's exact flags and structure sizes. Every gem5 flag below is AMuLeT's, cited to cafe2
+  // gem5_dev /work/amulet-repo @ c871bdf (src/executor.py set_cmd :196-307, src/config.py defaults,
+  // src/benchmark_all.sh :47-49, docker/docker_cleanupspec/docker_gem5_v1_final_cache_ipc.yaml).
+  // Comparison tables: wiki/findings/audits/2026-10-28/full_configs.md "Comparison with AMuLeT's flags (2026-11-08)".
+  // Run: make run MODEL=STT_6 RUNCONFIG=runconfigs/amulet_parity/run_config_STT_6_cleanupspec_amulet_parity.jsonc
+  //
+  // REMAINING DIFFERENCES from AMuLeT (harness requirements, kept on purpose):
+  //   - BTB force (branch_ann_enable) + 5000-cycle resolve stall on the model's mispredicted branches (sweep below).
+  //   - harness always adds --caches (inert under --ruby) and --scheme=2 (ignored by this tree, Options.py:315-319).
+  //   - run bound --abs-max-tick=1e11 (gem5_common.py) + 120 s wall timeout vs AMuLeT --rel-max-tick=1000000000 (executor.py:305).
+  //   - one gem5 process per test, plain se.py: no RevizorIPC (executor.py:311-312,335-338; AMuLeT clflushes the
+  //     sandbox lines between inputs), no --checkpoint-dir (:306). --access-backing-store (ipc.py:62-63) is passed below.
+  //   - debug flags O3PipeView (+Commit) only (CleanupSpec's LSQUnit print corrupts hook lines), single-run oracle.
+  // amulet-STT: no parity config, see the README block in run_config_STT_6_invisispec_futuristic_amulet_parity.jsonc.
+  "paths": {
+    "alloy_stage":        "STAGE1_alloy",
+    "models_dir":         "STAGE1_alloy/models",
+    "stage2_dir":         "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir":         "STAGE3_gem5",
+    "testset_dir":        "testsets_twostage",
+    "results_dir":        "results",
+    "results_name":       "T2g_ext_Footprint_6_u_core_lpP_fv3_ext",
+    "model":              "Footprint_6_u"
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow":    false,
+    "branch_modes": ["mispredict_not_taken", "mispredict_taken"]
+  },
+  "filter": { "xmit_kind": "ld" },   // read by the launchers only, not by pipeline.py
+  "gem5": {
+    "binary":        "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt",
+    "config_script": "/work/amulet/amulet-gem5-CleanupSpec_AE-v1.1/configs/example/se.py",
+    "branch_ann_enable":       true,               // harness addition (BTB force)
+    "cpu_type":                "DerivO3CPU",       // executor.py:209, config.py:249
+    "scheme":                  2,                  // harness; accepted and ignored by this tree
+    "jobs":                    4,
+    "debug_flags":             ["O3PipeView"],
+    "debug_file":              "pipeview.txt",
+    "checker":                 "check_footprint.py",
+    "criterion":               "specs/leakage/cleanupspec.json",
+    "fnc_commit_stall_cycles": 0,                  // harness hook off (AMuLeT has none)
+    "cache_setup":             "random_all",      // recipe-v3 2026-11-10 (Anna TA-6): per test uniform over the setups this build allows, sha256(seed, stem), seed = cache_setup.DEFAULT_SEED
+    "extra_args": [
+      "--num-cpu=1",                               // executor.py:208
+      "--cpu-clock=2GHz",                          // executor.py:210, config.py:250
+      "--sys-clock=2GHz",                          // executor.py:211, config.py:251
+      "--ruby",                                    // executor.py:214-215; benchmark_all.sh:48 "--ruby,--CleanupSpec"
+      "--L1_TBEs=256", "--L2_TBEs=256", "--DC_TBEs=256",   // executor.py:216-218, config.py:255 tbe_count=256
+      "--l1d_size=32kB", "--l1d_assoc=8",          // executor.py:224-225; ipc.yaml:47,49
+      "--l1i_size=32kB", "--l1i_assoc=2",          // executor.py:226-227; ipc.yaml:48,50
+      "--cacheline_size=64",                       // executor.py:228, config.py:277
+      "--l2_size=2MB", "--l2_assoc=8",             // executor.py:229-230, config.py:278-279
+      "--DTB_entries=64",                          // executor.py:233, config.py:282
+      "--needsTSO=0", "--scheme_invisispec=UnsafeBaseline", "--scheme_cleanupcache=Cleanup_FOR_L1L2",   // executor.py:289
+      "--access-backing-store"                     // configs/revizor/ipc.py:62-63 under --ruby (ipc.yaml:46 gem5_orchestration "ipc")
+    ]
+  },
+  // harness addition: resolve stall 5000 cycles on the model's mispredicted branches, xmit branch 0
+  // firstdet-final 2026-11-10 PROTOCOL timing (Anna: the old timing included IN the randomization): per test ONE whole-test
+  // point drawn uniformly from the 3x3 grid, unresolved stall {2500, 5000, 10000} on every unresolved branch x resolved stall
+  // {0, 500, 2500} on every resolved branch (pipeline._timing_grid_point, sha256("tgrid-v1:<stem>") mod 9); the old parity
+  // timing (5000, 0) is one point. Recorded per record: results.jsonl timing_point [u, r] + stall_points.
+  "sweep": {
+    "enabled": true,
+    "points": [0],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": { "unresolved": [2500, 5000, 10000], "resolved": [0, 500, 2500], "seed": "tgrid-v1" }
+  },
+  "pipeline": { "check": "per_type", "keep_tmp": false }
+}

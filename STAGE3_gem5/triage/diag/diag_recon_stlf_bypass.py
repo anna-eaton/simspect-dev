@@ -8,7 +8,7 @@ window.
 ONE cause; build-specific (applies to every campaign on gem5-recon-modded, with
 that campaign's own evidence file). Same bug as
 results/Recon_6__latest/diagnostics/diag_recon_slf.py and
-wiki/findings/bug/recon_SLF_stlf_bypass/, re-verified 2026-11-07 under the fixed
+wiki/findings/bug/recon_SLF_stlf_bypass/, re-verified under the fixed
 harness on an unfiltered trace: right after "Executing load" the LSQ prints
 "STL_CHECK: load PC <xmit> isTainted=1 isSpeculative=1", then "Forwarding from
 store idx N to load", and Commit marks the load ready within the ROB about 2500

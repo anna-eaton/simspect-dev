@@ -1,0 +1,87 @@
+// SMOKE run (2026-11-10, migration-uv6fix): the footprint testset InvisiSpec_6 on eval row E12b's build and flags.
+// Generated from runconfigs/twostage_fv2_20261109/E12b_STT_6_fv2.jsonc: identical gem5/sweep/checker/cache keys;
+// changed only paths (testset InvisiSpec_6, default instruction table), sample_fraction 0.004, jobs 6; dropped the
+// Stage-2-only keys ['fanout_v2', 'branch_cond', 'interleave']. Purpose: vet the new testset (compiles, runs, valid windows, which bug classes hit).
+{
+  "paths": {
+    "testset_dir": "testsets",
+    "results_dir": "results",
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/instructions.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "results_name": "smoke_E12b_InvisiSpec_6",
+    "model": "InvisiSpec_6"
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "filter": {
+    "xmit_kind": "ld"
+  },
+  "gem5": {
+    "binary": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt",
+    "config_script": "/work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type": "DerivO3CPU",
+    "scheme": 2,
+    "jobs": 6,
+    "debug_flags": [
+      "O3PipeView"
+    ],
+    "debug_file": "pipeview.txt",
+    "checker": "check_footprint.py",
+    "criterion": "specs/leakage/invisispec.json",
+    "fnc_commit_stall_cycles": 0,
+    "extra_args": [
+      "--ruby",
+      "--scheme=SpectreSafeInvisibleSpec",
+      "--needsTSO=1",
+      "--allowSpecBuffHit=1",
+      "--l1d_size=1kB",
+      "--l1d_assoc=2",
+      "--l1i_size=32kB",
+      "--l1i_assoc=4",
+      "--l2_size=2MB",
+      "--l2_assoc=16",
+      "--L1_TBEs=2",
+      "--L2_TBEs=2",
+      "--DC_TBEs=2"
+    ],
+    "sample_fraction": 0.004
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "unresolved_stall_per_branch": {
+      "mode": "random",
+      "choices": [
+        2500,
+        5000,
+        10000
+      ],
+      "seed": 0
+    }
+  },
+  "legacy_checker": "STAGE3_gem5/check_ld_invisispec_compound.py",
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "alloy": {
+    "max_instances": 0
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  }
+}

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Recon STLF taint-bypass evidence for every ld hit of a recon-modded campaign (2026-11-08).
+"""Recon STLF taint-bypass evidence for every ld hit of a recon-modded campaign.
 
 For each (mode, stem) with an ld hit, re-runs the test faithfully at its lowest
 hit grid point (spt_taint_probe.probe_one, --keep) and reads the trace right

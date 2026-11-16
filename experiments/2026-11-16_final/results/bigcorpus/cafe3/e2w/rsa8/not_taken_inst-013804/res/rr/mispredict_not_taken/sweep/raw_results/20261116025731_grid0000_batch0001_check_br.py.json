@@ -1,0 +1,201 @@
+[
+  {
+    "name": "inst-013804",
+    "status": "ok",
+    "xmit_pc": "0x401080",
+    "last_committed_pc": "0x401056",
+    "first_noncommitted_pc": "0x401068",
+    "xmit_kind": "br_x",
+    "issued_in_window": true,
+    "xmit_issue": null,
+    "xmit_complete": 226000,
+    "lc_retire": 156000,
+    "fnc_retire": 5158500,
+    "fnc_complete": 157500,
+    "error": null,
+    "cache_setup": "warm",
+    "retire_from_commit_trace": [],
+    "force_plan": [
+      {
+        "branch_pc": 2,
+        "addr": 4198504,
+        "mode": "mispredict_not_taken",
+        "arch_taken": null,
+        "fallthrough": 4198506,
+        "static_target": 4198550,
+        "dest": 4198511,
+        "force": "not_taken"
+      },
+      {
+        "branch_pc": 5,
+        "addr": 4198528,
+        "mode": "mispredict_not_taken",
+        "arch_taken": null,
+        "fallthrough": 4198530,
+        "static_target": 4198550,
+        "dest": 4198535,
+        "force": "not_taken"
+      }
+    ],
+    "br_resolve_source": "observed",
+    "br_events": {
+      "0x401000": {
+        "5": {
+          "resolve_visible": 81500,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 4
+        }
+      },
+      "0x401068": {
+        "46": {
+          "predict_force": 132500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506,
+          "resolve_hold": 157500,
+          "resolve_hold_stall": 10000,
+          "resolve_hold_fire": 5157500,
+          "resolve_hold_mispred": 1,
+          "resolve_release": 5157500,
+          "resolve_release_mispred": 1,
+          "resolve_bcast": 5157500,
+          "resolve_visible": 5158000,
+          "resolve_visible_stall": 10000,
+          "resolve_visible_mispred": 1,
+          "resolve_visible_upc": 2
+        },
+        "139": {
+          "predict_force": 193000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506
+        },
+        "215": {
+          "predict_force": 206500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506
+        },
+        "291": {
+          "predict_force": 220000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506
+        },
+        "367": {
+          "predict_force": 233500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506
+        },
+        "443": {
+          "predict_force": 247000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506
+        },
+        "527": {
+          "predict_force": 5163000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198506
+        }
+      },
+      "0x401080": {
+        "54": {
+          "predict_force": 184000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530,
+          "resolve_visible": 187000,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 1,
+          "resolve_visible_upc": 2
+        },
+        "147": {
+          "predict_force": 194500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530
+        },
+        "223": {
+          "predict_force": 208000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530
+        },
+        "299": {
+          "predict_force": 221500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530
+        },
+        "375": {
+          "predict_force": 235000,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530
+        },
+        "451": {
+          "predict_force": 248500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530
+        },
+        "535": {
+          "predict_force": 5164500,
+          "predict_force_taken": 0,
+          "predict_force_target": 4198530
+        }
+      },
+      "0x40109e": {
+        "104": {
+          "resolve_visible": 194500,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        },
+        "492": {
+          "resolve_visible": 5164500,
+          "resolve_visible_stall": 0,
+          "resolve_visible_mispred": 0,
+          "resolve_visible_upc": 2
+        }
+      }
+    },
+    "criteria": {
+      "lc_retired": true,
+      "signal_seen": true,
+      "branch_redirected": true,
+      "after_lc": true,
+      "before_fnc": true,
+      "branches_unresolved": true,
+      "resolved_correct": null,
+      "window_opened": true,
+      "stall_applied": true,
+      "force_applied": true
+    },
+    "xmit_signal": 187000,
+    "xmit_redirect": 187000,
+    "xmit_last_alive": 226000,
+    "ft_last_alive": 186000,
+    "ft_pc": "0x401082",
+    "lc_unretired_but_specified": false,
+    "branches_unresolved": true,
+    "branch_resolutions": [
+      {
+        "pc": "0x401068",
+        "stall": 10000,
+        "source": "observed",
+        "complete": 157500,
+        "seq": 46,
+        "hold_tick": 157500,
+        "release_tick": 5157500,
+        "visible_tick": 5158000,
+        "dropped": false,
+        "stall_applied": true,
+        "estimate_tick": 5157500,
+        "resolve_tick": 5158000,
+        "ok": true
+      }
+    ],
+    "validity": {
+      "resolved_correct": null,
+      "window_opened": true,
+      "stall_applied": true,
+      "force_applied": true,
+      "notes": []
+    },
+    "resolved_branches": [],
+    "resolved_before_signal": null,
+    "workdir": "/tmp/r8_not_taken_inst-013804/gem5_inst-013804_3xp7k02s"
+  }
+]

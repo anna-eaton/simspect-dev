@@ -1,0 +1,80 @@
+{
+ "defense": "speclfb",
+ "N_prefix": 2725,
+ "n_rows": 2728,
+ "status": {
+  "ok": 2725
+ },
+ "hits": 1162,
+ "gem5_cpu_s_total": 3974.17,
+ "total_cpu_s_total": 13706.13,
+ "gem5_cpu_s_per_test": 1.458,
+ "total_cpu_s_per_test": 5.03,
+ "signatures": {
+  "UV6": {
+   "first_idx": 3,
+   "tests_to_first": 4,
+   "stem": "inst-007027",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 5.82,
+   "cum_total_cpu_s": 18.45,
+   "K": 558,
+   "N": 2725,
+   "expected_tests_to_first": 4.88,
+   "expected_gem5_cpu_s_to_first": 7.11,
+   "expected_total_cpu_s_to_first": 24.53
+  },
+  "jmp_shadow": {
+   "first_idx": 3,
+   "tests_to_first": 4,
+   "stem": "inst-007027",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 5.82,
+   "cum_total_cpu_s": 18.45,
+   "K": 354,
+   "N": 2725,
+   "expected_tests_to_first": 7.68,
+   "expected_gem5_cpu_s_to_first": 11.2,
+   "expected_total_cpu_s_to_first": 38.62
+  },
+  "other:replayed_after_safe(jmp_in_shadow)": {
+   "first_idx": 10,
+   "tests_to_first": 11,
+   "stem": "inst-000934",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 15.12,
+   "cum_total_cpu_s": 49.29,
+   "K": 209,
+   "N": 2725,
+   "expected_tests_to_first": 12.98,
+   "expected_gem5_cpu_s_to_first": 18.93,
+   "expected_total_cpu_s_to_first": 65.29
+  },
+  "other:replayed_after_safe+replayed_after_safe(jmp_in_shadow)": {
+   "first_idx": 1194,
+   "tests_to_first": 1195,
+   "stem": "inst-006544",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 1793.25,
+   "cum_total_cpu_s": 6083.9,
+   "K": 1,
+   "N": 2725,
+   "expected_tests_to_first": 1363.0,
+   "expected_gem5_cpu_s_to_first": 1987.81,
+   "expected_total_cpu_s_to_first": 6855.58
+  },
+  "walk_order": {
+   "first_idx": 6,
+   "tests_to_first": 7,
+   "stem": "inst-014737",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 9.57,
+   "cum_total_cpu_s": 31.32,
+   "K": 421,
+   "N": 2725,
+   "expected_tests_to_first": 6.46,
+   "expected_gem5_cpu_s_to_first": 9.42,
+   "expected_total_cpu_s_to_first": 32.49
+  }
+ }
+}

@@ -11,21 +11,42 @@ then an `mfence` barrier (parsexml.py "Prologue -> test region barrier"), so eve
 sandbox line is hot in L1D when the test region starts. A strategy rewrites the
 .s right after that barrier, before the first test instruction:
 
-  warm  today's behavior. The .s is not touched; process_one calls
-        gem5_common.build_binary exactly as before (byte-identical binary).
+  warm  the default. The .s is not touched; process_one calls
+        gem5_common.build_binary unchanged.
   cold  clflush every cache line of the test function's data region (its whole
         stack frame: allocas, red zone, saved registers, return address; plus any
         rip-relative global, of which today's corpora have none -> refused), then
         `mfence`. General: the region comes from the function's prologue, never
         from the transmitter or any one instruction.
 
-  random  (2026-11-09, Anna: the default for CleanupSpec and SpecLFB only) each test
+  random  (default for CleanupSpec and SpecLFB only) each test
         runs warm or cold, chosen per test by choose(stem, seed): a hash of
         (gem5.cache_setup_seed -> SIMSPECT_CACHE_SETUP_SEED, default DEFAULT_SEED, test
         stem). Deterministic: re-running one test by hand with the same seed gives the
         same choice (`python3 cache_setup.py choose <stem> [--seed S]` prints it). Each
         record carries the strategy actually used (`cache_setup`), plus
         `cache_setup_mode: "random"` and `cache_setup_seed`. Refused wherever cold is.
+
+  full  (defense-agnostic way to start with every
+        L1D set full) a sequential sweep of plain loads over a dedicated .bss buffer exactly the
+        L1D size, one `movq` per 64-byte line, unrolled (no branch, so no predictor state), %rax
+        saved/restored through a .bss slot, then `mfence`. Size: gem5.cache_setup_fill_bytes
+        (-> SIMSPECT_CACHE_SETUP_FILL_BYTES) if set, else the run's last `--l1d_size=` in
+        gem5.extra_args (SIMSPECT_GEM5_EXTRA); neither -> refused at checker start. It knows
+        nothing about the test's addresses and targets no set: a contiguous buffer of the L1D
+        size maps exactly assoc lines to every set (exact when sets*64 <= 4096, i.e. the index
+        bits are page-offset bits; recorded as set_cover_exact). Plain loads only, so no build is
+        refused for clflush reasons. The prologue zero-fill's sandbox lines are evicted from L1D
+        by the sweep (they stay in L2).
+
+  random_all  (one policy for every defense) each test runs ONE of the setups allowed on the run's build,
+        chosen uniformly per test by choose_all(stem, seed, gem5_bin): warm, cold and full, minus
+        cold where clflush does not flush (CLFLUSH_UNSUPPORTED; e.g. InvisiSpec -> warm, full).
+        Index = int(sha256(f"{seed}\0{stem}")[:8 bytes], big endian) % len(choices), choices in
+        the fixed order RANDOM_ALL_ORDER. Same seed knob and default as `random`. Records carry
+        `cache_setup` (the one used), `cache_setup_mode: "random_all"`, `cache_setup_seed` and
+        `cache_setup_choices`. Refused where `full` is (L1D size unknown), never where cold is.
+        `random` stays warm/cold from the first hash byte.
 
 Adding a strategy = one function `payload(frame) -> list[str]` in STRATEGIES.
 
@@ -77,11 +98,19 @@ def _safe(stem: str) -> str:
     return stem.replace("-", "_").replace(".", "_")
 
 
+_ZERO_FILL_RE = re.compile(r"^movq\s+\$0,\s*(-?\d+)?\(%(rsp|rbp)\)$")
+
+
 def find_barrier(lines: List[str], stem: str) -> int:
     """Index of the line AFTER the prologue barrier's `#NO_APP` (the insertion point).
 
-    The barrier is the only `mfence` between the function label and the first
-    __litmus_<stem>_* label (parsexml.py emits exactly one there)."""
+    The barrier is the LAST `mfence` between the function label and the first
+    __litmus_<stem>_* label. parsexml.py emits one there, plus (fanout v2, OTB
+    applied) a second one after the %otb_mem zero-fill (parsexml.py, `_otb` block
+    after "Prologue -> test region barrier").
+    Conservative: when there are several, every instruction between the first and
+    the last must be a zero-fill store `movq $0, disp(%rsp|%rbp)` (inline-asm
+    #APP/#NO_APP markers and comments allowed), else raise."""
     fstart = next((i for i, l in enumerate(lines) if _code(l) == f'"{stem}":'), None)
     if fstart is None:
         raise CacheSetupError("function label not found")
@@ -91,9 +120,15 @@ def find_barrier(lines: List[str], stem: str) -> int:
     if first_lab is None:
         raise CacheSetupError("no __litmus_ label")
     mf = [i for i in range(fstart, first_lab) if _code(lines[i]) == "mfence"]
-    if len(mf) != 1:
-        raise CacheSetupError(f"expected 1 prologue mfence, found {len(mf)}")
-    j = mf[0] + 1
+    if not mf:
+        raise CacheSetupError("expected 1 prologue mfence, found 0")
+    for i in range(mf[0] + 1, mf[-1]):
+        c = _code(lines[i])
+        if not c or c in ("mfence",) or c.startswith(".") or _ZERO_FILL_RE.match(c):
+            continue
+        raise CacheSetupError(f"expected 1 prologue mfence, found {len(mf)} "
+                              f"with non-zero-fill code between them: {c!r}")
+    j = mf[-1] + 1
     while j < len(lines) and not lines[j].strip():
         j += 1
     if j >= len(lines) or lines[j].strip() != "#NO_APP":
@@ -107,7 +142,7 @@ _MEM_RE = re.compile(r"(-?\d+)?\(%(rsp|rbp)(?:,|\))")
 def frame_region(lines: List[str], stem: str, insert_at: int) -> dict:
     """The test function's stack data region, relative to %rsp or %rbp at the barrier.
 
-    Two prologue shapes occur (clang, all corpora checked 2026-11-08):
+    Two prologue shapes occur (clang, all corpora):
       A  push %rbp; mov %rsp,%rbp; push*P; and $-A,%rsp; sub $N,%rsp
          -> base rbp, region [-(8P + A-1 + N), +16)  (covers locals, the
             realignment gap, saved regs, saved rbp and the return address)
@@ -216,7 +251,7 @@ def _cold(frame: dict) -> List[str]:
 
     Paced because back-to-back flushes break CleanupSpec's Ruby MESI_Two_Level with
     L2_TBEs=2 (panic "Invalid L1 forwarded request type" when a PUTFLUSH meets a
-    Resource Stall; smoke 2026-11-08), and because with ample TBEs a burst can still
+    Resource Stall), and because with ample TBEs a burst can still
     find the L2 copy mid-writeback (M_I). The same paced code runs on every build so
     cold means the same thing everywhere. Each clflush's address
     depends on %rax = 0 loaded AFTER the previous clflush's mfence, through a chain of
@@ -235,15 +270,106 @@ def _cold(frame: dict) -> List[str]:
     return out
 
 
+PAGE = 4096
+_SIZE_RE = re.compile(r"^(\d+)\s*([kKmM]?)([iI]?[bB])?$")
+
+
+def parse_size(txt: str) -> int:
+    """gem5 memory-size string ('32kB', '1kB', '2MB', '32768', '64KiB') -> bytes (powers of 1024,
+    as gem5's MemorySize param does for kB/MB)."""
+    m = _SIZE_RE.match(str(txt).strip())
+    if not m:
+        raise CacheSetupError(f"cache_setup=full: cannot parse size {txt!r}")
+    return int(m.group(1)) * {"": 1, "k": 1024, "m": 1024 * 1024}[m.group(2).lower()]
+
+
+def _extra_args() -> List[str]:
+    e = os.environ.get("SIMSPECT_GEM5_EXTRA") or ""
+    return [a for a in e.split("\x1f") if a]
+
+
+def _last_flag(args: List[str], flag: str) -> Optional[str]:
+    v = None
+    for i, a in enumerate(args):
+        if a.startswith(flag + "="):
+            v = a.split("=", 1)[1]
+        elif a == flag and i + 1 < len(args):
+            v = args[i + 1]
+    return v
+
+
+def fill_config() -> dict:
+    """`full`'s buffer size and where it came from. Raises CacheSetupError when unknown.
+
+    gem5.cache_setup_fill_bytes (SIMSPECT_CACHE_SETUP_FILL_BYTES) wins; else the last
+    --l1d_size in the run's extra_args (SIMSPECT_GEM5_EXTRA). No silent default: se.py's
+    built-in L1D size differs between trees, so a config without either is refused."""
+    args = _extra_args()
+    explicit = (os.environ.get("SIMSPECT_CACHE_SETUP_FILL_BYTES") or "").strip()
+    l1d = _last_flag(args, "--l1d_size")
+    assoc = _last_flag(args, "--l1d_assoc")
+    line = int(_last_flag(args, "--cacheline_size") or LINE)
+    if line != LINE:
+        raise CacheSetupError(f"cache_setup=full: --cacheline_size={line}, only {LINE} supported")
+    if explicit:
+        n, src = parse_size(explicit), "gem5.cache_setup_fill_bytes"
+    elif _last_flag(args, "--l0d_size"):
+        # MESI_Three_Level (gem5-recon-ruby3): the core-side data cache is L0 and --l1d_size is
+        # the SECOND level, so "the L1D size" is ambiguous; refuse instead of sweeping 2 MB.
+        raise CacheSetupError("cache_setup=full: this config has --l0d_size (Ruby MESI_Three_Level), so "
+                              "--l1d_size is the second-level cache; set gem5.cache_setup_fill_bytes to "
+                              "the size of the cache you want full (e.g. the L0D size)")
+    elif l1d:
+        n, src = parse_size(l1d), "--l1d_size"
+    else:
+        raise CacheSetupError("cache_setup=full needs the L1D size: set gem5.cache_setup_fill_bytes "
+                              "or pass --l1d_size=<size> in gem5.extra_args (se.py defaults differ "
+                              "between gem5 trees, so none is assumed)")
+    if n <= 0 or n % LINE:
+        raise CacheSetupError(f"cache_setup=full: fill size {n} is not a positive multiple of {LINE}")
+    out = dict(fill_bytes=n, fill_source=src, l1d_size_arg=l1d, l1d_assoc_arg=assoc,
+               n_loads=n // LINE)
+    if assoc:
+        a = int(assoc)
+        if l1d and parse_size(l1d) % (a * LINE) == 0:
+            way = parse_size(l1d) // a
+            out.update(l1d_sets=way // LINE, set_cover_exact=(n == parse_size(l1d) and way <= PAGE))
+    return out
+
+
+def _full(frame: dict) -> List[str]:
+    """Sweep a dedicated buffer of fill_config()['fill_bytes'] with one plain load per line.
+
+    Defense-agnostic: `frame` (the test's addresses) is deliberately not used. Unrolled
+    (no loop branch -> no branch-predictor/BTB training before the test); loads into %rax,
+    which is saved to and restored from a .bss slot (mov writes no flags), then mfence.
+    No fence between the loads: on InvisiSpec-Futuristic the sweep loads issue as speculative
+    loads and expose at retire, and every set still ends full (64/64 sets at 8
+    ways; a fenced variant, as AMuLeT's thrash loop does, gave the same state at twice the
+    simulated time, so it was dropped)."""
+    cfg = fill_config()
+    out = ["\t.pushsection .bss", "\t.p2align 12", "__simspect_csf_buf:",
+           f"\t.zero {cfg['fill_bytes']}", "__simspect_csf_save:", "\t.zero 64", "\t.popsection",
+           "\tmovq\t%rax, __simspect_csf_save(%rip)"]
+    for o in range(0, cfg["fill_bytes"], LINE):
+        out.append(f"\tmovq\t__simspect_csf_buf+{o}(%rip), %rax")
+    out += ["\tmovq\t__simspect_csf_save(%rip), %rax", "\tmfence"]
+    return out
+
+
 # name -> payload(frame) -> asm lines (inserted between BEGIN/END labels).
 # A third strategy (e.g. `l1_evicted`: out of L1D, still in L2) is one function here.
 STRATEGIES: Dict[str, Callable[[dict], List[str]]] = {
     "cold": _cold,
     "cold_burst": _cold_burst,
+    "full": _full,
 }
 # Meta-strategies: resolved per test to a concrete one ("warm" or a STRATEGIES key).
 RANDOM_CHOICES = ("warm", "cold")
-META = ("random",)
+# random_all: the candidate order; cold is dropped on builds whose clflush does
+# not flush (allowed_setups). Changing this order changes every choice: it is provenance.
+RANDOM_ALL_ORDER = ("warm", "cold", "full")
+META = ("random", "random_all")
 KNOWN = ("warm",) + tuple(STRATEGIES) + META
 # Default seed for `random` (run config gem5.cache_setup_seed overrides it). Changing it
 # changes which tests run cold, so it is part of a campaign's provenance (manifest + records).
@@ -268,11 +394,45 @@ def choose(stem: str, seed: Optional[str] = None) -> str:
     return RANDOM_CHOICES[h[0] & 1]
 
 
-def resolve(strategy: str, stem: str, seed: Optional[str] = None) -> str:
-    """Concrete strategy for one test (identity except for the META strategies)."""
-    return choose(stem, seed) if strategy == "random" else strategy
+def _gem5_bin(gem5_bin: Optional[str]) -> str:
+    b = gem5_bin if gem5_bin is not None else os.environ.get("SIMSPECT_GEM5_BIN", "")
+    if not str(b).strip():
+        raise CacheSetupError("cache_setup=random_all needs the gem5 binary path (to know which "
+                              "setups the build allows); set SIMSPECT_GEM5_BIN or pass gem5_bin")
+    return str(b)
 
-# Builds whose clflush does not flush (smoke 2026-11-08,
+
+def allowed_setups(gem5_bin: Optional[str] = None) -> Tuple[str, ...]:
+    """random_all's candidates on this build: RANDOM_ALL_ORDER minus cold where clflush is a
+    no-op or panics (CLFLUSH_UNSUPPORTED, matched on the binary path as check_build does)."""
+    b = _gem5_bin(gem5_bin)
+    no_flush = any(key in b for key in CLFLUSH_UNSUPPORTED)
+    return tuple(x for x in RANDOM_ALL_ORDER if not (x == "cold" and no_flush))
+
+
+def choose_all(stem: str, seed: Optional[str] = None, gem5_bin: Optional[str] = None) -> str:
+    """`random_all`'s per-test choice, uniform over allowed_setups(gem5_bin).
+
+    Keyed on (seed, stem) exactly as choose() (stem's `__<suffix>` dropped), so reruns and
+    by-hand reproductions agree; index = first 8 digest bytes, big endian, mod len(choices)."""
+    import hashlib
+    stem = str(stem).split("__")[0]
+    seed = current_seed() if seed is None else str(seed)
+    choices = allowed_setups(gem5_bin)
+    h = hashlib.sha256(f"{seed}\0{stem}".encode()).digest()
+    return choices[int.from_bytes(h[:8], "big") % len(choices)]
+
+
+def resolve(strategy: str, stem: str, seed: Optional[str] = None,
+            gem5_bin: Optional[str] = None) -> str:
+    """Concrete strategy for one test (identity except for the META strategies)."""
+    if strategy == "random":
+        return choose(stem, seed)
+    if strategy == "random_all":
+        return choose_all(stem, seed, gem5_bin)
+    return strategy
+
+# Builds whose clflush does not flush (smoke test:
 # STAGE3_gem5/triage/cache_setup_20261108/smoke_cache_setup.py; table in
 # wiki/design/SIMSPECT_HOOKS.md "Cache setup strategies"). A clflush-based strategy is
 # refused there instead of silently running warm. Key = substring of the gem5 binary path.
@@ -286,6 +446,9 @@ CLFLUSH_UNSUPPORTED = {
 
 
 def check_build(strategy: str, gem5_bin: str) -> None:
+    if strategy in ("full", "random_all"):   # plain loads: no build refused; the L1D size must
+        fill_config()                          # be known (random_all runs full on ~1/3 of tests;
+        return                                 # it drops cold itself where clflush is a no-op)
     if strategy in ("cold", "cold_burst", "random"):   # random runs cold on ~half the tests
         for key, why in CLFLUSH_UNSUPPORTED.items():
             if key in str(gem5_bin):
@@ -303,10 +466,13 @@ def transform_asm(text: str, stem: str, strategy: str) -> Tuple[str, dict]:
               f"{BEGIN_LABEL}:"] + payload + [f"{END_LABEL}:", "\t#NO_APP"])
     new = lines[:at] + block + lines[at:]
     n_flush = sum(1 for p in payload if "clflush" in p)
-    return "\n".join(new), dict(strategy=strategy, frame=frame, n_clflush=n_flush,
-                                n_payload_instrs=sum(1 for p in payload if not
-                                                     p.strip().startswith(".") and
-                                                     not p.strip().endswith(":")))
+    info = dict(strategy=strategy, frame=frame, n_clflush=n_flush,
+                n_payload_instrs=sum(1 for p in payload if not
+                                     p.strip().startswith(".") and
+                                     not p.strip().endswith(":")))
+    if strategy == "full":
+        info.update(fill_config())
+    return "\n".join(new), info
 
 
 # ── annotation re-resolution + verification ─────────────────────────────────
@@ -452,12 +618,16 @@ def _main(argv=None):
     import argparse
     ap = argparse.ArgumentParser(description="cache_setup helpers")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    c = sub.add_parser("choose", help="print `random`'s choice (warm|cold) for test stems")
+    c = sub.add_parser("choose", help="print `random`'s choice (warm|cold) for test stems, or "
+                                      "random_all's with --mode random_all --gem5-bin <path>")
     c.add_argument("stems", nargs="+")
     c.add_argument("--seed", default=None, help=f"default: $SIMSPECT_CACHE_SETUP_SEED or {DEFAULT_SEED}")
+    c.add_argument("--mode", default="random", choices=("random", "random_all"))
+    c.add_argument("--gem5-bin", default=None, help="random_all: the run's gem5 binary "
+                                                     "(default $SIMSPECT_GEM5_BIN)")
     a = ap.parse_args(argv)
     for s in a.stems:
-        print(f"{s}\t{choose(s, a.seed)}")
+        print(f"{s}\t{choose(s, a.seed) if a.mode == 'random' else choose_all(s, a.seed, a.gem5_bin)}")
 
 
 if __name__ == "__main__":

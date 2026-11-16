@@ -1,0 +1,232 @@
+--- STAGE2_compilation/proposed/pre_interleave_only_20261112/parsexml.py	2026-11-12 00:31:08
++++ STAGE2_compilation/parsexml.py	2026-11-12 00:36:07
+@@ -212,9 +212,15 @@
+     fr_mem_atoms: List[str],
+     step_kinds: List[str],
+     rng: random.Random,
++    ilv_chain: Optional[List[Dict[str, Any]]] = None,
+ ) -> List[Dict[str, Any]]:
+     """Build a linear chain of `length` steps.
+ 
++    ilv_chain (opt-in interleave.interleave_only): when given, every other_n step
++    is drawn uniformly from these interleave-only entries (concrete
++    "ilv:<name>", one or two inputs as the template reads $1 or $1,$2) instead
++    of bitnot/add. None = unchanged.
++
+     Every consecutive pair shares a forced data dependency: step N's output
+     feeds at least one input slot of step N+1.
+       - outreg → next.inreg or next.inaddr
+@@ -297,7 +303,8 @@
+                 slots["inmem"][0] = _fr_slot("inmem", last_atom)
+ 
+         if kind == "other_n":
+-            two_inputs = rng.random() < 0.7
++            ent = rng.choice(ilv_chain) if ilv_chain else None
++            two_inputs = _ilv_refs(ent["asm"], 2) if ent is not None else rng.random() < 0.7
+             if not two_inputs:
+                 # bitnot: only inreg0 participates; inreg1 stays unspecified-and-unused.
+                 # If the bridge landed on inreg1, swap it down so inreg0 holds it.
+@@ -307,6 +314,8 @@
+                 concrete, llvm_op = "bitnot", "notq"
+             else:
+                 concrete, llvm_op = "add", "leaq"
++            if ent is not None:
++                concrete, llvm_op = ILV_PREFIX + ent["name"], "inline asm (interleave_only)"
+             out = alloc_outreg()
+             slots["outreg"][0] = _fr_slot("outreg", out)
+             last_kind, last_atom = "reg", out
+@@ -1335,6 +1344,8 @@
+       chain.min_length     int    min steps per chain (default 2)
+       chain.max_length     int    max steps per chain (default 4)
+       chain.step_kinds     list   subset of {"other_n","ld","str"} allowed per step
++      interleave_only      dict   {"enabled", "table", "exclude_tags"}: other_n steps drawn
++                                  uniformly from the interleave-only category (opt-in)
+       num_chains           int    1 or 2 (default 1)
+     """
+     cfg = interleave_cfg or {}
+@@ -1355,6 +1366,11 @@
+     max_length = int(chain_cfg.get("max_length", 4))
+     step_kinds: List[str] = list(chain_cfg.get("step_kinds", _STEP_KINDS_DEFAULT))
+     num_chains = min(max(int(cfg.get("num_chains", 1)), 0), 2)
++    # opt-in interleave_only: other_n chain steps drawn from the interleave-only category
++    _ilv_icfg = cfg.get("interleave_only") or {}
++    ilv_chain = _ilv_chain_entries(_ilv_select(_ilv_icfg)) if _ilv_icfg.get("enabled") else None
++    if _ilv_icfg.get("enabled") and not ilv_chain:
++        raise ValueError("interleave.interleave_only: no usable chain entries after exclude_tags")
+     if num_chains == 0:
+         # No chains for this variant — return baseline pass25 with empty pools.
+         result = dict(pass25_result)
+@@ -1387,7 +1403,8 @@
+         lo = max(min_length, 1)
+         hi = max(max_length, lo)
+         length = rng.randint(lo, hi)
+-        all_steps.extend(_build_chain(cid, length, fr_reg_atoms, fr_mem_atoms, step_kinds, rng))
++        all_steps.extend(_build_chain(cid, length, fr_reg_atoms, fr_mem_atoms, step_kinds, rng,
++                                      ilv_chain=ilv_chain))
+ 
+     L = len(all_steps)
+     uncommitted_count = N - first_uncommitted_idx
+@@ -1525,7 +1542,70 @@
+ # xor, ...): a direct jmp to the next instruction (`eb 00`), value neutral.
+ FV2_FILLER_JMP = "jmp"
+ LOAD_LIKE = ("load", VOCAB_RJ_RMW["name"])
++
++# [interleave-only category, ilv-vocab 2026-11-12; opt-in fanout_v2.interleave_only
++# and interleave.interleave_only, absent = output unchanged]
++# Instructions that are not in the abstract model and are drawn only by the random
++# interleaving: the fanout_v2 filler draw and the chain-interleave other_n step draw.
++# Table instruction_tables/proposed/interleave_only.jsonc (templates, safety rules S1-S7,
++# gem5 validation, spt_bwd_invertible tags); doc wiki/design/VOCAB_TABLES.md
++# "Interleave-only category (2026-11-12)". Uniform: every usable entry has weight 1.
++ILV_TABLE_DEFAULT = "STAGE2_compilation/instruction_tables/proposed/interleave_only.jsonc"
++ILV_PREFIX = "ilv:"   # concrete_instruction of a chain step drawn from the category
++_ILV_CACHE: Dict[str, Dict[str, Dict[str, Any]]] = {}
++_ILV_USES: Dict[str, Set[str]] = {}
++
++
++def _ilv_refs(asm: str, n: int) -> bool:
++    """Does an inline-asm template reference operand n ($n or ${n:mod}, not the $$ escape)?"""
++    t = asm.replace("$$", "")
++    return f"${n}" in t or ("${%d:" % n) in t
++
++
++def load_interleave_only(path: Optional[str] = None) -> Dict[str, Dict[str, Any]]:
++    """name -> entry of the interleave-only table, usable entries only, table order.
++    A relative path is tried from the cwd, then from the repo root."""
++    p = Path(path or ILV_TABLE_DEFAULT)
++    if not p.is_absolute() and not p.exists():
++        p = Path(__file__).resolve().parent.parent / p
++    key = str(p.resolve())
++    if key not in _ILV_CACHE:
++        text = p.read_text(encoding="utf-8")
++        text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)
++        text = re.sub(r'//[^\n]*', '', text)
++        ents: Dict[str, Dict[str, Any]] = {}
++        for e in json.loads(text)["entries"]:
++            if e.get("status", "ok") != "ok" or int(e.get("weight", 1)) != 1:
++                continue
++            if e.get("form", "rr") not in ("rr", "none"):
++                raise ValueError(f"interleave_only entry {e['name']!r}: unknown form {e.get('form')!r}")
++            ents[e["name"]] = e
++            _ILV_USES[ILV_PREFIX + e["name"]] = (
++                {"inreg0", "outreg"} | ({"inreg1"} if _ilv_refs(e["asm"], 2) else set()))
++        _ILV_CACHE[key] = ents
++    return _ILV_CACHE[key]
++
++
++def _ilv_entry(name: str) -> Dict[str, Any]:
++    """The loaded interleave-only entry `name` (pass_interleave loaded its table)."""
++    for ents in _ILV_CACHE.values():
++        if name in ents:
++            return ents[name]
++    raise ValueError(f"interleave_only entry {name!r} not loaded")
+ 
++
++def _ilv_select(icfg: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
++    """Entries of the table named by an interleave_only config block, minus exclude_tags."""
++    ents = load_interleave_only(icfg.get("table"))
++    tags = list(icfg.get("exclude_tags") or [])
++    return {n: e for n, e in ents.items() if not any(e.get(t) for t in tags)}
++
++
++def _ilv_chain_entries(ents: Dict[str, Dict[str, Any]]) -> List[Dict[str, Any]]:
++    """Entries usable as a chain step: operand form whose output reads $1 (a chain
++    step must carry its input to its output; constants, nops and jmp cannot)."""
++    return [e for e in ents.values() if e.get("form", "rr") == "rr" and _ilv_refs(e["asm"], 1)]
++
+ # [fv4 abstract-category forms, abs-vocab 2026-11-12; only reachable from
+ # instruction_tables/proposed/fv4_vocab.jsonc, absent = output unchanged]
+ # other_n ALU forms: unary out = f(in0), binary out = f(in0, in1). Each emits
+@@ -1571,6 +1651,8 @@
+         return set()
+     if concrete_instruction == VOCAB_RJ_RMW["name"]:
+         return VOCAB_RJ_RMW["uses"]
++    if concrete_instruction.startswith(ILV_PREFIX):
++        return _ILV_USES[concrete_instruction]
+     for candidates in INSTRUCTION_TABLE.values():
+         for c in candidates:
+             if c["name"] == concrete_instruction:
+@@ -2435,6 +2517,7 @@
+     # ---- Opt-in fanout v2: edge splices + read-only fillers (see docstring) ----
+     _fv2_on = bool(fv2_cfg and fv2_cfg.get("enabled"))
+     _fv2_rec: Dict[str, Any] = {"splices": [], "fillers": [], "notes": []}
++    _ilv_fents: Optional[Dict[str, Dict[str, Any]]] = None
+     _fv2_plan_splice: Dict[int, List[Tuple[str, str, str, Dict[str, Any]]]] = {}
+     _fv2_plan_fill: Dict[int, int] = {}
+     _fv2_cur: Dict[str, str] = dict((reg, ssa) for reg, ssa in ssa_init.items())
+@@ -2448,9 +2531,21 @@
+         _fl_cfg = fv2_cfg.get("fillers", {})
+         _sp_ops = list(_sp_cfg.get("ops", list(FV2_SPLICE_OPS)))
+         _fl_ops = list(_fl_cfg.get("ops", list(FV2_FILLER_OPS)))
++        _ilv_fcfg = fv2_cfg.get("interleave_only") or {}
++        if _ilv_fcfg.get("enabled"):
++            # interleave-only category: the filler draw is uniform over every usable
++            # entry (jmp, nops and the six legacy fillers are ordinary members);
++            # fillers.ops is not used
++            _ilv_fents = _ilv_select(_ilv_fcfg)
++            if not _ilv_fents:
++                raise ValueError("fanout_v2.interleave_only: no usable entries after exclude_tags")
++            _fl_ops = list(_ilv_fents)
++            _fv2_rec["interleave_only"] = {"table": _ilv_fcfg.get("table") or ILV_TABLE_DEFAULT,
++                                           "exclude_tags": list(_ilv_fcfg.get("exclude_tags") or []),
++                                           "n_ops": len(_fl_ops)}
+         for o in _sp_ops:
+             if o not in FV2_SPLICE_OPS: raise ValueError(f"fv2 splice op {o!r} not in FV2_SPLICE_OPS")
+-        for o in _fl_ops:
++        for o in ([] if _ilv_fents else _fl_ops):
+             if o not in FV2_FILLER_OPS: raise ValueError(f"fv2 filler op {o!r} not in FV2_FILLER_OPS")
+         if _vrj.get("jmp") and FV2_FILLER_JMP not in _fl_ops:
+             _fl_ops.append(FV2_FILLER_JMP)   # VOCAB-RJ: one more op, same uniform draw
+@@ -2576,6 +2671,23 @@
+             if not live:
+                 break
+             op = _fv2_rng.choice(_fl_ops)
++            if _ilv_fents is not None:
++                ie = _ilv_fents[op]
++                if ie.get("form", "rr") == "none":
++                    # operand-less entry (jmp, nops): its own asm block, no dataflow
++                    il(f'call void asm sideeffect "{ie["asm"]}", ""()')
++                    _fv2_rec["fillers"].append({"before_pc": pc_, "op": op})
++                    continue
++                srcs = [_fv2_rng.choice(live) for _ in range(2)]
++                d = _fv2_rng.choice(_fv2_dead)
++                _fv2_n[0] += 1
++                xclob = "".join(f",~{{{x}}}" for x in ie.get("clobbers", []))
++                il(f'%__fill_{_fv2_n[0]} = call i64 asm sideeffect "{ie["asm"]}", '
++                   f'"=&{{{d}}},{{{srcs[0][0]}}},{{{srcs[1][0]}}},~{{flags}}{xclob}"'
++                   f'(i64 %{srcs[0][1]}, i64 %{srcs[1][1]})')
++                _fv2_rec["fillers"].append({"before_pc": pc_, "op": op, "dst": d,
++                                            "srcs": [srcs[0][0], srcs[1][0]]})
++                continue
+             if op == FV2_FILLER_JMP:
+                 # VOCAB-RJ jmp filler: direct jmp to the next instruction, own asm block
+                 il(f'call void asm sideeffect "jmp .Lsimspect_jf${{:uid}}\\0A.Lsimspect_jf${{:uid}}:", ""()')
+@@ -2889,6 +3001,28 @@
+                     il(f'call void asm sideeffect '
+                        f'"{mkr}movq $$0, {offset}({",$0,1" if _swp else "$0"})", '
+                        f'"{{{_probe_base_phys}}},~{{memory}}"(ptr %mem_base)')
++
++        elif concrete.startswith(ILV_PREFIX):
++            # interleave-only chain step (opt-in interleave.interleave_only): the
++            # entry's template with $0 = the step's outreg, $1/$2 = inreg0/inreg1.
++            ie = _ilv_entry(concrete[len(ILV_PREFIX):])
++            cons, ins, phys = [], [], []
++            for sn in (("inreg0", "inreg1") if _ilv_refs(ie["asm"], 2) else ("inreg0",)):
++                sr_ = get_slot(rec, sn)
++                ph_ = sr_.get("assigned") if sr_ else None
++                ins.append(f"i64 {ssa_ref(rec, sn) or '0'}")
++                cons.append(f'{{{ph_}}}' if ph_ else 'r')
++                phys.append(ph_)
++            xclob = "".join(f",~{{{x}}}" for x in ie.get("clobbers", []))
++            outreg_sr = get_slot(rec, "outreg")
++            phys_out = outreg_sr.get("assigned") if outreg_sr else None
++            # early-clobber unless the output shares a register with an input
++            # (LLVM rejects =&{r} with {r}); then the template computes in place
++            ec = "=" if (phys_out and phys_out in phys) else "=&"
++            out_con = f'{ec}{{{phys_out}}}' if phys_out else f'{ec}r'
++            out_name = (outreg_sr.get("ssa_name") if outreg_sr else None) or f"__ilv_dead_{pc}"
++            il(f'%{out_name} = call i64 asm sideeffect "{mkr}{ie["asm"]}", '
++               f'"{out_con},{",".join(cons)},~{{flags}}{xclob}"({", ".join(ins)})')
+ 
+         elif concrete == "bitnot":
+             inreg0 = ssa_ref(rec, "inreg0") or "0"

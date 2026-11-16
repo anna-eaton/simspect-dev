@@ -1,0 +1,40 @@
+{
+ "mispredict_not_taken/inst-021207": {
+  "variants": [
+   {
+    "record": "inst-021207",
+    "terms": [
+     "over_clean"
+    ],
+    "inconsistent": true,
+    "items": [
+     {
+      "struct": "L1D",
+      "line": "0x75c0",
+      "event_ids": [
+       4549,
+       4594
+      ],
+      "term": "over_clean",
+      "cause": "UV5_older_load",
+      "why": "S=3151 fill 0x75c0 @17483500; older committed U=3124 req=ld addr=0x75c0 size=8 hits @17484000; cleanup_inv @20072000"
+     },
+     {
+      "struct": "L2",
+      "line": "0x75c0",
+      "event_ids": [
+       4482,
+       4608
+      ],
+      "term": "over_clean",
+      "cause": "UV5_older_load",
+      "why": "S=3151 fill 0x75c0 @17405000; older committed U=3124 req=ld addr=0x75c0 size=8 hits @17484000; cleanup_inv @20072000"
+     }
+    ]
+   }
+  ],
+  "causes": [
+   "UV5_older_load"
+  ]
+ }
+}

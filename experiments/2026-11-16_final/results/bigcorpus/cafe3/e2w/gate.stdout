@@ -1,0 +1,9 @@
+== bc_E2w_STT_6_u_core_lpP_s2A
+  mispredict_not_taken/_merge                runs 36  stems 15184 / expected 15184  MISSING 0  DUPLICATES 0
+  mispredict_not_taken/br_x/plain            tests  6170  raw 2735  gated 2735  {'R-SA-13_static(SSE-load producer)': 2728, 'other(xmm on slice)': 4, 'other(GPR slice)': 3}
+  mispredict_not_taken/ld/plain              tests  6251  raw 3540  gated 3540  {'R-SA-13_static(SSE-load producer)': 2972, 'other(xmm on slice)': 566, 'other(GPR slice)': 2}
+  mispredict_not_taken/ld/rmw                tests  2763  raw 2721  gated 2660  {'R-SA-13_static(SSE-load producer)': 1350, 'other(xmm on slice)': 1308, 'disq_not_obtained(never_executed)': 61, 'other(GPR slice)': 2}
+  mispredict_taken/_merge                    runs 36  stems 15184 / expected 15184  MISSING 0  DUPLICATES 0
+  mispredict_taken/br_x/plain                tests  6170  raw 2772  gated 2772  {'R-SA-13_static(SSE-load producer)': 2765, 'other(xmm on slice)': 4, 'other(GPR slice)': 3}
+  mispredict_taken/ld/plain                  tests  6251  raw 3540  gated 3540  {'R-SA-13_static(SSE-load producer)': 2979, 'other(xmm on slice)': 559, 'other(GPR slice)': 2}
+  mispredict_taken/ld/rmw                    tests  2763  raw 2721  gated 2660  {'R-SA-13_static(SSE-load producer)': 1361, 'disq_not_obtained(never_executed)': 61, 'other(xmm on slice)': 1297, 'other(GPR slice)': 2}

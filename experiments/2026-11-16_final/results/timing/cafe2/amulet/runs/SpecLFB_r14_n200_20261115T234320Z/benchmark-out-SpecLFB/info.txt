@@ -1,0 +1,43 @@
+
+========================================================================================================================
+Config 0: /tests/timing_20261115/amulet/runs/SpecLFB_r14_n200_20261115T234320Z/docker_gem5_v1_final_cache_tlb.yaml
+
+Command line: 
+python3 cli.py fuzz -s /tests/timing_20261115/amulet/amulet-repo/src/x86/isa_spec/base.json -i 70 -n 201 -c /tests/timing_20261115/amulet/runs/SpecLFB_r14_n200_20261115T234320Z/docker_gem5_v1_final_cache_tlb.yaml -p bench_time1SpecLFB_config0_round0 --no-save-stats --result-dir=/tests/timing_20261115/amulet/runs/SpecLFB_r14_n200_20261115T234320Z/benchmark-out-SpecLFB/config0 --SpecLFB --nonstop
+
+avg_wall_time: 301.42
+total_system_time: 4219.82
+total_test_programs: 2800
+input_count: 140
+total_test_cases: 392000
+total_violations: 116
+avg_violations: 8.29
+
+contract_clause: CT-SEQ
+detected_violation: YES
+avg_detection_time: 2.60
+testing_throughput: 1300.53
+campaign_execution_time: 301.42
+
+Detailed Results - Config 0
+===========================
+Round    | Execution Time (s)   | Test Cases   | Violations Found   | First Violation (s)   
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+       0 |               411.57 |          200 |                  8 |                  40.05
+       1 |               380.69 |          200 |                  4 |                 136.65
+       2 |               290.98 |          200 |                  7 |                  21.17
+       3 |               245.06 |          200 |                  9 |                  23.53
+       4 |               291.21 |          200 |                 13 |                  21.44
+       5 |               292.77 |          200 |                 13 |                  11.71
+       6 |               261.91 |          200 |                  6 |                  53.08
+       7 |               252.14 |          200 |                  9 |                  81.66
+       8 |               256.44 |          200 |                  5 |                  49.68
+       9 |               334.75 |          200 |                  8 |                  27.08
+      10 |               273.41 |          200 |                  4 |                  65.63
+      11 |               250.18 |          200 |                 13 |                   8.37
+      12 |               308.28 |          200 |                  9 |                 119.71
+      13 |               370.43 |          200 |                  8 |                  92.66
+    Mean |               301.42 |            - |  8.285714285714286 |                      -
+ Std Dev |                53.51 |            - |               3.07 |                      -
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+========================================================================================================================

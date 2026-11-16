@@ -1,0 +1,47 @@
+{
+ "build": "gem5-recon-modded",
+ "base": "node/gem5-recon",
+ "copied": 9666,
+ "modified": [
+  "configs/common/Options.py",
+  "configs/common/Simulation.py",
+  "configs/example/se.py",
+  "src/arch/arm/pcstate.hh",
+  "src/arch/generic/pcstate.hh",
+  "src/arch/x86/pcstate.hh",
+  "src/cpu/o3/BaseO3CPU.py",
+  "src/cpu/o3/commit.cc",
+  "src/cpu/o3/commit.hh",
+  "src/cpu/o3/cpu.cc",
+  "src/cpu/o3/cpu.hh",
+  "src/cpu/o3/fetch.hh",
+  "src/cpu/o3/iew.cc",
+  "src/cpu/o3/lsq_unit.cc",
+  "src/cpu/pred/BranchPredictor.py",
+  "src/cpu/pred/bpred_unit.cc",
+  "src/cpu/pred/bpred_unit.hh"
+ ],
+ "added": [
+  "src/cpu/o3/store_set_annot.cc",
+  "src/cpu/o3/store_set_annot.hh"
+ ],
+ "deleted": [],
+ "comments_removed": 87,
+ "skipped_mixed": [
+  "src/cpu/o3/store_set_annot.hh:44-66: REMOVED (comment block partly upstream, holds our text): /**\n * Annotation-driven store set predictor.  Extends the s",
+  "src/cpu/o3/store_set_annot.hh:90-104: REMOVED (comment block partly upstream, holds our text): /**\n     * Checks if the instruction at PC is dependent on a",
+  "src/cpu/o3/store_set_annot.hh:108-111: REMOVED (comment block partly upstream, holds our text): /**\n     * Annotation-driven override map loaded at construc"
+ ],
+ "new_binary": [],
+ "top_excluded": [],
+ "new_noncode": [],
+ "derived_from": {
+  "src/cpu/o3/store_set_annot.cc": "src/cpu/o3/store_set.cc",
+  "src/cpu/o3/store_set_annot.hh": "src/cpu/o3/store_set.hh"
+ },
+ "base_local_edit_stripped": [
+  "src/cpu/o3/dyn_inst.hh",
+  "src/cpu/o3/iew.cc",
+  "src/cpu/o3/lsq_unit.cc"
+ ]
+}

@@ -4,7 +4,11 @@ old/alloy-out/
 old/images/
 old/crap/
 generated/
-experiments/
+# experiments/: everything ignored except the versioned snapshot dirs listed below; their data/ subdirs (large tarballs) stay ignored (snapshot agent, 2026-11-10)
+experiments/*
+!experiments/2026-11-10_footprint_vs_amulet/
+!experiments/2026-11-16_final/
+experiments/*/data/
 results/
 testsets/
 tmp_taken_results_preregen_20260519_193643/
@@ -21,3 +25,15 @@ m5out/
 
 # Third-party reference paper PDFs (downloaded for figure-style survey; crops are kept)
 paper_figures/reference_papers/**/*.pdf
+
+# keep the snapshot results versioned despite the global results/ rule (snapshot agent, 2026-11-10)
+!experiments/2026-11-10_footprint_vs_amulet/results/
+!experiments/2026-11-16_final/results/
+!experiments/2026-11-16_final/results/**/testsets/
+!experiments/2026-11-16_final/results/**/jobs/
+
+# ad-hoc testsets/results/configs (scripts/run_als.sh); never tracked
+build/
+
+# Caroline Trippel paper copies (be-caroline skill); PDFs stay local like reference_papers
+paper_figures/caroline/papers/**/*.pdf

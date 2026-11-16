@@ -80,10 +80,11 @@ STL_STORE_STALL_CYCLES: int = int(os.environ.get("SIMSPECT_STL_STORE_STALL_CYCLE
 STL_ALIAS_PRED = os.environ.get("SIMSPECT_STL_ALIAS_PRED", "no_alias")
 
 FNC_COMMIT_STALL_CYCLES: int = int(os.environ.get("SIMSPECT_FNC_COMMIT_STALL_CYCLES", "0"))
-# Initial cache state (run_config gem5.cache_setup, 2026-11-08): "warm" (default,
-# the Stage-2 prologue leaves the sandbox hot) or a strategy in cache_setup.STRATEGIES
-# (e.g. "cold" = clflush the test's stack frame after the prologue barrier), or
-# "random" (per-test warm/cold from SIMSPECT_CACHE_SETUP_SEED + stem, 2026-11-09).
+# Initial cache state (run_config gem5.cache_setup): "warm" (default, the Stage-2 prologue leaves the sandbox
+# hot), a strategy in cache_setup.STRATEGIES (e.g. "cold" = clflush the stack frame after the prologue barrier),
+# "random" (per-test warm/cold from SIMSPECT_CACHE_SETUP_SEED + stem), "random_all" (per-test uniform over the
+# build's allowed warm/cold/full), or "full" (sweep an L1D-sized buffer so every set starts full; size from
+# SIMSPECT_CACHE_SETUP_FILL_BYTES or --l1d_size in SIMSPECT_GEM5_EXTRA).
 # Applied only by process_one via cache_setup.prepare; see build_binary's guard.
 CACHE_SETUP: str = (os.environ.get("SIMSPECT_CACHE_SETUP") or "warm").strip().lower()
 if CACHE_SETUP != "warm":
@@ -181,7 +182,7 @@ _force_support: Dict[str, bool] = {}
 
 
 def binary_has_resolve_hooks(gem5_bin: Path) -> bool:
-    """True if the gem5 binary carries the 2026-10-30 resolve hooks (BR lines +
+    """True if the gem5 binary carries the resolve hooks (BR lines +
     forced-not-taken), detected by the predict_force format string."""
     key = str(gem5_bin)
     if key not in _force_support:
@@ -277,11 +278,8 @@ def branch_force_plan(binary: Path, ann: dict) -> List[dict]:
     instruction (label pc+1): the speculative critical section for an
     unresolved or xmit branch, the architectural path for a resolved one. The
     force is then "not_taken" (fall-through reaches it) or "taken" to the jcc's
-    own static target, never an arbitrary label address. Forcing "taken" to the
-    label (the pre-2026-10-30 rule) skipped LLVM-hoisted instructions before the
-    label on old builds, and on gem5-22 builds (recon-modded, SpecLFB) was
-    caught at decode, so the branch never mispredicted at execute.
-    wiki/design/RESOLUTION_HOOKS.md §2.
+    own static target, never an arbitrary label address (forcing "taken" to the label skipped LLVM-hoisted
+    instructions, and on gem5-22 builds was caught at decode). wiki/design/RESOLUTION_HOOKS.md §2.
     """
     rows = _disasm(binary)
     rows_by_addr = {r[0]: r for r in rows}
@@ -342,11 +340,9 @@ def _branch_ann_for_se(ann_path: Path, workdir: Path,
     (1) Key alias. compile_annotate.py writes each branch's absolute PC as
     `branch_addr[_hex]`, which /work/stt's se.py reads. The /work/gem5-spt and
     /work/gem5-recon-modded se.py loaders only accept `branch_pc_addr[_hex]` (or
-    x86 offsets) and skip every other entry, so no BTB override and no resolve
-    stall were registered on those builds (config.ini annotationBranchPCs
-    empty; confirmed by STAGE3_gem5/hook_audit.py 2026-10-30). The alias is
-    added here, at the one point where an annotation is handed to gem5, so
-    existing testsets need no regeneration. wiki/design/COMMIT_BOUNDARY.md §3.
+    x86 offsets) and skip every other entry, so without the alias no BTB override and no
+    resolve stall are registered on those builds. Added here, where an annotation is handed
+    to gem5, so existing testsets need no regeneration. wiki/design/COMMIT_BOUNDARY.md §3.
 
     (2) Forced direction. When the gem5 binary has the resolve hooks, every
     annotated branch gets the direction from branch_force_plan: target 1 means
@@ -478,8 +474,7 @@ def _run_bounded(cmd: list) -> None:
 # Some native gem5 DPRINTF formats print text after their own newline, which
 # glues it onto the front of the next trace line: CleanupSpec lsq_unit.hh:1257
 # ("...0x%llx\n.") and RubyPort.cc:272 ("...Ruby.\n "). The glued line then fails
-# every startswith/^-anchored match, so a hook or pipeview line was silently
-# dropped (2026-11-08, CleanupSpec UV3 demo lost a BR:resolve_hold line).
+# every startswith/^-anchored match, so a hook or pipeview line was silently dropped.
 # _unglue drops that leading residue; every trace parser reads through it.
 _GLUE_BEFORE_TICK_RE = re.compile(r"^[^\s\d]+(?=\s*\d+: )")
 
@@ -527,7 +522,7 @@ def parse_pipeview(trace_path: Path) -> Dict[int, List[dict]]:
 
 # ── SimSpect hook events (O3PipeView:simspect:...) ──────────────────────────
 #
-# Additive (2026-10-28): parsers for the print-only SimSpect cache/defense
+# Parsers for the print-only SimSpect cache/defense
 # hooks. Line format is defined in wiki/design/SIMSPECT_HOOKS.md:
 #   O3PipeView:simspect:<tick>:<struct>:<kind>:line=0x..:seq=..:pc=..:victim=..:cause=..:sq=..:id=..
 # `-` means "not applicable / unknown" and parses to None. parse_pipeview()
@@ -790,8 +785,7 @@ def parse_commit_ticks(trace_path: Path) -> Dict[int, List[int]]:
 
     O3PipeView records are printed from the DynInst destructor
     (dyn_inst_impl.hh:73), so an instruction gem5 still references when the run
-    ends has no record even though it committed. Seen on gem5-spt for committed
-    stores (inst-043417 fnc: committed at 2952000, no record; 2026-11-07).
+    ends has no record even though it committed (seen on gem5-spt for committed stores).
     """
     by_pc: Dict[int, List[int]] = defaultdict(list)
     for line in _trace_lines(trace_path):
@@ -805,9 +799,8 @@ def fill_retire_from_commit(by_pc: Dict[int, list], commit_by_pc: Dict[int, List
                             pcs: List[Optional[int]]) -> List[str]:
     """For each pc in `pcs` with no retired pipeview record but Commit-trace
     commits, add a record whose retire is the first commit tick. Where both
-    exist, the pipeview retire equals the first or last commit line of the pc
-    (273/282 last, 9/282 first, at most 1 cycle apart; stt/recon/spt traces
-    2026-11-07). Returns the hex pcs filled."""
+    exist, the pipeview retire equals the first or last commit line of the pc (at most
+    1 cycle apart). Returns the hex pcs filled."""
     filled = []
     for pc in pcs:
         if pc is None or not commit_by_pc.get(pc):
@@ -962,10 +955,9 @@ def collect_unresolved_branches(ann_full: dict, binary: Path,
         if stall <= 0:
             continue
         # Only the model's unresolved branches define the window. A resolved
-        # (correctly_not_taken) branch can carry a sweep grid stall, but the
-        # model says it has resolved, so it must not be required to still be
-        # unresolved at the signal (pre-2026-10-30 it was). Its timing is
-        # reported separately (criteria.resolved_before_signal).
+        # (correctly_not_taken) branch can carry a sweep grid stall but must not be
+        # required to still be unresolved at the signal. Its timing is reported
+        # separately (criteria.resolved_before_signal).
         if e.get("mode") == "correctly_not_taken":
             continue
         # New schema: absolute branch_addr.
@@ -985,7 +977,7 @@ def collect_unresolved_branches(ann_full: dict, binary: Path,
 
 
 def parse_branch_events(trace_path: Path) -> Dict[int, Dict[int, dict]]:
-    """BR resolve lines (2026-10-30 hooks) -> {pc: {seq: {kind: tick, ...}}}.
+    """BR resolve lines (resolve hooks) -> {pc: {seq: {kind: tick, ...}}}.
 
     Kinds: predict_force (fetch: forced direction), resolve_hold (IEW schedules
     the stall), resolve_drop (squashed before release), resolve_release (IEW
@@ -1027,7 +1019,7 @@ def check_branch_resolutions(by_pc: Dict[int, list],
                              ticks_per_cycle: int) -> Tuple[bool, List[dict]]:
     """Is every unresolved branch still unresolved at `xmit_complete`?
 
-    Observed (binary with the 2026-10-30 resolve hooks; process_one puts the
+    Observed (binary with the resolve hooks; process_one puts the
     branch's BR events in u["br"]): resolve_tick = resolve_visible, the commit
     setCanCommit() tick every defense keys "resolved" on (falls back to
     resolve_release). A branch held but dropped (squashed first) never
@@ -1086,7 +1078,7 @@ def check_branch_resolutions(by_pc: Dict[int, list],
 def execution_validity(ann_entries: List[dict], br_events: Dict[int, Dict[int, dict]],
                        by_seq: Dict[int, dict], xmit_pc: Optional[int],
                        plan: Optional[List[dict]]) -> dict:
-    """Did gem5 run the speculation shape the model asked for? (2026-10-30)
+    """Did gem5 run the speculation shape the model asked for?
 
     resolved_correct  no correctly_not_taken branch mispredicted on the correct
                       path (an instance that retired)
@@ -1184,18 +1176,21 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
 
         result["xmit_kind"] = xmit.get("kind", "")
 
-        # cache_setup (2026-11-08): warm = build_binary exactly as before; any
-        # other strategy rewrites the .s and hands back a re-resolved annotation.
+        # cache_setup: warm = plain build_binary; any other strategy rewrites the .s
+        # and hands back a re-resolved annotation.
         if str(Path(__file__).resolve().parent) not in sys.path:
             sys.path.append(str(Path(__file__).resolve().parent))
         import cache_setup as _cs
-        # random (2026-11-09): resolved per test from (seed, stem); the record keeps
-        # the strategy actually used plus the mode and seed. warm/cold: unchanged.
-        _cs_used = _cs.resolve(CACHE_SETUP, name)
+        # random: resolved per test from (seed, stem); the record keeps the strategy
+        # actually used plus the mode and seed. random_all: uniform over the setups
+        # this build allows (warm/cold/full).
+        _cs_used = _cs.resolve(CACHE_SETUP, name, gem5_bin=str(GEM5_BIN))
         result["cache_setup"] = _cs_used
         if CACHE_SETUP in _cs.META:
             result["cache_setup_mode"] = CACHE_SETUP
             result["cache_setup_seed"] = _cs.current_seed()
+        if CACHE_SETUP == "random_all":
+            result["cache_setup_choices"] = list(_cs.allowed_setups(str(GEM5_BIN)))
         binary, ann_path, cs_info = _cs.prepare(s_path, ann_path, workdir, build_binary,
                                                 _cs_used)
         if cs_info is not None:
@@ -1216,7 +1211,7 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
         else:
             trace = run_gem5(binary, workdir, ann_path=ann_path, fnc_pc=fnc_pc)
             by_pc     = parse_pipeview(trace)
-            # lc/fnc committed but missing from O3PipeView (2026-11-07): take
+            # lc/fnc committed but missing from O3PipeView: take
             # the retire tick from the Commit trace, else before_fnc passes
             # vacuously and lc_retired disqualifies a real retire.
             result["retire_from_commit_trace"] = fill_retire_from_commit(
@@ -1229,8 +1224,8 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
             # The xmit PC, if itself an annotated unresolved branch, is the
             # event we're conditioning on — exclude it from the bound check.
             unresolved = [u for u in unresolved if u["pc"] != xmit_pc]
-            # Observed branch resolution (binaries with the 2026-10-30 resolve
-            # hooks): hand each unresolved branch its BR events.
+            # Observed branch resolution (binaries with the resolve hooks): hand each
+            # unresolved branch its BR events.
             br_events = parse_branch_events(trace)
             if br_events:
                 for u in unresolved:
@@ -1242,8 +1237,7 @@ def process_one(s_path: Path, ann_path: Path, check_fn: CheckFn,
             result["br_events"] = {hex(pc): {str(q): d for q, d in seqs.items()}
                                    for pc, seqs in br_events.items()}
             if getattr(check_fn, "wants_trace", False):
-                # Additive (2026-10-28): trace-reading checkers such as
-                # check_footprint.py also get the raw trace path.
+                # Trace-reading checkers such as check_footprint.py also get the raw trace path.
                 check_result = check_fn(by_pc, xmit_pc, lc_pc, fnc_pc,
                                         unresolved, ticks_per_cycle, lsq_by_pc,
                                         squash_by_pc, trace_path=trace)
@@ -1404,3 +1398,17 @@ def run_batch(check_fn: CheckFn, description: str = "window check") -> None:
     if args.out:
         args.out.write_text(json.dumps(results, indent=2))
         print(f"Full results written to {args.out}")
+
+
+# ── Opt-in fast path (run_config gem5.fast_path: true → SIMSPECT_FAST_PATH=1) ─
+# Off by default: then nothing below runs and every function above is used as is.
+# On: gem5_fastpath.install() caches binary_has_resolve_hooks per binary (path, size,
+# mtime, inode) and, inside process_one only, reads the trace once and hands each
+# parser the lines of its class. Same gem5 command lines, parser bodies and checker
+# code. wiki/state/COMMANDS.md "Fast path (opt-in, 2026-11-16)".
+FAST_PATH = os.environ.get("SIMSPECT_FAST_PATH", "").lower() in ("1", "true", "yes", "on")
+if FAST_PATH:
+    if str(Path(__file__).resolve().parent) not in sys.path:
+        sys.path.append(str(Path(__file__).resolve().parent))
+    import gem5_fastpath as _gem5_fastpath
+    _gem5_fastpath.install(sys.modules[__name__])

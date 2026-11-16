@@ -1,0 +1,8 @@
+[provenance] Saved provenance.tar.gz  (parsexml.py, pass_cfg.json)
+[gem5:sweep] 1 tests × variable grid (max 1 points) → 1 variant runs  (points=[0], unresolved_stall=5000)
+  grid 0 (check_footprint.py): inst-017461 … inst-017461  (1 tests)
+    [???] inst-017461           xmit=0x401d11(ld)  lc_ret=0  xmit_cmp=0  fnc_ret=0  [ERROR]  panic: Tried to read unmapped address 0xfff87fffffffe5c0. |
+
+[gem5:sweep] Done — 0 hits / 1 tests (1 errors)  across 1 variant runs
+             Results  → /tests/bigcorpus_20261115/firstdet/T1g_Footprint_6_u_nov10_s2B/work/001625/res/out/mispredict_taken/window-results.json
+             Sweep    → /tests/bigcorpus_20261115/firstdet/T1g_Footprint_6_u_nov10_s2B/work/001625/res/out/mispredict_taken/sweep/<stem>_sweep.json

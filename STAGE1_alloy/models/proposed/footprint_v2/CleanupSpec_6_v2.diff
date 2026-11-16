@@ -1,0 +1,35 @@
+5,17c5,15
+< CleanupSpec_6 -- footprint model for CleanupSpec (Saileshwar and Qureshi, MICRO 2019), branch (control-flow) speculation.
+< Copy of STT_6.als (2026-11-09, new file requested by Anna). Differences are confined
+< to the "Specific defense model" block at the bottom: two clause lines change (the
+< leakage function and the protection-set propagation); everything else is
+< byte-identical to STT_6.als.
+<   - protection set = ALL memory, never untainted (STT_6 untaints a location once a
+<     load with no older unresolved branch reads it). A test exists when a speculative
+<     load's address derives from a memory value, wherever that value was read.
+<   - transmitters = load addresses only (STT_6 also has branch conditions).
+<   - speculation contract = STT_6's (after an unresolved branch).
+< The defense block is the same in InvisiSpec_6, CleanupSpec_6 and SpecLFB_6: the three
+< papers make the same promise about a speculative load. Store-bypass speculation is
+< in CleanupSpec_6_stl.als. See wiki/design/MODELS_AND_BUILDS.md PART 8.
+---
+> CleanupSpec_6_v2 -- DRAFT (footprint-check, 2026-11-10; NOT approved, not used by any config).
+> Copy of STAGE1_alloy/models/CleanupSpec_6.als (Saileshwar and Qureshi, MICRO 2019). Only the protection-set clause in the
+> "Specific defense model" block changes, plus this header; everything else is byte-identical
+> to CleanupSpec_6.als (and therefore to STT_6.als outside the defense block).
+>   - protection set = all memory AND every register the test never writes (its initial value),
+>     never untainted. Values computed from either are protected through rf/ddi as before.
+>     CleanupSpec_6 protects memory only, so a speculative load whose address comes from an initial
+>     register, or from ALU work on initial registers, with no load in the chain (AMuLeT's UV6
+>     shape) cannot be generated there.
+>   - speculation contract (after an unresolved branch) and leakage (load addresses) unchanged.
+> See wiki/design/MODELS_AND_BUILDS.md PART 8, '2026-11-10 -- Paper check of the footprint models'.
+347c345,350
+< fun hardware_protection_policy: State {Mem_s}
+---
+> // footprint-check 2026-11-10 (draft): registers the test never writes hold their initial value, which is a secret
+> //     too. CleanupSpec p3 (Sec. 2.1): "The secret may be accessed from the memory or from a register, or computed,
+> //     transiently"; "Future attacks could use this recipe to leak secrets stored in registers, or results of malicious
+> //     computations performed transiently" (p3, Sec. 2.2).
+> // CleanupSpec_6: fun hardware_protection_policy: State {Mem_s}
+> fun hardware_protection_policy: State {Mem_s + (Reg_s - Instruction.outreg.opstate)}

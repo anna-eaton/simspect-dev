@@ -1,0 +1,93 @@
+{
+ "defense": "speclfb",
+ "N_prefix": 4000,
+ "n_rows": 4000,
+ "status": {
+  "ok": 4000
+ },
+ "hits": 1793,
+ "gem5_cpu_s_total": 3752.51,
+ "total_cpu_s_total": 13907.89,
+ "gem5_cpu_s_per_test": 0.938,
+ "total_cpu_s_per_test": 3.477,
+ "signatures": {
+  "UV6": {
+   "first_idx": 6,
+   "tests_to_first": 7,
+   "stem": "inst-005422",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 9.58,
+   "cum_total_cpu_s": 35.64,
+   "K": 791,
+   "N": 4000,
+   "expected_tests_to_first": 5.05,
+   "expected_gem5_cpu_s_to_first": 4.74,
+   "expected_total_cpu_s_to_first": 17.56
+  },
+  "jmp_shadow": {
+   "first_idx": 4,
+   "tests_to_first": 5,
+   "stem": "inst-046117",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 6.58,
+   "cum_total_cpu_s": 24.75,
+   "K": 584,
+   "N": 4000,
+   "expected_tests_to_first": 6.84,
+   "expected_gem5_cpu_s_to_first": 6.42,
+   "expected_total_cpu_s_to_first": 23.78
+  },
+  "other:replayed_after_safe": {
+   "first_idx": 1713,
+   "tests_to_first": 1714,
+   "stem": "inst-019612",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 1712.18,
+   "cum_total_cpu_s": 6258.17,
+   "K": 1,
+   "N": 4000,
+   "expected_tests_to_first": 2000.5,
+   "expected_gem5_cpu_s_to_first": 1876.73,
+   "expected_total_cpu_s_to_first": 6955.69
+  },
+  "other:replayed_after_safe(jmp_in_shadow)": {
+   "first_idx": 37,
+   "tests_to_first": 38,
+   "stem": "inst-005549",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 50.4,
+   "cum_total_cpu_s": 181.88,
+   "K": 326,
+   "N": 4000,
+   "expected_tests_to_first": 12.24,
+   "expected_gem5_cpu_s_to_first": 11.48,
+   "expected_total_cpu_s_to_first": 42.54
+  },
+  "other:replayed_after_safe+replayed_after_safe(jmp_in_shadow)": {
+   "first_idx": 1008,
+   "tests_to_first": 1009,
+   "stem": "inst-034991",
+   "mode": "mispredict_taken",
+   "cum_gem5_cpu_s": 1134.64,
+   "cum_total_cpu_s": 4088.62,
+   "K": 2,
+   "N": 4000,
+   "expected_tests_to_first": 1333.67,
+   "expected_gem5_cpu_s_to_first": 1251.15,
+   "expected_total_cpu_s_to_first": 4637.12
+  },
+  "walk_order": {
+   "first_idx": 1,
+   "tests_to_first": 2,
+   "stem": "inst-060713",
+   "mode": "mispredict_not_taken",
+   "cum_gem5_cpu_s": 2.79,
+   "cum_total_cpu_s": 10.7,
+   "K": 651,
+   "N": 4000,
+   "expected_tests_to_first": 6.14,
+   "expected_gem5_cpu_s_to_first": 5.76,
+   "expected_total_cpu_s_to_first": 21.34
+  }
+ }
+}

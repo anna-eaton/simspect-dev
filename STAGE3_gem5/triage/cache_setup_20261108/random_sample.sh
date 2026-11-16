@@ -1,5 +1,5 @@
 #!/bin/bash
-# cache_setup "random" check (2026-11-09, cache-random session). Run on cafe2 gem5_dev from the tree root
+# cache_setup "random" check. Run on cafe2 gem5_dev from the tree root
 # /tests/simspect_fixed_20261030. Three 590-test campaigns with the FINAL default footprint configs
 # (runconfigs/footprint/run_config_STT_6_{cleanupspec,speclfb}_footprint.jsonc, gem5.cache_setup random), changing only
 # the testset (paths.testset_dir/model -> a staged stem list), results_name, keep_tmp (true on CleanupSpec, for the UV3

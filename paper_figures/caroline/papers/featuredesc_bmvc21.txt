@@ -1,0 +1,1223 @@
+arXiv:2105.03812v1 [cs.CV] 9 May 2021
+
+Analysis and Mitigations of Reverse Engineering Attacks
+on Local Feature Descriptors
+Deeksha Dangwal†‡ , Vincent T. Lee‡ , Hyo Jin Kim‡ , Tianwei Shen‡ , Meghan Cowan‡ , Rajvi Shah‡ ,
+Caroline Trippel§ , Brandon Reagen∗ , Timothy Sherwood† , Vasileios Balntas‡ , Armin Alaghi‡ , Eddy Ilg‡
+†
+University of California, Santa Barbara
+§
+Stanford University
+∗
+New York University
+‡
+Facebook Reality Labs Research
+{deeksha, sherwood}@cs.ucsb.edu, trippel@stanford.edu, bjr5@nyu.edu,
+{vtlee, hyojinkim, tianweishen, meghancowan, rajvishah, vassileios, alaghi, eddyilg}@fb.com
+
+Abstract
+As autonomous driving and augmented reality evolve, a
+practical concern is data privacy. In particular, these applications rely on localization based on user images. The
+widely adopted technology uses local feature descriptors,
+which are derived from the images and it was long thought
+that they could not be reverted back. However, recent work
+has demonstrated that under certain conditions reverse engineering attacks are possible and allow an adversary to
+reconstruct RGB images. This poses a potential risk to user
+privacy. We take this a step further and model potential
+adversaries using a privacy threat model. Subsequently, we
+show under controlled conditions a reverse engineering attack on sparse feature maps and analyze the vulnerability
+of popular descriptors including FREAK, SIFT and SOSNet. Finally, we evaluate potential mitigation techniques
+that select a subset of descriptors to carefully balance privacy reconstruction risk while preserving image matching
+accuracy; our results show that similar accuracy can be
+obtained when revealing less information.
+
+(a)
+
+(b)
+
+(c)
+
+(d)
+
+Figure 1: Reverse Engineering Attack and Mitigations.
+(a) Original image. Object detections are marked with orange bounding boxes. (b) Image reconstruction from 1, 000
+SIFT descriptors using our reverse engineering attack. The
+reconstruction gives sufficient fidelity to preserve detectable
+semantic information. By (c) reducing the number of features or (d) selective suppression around objects, we can
+reduce the efficacy of the attack and improve privacy.
+
+1. Introduction
+the device, they must be sent to a service provider to enable
+services such as localization, and virtual content. As a result,
+there is understandable concern that any data assets shared
+with a cloud service provider, no matter how well-trusted,
+can potentially be abused [5]. To enable augmented reality
+in practice, beyond the application functionality, privacypreserving techniques are thus an important consideration.
+In this work, we focus on localization as a fundamental
+component of augmented reality. Localization relies on
+visual data assets to make a prediction of the location and
+
+Privacy and security of user data has quickly become an
+important concern and a design consideration when engineering autonomous driving and augmented reality systems.
+In order to support machine perception stacks, these systems
+require always-on information capture. Most of these usecases rely directly or indirectly on the data that originates
+from the user’s device, i.e., RGB, inertial, depth, and other
+sensor values. Data assets are potentially rich in private
+information, but due to the compute power limitations on
+
+1
+
+2. Related Work
+
+pose of the user; in particular, most established algorithms
+rely on local feature descriptors. Since these descriptors
+contain only derived information, they were long thought to
+be secure.
+Unfortunately, recent literature shows that descriptors can
+be reverse engineered surprisingly well. We show an example in Figure 1. In general, a reverse engineering attack is
+the process by which an artificial object is deconstructed to
+reveal its designs, architecture, code or to extract knowledge
+from the object [11]. For feature descriptors, a reverse engineering attack attempts to reconstruct the original RGB
+image that was used to derive the feature descriptors. The fidelity to which the original RGB image can be reconstructed
+roughly correlates to the severity of the potential risk to
+privacy. Prior work [52, 6, 9, 30] has shown that feature descriptors are potentially susceptible to such an attack under
+a range of conditions and configurations. However, there
+is limited work on quantitatively analyzing privacy implications as well as evaluating potential defenses against such
+reverse engineering attacks, which our work will explore.
+To scope the problem, we first outline a privacy threat
+model [8] to contextualize the practicality and data assets
+available to a descriptor reverse-engineering attack. Using
+these assets, we show potential reverse engineering attacks
+and quantify the information leakage to evaluate the privacy implications. We then propose mitigation techniques
+inspired by some of the current best practices in privacy and
+security [54]. In particular, we propose two mitigation techniques: (1) reducing the number of features shared and (2)
+selective suppression of features around potentially sensitive
+objects. We show that these techniques can mitigate the
+potency of reverse engineering attacks on feature descriptors
+to improve protections on user data. In summary, we make
+the following contributions:
+
+The concept of reverse engineering local features has
+evolved over recent years as local descriptors play an increasingly important role. Prior work focused primarily on
+better understanding the image features. Only recently have
+there been proposals towards leveraging this line of research
+to understand the privacy implications. Work towards discovering vulnerabilities and mitigating against attacks remains
+an emerging area of research.
+
+2.1. Recovering Images from Feature Vectors
+Reconstruction from Sparse Local Features. Weinzaepfel et al. [52] demonstrated the feasibility of reconstructing the input image, given SIFT [22] descriptors and their
+keypoint locations, by finding and stitching the nearest neighbors in a database of patches. d’Angelo et al. [6] cast the reconstruction problem as regularized deconvolution problem
+to recover the image content from binary descriptors, such
+as FREAK [2] and ORB [36], and their keypoint locations.
+Kato and Harada [16] showed that it is possible to recover
+some of the structures of the original image from an aggregation of sparse local descriptors in bag-of-words (BoW)
+representation, even without keypoint locations. While the
+quality of reconstructed images from the above methods
+is far from the original images, they allow clear interpretations of the semantic image content. In this paper, we
+demonstrate that reverse engineering attacks using CNNs
+reveal much more image details and quantitatively analyse
+privacy implications for floating-point [22], binary [2] and
+machine-learned descriptors [46].
+Reconstruction from Dense Feature Maps. Vondrick et
+al. [50] perform a visualization of HoG [56] features in
+order to understand its gaps for recognition tasks. To understand what information is captured in CNNs, Mahendran and
+Vedaldi [23] showed the inversions of CNN feature maps
+as well as a differentiable version of DenseSIFT [21] and
+HoG [56] descriptors using gradient descent. Dosovitskiy
+and Brox [9] took an alternative approach to directly model
+the inverse of feature extraction for HoG [56], LBP [28] and
+AlexNet [18] using CNNs, and qualitatively show better reconstruction results than the gradient descent approach [23].
+They also show reconstructions from SIFT [22] features using descriptor, keypoint, scale, and orientation information.
+All the above approaches differ from ours in that we perform
+the reconstruction from descriptors and keypoints only.
+Modern Reverse Engineering Attacks. In the context of
+3D point clouds and the AR/VR applications built on top of
+them, a common formulation of the reverse engineering attack is to synthesize scene views given the 3D reconstruction
+information. Recent work by Pittaluga et al. [30] showed that
+it is possible to reconstruct a scene from an arbitrary viewpoint from SfM models using the projected keypoints, sparse
+RGB values, depth, and descriptors. Our work extends this
+
+1. We present a privacy threat model for a reverse engineering attack to narrow down the privacy-critical
+information and scope the setup for a practical attack.
+2. We demonstrate a reverse engineering attack to reconstruct RGB images from sparse feature descriptors such
+as FREAK [2], SIFT [22] and SOSNet [46], and quantitatively analyze the privacy implications. In contrast
+to previous work [30, 9], our approach does not take
+additional information such as sparse RGB, depth, orientation, or scale as input.
+3. We present two mitigation techniques to improve local
+feature descriptor privacy by reducing the number of
+keypoints shared for localization. We show that there is
+a trade-off between enhanced privacy (less fidelity of
+reconstruction) and the utility (localization accuracy).
+We also show which keypoints are shared matters for
+privacy.
+
+2
+
+3. System and Threat Definition
+
+approach by considering only the modalities available to an
+attacker as input, which are keypoints and descriptors.
+
+In this section, we first define privacy and utility as well
+as their trade-offs as they are discussed in this paper. We also
+describe our privacy threat model, which defines assumptions on adversary behavior and the conditions for a practical
+reverse engineering attack.
+
+2.2. Defences and Mitigations
+Mitigations for Attacks on Sparse Local Features. For
+reverse engineering attacks on local features, one notable
+recent work [43, 13, 42] proposes using line-based features
+to obfuscate the precise location of keypoints in the scene
+to make the reconstruction difficult. The key idea is to lift
+every keypoint location to a line with a random direction,
+but passing through the original 2D [13] or 3D keypoints
+[43]. Since the feature location can be anywhere on a line,
+this alleviates privacy implications in the standard mapping
+and localization process. Shibuya et al. [42] later extended
+this approach for SLAM. Similarly, Dusmanu et al. [10]
+represent a keypoint location as an affine subspace passing
+through the original point, as well as augmenting the subspace with adversarial feature samples, which makes it more
+difficult for an adversary to recover original image content.
+Mitigations on Raw Images. Apart from local features,
+other works try to alleviate the privacy concern around sharing raw images by perturbing the images [34, 19, 4, 37, 32,
+53, 29, 51]. One way of achieving this is to mask out or replace the parts of images (e.g., faces) that may contain private
+information [49, 34, 19]. Another stream of work focuses
+on encoding schemes or degrading images to prevent recognition of private image content [4, 37, 32, 53, 29, 51]. A
+few cryptographic methods were proposed to encrypt visual
+content in a homomorphic way on local devices [12, 38, 55],
+which allows computing on encrypted data without decrypting. However, such methods are computationally expensive
+and it is not clear how to apply them to complex applications
+such as localization.
+
+3.1. Definitions
+Privacy. The LINDDUN privacy threat modeling methodology, one particular methodology in academic discussions,
+looks at privacy through the following properties [8]: linkability, identifiability, non-repudiation, detectability, information disclosure, content unawareness, and policy. The
+idea behind LINDDUN is that whenever users share information, one or more of these privacy properties may be at
+risk. That is relied on for the notion that minimizing the
+amount of shared information improves privacy. However,
+precisely quantifying the impact on privacy is applicationspecific and can be implemented as a continuum, modulating
+the amount of information to be shared as required. In this
+work, references to privacy risk and/or threat applies specifically to reidentification risk that comes as a direct result of
+the reverse engineering attack; we describe and evaluate the
+trade-offs in Section 5.2)
+Utility. Utility captures the accuracy (or performance) of an
+application or how useful a data asset is to an application.
+Applications may have multiple utility functions to present
+a well-rounded understanding of the operation. Utility generally presents a trade-off with privacy considerations as
+performance tends to increase with dataset size, e.g., ML
+training. In our case, we use feature matching recall as a
+proxy for localization accuracy (see Section 5.2).
+Privacy-Utility Trade-Off. Applying privacy-preserving
+techniques can adversely affect utility. The ideal objective
+of the system is to have both high utility and higher privacy,
+but in practice there is a fundamental trade-off between the
+amount of information that one is willing to share and the
+utility one receives from sharing it. In our case, this means
+there is a trade-off between the desired localization accuracy
+(utility) and the images that may potentially be revealed
+(privacy). The descriptor-based localization service offers
+a balance between privacy and utility; features sent to the
+server are still useful to the application pipeline but do not
+directly leak the rich information content of RGB images
+that may contain private information.
+In certain cases where the definitions of utility and privacy
+are simple, this trade-off can be formalized and reasoned
+about analytically (e.g. k-anonymity [44]). In larger systems
+this is not possible and we must actively play the roles of
+attacker and defender to model possible attacks and understand the potential risks to user privacy from reidentification.
+In computer security and privacy, this is the role of a privacy
+threat model [40, 26, 47, 48, 25, 39, 8].
+
+2.3. Relationship to Adversarial Attacks on Neural
+Networks
+Recent work has shown that it is possible to trick deep
+learning models with adversarial inputs to induce incorrect
+outputs [45, 27, 3, 1]. For example, an adversarial attack
+may engineer a perceptually indistinguishable input image
+to trick a deep learning model into emitting an incorrect
+classification result.
+Conceptually, these adversarial attacks are similar to the
+defense or mitigation strategies that we will propose, since
+state-of-the-art reverse engineering attacks on descriptors
+rely on deep learning models. Our mitigation techniques
+modify inputs in a way to prevent the deep learning model
+used in the attack from accomplishing its objective — reverse
+engineering the image. However, unlike prior work in this
+space, our work lifts the insight that inputs can be modified
+to induce incorrect outputs and leverages it to defend against
+reverse engineering attacks instead of as an attack vector.
+
+3
+
+Client
+
+Service Provider (Server)
+
+Service provider
+is curious and
+may analyze data
+it receives.
+2D
+
+RGB Image
+User Application
+
+CNN
+
+Reverse
+Engineering Attack
+
+Keypoints
+and Descriptors
+
+query
+
+Location and Pose
+
+Service provider
+is honest and
+faithfully executes
+relocalization.
+
+Reconstructed Image
+
+?
+
+?
+?
+
+?
+
+3D
+
+Private
+Information
+
+Honest-but-curious
+Adversary
+
+Relocalization
+Service
+
+Map
+
+Large Amount of RGB Images
+and Compute Power
+
+Figure 2: Overview of a typical localization system and our privacy threat model. A client derives descriptors from
+RGB images and shares only the descriptors with a service provider. The service provider is honest and faithfully executes
+relocalization by matching query descriptors against those of a map. The service provider is also curious and may attempt to
+derive insight about the user. This sets up a potential reverse engineering attack. For such a system, our mitigation strategy
+must lie at the interface between the client device and the honest-but-curious service provider. Minimizing information shared
+at this interface reduces the amount of sensitive information that reaches the adversary.
+
+3.2. Privacy Threat Model
+
+leak RGB information. However in Section 5.3, we will
+show that indirectly this is not true.
+Adversary Definition and Potential Attacks. Our privacy
+threat model considers the service provider as an adversary
+(Figure 2) that is honest-but-curious, which is canonical in
+the security literature [15]. The honest-but-curious adversary
+is a legitimate participant in the system and executes the
+agreed upon application or service faithfully (as opposed to
+outright malicious behavior). But, while fulfilling the service,
+the adversary is curious and may use available data to learn
+information about the client. In our case, the adversary
+poses a risk to the client’s privacy by reverse engineering
+the RGB images from feature descriptors. This is possible
+because the adversary has access to similar data – specifically
+feature descriptors and source RGB images – and large scale
+compute resources. Together, this means an adversary is
+capable of training deep-learning models (such as a reverse
+engineering model) to analyze data in a reasonable amount
+of time.
+The goal of this paper is to understand how a client’s
+protection against an honest-but-curious adversary capable
+of training deep learning models to reverse engineer RGB
+images from feature descriptors could be enhanced.
+
+Building a privacy threat model is application specific.
+For our localization use-case, the closest is the LINDDUN
+”hard privacy” threat model [8] where the objective is to
+share as little information as possible to a potential adversary.
+At a high level, LINDDUN proposes building a dataflow
+diagram of a system, data assets, adversary, and potential
+attack vectors. These are then used to audit potential threats
+that may impact privacy properties. In our work, we focus
+on identifiability, detectability, and information disclosure,
+which are the most relevant to our reverse engineering attack
+on RGB images. Identifiability refers to whether an adversary can identify items of interest. Detectability refers to
+whether an adversary can detect whether items exist or not.
+Information disclosure refers to whether information about
+the user is disclosed to an adversary who should not have
+access to it. An adversary with an RGB image can observe
+information about each of these properties which poses a
+risk to privacy.
+System Definition and Sensitive Data Assets. Figure 2
+shows the relevant components of our privacy threat model.
+Our system follows a client-server architecture to process
+localization requests. For localization, there are two primary
+data assets: (1) RGB images and (2) feature descriptors.
+The client takes RGB images and derives feature descriptors
+which are shared with the server to query the user’s location
+and pose from a map. We focus on protecting the RGB images as these are data assets which could be used to identify
+items of interest. Descriptors are perceived as more private
+and more acceptable to share because they do not directly
+
+4. Reverse Engineering Attack
+This section defines the convolutional neural network
+models we use to craft our reverse engineering attack. As
+shown in Figure 2, this model takes sparse local features
+(keypoints and descriptors) as input and estimates the original RGB image.
+
+4
+
+4.1. Model Architecture
+
+5. Evaluation
+
+Given a user image I(i, j) ∈ R3 and a derived sparse
+feature map FI,M (i, j) ∈ RC containing C-dimensional
+local descriptors from the image I using a feature extractor
+M , we seek to reconstruct an image Î(i, j) ∈ R3 from
+FI,M . The sparse feature map is assembled by starting with
+zero vectors and placing extracted descriptors at keypoint
+locations i, j. Our reverse engineering attack relies on a
+deep convolutional generator-discriminator architecture that
+is trained for each specific feature extraction method M . The
+generator GM produces the reconstructed image:
+
+5.1. Experimental Setup
+Sparse Local Features. For the feature extraction method
+M from Section 4.1, we use SIFT [22] (C = 128),
+FREAK [2] (C = 64), and SOSNet [46] descriptors (C =
+128) as representatives of traditional and machine-learned
+variants. Keypoint locations for FREAK and SOSNet were
+detected using Harris corner detection [14]. For reconstruction, we use the SIFT detector for SIFT descriptors as in [30];
+however, for image matching we use Harris corners for SIFT
+descriptors because we found the SIFT detector performed
+poorly in this setting.
+Training and Evaluation Data. We train our networks on
+50, 000 images and their extracted sparse local features from
+the training partition of the MegaDepth dataset [20]. For
+testing the reverse engineering attack, we sampled 9, 800
+images from the MegaDepth test set that contain objects as
+candidates for potential private data.
+Network Training. A different reverse engineering model
+M is trained for 400 epochs for each descriptor type. The
+learning rate is initialized to 0.001 and 0.0001 for the generator and discriminator networks respectively. Learning rates
+are adjusted using the Adam optimizer [17].
+
+Î = GM (FI,M )
+and follows a single 2-dimensional U-Net topology [35] with
+5 encoding and 5 decoding layers as well as skip connections with convolutions. The discriminator DM is a 6 layer
+convolutional network operating on top of GM [31]. Please
+see the supplemental material for details. In order to adhere
+to our privacy threat model and in contrast to prior work by
+Pittaluga et al. [30], we do not use depth or RGB inputs and
+subsequently also do not make use of a VisibNet.
+
+4.2. Loss Functions
+We use the following loss functions to train the reconstruction network:
+MAE. The mean absolute error (MAE) is the pixelwise L1
+distance between the reconstructed and ground truth RGB
+images:
+X
+Lmae =
+||Î(i, j) − I(i, j)||1 .
+(1)
+
+5.2. Measuring Privacy and Utility
+Measuring Privacy with SSIM. Our first metric for measuring privacy is structural similarity (SSIM), which measures
+the perceptual similarity between images. In our case, we
+use SSIM to evaluate how much visual information the reverse engineering attack can recover by comparing against
+the original image. Therefore, SSIM provides a way to measure identifiability. We note that the SSIM measures to what
+extent the whole image may be recovered, which includes
+private and public information (e.g. people and buildings
+respectively); the public information is also available to the
+service provider when building the map. However, measuring how well the whole image can be reconstructed includes
+the reconstruction quality of private regions. SSIM can further serve as a proxy to estimate how well other tasks such as
+object detection, landmark recognition, and optical character
+recognition may perform on the reverse-engineered image.
+Measuring Privacy by Object Detection. We use an object
+detector (YOLO v3 [33], with 80 classes) to measure how
+much semantic information can be inferred from the reverseengineered images. We compare object detection results on
+both the original and the reconstructed images. If an object’s
+bounding box in the original image has at least 50% overlap
+with that of the reconstructed image of the same class label,
+we consider them as a match. The more correspondence
+between objects in the original and the reconstructed image,
+the higher the risk to privacy.
+Measuring Utility. To assess utility of local features when
+
+i,j
+
+L2 Perceptual Loss. The L2 perceptual loss is measured
+as:
+Lperc =
+
+3
+XX
+
+||φk (Î(i, j)) − φk (I(i, j))||22 ,
+
+(2)
+
+i,j k=1
+
+with φk being the outputs of a pre-trained and fixed VGG16
+ImageNet model [7]. φk are taken after the ReLU layer k
+with k ∈ {2, 9, 16}.
+BCE. For the generator-discriminator combination, we use
+the binary cross-entropy (BCE) loss defined as:
+X
+Lbce =
+log(DM (Î(i, j))) + log(1 − DM (I(i, j))) .
+i,j
+
+(3)
+Finally, we optimize the losses together:
+LG = Lmae + αLperc + βLbce ,
+
+(4)
+
+with α and β as scaling factors.
+5
+
+Original Image
+SIFT
+FREAK
+SOSNet
+Figure 3: Reverse Engineering Attack Results. From top to bottom: ground truth and reconstructions from a max. of 1, 000
+sparse SIFT, FREAK and SOSNet features. One can observe that reconstruction from only sparse local features reveals the
+original image information extremely well. Note that the images show landmarks not included in the training data. Image
+attribution [24].
+applying our mitigation strategies, we define an image matching task as a proxy for localization and investigate how the
+feature matching between two images deteriorates as we increase the privacy. Specifically, we generate corresponding
+image pairs from the 53 landmarks of the test split of the
+MegaDepth [20] dataset. For each landmark, we sample
+50 pairs of images that have at least 20 covisible 3D points
+determined from a reference map built with COLMAP [41],
+resulting in 2, 650 image pairs. For each corresponding pair
+of images, we perform local correspondence matching using
+input features, and count the number of pairs with at least
+20 inlier matches which we deem as successful. We refer
+to the proportion of image pairs that have been successfully
+matched as our matching recall, which we use as our utility
+measure.
+
+semantic content than SIFT [22] and SOSNet [46]. Despite
+differences in feature extraction techniques and descriptor
+sizes, all three descriptors are susceptible to the attack and
+yield reconstructions comparable to prior work [30] (please
+see supplemental material for detailed comparison to prior
+work), but notably without RGB or depth information as input. At a higher level, the results show that under controlled
+conditions the reverse engineering attack can introduce a
+reidentification risk of RGB image content. The results from
+Table 1 also show that the reverse-engineered images still
+Descriptor
+SIFT [22]
+FREAK [2]
+SOSNet [46]
+
+SSIM
+0.675
+0.511
+0.616
+
+Detected Objects
+32.58%
+19.32%
+41.26%
+
+5.3. Reverse Engineering Attack
+Table 1: Privacy metrics of reverse-engineered images
+using 1, 000 keypoints. The amount of detected objects
+using YOLO v3 [33] is measured on the reverse-engineered
+images relative the amount detected on the original images.
+FREAK descriptors reveal less information than SIFT and
+SOSNet.
+
+We first evaluate to what extent the reverse-engineering
+attack from Section 4 poses a reidentification risk to privacy.
+Examples of the reconstructions are shown in Figure 3 and
+the privacy metrics of the reverse-engineered images are
+given in Table 1. Reconstructions using FREAK [2] descriptors yield substantially poorer reconstruction quality and
+6
+
+800 Keypoints
+
+400 Keypoints
+
+200 Keypoints
+
+100 Keypoints
+
+SSIM = 0.666
+
+SSIM = 0.666
+
+SSIM = 0.553
+
+SSIM = 0.375
+
+SSIM = 0.316
+
+SSIM = 0.488
+
+SSIM = 0.474
+
+SSIM = 0.406
+
+SSIM = 0.343
+
+SSIM = 0.300
+
+SIFT
+
+All Keypoints
+
+SOSNet
+
+FREAK
+
+Ground Truth
+
+SSIM = 0.604
+SSIM = 0.582
+SSIM = 0.487
+SSIM = 0.407
+SSIM = 0.346
+Figure 4: Reverse engineering ablation study of reducing keypoints. SIFT, FREAK and SOSNet reverse engineering
+results using 1, 000, 800, 400, 200, and 100 keypoints respectively, annotated in red. Reducing keypoints reduces the potency
+of the reverse engineering attack. Regions with higher densities of keypoints have better reconstruction quality.
+only 2% performance. The trade-off between utility and
+privacy is shown in Figure 5c. Overall, we find that SIFT
+yields the best privacy-utility trade-off among the evaluated
+descriptor configurations on the Megadepth dataset. We note
+that these results do not preclude the possibility that other
+descriptor configurations (i.e., in terms of dimensionality, target dataset, and type) may achieve better results. Ultimately
+the ideal descriptor chosen will depend on the precise privacy and utility requirements necessitated by the localization
+service.
+
+allow an adversary to potentially detect and identify some
+objects that were present in the original images.
+
+5.4. Mitigation by Reduction of Features
+Following Section 3.2, to improve privacy, our objective
+is to minimize the information shared by the client. To this
+end, we investigate how reducing the number of features
+increases privacy at the expense of utility.
+For each descriptor type, we retain a maximum of N topscoring keypoints based on the detector response and vary
+N from 1000 to 100. For each value of N we then evaluate
+how well our reverse-engineering models perform. Qualitative results are given in Figure 4. We show the average
+privacy (measured by 1−SSIM) of the reconstructed images
+vs. the number of features in Figure 5a. The data shows the
+degradation in SSIM of the reconstructed images accelerates
+as more keypoints are removed. For less than 300 features,
+SIFT gives better results than SOSNet. FREAK outperforms
+SIFT and SOSNet, and yields the best results in terms of
+privacy.
+However, despite strong privacy results, FREAK tradesoff utility. In Figure 5b, we show how the utility changes.
+Here, FREAK gives the lowest utility, indicating that
+FREAK descriptors overall provide less useful information
+than SOSNet and SIFT. Interestingly, for SOSNet and SIFT
+the number of keypoints can be reduced to 200 by sacrificing
+
+5.5. Selective Suppression of Features
+Globally reducing image features can reduce the potency
+of the reconstruction attack, but at the same time it reduces
+the matching accuracy. In this section, we investigate to what
+extent an object detector can help implement a more selective
+approach. We identify and mark the sensitive regions in the
+images using the bounding boxes produced by the YOLO
+v3 [33] object detector. Based on the bounding boxes, we
+then suppress any features in these regions. Finally, we apply
+our reverse-engineering attack and measure the detectable
+semantic information content in the images before and after
+reverse engineering (Table 2).
+Figure 6 shows a qualitative example of how selective
+feature suppression effectively defeats the object detector;
+the people detected in the original image do not appear nor
+7
+
+Privacy (1-SSIM)
+
+0.65
+
+0.66
+0.63
+0.58 0.59
+
+0.60
+0.55
+
+1.01.00
+
+0.68
+
+0.53
+
+0.60
+
+0.55
+
+0.50
+
+0.47
+0.49
+
+0.45
+0.35
+
+800
+
+600
+
+400
+
+200
+
+Number of Features
+
+1.00
+0.98
+
+0.75
+
+0.98
+
+0.70 100
+0.83
+
+0.84
+
+0.6
+
+SIFT
+FREAK
+SOSNet
+
+0.4
+
+0.0
+
+0
+
+1.00
+
+0.8
+
+0.2
+
+0.43
+0.40 0.39
+
+1.00
+
+0.21
+
+800
+
+0.13
+600
+
+400
+
+200
+
+0.65
+
+0
+
+100
+
+200
+400
+
+0.60
+0.55
+
+200
+
+100
+
+800
+
+200
+
+0.50
+
+400 400
+
+0.45
+
+800
+
+0.40
+0.35
+
+0.07 0.04
+
+Number of Features
+
+(a)
+
+Privacy (1-SSIM)
+
+SIFT
+FREAK
+SOSNet
+
+0.70
+
+Utility (Recall)
+
+0.75
+
+0.30
+0.0
+
+800
+
+SIFT
+FREAK
+SOSNet
+0.2
+
+0.4
+
+0.6
+
+0.8
+
+Utility (Recall)
+
+(b)
+
+1.0
+
+1.2
+
+(c)
+
+Figure 5: Utility and Privacy Trade-Off when Varying the Number of Features. Privacy increases when reducing the
+number of features where FREAK gives the best results. For utility, FREAK and SIFT gives the best results. SIFT gives the
+best overall trade-off.
+SIFT
+
+(a) Original Image
+
+FREAK
+
+SOSNet
+
+(b)
+
+(c)
+
+Figure 6: Reverse Engineering Results after Selective Feature Supression. (a) Original image with object detection results
+(people). (b) Reverse-engineered images without feature suppression (with max. number of keypoints set to 1000), followed by
+object detection. (c) Reverse-engineered images using feature suppression, followed by object detection. As visible, all objects
+that can be detected by the YOLOv3 object detector without the suppression are successfully removed with the suppression.
+
+Supression
+SIFT [22]
+FREAK [2]
+SOSNet [46]
+
+Privacy
+(Object Recall)
+No
+Yes
+20% 2.21%
+11% 1.29%
+28% 5.21%
+
+are identifiable by the object detector in the reconstructed
+images. These results confirm our intuition that selective
+suppression can effectively preserve the privacy around a
+potentially sensitive region of interest (in our case semantic
+content of people in the image). Note that the quality of
+the overall image outside of the marked sensitive regions
+remains largely unaffected. Finally, the results show that
+features of private objects should not be shared in order to
+mitigate privacy risks posed by reverse engineering attacks.
+Results for the privacy-utility trade-off of the suppression
+are given in Table 2. Under the evaluated experimental
+conditions, SIFT and SOSNet give better trade-offs than
+FREAK; these trends are consistent with the results from
+Section 5.4. Notably for SIFT the utility drops slightly, while
+the detected objects are almost eliminated.
+
+Utility
+(Matching Recall)
+No
+Yes
+100%
+88%
+34%
+28%
+100%
+88%
+
+Table 2: Privacy-Utility Trade-Off for Selective Feature
+Suppression. Object recall shows how many objects can
+be detected from the reverse engineered images compared
+to the original images without and with suppression (note
+that lower is better). Matching recall shows how many images can be successfully matched without and with selective
+feature suppression. SIFT gives the best overall trade-off.
+
+8
+
+6. Conclusion
+
+[10] Mihai Dusmanu, Johannes L Schönberger, Sudipta N Sinha,
+and Marc Pollefeys. Privacy-preserving visual feature descriptors through adversarial affine subspace embedding. arXiv
+preprint arXiv:2006.06634, 2020. 3
+[11] Eldad Eilam. Reversing: Secrets of Reverse Engineering.
+John Wiley & Sons, Inc., USA, 2005. 2
+[12] Zekeriya Erkin, Martin Franz, Jorge Guajardo, Stefan Katzenbeisser, Inald Lagendijk, and Tomas Toft. Privacy-preserving
+face recognition. In International symposium on privacy enhancing technologies symposium, 2009. 3
+[13] Marcel Geppert, Viktor Larsson, Pablo Speciale, Johannes L
+Schönberger, and Marc Pollefeys. Privacy preserving structurefrom-motion. ECCV, 2020. 3
+[14] Christopher G Harris, Mike Stephens, et al. A combined
+corner and edge detector. In Alvey vision conference. Citeseer,
+1988. 5
+[15] Chiraag Juvekar, Vinod Vaikuntanathan, and Anantha Chandrakasan. {GAZELLE}: A low latency framework for secure
+neural network inference. In USENIX, 2018. 4
+[16] Hiroharu Kato and Tatsuya Harada. Image reconstruction
+from bag-of-visual-words. In CVPR, 2014. 2
+[17] Diederik P Kingma and Jimmy Ba. Adam: A method for
+stochastic optimization. arXiv preprint arXiv:1412.6980, 2014.
+5
+[18] Alex Krizhevsky, Ilya Sutskever, and Geoffrey E Hinton. Imagenet classification with deep convolutional neural networks.
+Communications of the ACM, 2017. 2
+[19] Tao Li and Lei Lin. Anonymousnet: Natural face deidentification with measurable privacy. In CVPRW, 2019. 3
+[20] Zhengqi Li and Noah Snavely. Megadepth: Learning singleview depth prediction from internet photos. In CVPR, 2018. 5,
+6
+[21] Ce Liu, Jenny Yuen, and Antonio Torralba. Sift flow: Dense
+correspondence across scenes and its applications. TPAMI,
+2010. 2
+[22] David G. Lowe. Object recognition from local scale-invariant
+features. In ICCV, 1999. 2, 5, 6, 8
+[23] Aravindh Mahendran and Andrea Vedaldi. Understanding
+deep image representations by inverting them. In CVPR, 2015.
+2
+[24] J. Miers. Brandenburg gate, 2008. [Online; accessed February
+1, 2021]. 6
+[25] MM Morana. Wiley: Risk centric threat modeling: Process for attack simulation and threat analysis-tony ucedavelez,
+marco m. morana. accessed on 09/05/2016. 3
+[26] Suvda Myagmar, Adam J Lee, and William Yurcik. Threat
+modeling as a basis for security requirements. In Symposium
+on requirements engineering for information security (SREIS),
+volume 2005, pages 1–8. Citeseer, 2005. 3
+[27] Anh Nguyen, Jason Yosinski, and Jeff Clune. Deep neural
+networks are easily fooled: High confidence predictions for
+unrecognizable images. In CVPR, 2015. 3
+[28] Timo Ojala, Matti Pietikainen, and Topi Maenpaa. Multiresolution gray-scale and rotation invariant texture classification
+with local binary patterns. TPAMI, 2002. 2
+[29] Francesco Pittaluga, Sanjeev Koppal, and Ayan Chakrabarti.
+Learning privacy preserving encodings through adversarial
+training. In WACV, 2019. 3
+
+Our work has formulated a privacy threat model to scope
+the threats to descriptor-based localization. In contrast to
+prior work, for the first time, we have shown a reverse engineering attack that operates in the real-world scenario,
+where only sparse local features are available to an honestbut-curious adversary. We found that our reverse engineering
+attack could reconstruct the original image with surprisingly
+good quality. We then investigated two mitigation techniques and showed a trade-off between privacy and utility
+(measured by feature matching). We found that using an
+object detector to suppress objects slightly reduces matching
+accuracy (as a proxy for localization accuracy) but gives better privacy results (fewer reidentifiable objects). Finally, our
+analysis has shown that, among the descriptors and we evaluate, the best overall privacy-utility trade-off can be achieved
+with SIFT, when compared to FREAK and SOSNet. Privacy
+(defined as reidentification risk through reverse engineering
+attacks as specifically described in this paper) may be preserved with the mitigation techniques described in this paper.
+Looking forward, our work provides initial experiments on
+some mitigation techniques the community may consider
+to further the privacy-aware descriptor-based applications
+research.
+
+References
+[1] N. Akhtar and A. Mian. Threat of adversarial attacks on deep
+learning in computer vision: A survey. IEEE Access, 6:14410–
+14430, 2018. 3
+[2] Alexandre Alahi, Raphael Ortiz, and Pierre Vandergheynst.
+Freak: Fast retina keypoint. In CVPR, 2012. 2, 5, 6, 8
+[3] Battista Biggio, Igino Corona, Davide Maiorca, Blaine Nelson,
+Nedim Šrndić, Pavel Laskov, Giorgio Giacinto, and Fabio
+Roli. Evasion attacks against machine learning at test time. In
+Joint European conference on machine learning and knowledge
+discovery in databases, pages 387–402. Springer, 2013. 3
+[4] Daniel J Butler, Justin Huang, Franziska Roesner, and Maya
+Cakmak. The privacy-utility tradeoff for remotely teleoperated
+robots. In HRI, 2015. 3
+[5] Christian Cachin, Idit Keidar, and Alexander Shraer. Trusting
+the cloud. Acm Sigact News, 40(2):81–86, 2009. 1
+[6] Emmanuel d’Angelo, Laurent Jacques, Alexandre Alahi, and
+Pierre Vandergheynst. From bits to images: Inversion of local
+binary descriptors. TPAMI, 36(5):874–887, 2013. 2
+[7] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li
+Fei-Fei. Imagenet: A large-scale hierarchical image database.
+In CVPR, 2009. 5
+[8] Mina Deng, Kim Wuyts, Riccardo Scandariato, Bart Preneel,
+and Wouter Joosen. A privacy threat analysis framework: supporting the elicitation and fulfillment of privacy requirements.
+Requirements Engineering, 16(1):3–32, 2011. 2, 3, 4
+[9] Alexey Dosovitskiy and Thomas Brox. Inverting visual representations with convolutional networks. In CVPR, 2016.
+2
+
+9
+
+[30] Francesco Pittaluga, Sanjeev J Koppal, Sing Bing Kang, and
+Sudipta N Sinha. Revealing scenes by inverting structure from
+motion reconstructions. In CVPR, 2019. 2, 5, 6
+[31] Alec Radford, Luke Metz, and Soumith Chintala. Unsupervised representation learning with deep convolutional generative adversarial networks. arXiv preprint arXiv:1511.06434,
+2015. 5
+[32] Nisarg Raval, Ashwin Machanavajjhala, and Landon P Cox.
+Protecting visual secrets using adversarial nets. In CVPRW,
+2017. 3
+[33] Joseph Redmon and Ali Farhadi. Yolov3: An incremental
+improvement. arXiv preprint arXiv:1804.02767, 2018. 5, 6, 7
+[34] Zhongzheng Ren, Yong Jae Lee, and Michael S Ryoo. Learning to anonymize faces for privacy preserving action detection.
+In CVPR, 2018. 3
+[35] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net:
+Convolutional networks for biomedical image segmentation.
+In MICCAI. Springer, 2015. 5
+[36] Ethan Rublee, Vincent Rabaud, Kurt Konolige, and Gary
+Bradski. Orb: An efficient alternative to sift or surf. In ICCV,
+2011. 2
+[37] Michael S Ryoo, Brandon Rothrock, Charles Fleming,
+and Hyun Jong Yang. Privacy-preserving human activity
+recognition from extreme low resolution. arXiv preprint
+arXiv:1604.03196, 2016. 3
+[38] Ahmad-Reza Sadeghi, Thomas Schneider, and Immo Wehrenberg. Efficient privacy-preserving face recognition. In International Conference on Information Security and Cryptology,
+2009. 3
+[39] Paul Saitta, Brenda Larcom, and Michael Eddington. Trike
+v. 1 methodology document [draft]. URL: http://dymaxion.
+org/trike/Trike v1 Methodology Documentdraft. pdf, 2005. 3
+[40] Chris Salter, O Sami Saydjari, Bruce Schneier, and Jim Wallner. Toward a secure system engineering methodolgy. In
+Proceedings of the 1998 workshop on New security paradigms,
+pages 2–10, 1998. 3
+[41] Johannes Lutz Schönberger and Jan-Michael Frahm.
+Structure-from-motion revisited. In CVPR, 2016. 6
+[42] Mikiya Shibuya, Shinya Sumikura, and Ken Sakurada. Privacy preserving visual slam. arXiv preprint arXiv:2007.10361,
+2020. 3
+[43] Pablo Speciale, Johannes L Schonberger, Sing Bing Kang,
+Sudipta N Sinha, and Marc Pollefeys. Privacy preserving
+image-based localization. In CVPR, 2019. 3
+[44] Latanya Sweeney. k-anonymity: A model for protecting
+privacy. International Journal of Uncertainty, Fuzziness and
+Knowledge-Based Systems, 10(05):557–570, 2002. 3
+[45] Christian Szegedy, Wojciech Zaremba, Ilya Sutskever, Joan
+Bruna, Dumitru Erhan, Ian Goodfellow, and Rob Fergus.
+Intriguing properties of neural networks. arXiv preprint
+arXiv:1312.6199, 2013. 3
+[46] Yurun Tian, Xin Yu, Bin Fan, Fuchao Wu, Huub Heijnen, and
+Vassileios Balntas. Sosnet: Second order similarity regularization for local descriptor learning. In CVPR, 2019. 2, 5, 6,
+8
+[47] Peter Torr. Demystifying the threat modeling process. IEEE
+Security & Privacy, 3(5):66–70, 2005. 3
+
+[48] Tony UcedaVelez. Real world threat modeling using the pasta
+methodology. OWASP App Sec EU, 2012. 3
+[49] Nishant Vishwamitra, Bart Knijnenburg, Hongxin Hu, Yifang P Kelly Caine, et al. Blur vs. block: Investigating the
+effectiveness of privacy-enhancing obfuscation for images. In
+CVPRW, 2017. 3
+[50] Carl Vondrick, Aditya Khosla, Tomasz Malisiewicz, and Antonio Torralba. Hoggles: Visualizing object detection features.
+In Proceedings of the IEEE International Conference on Computer Vision, pages 1–8, 2013. 2
+[51] Zihao W. Wang, Vibhav Vineet, Francesco Pittaluga,
+Sudipta N. Sinha, Oliver Cossairt, and Sing Bing Kang.
+Privacy-preserving action recognition using coded aperture
+videos. In CVPRW, 2019. 3
+[52] Philippe Weinzaepfel, Hervé Jégou, and Patrick Pérez. Reconstructing an image from its local descriptors. In CVPR,
+2011. 2
+[53] Zhenyu Wu, Zhangyang Wang, Zhaowen Wang, and Hailin
+Jin. Towards privacy-preserving visual recognition via adversarial training: A pilot study. In ECCV, 2018. 3
+[54] Kim Wuyts and Wouter Joosen. Linddun privacy threat modeling: a tutorial. CW Reports, 2015. 2
+[55] Ryo Yonetani, Vishnu Naresh Boddeti, Kris M Kitani, and
+Yoichi Sato. Privacy-preserving visual learning using doubly
+permuted homomorphic encryption. In ICCV, 2017. 3
+[56] Qiang Zhu, Mei-Chen Yeh, Kwang-Ting Cheng, and Shai
+Avidan. Fast human detection using a cascade of histograms
+of oriented gradients. In CVPR, 2006. 2
+
+10
+
+Supplemental Material: Analysis and Mitigations of Reverse Engineering
+Attacks on Local Feature Descriptors
+Deeksha Dangwal†‡ , Vincent T. Lee‡ , Hyo Jin Kim‡ , Tianwei Shen‡ , Meghan Cowan‡ , Rajvi Shah‡ ,
+Caroline Trippel§ , Brandon Reagen∗ , Timothy Sherwood† , Vasileios Balntas‡ , Armin Alaghi‡ , Eddy Ilg‡
+†
+University of California, Santa Barbara
+§
+Stanford University
+∗
+New York University
+‡
+Facebook Reality Labs Research
+{deeksha, sherwood}@cs.ucsb.edu, trippel@stanford.edu, bjr5@nyu.edu,
+{vtlee, hyojinkim, tianweishen, meghancowan, rajvishah, vassileios, alaghi, eddyilg}@fb.com
+
+1. Comparison to Prior Work
+
+aligns with the real-world scenario. When using all input
+data assets (depth, SIFT, and RGB) Pittaluga et al. achieve a
+maximum average SSIM of 0.631 on reconstructions and an
+average SSIM of 0.578 when using only SIFT descriptors
+(Table 3). In contrast, our reverse engineering attack yields
+an average SSIM of 0.675 for reconstructions from SIFT
+features alone and thus provides a new state of the art. We
+attribute the improvements to our architecture choice and
+training procedure which we describe below.
+
+We compare our work against several prior works that
+attempt to reverse engineer RGB images from features. Figure 7 compares our reverse-engineered image results compared to that of d’Angelo et al. [6] and Weinzaepfel et al.
+[52]. Compared to the latter in Figure 7e, our result using SIFT shown in Figure 7b produces a qualitatively better
+reverse-engineered image with more accurate color estimates.
+As shown in Figure 7f, the work from d’Angelo et al. reconstructs image gradients only and is not comparable to
+our work. We also compare our results to those by Dosovitskiy and Brox [9] in Figure 7g. In contrast to our work,
+Dosovitskiy and Brox use more keypoints and descriptors for
+their reconstruction using SIFT descriptors; they use roughly
+3000 keypoints to reconstruct this image while we use 1, 000
+or fewer in our experiments. Qualitatively the results are
+comparable.
+The previous state of the art is recent work proposed
+by Pittaluga et al. [4] which also uses convolutional neural
+networks to reverse-engineer images. Pittaluga et al. use additional information such as depth and RGB at the keypoint
+location to supplement SIFT descriptors as input to their
+reverse engineering model. Our work does not use depth
+nor RGB information, and does not make use of a separate
+network for visibility estimation (as the VisibNet from [4]).
+We also compare against FREAK and SOSNet descriptors
+while Pittaluga et al. exclusively analyze SIFT descriptors.
+The results show that even without the additional depth
+and RGB information from Pittaluga et al., our reconstructions produce more detail and more accurate color in average
+in the cases of SIFT and SOSNet. In contrast, FREAK does
+not allow us to reconstruct the color information as well
+and we see some color artifacts (e.g., see the clock image).
+Since a practical reverse engineering attack for a relocalization service does not provide depth or RGB information
+to the honest-but-curious adversary, our attack formulation
+
+Prior Work [30]
+
+Ours
+
+Inputs
+Depth Only
+Depth+SIFT
+Depth+SIFT+RGB
+SIFT Only
+FREAK Only
+SOSNet Only
+
+SSIM
+0.578
+0.597
+0.631
+0.675
+0.511
+0.616
+
+Table 3: Comparison of average SSIM values of the reverse
+engineered images from prior work [30] and our work. Our
+work achieves better SSIM results for SIFT without using
+inputs like depth or RGB.
+
+2. Architecture Implementation Details
+Our reverse engineering attack uses a deep convolutional
+generator-discriminator network (see main paper). We provide the implementation details of our reverse engineering
+network, including architecture, optimization, and training
+methodology in this section.
+
+2.1. Generator
+The generator follows a 2-dimensional U-Net [35] topology with 5 encoding and 5 decoding layers. Specifically,
+the architecture of the encoder is conv64 -conv128 -conv256 conv512 -conv1024 , where convN denotes a convolutional
+
+11
+
+(a) Original
+
+(b) Ours-SIFT
+
+(e) [52]-SIFT
+
+(c) Ours-FREAK
+
+(f) [6]-binary
+
+(d) Ours-SOSNet
+
+(g) [9]-SIFT
+
+Figure 7: (a) Original image and our reconstructions from SIFT (b), FREAK (c), and SOSNet (d) descriptors. Reconstructions
+by prior work from SIFT descriptors in [52] (e), and BRIEF descriptors in [6] (f), and SIFT descriptors in [9] (g).
+layer with N kernels of size 3 × 3, stride of 1, and padding
+of 1. A bias is added to the output, followed by a BatchNorm2D, and ReLU operation. Between convolutions, there is a
+2D MaxPool operation with kernel size and stride both set
+to 2. The decoder architecture is upconv1024 -upconv512 upconv256 -upconv128 -upconv64 where upconvN denotes
+a convolutional layer with N kernels which is also upsampled by a scale factor of 2. The kernels for these layers are
+also 3 × 3 in size and have a stride and padding of both 1.
+The convolution is also followed by a BatchNorm-2D and
+ReLU operation.
+
+where, α = 1, and β = 0.1.
+We detail how we use the L2 perceptual loss here. We
+utilize a VGG16 model pre-trained on ImageNet [2]. The
+outputs of three ReLU layers are used: layers 2, 9, and 16.
+φi is used to denote the these layers. φ1 : RH×W ×3 →
+RH/2×W/2×64 , φ2 : RH/2×W/2×64 → RH/4×W/4×128 ,
+and φ3 : RH/4×W/4×128 → RH/8×W/8×256 . These outputs are used by the L2 perceptual loss to train the network.
+Both the generator and discriminator were trained using
+the Adam optimizer with β1 = 0.9 and β2 = 0.999 and  =
+1e−8 . The learning rate for the generator is 0.001 and for the
+discriminator is 0.0001. We train each of the SIFT, FREAK,
+and SOSNet networks for 400 epochs each. The first 250
+epochs are run without the discriminator contributing to the
+generator-discriminator combination network. The next 150
+epochs are run with both the generator and discriminator
+losses.
+
+2.2. Discriminator
+The discriminator used for adversarial training has
+the following architecture: Disc256 -Disc128 -Disc64 -Disc32 Disc16 -Disc8 -Disc4 where DiscN denotes a 2D-convolution
+with N kernels of size 4 × 4, stride of 2, and padding of 1,
+followed by BatchNorm-2D and leaky ReLU with negative
+slope of 0.2. Disc256 is not followed by a batch normalization and in Disc4 leaky ReLU is replaced by a sigmoid
+operation.
+
+References
+[1] Emmanuel d’Angelo, Laurent Jacques, Alexandre Alahi, and
+Pierre Vandergheynst. From bits to images: Inversion of local
+binary descriptors. TPAMI, 36(5):874–887, 2013. 2
+[2] Jia Deng, Wei Dong, Richard Socher, Li-Jia Li, Kai Li, and Li
+Fei-Fei. Imagenet: A large-scale hierarchical image database.
+In 2009 IEEE conference on computer vision and pattern
+recognition, pages 248–255. Ieee, 2009.
+
+2.3. Training Methodology and Optimization
+The loss functions we use are described in Section 4.2 of
+our paper. Our losses together are described as:
+LG = Lmae + αLperc + βLbce ,
+
+(5)
+
+12
+
+[3] Alexey Dosovitskiy and Thomas Brox. Inverting visual representations with convolutional networks. In CVPR, 2016.
+2
+[4] Francesco Pittaluga, Sanjeev J Koppal, Sing Bing Kang, and
+Sudipta N Sinha. Revealing scenes by inverting structure from
+motion reconstructions. In Proceedings of the IEEE/CVF
+Conference on Computer Vision and Pattern Recognition,
+pages 145–154, 2019.
+[5] Olaf Ronneberger, Philipp Fischer, and Thomas Brox. U-net:
+Convolutional networks for biomedical image segmentation.
+In MICCAI. Springer, 2015. 5
+[6] Philippe Weinzaepfel, Hervé Jégou, and Patrick Pérez. Reconstructing an image from its local descriptors. In CVPR,
+2011. 2
+
+13
+
+

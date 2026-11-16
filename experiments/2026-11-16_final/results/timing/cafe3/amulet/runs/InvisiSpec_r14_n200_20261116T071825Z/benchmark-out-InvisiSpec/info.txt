@@ -1,0 +1,43 @@
+
+========================================================================================================================
+Config 0: /tests/timing_20261115/amulet/runs/InvisiSpec_r14_n200_20261116T071825Z/docker_gem5_v1_final_cache_ipcFP.yaml
+
+Command line: 
+python3.11 cli.py fuzz -s /tests/timing_20261115/amulet/amulet-repo/src/x86/isa_spec/base.json -i 70 -n 201 -c /tests/timing_20261115/amulet/runs/InvisiSpec_r14_n200_20261116T071825Z/docker_gem5_v1_final_cache_ipcFP.yaml -p bench_time1InvisiSpec_config0_round0 --no-save-stats --result-dir=/tests/timing_20261115/amulet/runs/InvisiSpec_r14_n200_20261116T071825Z/benchmark-out-InvisiSpec/config0 --ruby --InvisiSpec --InvisiSpec_Futuristic --nonstop
+
+avg_wall_time: 1985.09
+total_system_time: 27791.32
+total_test_programs: 2800
+input_count: 140
+total_test_cases: 392000
+total_violations: 100
+avg_violations: 7.14
+
+contract_clause: CT-SEQ
+detected_violation: YES
+avg_detection_time: 19.85
+testing_throughput: 197.47
+campaign_execution_time: 1985.09
+
+Detailed Results - Config 0
+===========================
+Round    | Execution Time (s)   | Test Cases   | Violations Found   | First Violation (s)   
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+       0 |              2269.92 |          200 |                 14 |                  29.72
+       1 |              2020.64 |          200 |                 14 |                  35.14
+       2 |              1924.76 |          200 |                  6 |                  12.67
+       3 |              1850.86 |          200 |                  3 |                 133.27
+       4 |              1956.67 |          200 |                  7 |                 181.26
+       5 |              1959.62 |          200 |                  9 |                 117.29
+       6 |              2239.23 |          200 |                  6 |                 357.67
+       7 |              1788.42 |          200 |                  1 |                 246.05
+       8 |              1779.51 |          200 |                  0 |                    N/A
+       9 |              1990.41 |          200 |                  3 |                 199.56
+      10 |              1783.83 |          200 |                  1 |                 190.67
+      11 |              2261.14 |          200 |                 13 |                 203.04
+      12 |              2014.72 |          200 |                 11 |                  81.28
+      13 |              1951.58 |          200 |                 12 |                  14.16
+    Mean |              1985.09 |            - |  7.142857142857143 |                      -
+ Std Dev |               168.65 |            - |               5.07 |                      -
+-------- | -------------------- | ------------ | ------------------ | ----------------------
+========================================================================================================================

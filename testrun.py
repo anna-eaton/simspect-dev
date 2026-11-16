@@ -1,29 +1,19 @@
 #!/usr/bin/env python3
 """
-testrun.py — SimSpect test executor (the CONSUMER half of the pipeline).
+testrun.py — SimSpect test executor (the consumer half of the pipeline).
 
-A gem5-ONLY sweep watcher (same mechanism as results/_sweep_watcher.py) with
-two additions:
+A gem5-only sweep watcher (same mechanism as results/_sweep_watcher.py, kept as a separate copy) that
+  1. partitions results by transmitter kind: results/<name>__<ts>/<mode>/<kind>/window-results.json
+     (kind in ld / br_x / other_x), and
+  2. timestamps each campaign (results/<name>__<ts>/, with a results/<name>__latest symlink and a
+     manifest recording the build/scheme).
 
-  1. Results are PARTITIONED BY TRANSMITTER TYPE — each test's records land in
-     results/<name>__<ts>/<mode>/<kind>/window-results.json (kind ∈ ld / br_x /
-     other_x), so ld vs br_x hits can be inspected separately without joining
-     records back to the annotations.
-  2. The campaign dir is TIMESTAMPED (results/<name>__<ts>/) with a stable
-     results/<name>__latest symlink, so every run is dated and a manifest
-     records which build/scheme produced it.
-
-Polls a testset still being produced by testsetgen.py, runs gem5 on each newly
-ready test (asm ∩ ann) via pipeline.py's gem5 phase, and merges per kind. Pure
-consumer: never compiles, never writes into testsets/.
-
-Run one per build/scheme (each --config points at its own gem5 binary); launch
-several against the same --model to compare defenses concurrently. This file is
-a standalone duplicate of the watcher so the in-flight _sweep_watcher.py runs
-are never touched.
+Polls a testset being produced by testsetgen.py, runs gem5 on each newly ready test (asm ∩ ann) via
+pipeline.py's gem5 phase, and merges per kind. Never compiles or writes into testsets/. Run one per
+build/scheme; several can run against the same --model concurrently.
 
 Usage:
-    python3 testrun.py --config results/SPT_6_oneLP_fence/run_config.jsonc \
+    python3 testrun.py --config results/SPT_6_oneLP_fence/run_config.jsonc \\
                        --model SPT_6_oneLP [--interval 300] [--max-new 2000]
                        [--resume] [--once]
 """
@@ -151,10 +141,15 @@ def run_pass(cfg: dict, model: str, mode: str, results_base: Path,
 
     print(f"[testrun {time.strftime('%H:%M:%S')}] {model}/{mode}: "
           f"{len(batch)} new (of {len(new)} pending) → gem5", flush=True)
+    # Opt-in fast path (gem5.fast_path: true; pipeline._build_gem5_env turns it on in the checkers): its
+    # per-test log goes to the campaign's mode dir, which outlives this pass's _tmp dir.
+    env = None
+    if cfg.get("gem5", {}).get("fast_path", True) is True:
+        env = dict(os.environ, SIMSPECT_FAST_PATH_LOG=str(mode_dir / "fastpath.log"))
     r = subprocess.run(
         [sys.executable, "pipeline.py", "gem5", "--model", model,
          "--config", str(pass_cfg_path.relative_to(ROOT)), "--force"],
-        cwd=str(ROOT), capture_output=True, text=True)
+        cwd=str(ROOT), capture_output=True, text=True, env=env)
     if r.returncode != 0:
         print(f"[testrun] pipeline gem5 FAILED ({model}/{mode}):\n"
               f"{r.stdout[-1500:]}\n{r.stderr[-1500:]}", flush=True)
@@ -228,11 +223,20 @@ def main() -> None:
             "gem5_binary": cfg.get("gem5", {}).get("binary"),
             "gem5_extra_args": cfg.get("gem5", {}).get("extra_args"),
             "cache_setup": cfg.get("gem5", {}).get("cache_setup", "warm"),
-            # random (2026-11-09): None = cache_setup.DEFAULT_SEED
+            # random: None = cache_setup.DEFAULT_SEED
             "cache_setup_seed": cfg.get("gem5", {}).get("cache_setup_seed"),
+            # full: None = the run's --l1d_size
+            "cache_setup_fill_bytes": cfg.get("gem5", {}).get("cache_setup_fill_bytes"),
             "config": str(cfg_path),
         }, indent=2))
+        if cfg.get("gem5", {}).get("fast_path", True) is True:   # recorded only when on (default on since 2026-11-16)
+            m = json.loads((results_base / "manifest.json").read_text())
+            m["gem5_fast_path"] = True
+            (results_base / "manifest.json").write_text(json.dumps(m, indent=2))
         print(f"[testrun] campaign {results_base}", flush=True)
+    if cfg.get("gem5", {}).get("fast_path", True) is True:
+        print("[testrun] fast path ON (gem5.fast_path: true): hook-scan cache + routed trace read in the "
+              "checkers; per-test path in <campaign>/<mode>/fastpath.log", flush=True)
 
     job_id = jobs_registry.record_start(
         "sweep", a.model, a.config, results_name=results_name,

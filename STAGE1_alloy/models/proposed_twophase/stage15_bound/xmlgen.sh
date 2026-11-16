@@ -1,6 +1,6 @@
 #!/bin/bash
 # xmlgen.sh — enumerate a few seeded Stage-1.5 models to XML (production driver a6CountModels) so Stage 2
-# can be checked at larger bounds. stage15-bound session 2026-11-08. Run from the workspace root (<ws>).
+# can be checked at larger bounds. Run from the workspace root (<ws>).
 # Usage: bash STAGE1_alloy/models/proposed_twophase/stage15_bound/xmlgen.sh <ws> [limit]
 set -x
 WS=$1; LIMIT=${2:-100}

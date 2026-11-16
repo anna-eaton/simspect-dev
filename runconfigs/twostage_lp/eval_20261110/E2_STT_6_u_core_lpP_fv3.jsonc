@@ -1,0 +1,149 @@
+// E2 Recon-STT (gem5-recon-modded, scheme 2) on the core-pinned loose-pin v3 corpus STT_6_u_core_lpP_fv3 (regen-lp 2026-11-10; Anna away, coordinator's experiment).
+// gem5 block = runconfigs/twostage_fv2_20261109/E2_STT_6_u_fv2fp.jsonc (binary, config script, scheme, extra_args, hooks: BTB branch force, fnc stall 0) with sample_fraction 0.1 (was 0.02 for the first pass; testrun --resume adds the rest, sample_keep sets are nested) and jobs 16 (run on cafe3);
+// cache setup warm (the row default: no cache_setup key); timing = firstdet-final's protocol 3x3 grid, one whole-test point per test:
+// unresolved stall {2500, 5000, 10000} x resolved stall {0, 500, 2500} (pipeline._timing_grid_point, sha256('tgrid-v1:<stem>') mod 9).
+// Stage-2 keys = runconfigs/regen_lp_20261110/stage2_fv3.jsonc (the corpus recipe, for provenance only; the run does not regenerate).
+{
+  "paths": {
+    "alloy_stage": "STAGE1_alloy",
+    "models_dir": "STAGE1_alloy/models",
+    "stage2_dir": "STAGE2_compilation",
+    "instruction_tables": "STAGE2_compilation/instruction_tables/proposed/fv2_vocab.jsonc",
+    "stage3_dir": "STAGE3_gem5",
+    "testset_dir": "/tests/simspect_alloy_20261108/testsets_twostage",
+    "results_dir": "/tests/simspect_alloy_20261108/loosepin_regen/eval_results",
+    "results_name": "E2_STT_6_u_core_lpP_fv3"
+  },
+  "alloy": {
+    "max_instances": 93041,
+    "batch_size": 1000
+  },
+  "speculation": {
+    "control_flow": true,
+    "data_flow": false,
+    "branch_modes": [
+      "mispredict_not_taken",
+      "mispredict_taken"
+    ]
+  },
+  "gem5": {
+    "binary": "/work/gem5-recon-modded/build/X86/gem5.opt",
+    "config_script": "/work/gem5-recon-modded/configs/example/se.py",
+    "branch_ann_enable": true,
+    "cpu_type": "X86O3CPU",
+    "scheme": 2,
+    "caches": true,
+    "jobs": 16,
+    "debug_flags": [
+      "O3PipeView",
+      "LSQUnit"
+    ],
+    "debug_file": "pipeview.txt",
+    "fnc_commit_stall_cycles": 0,
+    "sample_fraction": 0.1
+  },
+  "sweep": {
+    "enabled": true,
+    "points": [
+      0
+    ],
+    "unresolved_stall_cycles": 5000,
+    "timing_grid": {
+      "unresolved": [
+        2500,
+        5000,
+        10000
+      ],
+      "resolved": [
+        0,
+        500,
+        2500
+      ],
+      "seed": "tgrid-v1"
+    }
+  },
+  "pipeline": {
+    "check": "per_type",
+    "keep_tmp": false
+  },
+  "interleave": {
+    "enabled": false
+  },
+  "reg_naming": {
+    "mode": "random",
+    "seed": 0
+  },
+  "fanout_v2": {
+    "enabled": true,
+    "pre_window_reads": true,
+    "splice": {
+      "enabled": true,
+      "p_xmit": 0.75,
+      "p_other": 0.25,
+      "ops": [
+        "add0",
+        "or0",
+        "xor0",
+        "and_m1",
+        "imul1",
+        "lea0",
+        "not2",
+        "neg2",
+        "rol_ror",
+        "add_sub",
+        "xor2",
+        "bswap2"
+      ]
+    },
+    "fillers": {
+      "enabled": true,
+      "count": [
+        1,
+        3
+      ],
+      "ops": [
+        "add",
+        "xor",
+        "and",
+        "imul",
+        "lea",
+        "shl"
+      ]
+    },
+    "otb": {
+      "enabled": false,
+      "p": 0.5
+    }
+  },
+  "branch_cond": {
+    "from_alloy": true
+  },
+  "fpr": {
+    "enabled": true,
+    "loads": "consumed",
+    "xmm_regs": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15
+    ],
+    "forms": [
+      "route",
+      "direct",
+      "route_alu",
+      "direct_alu"
+    ]
+  }
+}

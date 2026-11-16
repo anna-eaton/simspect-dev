@@ -1,0 +1,235 @@
+{
+ "row": "bc_E2w_STT_6_u_core_lpP_s2A",
+ "buckets": {
+  "mispredict_not_taken/br_x/plain": {
+   "tests": 6170,
+   "raw": 2735,
+   "gated": 2735,
+   "buckets": {
+    "R-SA-13": 2632,
+    "R-SA-8 candidate (br_x twin hit; E2LT-2)": 13,
+    "R-SA-13 (static only)": 85,
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": 5
+   },
+   "examples": {
+    "R-SA-13": [
+     "inst-000505",
+     "inst-000325",
+     "inst-000649"
+    ],
+    "R-SA-8 candidate (br_x twin hit; E2LT-2)": [
+     "inst-000685",
+     "inst-003901",
+     "inst-007681"
+    ],
+    "R-SA-13 (static only)": [
+     "inst-004825",
+     "inst-010513",
+     "inst-011701"
+    ],
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": [
+     "inst-013586",
+     "inst-012162",
+     "inst-011753"
+    ]
+   }
+  },
+  "mispredict_not_taken/ld/plain": {
+   "tests": 6251,
+   "raw": 3540,
+   "gated": 3540,
+   "buckets": {
+    "R-SA-13": 2292,
+    "isTainted=0 (reveal not checked)": 540,
+    "R-SA-13 (static only)": 83,
+    "A2 STLF bypass": 598,
+    "A2 STLF bypass (main-run evidence, no twin)": 16,
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": 11
+   },
+   "examples": {
+    "R-SA-13": [
+     "inst-000037",
+     "inst-000073",
+     "inst-000001"
+    ],
+    "isTainted=0 (reveal not checked)": [
+     "inst-001225",
+     "inst-001621",
+     "inst-002233"
+    ],
+    "R-SA-13 (static only)": [
+     "inst-006841",
+     "inst-009865",
+     "inst-014293"
+    ],
+    "A2 STLF bypass": [
+     "inst-002063",
+     "inst-004944",
+     "inst-009660"
+    ],
+    "A2 STLF bypass (main-run evidence, no twin)": [
+     "inst-009192",
+     "inst-004049",
+     "inst-008118"
+    ],
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": [
+     "inst-004909",
+     "inst-001674",
+     "inst-013466"
+    ]
+   }
+  },
+  "mispredict_not_taken/ld/rmw": {
+   "tests": 2763,
+   "raw": 2721,
+   "gated": 2660,
+   "buckets": {
+    "R-SA-13 (static only, RMW)": 1350,
+    "check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)": 1074,
+    "A2 STLF bypass (main-run evidence, no twin, RMW)": 235,
+    "disq_not_obtained(never_executed)": 61,
+    "untainted transmitter, no twin (R-SA-13 candidate, RMW)": 1
+   },
+   "examples": {
+    "R-SA-13 (static only, RMW)": [
+     "inst-000109",
+     "inst-001153",
+     "inst-001297"
+    ],
+    "check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)": [
+     "inst-000289",
+     "inst-000469",
+     "inst-001333"
+    ],
+    "A2 STLF bypass (main-run evidence, no twin, RMW)": [
+     "inst-000433",
+     "inst-000829",
+     "inst-004357"
+    ],
+    "disq_not_obtained(never_executed)": [
+     "inst-000253",
+     "inst-006553",
+     "inst-008112"
+    ],
+    "untainted transmitter, no twin (R-SA-13 candidate, RMW)": [
+     "inst-014517"
+    ]
+   }
+  },
+  "mispredict_taken/br_x/plain": {
+   "tests": 6170,
+   "raw": 2772,
+   "gated": 2772,
+   "buckets": {
+    "R-SA-13": 2670,
+    "R-SA-8 candidate (br_x twin hit; E2LT-2)": 11,
+    "R-SA-13 (static only)": 86,
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": 5
+   },
+   "examples": {
+    "R-SA-13": [
+     "inst-000505",
+     "inst-000325",
+     "inst-000649"
+    ],
+    "R-SA-8 candidate (br_x twin hit; E2LT-2)": [
+     "inst-000685",
+     "inst-003901",
+     "inst-007681"
+    ],
+    "R-SA-13 (static only)": [
+     "inst-004825",
+     "inst-010513",
+     "inst-011701"
+    ],
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": [
+     "inst-013586",
+     "inst-012162",
+     "inst-008511"
+    ]
+   }
+  },
+  "mispredict_taken/ld/plain": {
+   "tests": 6251,
+   "raw": 3540,
+   "gated": 3540,
+   "buckets": {
+    "R-SA-13": 2297,
+    "isTainted=0 (reveal not checked)": 535,
+    "R-SA-13 (static only)": 84,
+    "A2 STLF bypass": 597,
+    "A2 STLF bypass (main-run evidence, no twin)": 15,
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": 12
+   },
+   "examples": {
+    "R-SA-13": [
+     "inst-000037",
+     "inst-000073",
+     "inst-000001"
+    ],
+    "isTainted=0 (reveal not checked)": [
+     "inst-001225",
+     "inst-001621",
+     "inst-002233"
+    ],
+    "R-SA-13 (static only)": [
+     "inst-006841",
+     "inst-009865",
+     "inst-014293"
+    ],
+    "A2 STLF bypass": [
+     "inst-002063",
+     "inst-004944",
+     "inst-009660"
+    ],
+    "A2 STLF bypass (main-run evidence, no twin)": [
+     "inst-009192",
+     "inst-004049",
+     "inst-008118"
+    ],
+    "R-SA-13 via FP elsewhere (twin held; e2-losttaint idiv-divisor case)": [
+     "inst-004909",
+     "inst-001674",
+     "inst-013466"
+    ]
+   }
+  },
+  "mispredict_taken/ld/rmw": {
+   "tests": 2763,
+   "raw": 2721,
+   "gated": 2660,
+   "buckets": {
+    "R-SA-13 (static only, RMW)": 1361,
+    "disq_not_obtained(never_executed)": 61,
+    "check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)": 1069,
+    "A2 STLF bypass (main-run evidence, no twin, RMW)": 229,
+    "untainted transmitter, no twin (R-SA-13 candidate, RMW)": 1
+   },
+   "examples": {
+    "R-SA-13 (static only, RMW)": [
+     "inst-000109",
+     "inst-001153",
+     "inst-001297"
+    ],
+    "disq_not_obtained(never_executed)": [
+     "inst-000253",
+     "inst-006553",
+     "inst-008112"
+    ],
+    "check_ld RMW artifact (scores the RMW's leading limm micro-op; delay unit holds the load; RL-10 resolved)": [
+     "inst-000289",
+     "inst-000469",
+     "inst-001333"
+    ],
+    "A2 STLF bypass (main-run evidence, no twin, RMW)": [
+     "inst-000433",
+     "inst-000829",
+     "inst-004357"
+    ],
+    "untainted transmitter, no twin (R-SA-13 candidate, RMW)": [
+     "inst-014517"
+    ]
+   }
+  }
+ }
+}

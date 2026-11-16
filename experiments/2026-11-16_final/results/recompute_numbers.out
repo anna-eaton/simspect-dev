@@ -1,0 +1,40 @@
+== CleanupSpec pool (classes_rmw.jsonl)
+  main       N=50,232 UV3=1,274 UV4=162 UV5=0
+  OK  main N: 50232 (quoted 50232)
+  extra-new  N=90,932 UV3=1,930 UV4=237 UV5=1
+  OK  extra-new N: 90932 (quoted 90932)
+  round1     N=50,232 UV3=1,400 UV4=181 UV5=2
+  OK  round1 N: 50232 (quoted 50232)
+  round2     N=50,232 UV3=1,338 UV4=167 UV5=2
+  OK  round2 N: 50232 (quoted 50232)
+  round3     N=50,232 UV3=1,346 UV4=172 UV5=0
+  OK  round3 N: 50232 (quoted 50232)
+  OK  pooled N: 291860 (quoted 291860)
+  OK  pooled A-UV3 K: 7288 (quoted 7288)
+  OK  pooled A-UV4 K: 919 (quoted 919)
+  OK  pooled A-UV5 K: 5 (quoted 5)
+  OK  main-only A-UV3 K: 1274 (quoted 1274)
+  OK  main-only A-UV4 K: 162 (quoted 162)
+  OK  main-only A-UV5 K: 0 (quoted 0)
+== InvisiSpec T1g / SpecLFB T3g (first 4,000 seed-order tests, classes.jsonl)
+  OK  T1g N: 4000 (quoted 4000)
+  OK  T3g N: 4000 (quoted 4000)
+  OK  A-UV1 K (InvisiSpec): 2002 (quoted 2002)
+  OK  A-UV6 K (SpecLFB): 851 (quoted 851)
+  OK  walk order K (SpecLFB): 657 (quoted 657)
+  OK  jmp shadow K (SpecLFB): 527 (quoted 527)
+== SimSpect fast-path CPU-s per test (cafe3, 2026-11-16)
+  OK  T1g fast CPU-s/test (n=1000): 1.344 (quoted 1.344)
+  OK  T2g fast CPU-s/test (n=1000): 1.738 (quoted 1.738)
+  OK  T3g fast CPU-s/test (n=1000): 1.2956 (quoted 1.2956)
+== AMuLeT clean re-time, CPU-s per test case (cafe3, 2026-11-16)
+  OK  InvisiSpec (InvisiSpec_r14_n200_20261116T071825Z, 2800 programs): 0.07304 (quoted 0.07304)
+  OK  CleanupSpec (CleanupSpec_r15_n200_20261116T081006Z, 3000 programs): 0.02337 (quoted 0.02337)
+  OK  SpecLFB (SpecLFB_r13_n200_20261116T083026Z, 2600 programs): 0.01935 (quoted 0.01935)
+== E2w OTB check (ReCon-STT on STT_6_u_core_lpP_s2A), results/bigcorpus/cafe3/e2w
+  OK  E2w tests: 30368 (quoted 30368)
+  OK  E2w R-SA-8 candidate tests: 24 (quoted 24)
+  OK  E2w R-SA-8 signature-positive in faithful rerun: 22 (quoted 22)
+  OK  E2w A2 STLF bypass (UV2) tests: 1690 (quoted 1690)
+
+ALL MATCH

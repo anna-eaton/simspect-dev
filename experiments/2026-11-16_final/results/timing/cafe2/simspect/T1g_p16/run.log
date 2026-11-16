@@ -1,0 +1,31 @@
+=== TIME-1 SimSpect START 2026-11-15 22:27:14 row=T1g parallel=16 taskset=0-31 config=/tests/timing_20261115/configs/T1g_time1.jsonc
+f45251db6d580f12e549751b9331a3ca  /work/amulet/amulet-gem5-InvisiSpec_AE-v1.1/build/X86_MESI_Two_Level/gem5.opt
+=== SNAPSHOT before T1g 2026-11-15 22:27:15 ===
+ 22:27:15 up 134 days, 21:48, 11 users,  load average: 0.75, 1.08, 1.06
+top - 22:27:16 up 134 days, 21:48, 11 users,  load average: 0.75, 1.08, 1.06
+Tasks: 618 total,   1 running,  38 sleeping,   0 stopped, 579 zombie
+%Cpu(s):  0.2 us,  0.2 sy,  0.0 ni, 99.6 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total,  61040.6 free,   8840.6 used, 445699.2 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 501654.8 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 551822 Ss    0.0  6-19:48:15 python3 dashboard/dashboard.py --host 172.17.0.2 --port 8765
+2713188 Ss    0.0  6-09:19:12 bash -lc cd /tests/simspect_alloy_20261108/bugwork/spta2; until ! pgrep -f cfg_hand_ >/dev/null; do sleep 5; done; for v in T_cmov C1_nodecl C2_lea C3_mov C0_orig; do ech
+2989269 Ss    0.0  6-09:08:58 bash -lc cd /tests/simspect_alloy_20261108/bugwork/spta2; until ! pgrep -f cfg_hand_ >/dev/null; do sleep 10; done; for v in T_cmov C1_nodecl C2_lea C3_mov C0_orig; do ec
+3136323 Ss    0.0  6-08:58:39 bash -lc cd /tests/simspect_alloy_20261108/bugwork/spta2; until ! pgrep -f cfg_hand_ >/dev/null; do sleep 10; done; for v in T_cmov C1_nodecl C2_lea C3_mov C0_orig; do ec
+=== END SNAPSHOT ===
+=== SNAPSHOT after T1g 2026-11-15 22:31:26 ===
+ 22:31:26 up 134 days, 21:52, 11 users,  load average: 17.21, 10.48, 4.97
+top - 22:31:26 up 134 days, 21:52, 11 users,  load average: 17.21, 10.48, 4.97
+Tasks: 616 total,   1 running,  36 sleeping,   0 stopped, 579 zombie
+%Cpu(s):  0.1 us,  0.3 sy,  0.0 ni, 99.7 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+MiB Mem : 515580.4 total,  43193.9 free,  25956.5 used, 446430.0 buff/cache
+MiB Swap:      0.0 total,      0.0 free,      0.0 used. 484539.0 avail Mem 
+--- running gem5/java/python (non-zombie, container view) ---
+    PID STAT %CPU     ELAPSED COMMAND
+ 551822 Ss    0.0  6-19:52:26 python3 dashboard/dashboard.py --host 172.17.0.2 --port 8765
+2713188 Ss    0.0  6-09:23:23 bash -lc cd /tests/simspect_alloy_20261108/bugwork/spta2; until ! pgrep -f cfg_hand_ >/dev/null; do sleep 5; done; for v in T_cmov C1_nodecl C2_lea C3_mov C0_orig; do ech
+2989269 Ss    0.0  6-09:13:09 bash -lc cd /tests/simspect_alloy_20261108/bugwork/spta2; until ! pgrep -f cfg_hand_ >/dev/null; do sleep 10; done; for v in T_cmov C1_nodecl C2_lea C3_mov C0_orig; do ec
+3136323 Ss    0.0  6-09:02:50 bash -lc cd /tests/simspect_alloy_20261108/bugwork/spta2; until ! pgrep -f cfg_hand_ >/dev/null; do sleep 10; done; for v in T_cmov C1_nodecl C2_lea C3_mov C0_orig; do ec
+=== END SNAPSHOT ===
+=== TIME-1 SimSpect END 2026-11-15 22:31:26 row=T1g rc=0 rows=1000

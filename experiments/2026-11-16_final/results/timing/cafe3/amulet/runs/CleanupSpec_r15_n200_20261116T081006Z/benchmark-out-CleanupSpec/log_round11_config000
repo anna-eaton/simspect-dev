@@ -1,0 +1,1747 @@
+command line: $'python3.11' 'cli.py' 'fuzz' '-s' '/tests/timing_20261115/amulet/amulet-repo/src/x86/isa_spec/base.json' '-i' '70' '-n' '201' '-c' '/tests/timing_20261115/amulet/runs/CleanupSpec_r15_n200_20261116T081006Z/docker_gem5_v1_final_cache_ipc.yaml' '-p' 'bench_time1CleanupSpec_config0_round11' '--no-save-stats' '--result-dir=/tests/timing_20261115/amulet/runs/CleanupSpec_r15_n200_20261116T081006Z/benchmark-out-CleanupSpec/config0' '--ruby' '--CleanupSpec' '--nonstop'
+
+[2026-11-16 08:10:09]
+Logging mode list: ['info', 'fuzzer_debug']
+
+INFO: [fuzzer] Starting at 08:10:09
+
+[2026-11-16 08:10:09]
+DBG: [fuzzer] Using 1 pages in main region
+Progress: 0|0%, > Normal execution              
+
+
+[2026-11-16 08:10:12]
+Progress: 1|1%, EfCl:29.0, AlCl:111.0, In:140.0, Cov:0, Prim:0, PErr:0, Viol:0, > Normal execution              
+
+
+[2026-11-16 08:10:15]
+Progress: 2|1%, EfCl:49.5, AlCl:90.5, In:140.0, Cov:0, Prim:0, PErr:0, Viol:0, > Normal execution              
+
+
+[2026-11-16 08:10:18]
+Progress: 3|2%, EfCl:56.3, AlCl:83.7, In:140.0, Cov:0, Prim:0, PErr:0, Viol:0, > Normal execution              
+
+
+[2026-11-16 08:10:20]
+Progress: 3|2%, EfCl:56.3, AlCl:83.7, In:140.0, Cov:0, Prim:0, PErr:0, Viol:0, > Priming:2           
+[2026-11-16 08:10:22]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0xd564000028c00   
+RBX: 0x17a3c0001c9940  
+RCX: 0x1b000000d1700   
+RDX: 0x2b7f00000d0240  
+RSI: 0x1c6780002fd940  
+RDI: 0x3086400037ee40  
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xd564000028c00   
+RBX: 0x17a3c0001c9900  
+RCX: 0x700             
+RDX: 0x240             
+RSI: 0x940             
+RDI: 0xe40             
+RSP: +0xff8            
+EFLAGS=000000000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x38b64000268e40  
+RBX: 0x281fc0003dd680  
+RCX: 0x1b000000d1700   
+RDX: 0x2b7f00000d0240  
+RSI: 0x1c6780002fd940  
+RDI: 0x3086400037ee40  
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x38b64000268e40  
+RBX: 0x281fc0003dd680  
+RCX: 0x700             
+RDX: 0x240             
+RSI: 0x940             
+RDI: 0xe40             
+RSP: +0xff8            
+EFLAGS=000000000010
+
+Progress: 4|2%, EfCl:55.0, AlCl:85.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-16 08:10:24]
+Progress: 5|3%, EfCl:58.0, AlCl:82.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-16 08:10:27]
+Progress: 6|3%, EfCl:60.0, AlCl:80.0, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-16 08:10:29]
+Progress: 7|4%, EfCl:61.4, AlCl:78.6, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-16 08:10:32]
+Progress: 8|4%, EfCl:62.5, AlCl:77.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Normal execution              
+
+
+[2026-11-16 08:10:34]
+Progress: 8|4%, EfCl:62.5, AlCl:77.5, In:140.0, Cov:0, Prim:1, PErr:0, Viol:1, > Priming:3           
+[2026-11-16 08:10:35]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x2e1b0000364540  
+RBX: 0x7e4000181940    
+RCX: 0x2a0f0000177fc0  
+RDX: 0x817c0001fb300   
+RSI: 0x3855c0002fd6c0  
+RDI: 0x190480001e8e00  
+RSP: +0xff8            
+EFLAGS=100011000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x540             
+RBX: 0x7e4000181940    
+RCX: 0x2a0f0000177fc0  
+RDX: 0x817c0001fb300   
+RSI: 0x3855c0002fd6c0  
+RDI: 0x190480001e8e00  
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x2e1b0000364540  
+RBX: 0x1677c00030a480  
+RCX: 0x6d60000381740   
+RDX: 0x116fc0000309c0  
+RSI: 0x25228000224b00  
+RDI: 0x34acc0001aff80  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x540             
+RBX: 0x1677c00030a480  
+RCX: 0x6d60000381740   
+RDX: 0x116fc0000309c0  
+RSI: 0x25228000224b00  
+RDI: 0x34acc0001aff80  
+RSP: +0xff8            
+EFLAGS=000000000010
+
+Progress: 9|5%, EfCl:61.8, AlCl:75.1, In:140.0, Cov:0, Prim:2, PErr:0, Viol:2, > Normal execution              
+
+
+[2026-11-16 08:10:38]
+Progress: 10|5%, EfCl:62.6, AlCl:74.6, In:140.0, Cov:0, Prim:2, PErr:0, Viol:2, > Normal execution              
+
+
+[2026-11-16 08:10:40]
+Progress: 11|6%, EfCl:63.3, AlCl:74.2, In:140.0, Cov:0, Prim:2, PErr:0, Viol:2, > Normal execution              
+
+
+[2026-11-16 08:10:43]
+Progress: 12|6%, EfCl:63.8, AlCl:73.8, In:140.0, Cov:0, Prim:2, PErr:0, Viol:2, > Normal execution              
+
+
+[2026-11-16 08:10:46]
+Progress: 13|7%, EfCl:64.3, AlCl:73.5, In:140.0, Cov:0, Prim:2, PErr:0, Viol:2, > Normal execution              
+
+
+[2026-11-16 08:10:48]
+Progress: 13|7%, EfCl:64.3, AlCl:73.5, In:140.0, Cov:0, Prim:2, PErr:0, Viol:2, > Priming:10           
+[2026-11-16 08:10:51]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x1d3500001dd600  
+RBX: 0x1353c0003d2780  
+RCX: 0x24fd0000271700  
+RDX: 0x2af7000002e900  
+RSI: 0x3d874000197940  
+RDI: 0x377c0001379c0   
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1d3500001dd600  
+RBX: 0x1353c0003d2780  
+RCX: 0x24fd0000271700  
+RDX: 0x2af7000002e900  
+RSI: 0x3d874000197940  
+RDI: 0x9c0             
+RSP: +0xff8            
+EFLAGS=000010000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x13d7400018ef40  
+RBX: 0x39db00003c3d80  
+RCX: 0x3e4880000b0a40  
+RDX: 0x13c980001cae00  
+RSI: 0x342a8000168840  
+RDI: 0x377c0001379c0   
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x13d7400018ef40  
+RBX: 0x39db00003c3d80  
+RCX: 0x3e4880000b0a40  
+RDX: 0x13c980001cae00  
+RSI: 0x342a8000168840  
+RDI: 0x9c0             
+RSP: +0xff8            
+EFLAGS=000010000110
+
+Progress: 14|7%, EfCl:62.4, AlCl:74.5, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Normal execution              
+
+
+[2026-11-16 08:10:54]
+Progress: 15|8%, EfCl:62.9, AlCl:74.2, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Normal execution              
+
+
+[2026-11-16 08:10:56]
+Progress: 16|8%, EfCl:63.4, AlCl:73.9, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Normal execution              
+
+
+[2026-11-16 08:10:59]
+Progress: 17|9%, EfCl:63.8, AlCl:73.7, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Normal execution              
+
+
+[2026-11-16 08:11:01]
+Progress: 18|9%, EfCl:64.1, AlCl:73.5, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Normal execution              
+
+
+[2026-11-16 08:11:04]
+Progress: 19|10%, EfCl:64.4, AlCl:73.3, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Normal execution              
+
+
+[2026-11-16 08:11:07]
+Progress: 19|10%, EfCl:64.4, AlCl:73.3, In:140.0, Cov:0, Prim:3, PErr:0, Viol:3, > Priming:1           
+[2026-11-16 08:11:17]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0xc7400006e040    
+RBX: 0x51940000cf000   
+RCX: 0x129a00000ed080  
+RDX: 0x3eef40000dcac0  
+RSI: 0x3285c0000aea00  
+RDI: 0x2800000190fc0   
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xc7400006e040    
+RBX: 0x51940000cf000   
+RCX: 0x0               
+RDX: 0x398c00          
+RSI: 0x3285c0000aea00  
+RDI: 0x2800000190fc0   
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x1e7100003f7b80  
+RBX: 0x2b3b000024e880  
+RCX: 0x3834c00010b040  
+RDX: 0x1d318000257500  
+RSI: 0x2257800026e600  
+RDI: 0x1058c000198840  
+RSP: +0xff8            
+EFLAGS=100011000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1e7100003f7b80  
+RBX: 0x2b3b000024e880  
+RCX: 0x0               
+RDX: 0x1d5b80          
+RSI: 0x2257800026e600  
+RDI: 0x1058c000198840  
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x3b85c000171d40  
+RBX: 0x11590000393c40  
+RCX: 0x3b400000550c0   
+RDX: 0x2694c0000eaa40  
+RSI: 0x2cdc80001167c0  
+RDI: 0x2ca7800006aec0  
+RSP: +0xff8            
+EFLAGS=100000000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x3b85c000171d40  
+RBX: 0x11590000393c40  
+RCX: 0x0               
+RDX: 0x2e0dc0          
+RSI: 0x2cdc80001167c0  
+RDI: 0x2ca7800006aec0  
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x9140002e7480    
+RBX: 0x1ac44000322840  
+RCX: 0x245b00003cd040  
+RDX: 0x1288400020df80  
+RSI: 0x25370000112240  
+RDI: 0x298200001824c0  
+RSP: +0xff8            
+EFLAGS=100011000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x9140002e7480    
+RBX: 0x1ac44000322840  
+RCX: 0x0               
+RDX: 0x1d1fc0          
+RSI: 0x25370000112240  
+RDI: 0x298200001824c0  
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x20fb0000148a80  
+RBX: 0x2f508000017700  
+RCX: 0x129a00000ed080  
+RDX: 0xfdfc0003aea00   
+RSI: 0x194a400027c140  
+RDI: 0x172180002a0640  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x20fb0000148a80  
+RBX: 0x2f508000017700  
+RCX: 0x0               
+RDX: 0x8d840           
+RSI: 0x194a400027c140  
+RDI: 0x172180002a0640  
+RSP: +0xff8            
+EFLAGS=000001000110
+
+Progress: 20|10%, EfCl:64.5, AlCl:73.0, In:140.0, Cov:0, Prim:4, PErr:0, Viol:4, > Normal execution              
+
+
+[2026-11-16 08:11:19]
+Progress: 20|10%, EfCl:64.5, AlCl:73.0, In:140.0, Cov:0, Prim:4, PErr:0, Viol:4, > Priming:1           
+[2026-11-16 08:11:27]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0xec60000166dc0   
+RBX: 0x32a480002dbf40  
+RCX: 0x7dec0002d3c40   
+RDX: 0x2a4f00003bb080  
+RSI: 0x128a0000311b80  
+RDI: 0x6ef0000326500   
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xec60000166dc0   
+RBX: 0x32a480002dbf40  
+RCX: 0x7dec0002d3c40   
+RDX: 0x2a4f00003bb080  
+RSI: 0x128a0000311b80  
+RDI: 0x6ef0000326500   
+RSP: +0xff8            
+EFLAGS=000010000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x305cc0002fb2c0  
+RBX: 0x20a08000224cc0  
+RCX: 0x55f000011ae40   
+RDX: 0x1104400007b0c0  
+RSI: 0x2bd88000152300  
+RDI: 0xeda40000d4440   
+RSP: +0xff8            
+EFLAGS=100011000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x305cc0002fb2c0  
+RBX: 0x20a08000224cc0  
+RCX: 0x55f000011ae40   
+RDX: 0x1104400007b0c0  
+RSI: 0x2bd88000152300  
+RDI: 0xeda40000d4440   
+RSP: +0xff8            
+EFLAGS=000010000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x1fa3c00021ef80  
+RBX: 0x2f35400011d140  
+RCX: 0x2fe800027efc0   
+RDX: 0x13c380002ab3c0  
+RSI: 0x36aac0002b6940  
+RDI: 0x3b4180000b1f80  
+RSP: +0xff8            
+EFLAGS=000011000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1fa3c00021ef80  
+RBX: 0x2f35400011d140  
+RCX: 0x2fe800027efc0   
+RDX: 0x13c380002ab3c0  
+RSI: 0x36aac0002b6940  
+RDI: 0x3b4180000b1f80  
+RSP: +0xff8            
+EFLAGS=000010000010
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x221f40002acbc0  
+RBX: 0x2013c0003a6100  
+RCX: 0x2e30c000027f80  
+RDX: 0x7ae000033d300   
+RSI: 0x94900002909c0   
+RDI: 0x198e4000320140  
+RSP: +0xff8            
+EFLAGS=100011000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x221f40002acbc0  
+RBX: 0x2013c0003a6100  
+RCX: 0x2e30c000027f80  
+RDX: 0x7ae000033d300   
+RSI: 0x94900002909c0   
+RDI: 0x198e4000320140  
+RSP: +0xff8            
+EFLAGS=000010000110
+
+Progress: 21|11%, EfCl:63.2, AlCl:72.1, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:29]
+Progress: 22|11%, EfCl:63.5, AlCl:72.0, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:32]
+Progress: 23|12%, EfCl:63.8, AlCl:72.0, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:34]
+Progress: 24|12%, EfCl:64.0, AlCl:71.9, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:37]
+Progress: 25|13%, EfCl:64.3, AlCl:71.8, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:40]
+Progress: 26|13%, EfCl:64.5, AlCl:71.7, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:42]
+Progress: 27|14%, EfCl:64.6, AlCl:71.6, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:44]
+Progress: 28|14%, EfCl:64.8, AlCl:71.5, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:47]
+Progress: 29|15%, EfCl:65.0, AlCl:71.5, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:49]
+Progress: 30|15%, EfCl:65.2, AlCl:71.4, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:52]
+Progress: 31|16%, EfCl:65.3, AlCl:71.4, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:55]
+Progress: 32|16%, EfCl:65.4, AlCl:71.4, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:11:57]
+Progress: 33|17%, EfCl:65.6, AlCl:71.3, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:00]
+Progress: 34|17%, EfCl:65.7, AlCl:71.3, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:03]
+Progress: 35|18%, EfCl:65.8, AlCl:71.3, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:05]
+Progress: 36|18%, EfCl:65.9, AlCl:71.2, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:08]
+Progress: 37|19%, EfCl:66.1, AlCl:71.2, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:10]
+Progress: 38|19%, EfCl:66.2, AlCl:71.2, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:13]
+Progress: 39|20%, EfCl:66.3, AlCl:71.1, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:16]
+Progress: 40|20%, EfCl:66.3, AlCl:71.1, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:18]
+Progress: 41|21%, EfCl:66.4, AlCl:71.1, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:21]
+Progress: 42|21%, EfCl:66.2, AlCl:71.4, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:23]
+Progress: 43|22%, EfCl:65.5, AlCl:72.1, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Normal execution              
+
+
+[2026-11-16 08:12:26]
+Progress: 43|22%, EfCl:65.5, AlCl:72.1, In:140.0, Cov:0, Prim:5, PErr:0, Viol:5, > Priming:2           
+[2026-11-16 08:12:29]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x3078c0002ac840  
+RBX: 0x132b80002ca880  
+RCX: 0x2d354000166980  
+RDX: 0x2702800005d7c0  
+RSI: 0x209fc000347300  
+RDI: 0x2fad800021dcc0  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1c0             
+RBX: 0x880             
+RCX: 0x980             
+RDX: 0x340             
+RSI: 0x3c0             
+RDI: 0xcc0             
+RSP: +0xff8            
+EFLAGS=000010000010
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x3078c0002ac840  
+RBX: 0x132b80002ca880  
+RCX: 0x2d354000166980  
+RDX: 0x2702800005d7c0  
+RSI: 0x209fc000347300  
+RDI: 0x2fad800021dcc0  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1c0             
+RBX: 0x880             
+RCX: 0x980             
+RDX: 0x640             
+RSI: 0x3c0             
+RDI: 0xcc0             
+RSP: +0xff8            
+EFLAGS=000010000010
+
+Progress: 44|22%, EfCl:65.5, AlCl:72.2, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:32]
+Progress: 45|23%, EfCl:65.2, AlCl:72.6, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:35]
+Progress: 46|23%, EfCl:65.3, AlCl:72.5, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:37]
+Progress: 47|24%, EfCl:65.4, AlCl:72.5, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:40]
+Progress: 48|24%, EfCl:65.5, AlCl:72.4, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:42]
+Progress: 49|25%, EfCl:65.6, AlCl:72.4, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:45]
+Progress: 50|25%, EfCl:65.6, AlCl:72.3, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:48]
+Progress: 51|26%, EfCl:65.7, AlCl:72.3, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:50]
+Progress: 52|26%, EfCl:65.8, AlCl:72.2, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:53]
+Progress: 53|27%, EfCl:65.9, AlCl:72.2, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:55]
+Progress: 54|27%, EfCl:66.0, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:12:58]
+Progress: 55|28%, EfCl:66.0, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:01]
+Progress: 56|28%, EfCl:66.1, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:03]
+Progress: 57|29%, EfCl:66.2, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:06]
+Progress: 58|29%, EfCl:66.2, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:09]
+Progress: 59|30%, EfCl:66.3, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:11]
+Progress: 60|30%, EfCl:66.4, AlCl:71.9, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:14]
+Progress: 61|31%, EfCl:66.4, AlCl:71.9, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:16]
+Progress: 62|31%, EfCl:66.3, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:19]
+Progress: 63|32%, EfCl:66.3, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:22]
+Progress: 64|32%, EfCl:66.4, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:24]
+Progress: 65|33%, EfCl:66.2, AlCl:72.2, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:27]
+Progress: 66|33%, EfCl:66.3, AlCl:72.2, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:29]
+Progress: 67|34%, EfCl:66.3, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:32]
+Progress: 68|34%, EfCl:66.4, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:35]
+Progress: 69|35%, EfCl:66.4, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:37]
+Progress: 70|35%, EfCl:66.5, AlCl:72.1, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:40]
+Progress: 71|36%, EfCl:66.5, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:43]
+Progress: 72|36%, EfCl:66.6, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:45]
+Progress: 73|37%, EfCl:66.6, AlCl:72.0, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:48]
+Progress: 74|37%, EfCl:66.7, AlCl:71.9, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:50]
+Progress: 75|38%, EfCl:66.7, AlCl:71.9, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Normal execution              
+
+
+[2026-11-16 08:13:53]
+Progress: 75|38%, EfCl:66.7, AlCl:71.9, In:140.0, Cov:0, Prim:6, PErr:0, Viol:6, > Priming:6           
+[2026-11-16 08:13:54]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x302940003e3240  
+RBX: 0x25864000142d00  
+RCX: 0x15e64000241580  
+RDX: 0x24e7c000241e80  
+RSI: 0x6a18000071480   
+RDI: 0x3307c00006db00  
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x302940003e0100  
+RBX: 0xd00             
+RCX: 0x580             
+RDX: 0x24e7c000241e80  
+RSI: 0x480             
+RDI: 0xb00             
+RSP: +0xff8            
+EFLAGS=000000000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x362900002b2080  
+RBX: 0x25864000142d00  
+RCX: 0x15e64000241580  
+RDX: 0x22824000121440  
+RSI: 0x6a18000071480   
+RDI: 0x3307c00006db00  
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x362900002b0100  
+RBX: 0xd00             
+RCX: 0x580             
+RDX: 0x22824000121440  
+RSI: 0x480             
+RDI: 0xb00             
+RSP: +0xff8            
+EFLAGS=000000000110
+
+Progress: 76|38%, EfCl:66.8, AlCl:71.9, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:13:56]
+Progress: 77|39%, EfCl:66.7, AlCl:72.0, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:13:59]
+Progress: 78|39%, EfCl:66.7, AlCl:72.0, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:02]
+Progress: 79|40%, EfCl:66.7, AlCl:72.0, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:04]
+Progress: 80|40%, EfCl:66.8, AlCl:72.0, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:07]
+Progress: 81|41%, EfCl:66.8, AlCl:71.9, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:09]
+Progress: 82|41%, EfCl:66.8, AlCl:71.9, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:12]
+Progress: 83|42%, EfCl:66.9, AlCl:71.9, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:14]
+Progress: 84|42%, EfCl:66.9, AlCl:71.9, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:17]
+Progress: 85|43%, EfCl:67.0, AlCl:71.8, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:19]
+Progress: 86|43%, EfCl:67.0, AlCl:71.8, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:22]
+Progress: 87|44%, EfCl:67.0, AlCl:71.8, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:24]
+Progress: 88|44%, EfCl:67.1, AlCl:71.8, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:27]
+Progress: 89|45%, EfCl:67.1, AlCl:71.8, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:29]
+Progress: 90|45%, EfCl:67.1, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:32]
+Progress: 91|46%, EfCl:67.2, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:35]
+Progress: 92|46%, EfCl:67.2, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:37]
+Progress: 93|47%, EfCl:67.2, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:40]
+Progress: 94|47%, EfCl:67.2, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:42]
+Progress: 95|48%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:45]
+Progress: 96|48%, EfCl:67.2, AlCl:71.8, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:48]
+Progress: 97|49%, EfCl:67.2, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:50]
+Progress: 98|49%, EfCl:67.2, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:53]
+Progress: 99|50%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:56]
+Progress: 100|50%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:14:58]
+Progress: 101|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Normal execution              
+
+
+[2026-11-16 08:15:01]
+Progress: 101|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:7, PErr:0, Viol:7, > Priming:1           
+[2026-11-16 08:15:02]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x35ae80000df980  
+RBX: 0xd8c800032ca80   
+RCX: 0xdf3c0000ead40   
+RDX: 0x342640002378c0  
+RSI: 0x6cc400009d2c0   
+RDI: 0x1e2a00003bf000  
+RSP: +0xff8            
+EFLAGS=100000000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x980             
+RBX: 0xd8c800032ca80   
+RCX: 0xd40             
+RDX: 0x37fbc0          
+RSI: 0x2c0             
+RDI: 0x0               
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x35ae80000df980  
+RBX: 0x3152000001b640  
+RCX: 0xdf3c0000ead40   
+RDX: 0x192380000d9300  
+RSI: 0x6cc400009d2c0   
+RDI: 0x1e2a00003bf000  
+RSP: +0xff8            
+EFLAGS=000010000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x980             
+RBX: 0x3152000001b640  
+RCX: 0xd40             
+RDX: 0x1dffc0          
+RSI: 0x2c0             
+RDI: 0x0               
+RSP: +0xff8            
+EFLAGS=000000000010
+
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:04]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:9           
+[2026-11-16 08:15:07]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:8           
+[2026-11-16 08:15:09]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:7           
+[2026-11-16 08:15:12]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:6           
+[2026-11-16 08:15:15]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:5           
+[2026-11-16 08:15:18]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:4           
+[2026-11-16 08:15:20]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:3           
+[2026-11-16 08:15:24]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:2           
+[2026-11-16 08:15:27]
+Progress: 102|51%, EfCl:67.3, AlCl:71.7, In:140.0, Cov:0, Prim:8, PErr:0, Viol:8, > Priming:1           
+[2026-11-16 08:15:31]
+Progress: 103|52%, EfCl:67.4, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:33]
+Progress: 104|52%, EfCl:67.4, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:36]
+Progress: 105|53%, EfCl:67.4, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:38]
+Progress: 106|53%, EfCl:67.4, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:41]
+Progress: 107|54%, EfCl:67.5, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:44]
+Progress: 107|54%, EfCl:67.5, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Priming:3           
+[2026-11-16 08:15:46]
+Progress: 107|54%, EfCl:67.5, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Priming:2           
+[2026-11-16 08:15:48]
+Progress: 107|54%, EfCl:67.5, AlCl:71.6, In:140.0, Cov:0, Prim:9, PErr:0, Viol:8, > Priming:1           
+[2026-11-16 08:15:50]
+Progress: 108|54%, EfCl:67.5, AlCl:71.6, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:53]
+Progress: 109|55%, EfCl:67.5, AlCl:71.6, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:55]
+Progress: 110|55%, EfCl:67.5, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:15:58]
+Progress: 111|56%, EfCl:67.6, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:01]
+Progress: 112|56%, EfCl:67.6, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:03]
+Progress: 113|57%, EfCl:67.6, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:06]
+Progress: 114|57%, EfCl:67.6, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:09]
+Progress: 115|58%, EfCl:67.6, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:11]
+Progress: 116|58%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:14]
+Progress: 117|59%, EfCl:67.7, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:16]
+Progress: 118|59%, EfCl:67.7, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:19]
+Progress: 119|60%, EfCl:67.7, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:22]
+Progress: 120|60%, EfCl:67.7, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:24]
+Progress: 121|61%, EfCl:67.8, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:27]
+Progress: 122|61%, EfCl:67.8, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:29]
+Progress: 123|62%, EfCl:67.8, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:32]
+Progress: 124|62%, EfCl:67.8, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:35]
+Progress: 125|63%, EfCl:67.8, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Normal execution              
+
+
+[2026-11-16 08:16:37]
+Progress: 125|63%, EfCl:67.8, AlCl:71.4, In:140.0, Cov:0, Prim:10, PErr:0, Viol:8, > Priming:14           
+[2026-11-16 08:16:40]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x2c450000032b00  
+RBX: 0x2e00000015f1c0  
+RCX: 0x1e6e00000daa80  
+RDX: 0x3e2a80001f5140  
+RSI: 0x1b26800029bfc0  
+RDI: 0x55b400015a380   
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xb00             
+RBX: 0x1c0             
+RCX: 0x3ec040          
+RDX: 0x3e2a80001f5140  
+RSI: 0xdc0             
+RDI: 0x380             
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x2c450000032b00  
+RBX: 0x2e00000015f1c0  
+RCX: 0x36c4c0000b9a40  
+RDX: 0x31f8c00032d9c0  
+RSI: 0x1b26800029bfc0  
+RDI: 0x55b400015a380   
+RSP: +0xff8            
+EFLAGS=000001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xb00             
+RBX: 0x1c0             
+RCX: 0x5c7c0           
+RDX: 0x31f8c00032d9c0  
+RSI: 0xdc0             
+RDI: 0x380             
+RSP: +0xff8            
+EFLAGS=000000000010
+
+Progress: 126|63%, EfCl:67.6, AlCl:71.6, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:42]
+Progress: 127|64%, EfCl:67.6, AlCl:71.6, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:45]
+Progress: 128|64%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:47]
+Progress: 129|65%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:50]
+Progress: 130|65%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:53]
+Progress: 131|66%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:55]
+Progress: 132|66%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:16:58]
+Progress: 133|67%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:01]
+Progress: 133|67%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:11, PErr:0, Viol:9, > Priming:1           
+[2026-11-16 08:17:04]
+Progress: 134|67%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:07]
+Progress: 135|68%, EfCl:67.7, AlCl:71.5, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:09]
+Progress: 136|68%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:12]
+Progress: 137|69%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:14]
+Progress: 138|69%, EfCl:67.5, AlCl:71.7, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:17]
+Progress: 139|70%, EfCl:67.5, AlCl:71.7, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Normal execution              
+
+
+[2026-11-16 08:17:19]
+Progress: 139|70%, EfCl:67.5, AlCl:71.7, In:140.0, Cov:0, Prim:12, PErr:0, Viol:9, > Priming:6           
+[2026-11-16 08:17:20]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x65600001ce580   
+RBX: 0x1052800017fc40  
+RCX: 0x28ea800034fe40  
+RDX: 0x339500003c5d40  
+RSI: 0x3a9480003d5480  
+RDI: 0x11dbc000246040  
+RSP: +0xff8            
+EFLAGS=000000000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1e              
+RBX: 0x1052800017fc00  
+RCX: 0x28ea800034fe3f  
+RDX: 0x339500003c8dc0  
+RSI: 0x3a9480003d5480  
+RDI: 0x40              
+RSP: +0xff8            
+EFLAGS=000000000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x65600001ce580   
+RBX: 0x147a8000112d40  
+RCX: 0x1e9f80003f66c0  
+RDX: 0xb8a80000d9c40   
+RSI: 0x3a88c000183140  
+RDI: 0x11dbc000246040  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x1e              
+RBX: 0x147a8000112d00  
+RCX: 0x1e9f80003f66bf  
+RDX: 0xb8a80000d05c0   
+RSI: 0x3a88c000183140  
+RDI: 0x40              
+RSP: +0xff8            
+EFLAGS=000000000010
+
+Progress: 140|70%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:13, PErr:0, Viol:10, > Normal execution              
+
+
+[2026-11-16 08:17:23]
+Progress: 141|71%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:13, PErr:0, Viol:10, > Normal execution              
+
+
+[2026-11-16 08:17:25]
+Progress: 142|71%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:13, PErr:0, Viol:10, > Normal execution              
+
+
+[2026-11-16 08:17:28]
+Progress: 142|71%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:13, PErr:0, Viol:10, > Priming:12           
+[2026-11-16 08:17:29]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x3504c00031e980  
+RBX: 0x173e4000084c40  
+RCX: 0x37b1c0002927c0  
+RDX: 0x3b400003f680    
+RSI: 0x9f080002e6000   
+RDI: 0x41e40000f4a40   
+RSP: +0xff8            
+EFLAGS=100010000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x980             
+RBX: 0x0               
+RCX: 0x37b1c0002927c0  
+RDX: 0x680             
+RSI: 0x0               
+RDI: 0xa40             
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x3504c00031e980  
+RBX: 0x173e4000084c40  
+RCX: 0x10e14000391d80  
+RDX: 0x3b400003f680    
+RSI: 0x9f080002e6000   
+RDI: 0x41e40000f4a40   
+RSP: +0xff8            
+EFLAGS=100010000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x980             
+RBX: 0x0               
+RCX: 0x10e14000391dc0  
+RDX: 0x680             
+RSI: 0x0               
+RDI: 0xa40             
+RSP: +0xff8            
+EFLAGS=000001000110
+
+Progress: 143|72%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:14, PErr:0, Viol:11, > Normal execution              
+
+
+[2026-11-16 08:17:32]
+Progress: 144|72%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:14, PErr:0, Viol:11, > Normal execution              
+
+
+[2026-11-16 08:17:34]
+Progress: 144|72%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:14, PErr:0, Viol:11, > Priming:3           
+[2026-11-16 08:17:36]
+Progress: 144|72%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:14, PErr:0, Viol:11, > Priming:2           
+[2026-11-16 08:17:39]
+Progress: 144|72%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:14, PErr:0, Viol:11, > Priming:1           
+[2026-11-16 08:17:41]
+Progress: 145|73%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:15, PErr:0, Viol:11, > Normal execution              
+
+
+[2026-11-16 08:17:44]
+Progress: 145|73%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:15, PErr:0, Viol:11, > Priming:1           
+[2026-11-16 08:17:47]
+Progress: 146|73%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:16, PErr:0, Viol:11, > Normal execution              
+
+
+[2026-11-16 08:17:50]
+Progress: 147|74%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:16, PErr:0, Viol:11, > Normal execution              
+
+
+[2026-11-16 08:17:52]
+Progress: 147|74%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:16, PErr:0, Viol:11, > Priming:1           
+[2026-11-16 08:17:53]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0xd20c000190740   
+RBX: 0x436c0003f9f80   
+RCX: 0x3ebdc000250ac0  
+RDX: 0x10c1800023fd00  
+RSI: 0xa2c40000d1000   
+RDI: 0x281e4000349f00  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x740             
+RBX: 0xf80             
+RCX: 0xac0             
+RDX: 0xd00             
+RSI: 0x0               
+RDI: 0x281e4000349f00  
+RSP: +0xff8            
+EFLAGS=000000000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0xd20c000190740   
+RBX: 0x436c0003f9f80   
+RCX: 0x3ebdc000250ac0  
+RDX: 0x10c1800023fd00  
+RSI: 0xa2c40000d1000   
+RDI: 0x19db8000284fc0  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x700             
+RBX: 0xf80             
+RCX: 0xac0             
+RDX: 0xd00             
+RSI: 0x0               
+RDI: 0x19db8000284fc0  
+RSP: +0xff8            
+EFLAGS=000000000110
+
+Progress: 148|74%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:17:56]
+Progress: 149|75%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:17:58]
+Progress: 150|75%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:18:01]
+Progress: 151|76%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:18:03]
+Progress: 152|76%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:18:06]
+Progress: 153|77%, EfCl:67.6, AlCl:71.7, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:18:09]
+Progress: 154|77%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Normal execution              
+
+
+[2026-11-16 08:18:11]
+Progress: 154|77%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:17, PErr:0, Viol:12, > Priming:2           
+[2026-11-16 08:18:12]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x27cc800039af00  
+RBX: 0xdbf000022a500   
+RCX: 0x33600003b7040   
+RDX: 0x13070000288280  
+RSI: 0x5d9800024e480   
+RDI: 0x2374000019b440  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xf00             
+RBX: 0x0               
+RCX: 0x0               
+RDX: 0x0               
+RSI: 0x5d9800024000f   
+RDI: 0x440             
+RSP: +0xff8            
+EFLAGS=000001000110
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x27cc800039af00  
+RBX: 0xdbf000022a500   
+RCX: 0x33600003b7040   
+RDX: 0x13070000288280  
+RSI: 0x1ac580001aaf80  
+RDI: 0x2374000019b440  
+RSP: +0xff8            
+EFLAGS=100001000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0xf00             
+RBX: 0x0               
+RCX: 0x0               
+RDX: 0x0               
+RSI: 0x1ac580001a000f  
+RDI: 0x440             
+RSP: +0xff8            
+EFLAGS=000001000110
+
+Progress: 155|78%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:15]
+Progress: 156|78%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:18]
+Progress: 157|79%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:20]
+Progress: 158|79%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:23]
+Progress: 159|80%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:25]
+Progress: 159|80%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Priming:4           
+[2026-11-16 08:18:28]
+Progress: 159|80%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Priming:3           
+[2026-11-16 08:18:30]
+Progress: 159|80%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Priming:2           
+[2026-11-16 08:18:32]
+Progress: 159|80%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:18, PErr:0, Viol:13, > Priming:1           
+[2026-11-16 08:18:34]
+Progress: 160|80%, EfCl:67.7, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:37]
+Progress: 161|81%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:40]
+Progress: 162|81%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:42]
+Progress: 163|82%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:45]
+Progress: 164|82%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:48]
+Progress: 165|83%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:50]
+Progress: 166|83%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:53]
+Progress: 167|84%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:55]
+Progress: 168|84%, EfCl:67.8, AlCl:71.6, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:18:58]
+Progress: 169|85%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:00]
+Progress: 170|85%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:03]
+Progress: 171|86%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:06]
+Progress: 172|86%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:08]
+Progress: 173|87%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:11]
+Progress: 174|87%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:13]
+Progress: 175|88%, EfCl:67.5, AlCl:71.9, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:16]
+Progress: 176|88%, EfCl:67.6, AlCl:71.9, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:18]
+Progress: 177|89%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:21]
+Progress: 178|89%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:24]
+Progress: 179|90%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:26]
+Progress: 180|90%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:29]
+Progress: 181|91%, EfCl:67.6, AlCl:71.9, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:31]
+Progress: 182|91%, EfCl:67.6, AlCl:71.9, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:34]
+Progress: 183|92%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:36]
+Progress: 184|92%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:39]
+Progress: 185|93%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:42]
+Progress: 186|93%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:44]
+Progress: 187|94%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Normal execution              
+
+
+[2026-11-16 08:19:47]
+Progress: 187|94%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:19, PErr:0, Viol:13, > Priming:10           
+[2026-11-16 08:19:48]
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x47140003d8140   
+RBX: 0xd3b8000217f80   
+RCX: 0x2c02800009a1c0  
+RDX: 0x3f5000001d6b80  
+RSI: 0x10bd0000178a40  
+RDI: 0x270e00000dc240  
+RSP: +0xff8            
+EFLAGS=100010000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x47140003d8140   
+RBX: 0x7               
+RCX: 0xd80             
+RDX: 0xb80             
+RSI: 0xa40             
+RDI: 0x270e00000dc240  
+RSP: +0xff8            
+EFLAGS=000010000010
+
+DBG: [model] _load_input: Reached entry
+DBG: [model]: Initial arch state:
+
+Registers:
+RAX: 0x33a7000007db80  
+RBX: 0x30570000281500  
+RCX: 0x2c02800009a1c0  
+RDX: 0x3f5000001d6b80  
+RSI: 0x10bd0000178a40  
+RDI: 0xe6e4000179940   
+RSP: +0xff8            
+EFLAGS=100010000010
+
+DBG: [model] _execute_test_case: Ending speculation state: False
+DBG: [model]: Ending arch state:
+
+Registers:
+RAX: 0x33a7000007db80  
+RBX: 0x7               
+RCX: 0xd80             
+RDX: 0xb80             
+RSI: 0xa40             
+RDI: 0xe6e4000179940   
+RSP: +0xff8            
+EFLAGS=000000000010
+
+Progress: 188|94%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:19:50]
+Progress: 189|95%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:19:53]
+Progress: 190|95%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:19:56]
+Progress: 191|96%, EfCl:67.6, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:19:58]
+Progress: 192|96%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:01]
+Progress: 193|97%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:03]
+Progress: 194|97%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:06]
+Progress: 195|98%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:08]
+Progress: 196|98%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:11]
+Progress: 197|99%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:13]
+Progress: 198|99%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:16]
+Progress: 199|100%, EfCl:67.7, AlCl:71.8, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:18]
+Progress: 200|100%, EfCl:67.7, AlCl:71.7, In:140.0, Cov:0, Prim:20, PErr:0, Viol:14, > Normal execution              
+
+
+[2026-11-16 08:20:21]
+
+Duration Elapsed: 0hrs-10mins-11secs
+Finished at 08:20:21
+14 violations found
+
+[2026-11-16 08:20:21]

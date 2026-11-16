@@ -1,0 +1,992 @@
+G-QED: Generalized QED Pre-silicon Verification
+beyond Non-Interfering Hardware Accelerators
+2023 60th ACM/IEEE Design Automation Conference (DAC) | 979-8-3503-2348-1/23/$31.00 ©2023 IEEE | DOI: 10.1109/DAC56929.2023.10247903
+
+Saranyu Chattopadhyay∗ , Keerthikumara Devarajegowda‡ , Bihan Zhao§ , Florian Lonsing† ,
+Brandon A. D’Agostino∗ , Ioanna Vavelidou∗ , Vijay D. Bhatt§ , Sebastian Prebeck§ ,
+Wolfgang Ecker§ , Caroline Trippel∗ , Clark Barrett† , Subhasish Mitra∗
+EE Dept.∗ and CS Dept.† Stanford University, Siemens EDA‡ , Infineon Technologies§
+
+Abstract—Hardware accelerators (HAs) underpin highperformance and energy-efficient digital systems. Correctness of
+these systems thus depends on the correctness of constituent
+HAs. Self-consistency-based pre-silicon verification techniques,
+like A-QED (Accelerator Quick Error Detection), provide a quick
+and provably thorough HA verification framework that does not
+require extensive design-specific properties or a full functional
+specification. However, A-QED is limited to verifying HAs which
+are non-interfering – i.e., they produce the same result for a given
+input independent of its context within a sequence of inputs.
+We present a new technique called G-QED (Generalized QED)
+which goes beyond non-interfering HAs while retaining A-QED’s
+benefits. Our extensive results as well as a detailed industrial case
+study show that: G-QED is highly thorough in detecting critical
+bugs in well-verified designs that otherwise escape traditional
+verification flows while simultaneously improving verification
+productivity 18-fold (from 370 person days to 21 person days).
+These results are backed by theoretical guarantees of soundness
+and completeness.
+Index Terms—QED, Quick Error Detection, Accelerators,
+Processors, Functional consistency
+
+I. I NTRODUCTION
+Domain-specific hardware accelerators (HAs) are becoming
+increasingly crucial for high-throughput and energy-efficient
+digital systems. Today’s digital systems, often referred to
+as System-on-Chips or SoCs, contain many HAs spanning
+various application domains. Each HA implements a set of
+functions referred to as Actions in this paper. HAs may be
+tightly-coupled, e.g., integrated within a processor’s pipeline.
+More commonly though, HAs are loosely-coupled, interacting
+with other SoC components (other HAs, processor cores,
+memory) via on-chip networks. Given their pervasiveness [1],
+[2], loosely-coupled HAs (LCAs) are the focus of this paper
+although our presented techniques can be applied to tightlycoupled HAs as well.
+Every HA must be verified for correctness both thoroughly
+and quickly to meet the time-to-market demands of the diverse
+applications they support [3]. As discussed in many prior
+publications [4]–[7], HA formal verification is challenged by:
+(1) the tremendous effort required to craft highly thorough
+design-specific properties and full functional specifications,
+and (2) the scalability of off-the-shelf formal tools. Beyond
+being time-consuming and error prone [4], [5], producing
+thorough properties and specifications is an uphill battle due
+to the rapidly evolving nature of HAs that support rapidly
+evolving applications.
+A recent verification technique, Accelerator Quick Error
+Detection (A-QED, [6], [7]), overcomes the above challenges
+for a class of HAs that are non-interfering – i.e., HAs that
+produce the same output for a given action independent of
+its context within a sequence of actions. A-QED uses formal
+verification based on Bounded Model Checking (BMC, [8]).
+Unlike conventional BMC-based verification, A-QED does not
+
+require extensive design-specific properties or a full functional
+specification. Instead, A-QED uses self-consistency checks
+on a given HA. Specifically, A-QED checks for functional
+consistency (FC), the property that actions with identical
+inputs always produce the same outputs. In addition to FC, AQED also performs single-action checking (SAC) and response
+bound checking (RB) explained later in this paper. A-QED is
+sound and complete for non-interfering HAs.
+While non-interfering HAs readily capture a range of fixedfunction designs, interfering HAs are becoming more and more
+prevalent. This is partly due to the rise of programmable
+HAs [9]. In fact, traditional processors may be viewed as
+an extreme case of interfering HAs where each instruction
+is an HA action. Interfering HAs contain interfering actions
+whose outputs are dependent on the outputs of other actions,
+inherently violating A-QED’s FC checking. To complicate
+matters even further, an HA action might read the outputs
+produced by another action (or write its outputs to be consumed by another action) at clock cycles that depend on the
+execution of various other concurrent actions active in the HA.
+Thus, there is an urgent need for a new and general formal
+verification methodology for interfering (and non-interfering)
+HAs that preserves the benefits of A-QED (i.e., provably
+sound and complete verification without requiring extensive
+design-specific properties or full functional specifications)
+while reasoning about interfering actions (not possible using
+A-QED) – a highly difficult challenge.
+In this paper, we overcome this challenge through G-QED or
+Generalized QED – a new technique for thoroughly verifying
+both interfering and non-interfering HAs (and processor cores
+by extension) – and make the following contributions:
+• Given an HA with its set of actions, we present the GQED technique to thoroughly verify that HA without
+requiring detailed knowledge about its design or the
+interfering nature of its various actions. G-QED supports
+both RTL and high-level synthesis design flows and
+integrates seamlessly with several industrial BMC tools.
+• We provide a formal model of HAs, demonstrate its
+broad applicability, and prove soundness and completeness guarantees of G-QED for such HAs.
+• We demonstrate the effectiveness and practicality of GQED through extensive results on a wide variety of
+44 moderate-sized HAs and processor cores (that fit in
+existing BMC tools).
+• We present an industrial case study on live designs and
+demonstrate: (1) Significantly improved bug coverage
+of G-QED by uniquely detecting corner-case bugs that
+escaped industrial (simulation- and formal verificationbased) verification flow (in addition to detecting all
+bugs detected by the industrial flow). (2) Dramatically
+
+Authorized licensed use limited to: Stanford University. Downloaded on September 24,2024 at 17:59:19 UTC from IEEE Xplore. Restrictions apply.
+
+improved verification productivity of G-QED, from 370
+person days using industrial flow to only 21 person
+days using G-QED – an 18-fold boost. (3) G-QEDenabled short design-design verification loops with quick
+turnaround for rapidly evolving designs.
+While we focus on moderate-sized HAs that fit in existing
+BMC tools, there are further scaleup opportunities, e.g., new
+decomposition techniques enabled by self-consistency checking [7] – a topic of future work.
+II. M OTIVATING E XAMPLE
+The representative HA in Fig. 1 (adapted from a commercial design) is used to illustrate interfering HA verification
+challenges. The HA is connected to other SoC components
+via a handshake protocol similar to [6]. The HA only reads
+valid inputs (in valid asserted) from the network when it is
+ready (rdy out asserted). The network reads HA-generated
+outputs (out valid asserted) when it is not blocked by other
+components (rdy in asserted). The HA implements 3 actions
+{A1 , A2 , A3 } as follows:
+• A1 (D): updates Bypass register with D.
+• A2 (D): updates Factor register with D. A2 is stored in
+FIFO 2.
+• A3 (D, Bypass, Factor ): generates an output O = F (D)
+scaled by the Factor register value. The scaling operation
+is skipped depending on the Bypass register’s value. A3
+is stored in FIFO 1. The output of this interfering action
+depends not only on D, but also on the values of the
+Factor and Bypass registers. The Bypass and Factor
+registers constitute the Relevant State Registers (RSRs)
+of A3 . RSRs are formally defined in Sec. IV
+
+be detected by checking A3 for FC. However, to perform FC,
+we need to constrain the RSRs to prevent false fails.
+Challenge 1: The exact clock cycles when RSRs are read
+depend on the internal state and can be different for different
+RSRs. For example, consider action A3 . When the result of
+F () is fed to the Scaler(), the value stored in Factor is also
+read. It is very important to precisely specify the clock cycle
+during which this value should be read. That is not an easy
+task because it depends on the latency of F () (which in turn
+depends on the FIFO 1 state). Incorrect timing information
+can result in false fails.
+Challenge 2: Consider the same bug in FIFO 2. If we
+constrain F actor to a fixed value, A3 will always read the
+same value from the F actor register and pass FC check.
+Challenge 3: Checking FC on A2 is a non-trivial problem
+since an update can happen either from A2 or because the
+HA updates it to 0 when the Scaler() is bypassed. So it is
+not necessary that the ith input will produce the ith update
+to the F actor register. Thus, we need to understand the
+design implementation to figure out when an input updates
+the register.
+III. G-QED
+The new FC approach is shown in Fig. 2. To check FC
+for the action pair {a, b}, the BMC runs three copies of the
+HA from the reset state. The same input sequence I0 . . . Ik
+is fed to the first two copies. For the first copy, the HA is
+allowed to finish executing all the inputs and then the RSRs
+for actions a and b are saved. For the second copy, input pair
+Ia , Ib corresponding to the action pair {a, b} is fed to the
+HA and the output pair {Oa , Ob } is recorded. For the third
+copy, an input sequence Im+1 . . . In , which is not necessarily
+the same as I0 . . . Ik , is allowed to finish executing before
+sending the input pair Ia , Ib to the HA. The RSRs are saved
+before sending Ia , Ib and constrained to be the same as the
+RSR values saved in the first copy. Additionally, the output
+pair {Oa , Ob } is checked with that from the second copy. The
+FC property is formulated as:
+1st copy
+3rd copy
+RSRsaved
+=RSRsaved
+→
+{Oa , Ob }2
+
+nd
+
+copy
+
+rd
+
+= {Oa , Ob }3
+
+copy
+
+Fig. 1. a) HA loosely-coupled to other SoC components. b) HA example.
+
+F () and Scaler() take multiple cycles to compute and
+pending inputs are stored in the FIFOs. If either FIFO is full,
+the HA switches to fast F () implementation. If any of the
+Scaler() inputs is 0, the unit is designed to skip computation
+for better power and performance. Thus, when the Scaler()
+unit is bypassed, the HA updates F actor register with 0.
+Consider the following bug (adapted from an actual bug) the FIFO 1 full signal goes high only when the write pointer
+reaches 15 (starting from 0) but the FIFO can hold at most 15
+entries. Hence, the 16th A3 overwrites its predecessor. This
+bug is only triggered if the rdy in is low long enough. It can
+
+Fig. 2. FC check framework for the action pair {a, b}. The inputs I0 − In
+and the sequence lengths k, m and n are chosen symbolically. The inputs Ia
+and Ib are chosen symbolically with their respective actions a and b.
+
+We assume that they RSRs used to calculate {Oa , Ob } in
+the second copy have the same values as those saved in the
+first copy. This is elucidated in the following design constraint:
+Design Constraint: If we send the input pair {Ia , Ib } after
+all the inputs have finished executing in the first copy, then the
+output pair generated is the same as {Oa , Ob } in the second
+copy.
+This means the output generated or the RSR updated by an
+action in a sequence is independent of how long the design is
+
+Authorized licensed use limited to: Stanford University. Downloaded on September 24,2024 at 17:59:19 UTC from IEEE Xplore. Restrictions apply.
+
+idle in between the inputs. The HA example in Sec. II is idling
+when the in valid is low. During this time, no more inputs are
+accepted by the HA but previous inputs keep executing. We
+have seen this constraint to hold for all the designs we looked
+at in Sec. V. We avoid the Challenges 1 and 2 by constraining
+RSRs when no inputs are being executed.
+In case of challenge 3, the F actor value updated by A2
+can be propagated as an output of a future A3 action. Thus,
+we address challenge 3 by FC for the action pair {A2 , A3 }
+instead of checking FC for A2 action.
+Pair wise checking of actions allows us to find bugs in the
+RSR updating logic since checking the RSRs directly is nontrivial for a general HA as discussed in Challenge 3 in Sec. II.
+However, this is not the case for processors, so we consider
+all the RSRs as the output of every instruction. Thus, we don’t
+have to check instructions in pairs for processors.
+To catch the FIFO 2 bug, BMC will run:
+• In the first copy, an input sequence such that 14 FIFO
+entries are filled. It will collect the RSRs after the input
+sequence has finished executing.
+15
+• In the second copy the same sequence followed by IA ,
+2
+15
+16
+1
+IA3 and IA2 . Because of the bug, IA2 will be overwritten
+16
+1
+.
+) × IA
+and output will be F (IA
+2
+3
+• In the third copy an input sequence such that the RSR
+values after it finishes execution, the RSRs values match
+15
+1
+that of the first copy. Next, the BMC sends IA
+, IA
+and
+2
+3
+1
+15
+the output will be F (IA3 ) × IA2 not equal to the output
+in second copy.
+The bug in FIFO 1 can be caught in a similar manner.
+To ensure completeness, we run RB as well as SAC [6]. RB
+checks that the output for an input in a sequence is generated
+within some time bound. It works for interfering HAs. To
+check SAC for interfering actions, we need to consider the
+RSR values. To perform SAC on the action pair {A1 , A2 },
+starting from reset state, we check that for all valid input values
+and associated RSRs the output produced by the HA is the
+same as expected by the A1 and A2 actions.
+IV. F ORMAL M ODELS AND T HEORETICAL R ESULTS
+In this section, we formalize G-QED. We adapt the HA
+formalism from [6] to model a general set of HAs. Such
+transition systems implicitly include a clock signal to synchronize transitions between system states [10]. Additionally,
+we formally define the notion of RSRs, the total correctness
+of the HA in the context of RSRs, and the FC property. We
+prove that FC is both sound and complete.
+We first simplify the HA model in [6] by modeling all
+redundant inputs (either because the HA is not ready to read
+or the input is invalid) as an invalid action a⊥ (the two cases
+of redundancy were handled separately in [6]). We similarly
+model redundant outputs (invalid or the host is not ready to
+read the output) as o⊥ . To model actions that only update RSRs
+and do not produce any output, we distinguish Ano from the
+full set of actions A. The actions that update the Bypass and
+Factor registers in Fig. 1 belong to this class of actions.
+Definition 1 (Accelerator): An HA is a finite state transition
+system Acc := (S, Sinit , A, Ano , a⊥ , D, O, o⊥ , T, F ), where:
+• S is the finite set of states of the design. We assume that
+the system contains num independent state components
+so that S = S1 × · · · × Snum , where each Si represents
+the set of values for the ith component.
+
+Sinit ⊆ S is the set of initial states.
+A is a finite set of actions supported by the accelerator;
+• Ano ⊆ A is the subset of actions that do not generate a
+valid output but do update internal states of the accelerator;
+• a⊥ ∈ A is a distinguished element of A used to indicate
+that no operation is being selected or that the provided
+input is not valid;
+• D is a finite set of data inputs;
+• O is a finite set of outputs;
+• o⊥ ∈ O is a distinguished element of O used to indicate
+that no output is being produced or that the output
+produced is not valid;
+• T : S × A × D → S is the state transition function;
+• F : S → O is the output function.
+For the HA in Fig. 1, Sinit contains just the reset state, A
+consists of the three actions that either update the Bypass or
+Factor registers or generate the output. An input has an action
+value of a⊥ when in valid or the rdy out is low. An output
+takes the value o⊥ when rdy in or out valid is low.
+We assume that an accelerator Acc starts in some initial
+state sinit ∈ Sinit . The execution of Acc is determined by the
+current input from the set I = A × D. Each input in ∈ I
+includes the input data and an action specifying the function
+to perform on the data. We write a(in) and d(in) for the
+first (action) and second (data) components of an input in,
+respectively. Given a state s and an input in, the next state
+is given by s′ = T (s, a(in), d(in)), which we also write
+as s′ = T (s, in). At each state s, Acc produces an output
+O = F (s). We use v to denote a sequence with elements
+denoted vi and length |v|, so v = ⟨v1 , v2 , . . . , v|v| ⟩. We
+concatenate sequences (and with a slight abuse of notation,
+single elements with sequences) using ‘·’, e.g., v = v1 · v′ ,
+where v′ = ⟨v2 , . . . , v|v| ⟩.
+Let in be a sequence of inputs with |in| = k. From a
+state s0 , the sequence in induces a sequence s of states of
+the same length such that si = T (si−1 , in i ) for i ∈ [1, k]. We
+abbreviate this as s = T (s0 , in). We lift functions on sequence
+elements to functions over sequences in the natural way: e.g.,
+F (s) = F (s1 ) · . . . · F (sk ).
+We use a⊥ to model inputs ignored by the HA and similarly
+o⊥ to model outputs ignored by the host. We write ink⊥ for a
+sequence of inputs in of length k such that a(in i ) = a⊥ for
+i ∈ [1, k] and similarly ok⊥ for a sequence of k outputs, all
+of which are o⊥ . For an input sequence in, the sequence of
+captured inputs, Cin (in) is the subsequence of in obtained by
+keeping only elements ini where a(in i ) ̸= a⊥ and a(in i ) ̸∈
+Ano . Similarly, if s = T (s0 , in), then the sequence of captured
+outputs, Cout (s0 , in) is the subsequence of F (s0 · s) obtained
+by keeping all elements F (si ) not equal to o⊥ .
+To model interfering actions, we must allow the output produced by a specific input to depend on the current state as well
+as the input itself. To that end, we will introduce a notion of
+relevant state components. We first define projections of states.
+If s ∈ S is a state, then we denote by si (with i ∈ [1, num])
+the value of the ith state component in the state s. We also
+call si the projection of s with index i. Let p ⊆ [1, num] be
+a projection set. Then sp is the sequence containing only the
+projections of s whose indices are in p ordered by index (i.e.,
+sp = ⟨si1 , . . . , si|p| ⟩, where p = {i1 , . . . , i|p| } and ij ≤ ij+1
+for j ∈ [1, |p| − 1]). We say that a state s is stable if for
+m
+each m > 0, s = T (s, inm
+⊥ ) and |Cout (s, in⊥ )| = 0, i.e., the
+•
+•
+
+Authorized licensed use limited to: Stanford University. Downloaded on September 24,2024 at 17:59:19 UTC from IEEE Xplore. Restrictions apply.
+
+state does not change and no outputs are produced when any
+sequence of invalid actions is applied.
+Definition 2 (Relevant State Projection): Given an HA Acc
+and an ordered pair (ai , aj ) of actions with aj ∈
+/ Ano , the
+relevant state projection rsp(ai , aj ) is a minimal projection set
+p such that for all initial states sinit , input sequences in1 , in2 ,
+integers k 1 , l1 , k 2 , l2 and inputs in 1 and in 2 with a(in 1 ) = ai
+and a(in 2 ) = aj , if
+1
+
+s1 pre = T (sinit , in1 · ink⊥ ), with s1 pre stable,
+1
+1 post
+• s
+= T (s1 pre , in 1 · in 2 · inl⊥ ), with s1 post stable,
+1
+1
+1 pre
+• o = Cout (s
+, in 1 · in 2 · inl⊥ ),
+2
+2 pre
+• s
+= T (sinit , in2 · ink⊥ ), with s2 pre stable,
+2
+2 post
+• s
+= T (s2 pre , in 1 · in 2 · inl⊥ ), with s2 post stable,
+2
+2
+2 pre
+• o = Cout (s
+, in 1 · in 2 · inl⊥ ),
+1 pre
+2 pre
+then, sp
+= sp
+→ o1 = o2 .
+Note that p may not be unique—in that case, we assume
+that rsp deterministically picks a minimal projection set from
+among those satistfying the above definition. For the example
+in Fig. 1, rsp(A3 , a⊥ ) is p = {i1 , i2 } where i1 and i2 are the
+indices of the Bypass and Factor registers, respectively.
+We can now define a notion of correctness.
+Definition 3 (Total Correctness): An HA Acc is correct if
+for every ordered pair of actions (ai , aj ) such that ai = a⊥
+or ai ∈ Ano , and aj ∈
+/ Ano and aj ̸= a⊥ , input sequences in,
+in′ , inputs in 1 and in 2 with a(in 1 ) = ai and a(in 2 ) = aj ,
+and integers k and l, if
+pre
+• s
+= T (sinit , in · ink⊥ ), with spre stable,
+′
+• o = Cout (sinit , in · in1 · in2 · in ) with |o| = |Cin (in ·
+in 1 · in 2 )|
+ij
+then o|o| = Spec ij (d(in 1 ), d(in 2 ), spre
+rsp(ai ,aj ) ), where Spec :
+D × D × Si1 × · · · × Si|p| → O (with rsp(ai , aj ) = p =
+{i1 , . . . , i|p| }) defines the expected output for actions (ai , aj ).
+This definition of total correctness assumes an important
+design constraint—the output produced is independent of the
+presence of a⊥ actions in the input sequences. This is the same
+constraint as Constraint in Sec. III.
+Now, we will define functional consistency.
+Definition 4 (Functional Consistency Property): Given an
+HA Acc and an ordered pair of actions (ai , aj ) such that ai =
+a⊥ or ai ∈ Ano , and aj ∈
+/ Ano and aj ̸= a⊥ , for any input
+sequences in1 , in2 , in′1 , inputs in 1 , in 2 with a(in 1 ) = ai
+and a(in 2 ) = aj , and values k 1 , k 2 and l, if
+•
+
+1
+
+s1 pre = T (sinit , in1 · ink⊥ ), with s1 pre stable,
+1
+′
+1
+• o = Cout (sinit , in1 ·in 1 ·in 2 ·in1 ) with |o | = |Cin (in1 ·
+in 1 · in 2 )|,
+2
+2 pre
+• s
+= T (sinit , in2 · ink⊥ ), with s2 pre stable,
+2
+2 pre
+• o = Cout (s
+, in 1 · in 2 · inl⊥ ) with |o2 | = 1,
+1 pre
+2 pre
+then srsp(ai ,aj ) = srsp(ai ,aj ) → o1|o1 | = o2|o2 | .
+We will now show the soundness and completeness of FC.
+Lemma 1 (Soundness of FC): If an HA Acc is totally correct,
+it is functionally consistent.
+pre
+Proof 1: In def. 4, o1|o1 | = Spec ij (d(in 1 ), d(in 2 ), s1rsp(a
+)
+i ,aj )
+pre
+by definition 3. o2|o2 | = Spec ij (d(in 1 ), d(in 2 ), s2rsp(a
+)
+i ,aj )
+•
+
+2
+
+by definition 3 with in as in2 · ink⊥
+and
+pre
+in′ = inl⊥ from definition 4. Then, s1rsp(a
+=
+i ,aj )
+2 pre
+1 pre
+ij
+srsp(ai ,aj )
+→
+Spec (d(in1 ), d(in2 ), srsp(ai ,aj ) )
+=
+2 pre
+ij
+1
+2
+Spec (d(in1 ), d(in2 ), srsp(ai ,aj ) ) → o|o1 | = o|o2 | .
+
+To prove completeness, we need Single Action Correctness.
+Definition 5 (Single Action Correctness Property): Given
+an HA Acc and an ordered pair of actions (ai , aj ) such that
+ai = a⊥ or ai ∈ Ano , and aj ∈
+/ Ano and aj ̸= a⊥ , for any
+input sequence in, inputs in 1 and in 2 with a(in 1 ) = ai and
+a(in 2 ) = aj , and value k, if
+pre
+• s
+= T (sinit , in · ink⊥ ), with spre stable,
+pre
+• o = Cout (s
+, in1 · in2 · inl⊥ ) with |o| = 1,
+then o1 = Specij (d(in1 ), d(in2 ), spre
+rsp(ai ,aj ) ).
+Lemma 2 (Completeness of FC): If an HA Acc is single
+action correct but not totally correct, it fails FC.
+Proof 2: Since Acc is not total correct, by definition 3, there
+1 pre
+exists in 1 such that o1|o1 | ̸= Spec ij (in 1 , in 2 , srsp(a
+) where
+i ,aj )
+k
+pre
+s
+= T (sinit , in 1 · in ⊥ ). Now, we choose a sequence in 2
+pre
+2 pre
+= s1rsp(a
+. Since Acc is single action
+such that srsp(a
+i ,aj )
+i ,aj )
+pre
+2
+) =
+correct, in definition 4, o1 = Specij (in 1 , in 2 , s2rsp(a
+i ,aj )
+1 pre
+ij
+1
+2
+Spec (in 1 , in 2 , srsp(ai ,aj ) ) → o|o1 | ̸= o1 .
+V. R ESULTS
+A. G-QED for Various HAs and Processor Cores
+We demonstrate the effectiveness and practicality of G-QED
+using 44 designs covering a wide variety of HAs and processor
+cores, including several industrial designs. While we focus on
+interfering HAs, we have also included non-interfering HAs
+to demonstrate the generality of G-QED. The HAs represent
+diverse application domains such as security, neural nets, and
+image processing. The processor cores belong to the RISCV family [11] targeting embedded security and automotive
+domains. The design sizes are suitable for existing BMC tools.
+Table I summarizes the results. All designs were previously
+verified using state-of-the-art simulation-based verification.
+The industrial designs were additionally verified using stateof-the-art formal verification. All designs were available in
+Verilog RTL. For G-QED runs on Open Source Designs, we
+used JasperGold® (V2016.09p002) on an Intel®Xeon® E52640 v3 with 128GB of DRAM. We used OneSpin 360 DVVerify®on an Intel®Xeon®E5-2690 v3@2.6GHz with 50GB
+RAM to run G-QED on Industrial Designs.
+Observation 1: G-QED enables highly thorough verification of a wide variety of HAs and processor cores.
+G-QED uniquely detected bugs that were missed by conventional verification flows (which includes both simulation and
+traditional formal verification), in addition to all bugs detected
+using those flows. The bugs uniquely detected by G-QED
+represent corner-case scenarios that are often highly difficult to
+detect. For example, for the AIE-A design, G-QED detected a
+difficult bug which got triggered by a complex sequence of 16
+actions causing some inputs of another action to be dropped.
+G-QED could detect this bug within 5 hours with a 32-cycle
+counterexample. From our industrial experience, such bugs can
+be very tricky to detect using simulations.
+Observation 2: G-QED enables quick verification of HAs
+and processors. G-QED detected bugs quickly with short
+counterexamples (in terms of clock cycles), which in turn
+enabled quick debug. Since G-QED uses BMC, it finds the
+shortest sequence to detect bugs. This is in sharp contrast to
+conventional flows where counterexample lengths and error
+traces are highly dependent on the precision of properties,
+assertions, and test cases. The effort required to set up G-QED
+is small resulting in large verification productivity benefits – an
+
+Authorized licensed use limited to: Stanford University. Downloaded on September 24,2024 at 17:59:19 UTC from IEEE Xplore. Restrictions apply.
+
+TABLE I. G-QED RESULTS : HA S AND P ROCESSORS
+Size
+#Bugs
+Name
+#Versions #FF #Gates Bugs detected by G-QED New bugs detected
+and conventional flow
+by G-QED only
+Open Source Designs
+Stream cipher
+1
+13k 86k
+1
+0
+Deflate
+1
+10k 60k
+Not available
+1
+Interfering HA
+MEM controller1
+2
+20k 0.1M
+2
+0
+MEM controller2
+13
+20k 0.1M
+12
+1
+FIFO
+5
+20k 0.1M
+5
+3
+NVDLA cbuf
+1
+0.1M 0.3M
+1
+0
+Non-interfering HA
+NVDLA cacc
+2
+11k 56k
+2
+0
+AES
+4
+2k
+31k
+4
+0
+Industrial Designs
+AIE-A
+2
+4k
+71k
+G-QED detected all
+4
+Interfering HA
+bugs detected by
+AIE-D
+2
+4k
+71k
+5
+industrial flow.
+Core1
+4
+3.8k
+54k
+0
+Bug counts are not
+Processor core
+reported for reasons
+Core2
+2
+2.5k 45k
+0
+of confidentiality
+Core3
+1
+1.8k 18k
+0
+Core4
+4
+5k
+65k
+0
+A total of 44 designs are used for G-QED results
+Design
+Type
+
+apples-to-apples comparison with industrial verification flows
+is presented in Sec. V-B.
+Observation 3: G-QED provides a unified verification
+solution for interfering HAs, non-interfering HAs, and processor cores. G-QED thus advances state-of-the-art compared
+to other QED pre-silicon verification techniques such as AQED [6] (for non-interfering HAs), and Symbolic QED [12],
+S2 QED [13], and C-S2 QED [14] (for processor cores).
+Observation 4: G-QED integrates seamlessly with various BMC engines. We used G-QED together with JasperGold® (V2016.09p002) from Cadence and OneSpin 360 DVVerify® from Siemens EDA to generate Table I.
+B. Industrial Case Study on Live Designs
+For an apples-to-apples comparison of G-QED versus industrial verification flows, we conducted a case study using
+Artificial Intelligence Engine (AIE) HAs. We had access to
+several (buggy) versions of two Verilog designs, AIE-A and
+AIE-D (Table I), where AIE-D is a derivative of AIE-A with
+additional features. Both designs represent interfering HAs that
+are also LCAs. At the start of our G-QED study, both HAs
+already passed pre-silicon verification sign-off and were in the
+final stages of design – hence, we refer to them as live designs.
+1) Industrial Verification Flow: Our industrial verification
+flow included both Constrained Random Simulation (CRS)
+with UVM-based [15] test bench and Formal Verification
+(FV) with design-specific properties. CRS was carried out at
+the top level, targeting all design functionality. For designspecific property creation, a framework similar to [16]. was
+used to reduce manual effort. A standard industrial verification
+process similar to [17] was employed. The sign-off criteria
+for verification was 100% structural code coverage and 100%
+functional coverage from both CRS and FV combined.
+2) G-QED Flow: For each AIE HA, we defined the set of
+actions and extracted the associated RSR registers and inputoutput interface protocol details with help from design engineers. We then used the methodology explained in Sec. III. No
+knowledge of the internal architecture (performance optimizations, parallelism, internal pipelining) or existing industrial
+verification flow was required. With the G-QED FC (Sec. III),
+we were able to detect and root-cause 9 new bugs (missed
+
+Runtime
+[max:avg:min]
+minutes
+
+Bug trace
+[max:avg:min]
+clock cycles
+
+15:15:15
+5:5:5
+2:1:1
+5:2:1
+2:1:1
+21:21:21
+14:12:11
+4:1:<1
+
+35:35:35
+11:11:11
+4:4:4
+9:7:4
+7:5:4
+25:25:25
+108:106:105
+290:163:94
+
+240:180:60
+300:150:90
+1:1:<1
+1:1:1
+<1:<1:<1
+2:1:1
+
+32:26:20
+32:30:20
+7:7:6
+5:5:5
+4:4:4
+6:6:6
+
+by the industrial flow) within 3 person weeks, in addition to
+detecting bugs detected by the industrial flow (Table II).
+TABLE II. S UMMARY OF INDUSTRIAL CASE STUDY
+Industrial flow effort G-QED effort Bugs detected
+(person days)
+(person days) by G-QED only
+AIE-A 140 (CRS: 110, FV: 30)
+13
+4
+AIE-D 230 (CRS: 160, FV: 70)
+8
+5
+Design
+
+Observation 5: G-QED significantly improves bug coverage versus industrial verification flows. G-QED uniquely
+detected 9 corner-case and difficult-to-activate bugs in wellverified industrial designs. Of these 9 bugs, 4 were due to
+the specification inaccuracies and 5 were in the RTL implementations that were only triggered by a complex sequence of
+actions. All these bugs were detected in less than 5 hours.
+Observation 6: G-QED dramatically improves verification productivity. The industrial verification flow required 370
+person days for the two HAs. G-QED required only 21 person
+days (including setup, running the BMC tool, and root-cause
+analysis) – an 18-fold verification productivity boost.
+Observation 7: G-QED can be set up very quickly. It
+took only 7 and 2 person days for AIE-A and AIE-D to
+set up G-QED, respectively. In contrast, industrial verification
+flows often require detailed information about a design and its
+implementation. For the AIE HAs, it took 250 person days to
+set up CRS and FV (test bench and property development).
+Observation 8: G-QED enables quick debug. G-QED
+produced short counter-examples (32 cycles or fewer) for the
+AIE HAs (Table I) resulting in quick debug (less than a day).
+cause analysis. G-QED effort in Table II includes this debug
+effort. In contrast, it took several days for root cause analysis
+of some of the bugs detected by CRS.
+Observation 9: G-QED does not require low-level design
+details. G-QED largely relies on self-consistency checks,
+minimizing the need to understand deep design details. This
+saves verification effort significantly.
+Observation 10: G-QED enables short design-design verification loops with quick turnaround for rapidly evolving
+designs. Once the bugs detected by G-QED were fixed, we
+could reuse G-QED immediately to verify the fixed designs
+with little or no additional effort. In contrast, it required up
+
+Authorized licensed use limited to: Stanford University. Downloaded on September 24,2024 at 17:59:19 UTC from IEEE Xplore. Restrictions apply.
+
+to 120 person days for CRS and FV to debug, fix, update test
+cases and properties, and rerun verification.
+VI. R ELATED W ORK
+Simulation-based methodologies dominate the pre-silicon
+verification practice in industry [15], [17], [18]. However,
+as demonstrated in Sec. V-B, simulation-based methods are
+inadequate for ensuring thorough and quick verification of
+HAs. While simulation scales for large designs, there can be
+major scaleup opportunities for G-QED using techniques such
+as [7] – a topic of future work.
+While G-QED employs BMC for self-consistency checking,
+it differs from traditional formal verification (Sec. V-B). GQED can leverage recent formal verification advances to
+further reduce associated manual efforts (e.g., automatic RSR
+extraction [19], ILA [5]).
+Self-consistency-based checking has its roots in faulttolerant computing, including the use of design diversity. For
+pre-silicon verification, publications such as [20], [21] are
+relevant. Completeness guarantees may be affected by these
+techniques (e.g., for a bug always triggered by a particular sequence of instructions, irrespective of the number of NOPs and
+stalls inserted in the sequence). Another closely approach [22]
+requires specific clock cycles when RSRs are read and written,
+which can be very challenging for HAs (Sec. II). In contrast,
+we proved G-QED to be sound and complete.
+TABLE III. G-QED VS . OTHER PRE - SILICON QED TECHNIQUES
+Symbolic
+QED [12],
+[23]
+
+S2 QED [13]
+C-S2 QED
+[14]
+
+Non-interfering
+HAs only
+
+No
+
+No
+
+Yes
+
+No
+
+No
+
+Yes
+
+Yes
+
+Yes
+
+NA
+
+NA
+
+Yes
+
+Yes
+
+No
+
+NA
+
+NA
+
+Yes
+
+Yes
+
+Yes
+
+Yes
+
+Yes
+
+Yes ( [12]
+implementation might
+miss some
+bugs)
+Moderate/
+Large
+No
+
+Yes
+
+Attribute
+
+G-QED
+(This
+paper)
+
+Standalone
+HAs
+Processor
+cores
+Designer input for RSRs
+Clock cycle
+details
+for
+RSR updates
+Theoretical
+guarantees
+
+Yes
+
+Design size
+Symbolic
+starting states
+
+A-QED A-QED2
+[6]
+[7]
+
+Moderate Moderate
+No
+
+No
+
+Large
+No
+
+Moderate
+Yes
+
+Recently, there have been several publications on various
+flavors of QED pre-silicon verification techniques, namely,
+Symbolic QED [12], S2 QED [13], C-S2 QED [14], A-QED [6],
+and A-QED2 [7]. Table III contrasts these techniques versus
+G-QED with respect to various attributes.
+VII. C ONCLUSION
+G-QED presents a unified approach to highly thorough presilicon verification of interfering HAs, non-interfering HAs,
+and processor cores through self-consistency. With modest
+design assumptions, G-QED has been proven to be sound and
+complete. Results from a wide variety of designs, including an
+industrial case study, demonstrate its effectiveness and practicality. G-QED creates several promising research directions:
+(1) scale-up to very large designs through new decomposition
+and abstraction techniques (e.g., [7]). (2) G-QED with symbolic starting states to overcome BMC bounds; (3) G-QED for
+
+verifying third-party IP blocks with little/obfuscated internal
+design details; (4) functional safety verification through a
+combination of G-QED and formal fault injection techniques;
+and, (5) G-QED for deriving side-channel attacks in HAs
+(similar to timing side channels for processors [24]).
+ACKNOWLEDGEMENT
+This work was supported in part by ACE (one of the seven
+centers in JUMP 2.0, a Semiconductor Research Corporation
+(SRC) program sponsored by DARPA), Stanford SystemX
+Alliance, and SRC-sponsored Global Research Collaboration.
+R EFERENCES
+[1] “A14 Bionic - Apple - WikiChip.” [Online]. Available:
+https://en.wikichip.org/wiki/apple/ax/a14
+[2] J. Cross, “A14 bionic FAQ: What you need to know about Apple’s 5nm
+processor,” 2020, https://www.macworld.com/article/234595/a14-bionicfaq-performancefeatures-cpu-gpu-neural-engine.html.
+[3] Norrie et al., “The Design Process for Google’s Training Chips: TPUv2
+and TPUv3,” IEEE Micro, 2021.
+[4] H. D. Foster, “Trends in functional verification: A 2014 industry study,”
+in Proceedings of the 52nd Annual Design Automation Conference,
+2015, pp. 1–6.
+[5] Huang et al., “Instruction-Level Abstraction (ILA): A Uniform Specification for System-on-Chip (SoC) Verification,” ACM Trans. Des. Autom.
+Electron. Syst., 2019.
+[6] Singh et al., “A-QED Verification of Hardware Accelerators,” in 57th
+ACM/IEEE Design Automation Conference, DAC 2020, San Francisco,
+CA, USA, July 20-24, 2020. IEEE, 2020, pp. 1–6. [Online]. Available:
+https://doi.org/10.1109/DAC18072.2020.9218715
+[7] Chattopadhyay et al., “Scaling up hardware accelerator verification
+using a-qed with functional decomposition,” in 2021 Formal Methods
+in Computer Aided Design (FMCAD). IEEE, 2021, pp. 42–52.
+[8] Clarke et al., “Bounded Model Checking using Satisfiability Solving,”
+Formal methods in system design, vol. 19, no. 1, pp. 7–34, 2001.
+[9] Peccerillo et al., “A Survey on Hardware Accelerators: Taxonomy,
+Trends, Challenges, and Perspectives,” Journal of Systems Architecture,
+vol. 129, p. 102561, 2022.
+[10] R. M. Keller, “Formal Verification of Parallel Programs,” Communications of the ACM, vol. 19, no. 7, pp. 371–384, 1976.
+[11] A. Waterman and K. Asanovic. (2017, May) The RISC-V Instruction
+Set Manual, Volume I: User-Level ISA. https://riscv.org/specifications.
+[12] Singh et al., “Logic Bug Detection and Localization Using Symbolic
+Quick Error Detection,” IEEE Transactions on Computer-Aided Design
+of Integrated Circuits and Systems, 2018.
+[13] Fadiheh et al., “Symbolic Quick Error Detection using Symbolic Initial
+State for Pre-silicon Verification,” in 2018 Design, Automation & Test
+in Europe Conference & Exhibition (DATE). IEEE, 2018, pp. 55–60.
+[14] Devarajegowda et al., “Gap-free Processor Verification by S2QED and
+Property Generation,” in 2020 Design, Automation & Test in Europe
+Conference & Exhibition (DATE), 2020, pp. 526–531.
+[15] “IEEE Standard for Universal Verification Methodology Language Reference Manual,” IEEE Std 1800.2-2017, pp. 1–472, 2017.
+[16] Devarajegowda et al., “Python Based Framework for HDSLs with an
+Underlying Formal Semantics,” in 2017 IEEE/ACM ICCAD, Nov 2017.
+[17] Singh et al., “Symbolic QED Pre-silicon Verification for Automotive Microcontroller Cores: Industrial Case Study,” in 2019 Design, Automation
+& Test in Europe Conference & Exhibition (DATE), 2019.
+[18] Chen et al., “Challenges and Trends in Modern SoC Design Verification,” IEEE Design & Test, vol. 34, no. 5, pp. 7–22, 2017.
+[19] Zeng et al., “Generating Architecture-level Abstractions from RTL
+Designs for Processors and Accelerators Part I: Determining Architectural State Variables,” in 2021 IEEE/ACM International Conference On
+Computer Aided Design (ICCAD). IEEE, 2021, pp. 1–9.
+[20] R. B. Jones, C.-J. H. Seger, and D. L. Dill, “Self-consistency Checking,”
+in International Conference on Formal Methods in Computer-Aided
+Design. Springer, 1996, pp. 159–171.
+[21] J. R. Burch and D. L. Dill, “Automatic Verification of Pipelined Microprocessor Control,” in International Conference on Computer Aided
+Verification. Springer, 1994, pp. 68–80.
+[22] Reid et al., “End-to-end Verification of Processors with ISA-Formal,”
+in International Conference on Computer Aided Verification. Springer,
+2016, pp. 42–58.
+[23] F. Lonsing, S. Mitra, and C. W. Barrett, “A Theoretical Framework for
+Symbolic Quick Error Detection,” 2020 Formal Methods in Computer
+Aided Design (FMCAD), pp. 1–10, 2020.
+[24] Fadiheh et al., “Processor Hardware Security Vulnerabilities and Their
+Detection by Unique Program Execution Checking,” in 2019 Design,
+Automation & Test in Europe Conference & Exhibition (DATE). IEEE.
+
+Authorized licensed use limited to: Stanford University. Downloaded on September 24,2024 at 17:59:19 UTC from IEEE Xplore. Restrictions apply.
+
+

@@ -1,0 +1,119 @@
+% RW4 -- execution / semantic models of speculation (2026-11-10).
+% New entries only. Already in ISCA-27/sections/references.bib (do NOT duplicate): disselkoen2019code, ponce2022cats,
+% guanciale2020inspectre, pensieve, rtl2upath, cheang2019formal, mcilroy2019spectre, barthe2021highassurance,
+% guarnieri2020spectector, guarnieri2021contracts, cauligi2020constanttime, cauligi2022sok, patrignani2021exorcising,
+% vassena2021blade, shivakumar2023declassified, shivakumar2023typing, daniel2021haunter, fabian2022combinations,
+% checkmate, lcms, leave, mohr2024synthesizing, hsiao2021rtl2uspec.
+% Also already in sibling RW bibs (do NOT duplicate): guarnieri2020casco (rw2), smith2025wpspeculative, arranzolmos2025rsb.
+% Metadata verified 2026-11-10 against Crossref / ACM DL / USENIX / arXiv / the PDF itself (see rw4_semantics.md).
+
+@techreport{yu2019sttformal,
+  author      = {Jiyong Yu and Mengjia Yan and Artem Khyzha and Adam Morrison and Josep Torrellas and Christopher W. Fletcher},
+  title       = {Speculative Taint Tracking ({STT}): A Formal Analysis},
+  institution = {University of Illinois at Urbana-Champaign and Tel Aviv University},
+  year        = {2019},
+  note        = {Companion technical report to the MICRO 2019 STT paper},
+  url         = {https://iacoma.cs.uiuc.edu/iacoma-papers/stt-formal-tr_micro19.pdf}
+}
+
+@inproceedings{colvin2020abstractsemantics,
+  author    = {Robert J. Colvin and Kirsten Winter},
+  title     = {An Abstract Semantics of Speculative Execution for Reasoning About Security Vulnerabilities},
+  booktitle = {Formal Methods. {FM} 2019 International Workshops, Revised Selected Papers, Part {II}},
+  series    = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  pages     = {323--341},
+  year      = {2020},
+  doi       = {10.1007/978-3-030-54997-8_21}
+}
+
+@inproceedings{coughlin2024weakmemory,
+  author    = {Nicholas Coughlin and Kait Lam and Graeme Smith and Kirsten Winter},
+  title     = {Detecting Speculative Execution Vulnerabilities on Weak Memory Models},
+  booktitle = {Formal Methods: 26th International Symposium, {FM} 2024, Part {I}},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {14933},
+  publisher = {Springer},
+  pages     = {482--500},
+  year      = {2024},
+  doi       = {10.1007/978-3-031-71162-6_25}
+}
+
+@inproceedings{wu2019abstractinterp,
+  author    = {Meng Wu and Chao Wang},
+  title     = {Abstract Interpretation under Speculative Execution},
+  booktitle = {Proceedings of the 40th ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI)},
+  pages     = {802--815},
+  year      = {2019},
+  doi       = {10.1145/3314221.3314647}
+}
+
+@inproceedings{pescosta2021bmcsni,
+  author    = {Emmanuel Pescosta and Georg Weissenbacher and Florian Zuleger},
+  title     = {Bounded Model Checking of Speculative Non-Interference},
+  booktitle = {2021 IEEE/ACM International Conference On Computer Aided Design (ICCAD)},
+  pages     = {1--9},
+  year      = {2021},
+  doi       = {10.1109/ICCAD51958.2021.9643462}
+}
+
+@inproceedings{cabodi2019speculationmc,
+  author    = {Gianpiero Cabodi and Paolo Camurati and Fabrizio Finocchiaro and Danilo Vendraminetto},
+  title     = {Model Checking Speculation-Dependent Security Properties: Abstracting and Reducing Processor Models for Sound and Complete Verification},
+  booktitle = {Codes, Cryptology and Information Security: Third International Conference, {C2SI} 2019},
+  series    = {Lecture Notes in Computer Science},
+  publisher = {Springer},
+  pages     = {462--479},
+  year      = {2019},
+  doi       = {10.1007/978-3-030-16458-4_27}
+}
+
+@inproceedings{zhang2023ultimateslh,
+  author    = {Zhiyuan Zhang and Gilles Barthe and Chitchanok Chuengsatiansup and Peter Schwabe and Yuval Yarom},
+  title     = {Ultimate {SLH}: Taking Speculative Load Hardening to the Next Level},
+  booktitle = {32nd USENIX Security Symposium (USENIX Security 23)},
+  pages     = {7125--7142},
+  year      = {2023},
+  url       = {https://www.usenix.org/conference/usenixsecurity23/presentation/zhang-zhiyuan-slh}
+}
+
+@inproceedings{almeida2017jasmin,
+  author    = {Jos{\'e} Bacelar Almeida and Manuel Barbosa and Gilles Barthe and Arthur Blot and Benjamin Gr{\'e}goire and Vincent Laporte and Tiago Oliveira and Hugo Pacheco and Benedikt Schmidt and Pierre-Yves Strub},
+  title     = {Jasmin: High-Assurance and High-Speed Cryptography},
+  booktitle = {Proceedings of the 2017 ACM SIGSAC Conference on Computer and Communications Security (CCS)},
+  pages     = {1807--1823},
+  year      = {2017},
+  doi       = {10.1145/3133956.3134078}
+}
+
+@article{arranzolmos2025sctpreservation,
+  author  = {Santiago Arranz Olmos and Gilles Barthe and Lionel Blatter and Benjamin Gr{\'e}goire and Vincent Laporte},
+  title   = {Preservation of Speculative Constant-Time by Compilation},
+  journal = {Proceedings of the ACM on Programming Languages},
+  volume  = {9},
+  number  = {POPL},
+  pages   = {1293--1325},
+  year    = {2025},
+  doi     = {10.1145/3704880}
+}
+
+@article{vanderwall2025snip,
+  author  = {S{\"o}ren van der Wall and Roland Meyer},
+  title   = {{SNIP}: Speculative Execution and Non-Interference Preservation for Compiler Transformations},
+  journal = {Proceedings of the ACM on Programming Languages},
+  volume  = {9},
+  number  = {POPL},
+  pages   = {1506--1535},
+  year    = {2025},
+  doi     = {10.1145/3704887}
+}
+
+@article{arranzolmos2026sps,
+  author  = {Santiago Arranz-Olmos and Gilles Barthe and Lionel Blatter and Xingyu Xie and Zhiyuan Zhang},
+  title   = {({Dis})Proving {Spectre} Security with Speculation-Passing Style},
+  journal = {Proceedings of the ACM on Programming Languages},
+  volume  = {10},
+  pages   = {624--652},
+  year    = {2026},
+  doi     = {10.1145/3798222}
+}

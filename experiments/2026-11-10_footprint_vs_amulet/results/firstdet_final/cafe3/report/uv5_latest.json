@@ -1,0 +1,65 @@
+{
+ "estimator": "stratified: E[UV5 count] = K1*(N1_total/N1_run) + K2*(N2_total/N2_run); S1 = static same-line (class C, includes D) not_taken stems, S2 = all other tests (seed-order sample)",
+ "K1": 2,
+ "N1_run": 10849,
+ "N1_total": 10849,
+ "K2": 1,
+ "N2_run": 12277,
+ "N2_total": 39383,
+ "hits_pending_classification": 0,
+ "expected_uv5_in_corpus": 5.21,
+ "rate": 0.00010367630935961253,
+ "expected_tests": 9645.4,
+ "multiple": 23.22,
+ "ci95_note": "Poisson exact interval on K2, scaled by N2_total/N2_run, plus K1 (scaled by N1_total/N1_run)",
+ "expected_uv5_ci95": [
+  2.08,
+  19.87
+ ],
+ "expected_tests_ci95": [
+  2527.6,
+  24135.9
+ ],
+ "multiple_ci95": [
+  9.28,
+  88.62
+ ],
+ "uv5_hits": [
+  [
+   "mispredict_not_taken",
+   "inst-021207",
+   "cold",
+   [
+    10000,
+    2500
+   ],
+   "S1"
+  ],
+  [
+   "mispredict_not_taken",
+   "inst-007645",
+   "cold",
+   [
+    2500,
+    0
+   ],
+   "S1"
+  ],
+  [
+   "mispredict_taken",
+   "inst-007645",
+   "cold",
+   [
+    2500,
+    0
+   ],
+   "S2"
+  ]
+ ],
+ "T2g_tests_run": 23126,
+ "setups": {
+  "warm": 7883,
+  "cold": 7614,
+  "full": 7629
+ }
+}
