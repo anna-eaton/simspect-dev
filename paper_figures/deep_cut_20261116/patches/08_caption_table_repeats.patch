@@ -1,0 +1,11 @@
+--- a/tikz/instrtable_v2_short.tex
++++ b/tikz/instrtable_v2_short.tex
+@@ -4,7 +4,7 @@
+ \begin{table}[t]
+ \centering
+ % [before 2026-11-16 tersening] \caption{How each execution-graph element is realized. Rows are graph fragments in the notation of Table~\ref{tab:execvocab} (xmit: the test's transmitter; lc, fnc: last committed, first uncommitted). Each test starts with a prologue that zeroes its state and runs \texttt{mfence}.}
+-\caption{How each execution-graph element is realized (notation of Table~\ref{tab:execvocab}; lc, fnc: last committed, first uncommitted). Each test's prologue zeroes its state and runs \texttt{mfence}.}
++\caption{How each execution-graph element is realized \cutrep{(notation of Table~\ref{tab:execvocab}; lc, fnc: last committed, first uncommitted)}{(notation of Table~\ref{tab:execvocab})}. Each test's prologue zeroes its state and runs \texttt{mfence}.}
+ \label{tab:instrtable}\label{tab:sptable}% old label kept so the existing reference resolves
+ % Table (d), v2, 8pt version (every text >= 8pt, \figfont; derived from instrtable_v2.tex): how concretization instruments each execution-graph element (one column, \columnwidth = 241pt ACM).%
+ % Body only: \input this inside a table float; the caption is inline.%

@@ -1,0 +1,21 @@
+// futuristic 2026-11-16 (agent invisispec-fut): twostage_lp.py config for the Futuristic footprint corpus.
+// Source: runconfigs/twostage_lp/Footprint_6_u.jsonc (regen-lp 2026-11-10, whose Stage 1b XMLs became the reported corpus Footprint_6_u_nov10_s2A).
+// Changed ONLY: testset_dir; core_model/lp_model -> the _fut copies; corpus name; stage2_config = recipe A (runconfigs/futuristic_20261116/stage2_final_A.jsonc,
+// = runconfigs/bigcorpus_20261115/stage2_final_A.jsonc paths only) with stage2_postpasses false, exactly as nov10_s2A was concretized (RMW/jmp from vocab_rj, no post-passes).
+// Stage 1 / 1.5 / stream blocks = the 2026-11-10 regen-lp values unchanged. Docs: wiki/state/EVAL_MANIFEST.md 'Futuristic testsets (2026-11-16)'.
+{
+  "paths": {
+    "testset_dir": "/tests/futuristic_20261116/testsets"
+  },
+  "twostage_lp": {
+    "family": "Footprint_6_u",
+    "core_model": "Footprint_6_u_core_ri_fut",
+    "lp_model": "Footprint_6_u_lpP_fut",
+    "corpus": "Footprint_6_u_core_lpP_fut_s2A",
+    "stage2_config": "runconfigs/futuristic_20261116/stage2_final_A.jsonc",
+    "stage1": {"jobs": 8, "cap": 200000, "timeout_s": 10800, "xmx": "8g", "wait_k": 6},
+    "stage15": {"slots": 40, "job_timeout": 300, "budget_s": 5400, "cap": 25, "walk_p": 0.05, "shuffle_seed": 20261110, "spread": 2, "dedup_level": "seed", "xmx": "4g"},
+    "stream": {"interval": 120, "jobs": 24, "min_batch": 50, "max_batch": 150},
+    "stage2_postpasses": false
+  }
+}

@@ -1,0 +1,28 @@
+diff -ruN up_v22.1.0.0/src/cpu/pred/bpred_unit.cc ae_SpecLFB/src/cpu/pred/bpred_unit.cc
+--- up_v22.1.0.0/src/cpu/pred/bpred_unit.cc	2022-12-30 11:53:52
++++ ae_SpecLFB/src/cpu/pred/bpred_unit.cc	2025-02-05 21:05:37
+@@ -48,6 +48,7 @@
+ #include "base/compiler.hh"
+ #include "base/trace.hh"
+ #include "debug/Branch.hh"
++#include "debug/AnalyseIPC.hh"
+ 
+ namespace gem5
+ {
+@@ -296,6 +297,8 @@
+         iPred->updateDirectionInfo(tid, orig_pred_taken);
+     }
+ 
++    DPRINTF(AnalyseIPC, "analyse_ipc_violation: predicting branch at %#lx to go to %#lx\n", pc.instAddr(), target->instAddr());
++
+     predHist[tid].push_front(predict_record);
+ 
+     DPRINTF(Branch,
+@@ -452,6 +455,7 @@
+         update(tid, (*hist_it).pc, actually_taken,
+                pred_hist.front().bpHistory, true, pred_hist.front().inst,
+                corr_target.instAddr());
++        DPRINTF(AnalyseIPC, "analyse_ipc_violation: Mispredicted branch at PC %#llx\n", (unsigned long long)hist_it->pc);
+ 
+         if (iPred) {
+             iPred->changeDirectionPrediction(tid,

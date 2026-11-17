@@ -186,6 +186,17 @@ Replaces `classify_hits.py` + `cleanupspec_skip_evidence.py` + `classify_cs_rmw.
 | `python3 STAGE3_gem5/bugs/classify.py race <diag_stt_vp_squash_race output.json ...> [--json f]` | counts paper UV6 (`stt_vp_squash_race` verdicts) |
 | `python3 STAGE3_gem5/bugs/_regress.py classes\|evidence\|gate\|bucket <old> <new>` | record-by-record regression of the new output against the old classifiers' (exit 1 on any changed label) |
 
+## Trace-replay re-score of firstdet runs (offline, no gem5) — 2026-11-16
+
+Re-scores a firstdet/timing run's saved hits with the current checker code: `timing_driver.run_one` runs unchanged with the run's `run_config.jsonc`, but `run_gem5` returns the saved `traces/<mode>/<stem>.pipeview.txt.gz` (patch appended to a node code COPY only, never the repo). Only valid when every record that can change has a saved trace (e.g. a change that can only remove hits). Used for the W-3 + RG-1 re-score (`wiki/state/EVAL_MANIFEST.md` "Re-score with W-3 + RG-1 (2026-11-16)").
+
+| command | what it does |
+|---|---|
+| `cat experiments/2026-11-16_fprescore/tools/replay_patch.py >> <code copy>/STAGE3_gem5/gem5_common.py` | makes the copy's `run_gem5` replay `$SIMSPECT_REPLAY_TRACE` (writes the branch-ann copy + `force_plan.json` as the real call, then the saved trace and a `config.json` clock) |
+| `python3 replay_driver.py --code-root <copy> --old-run <run> --config <run>/run_config.jsonc --model <corpus> --testset-model <testset> --out <dir> --parallel N [--limit N] [--criterion-override specs/leakage/x.json]` | replays every saved trace (fast path forced off), copies rows without a trace as `replay: not_replayed`; resumable; log `<dir>/replay.log`; disk guard `--min-free-gb` |
+| `python3 compare.py <old run> <new run> --json c.json` | fidelity fields (PCs, lc/fnc retire, force plan, event counts, BR events) and hit transitions, record by record |
+| `python3 actor_breakdown.py <code> <new run> --json a.json` | per hit: offending events by micro-op class (load / nonload / unknown) |
+
 ## Resolved-branch gate re-score (offline, no gem5) — 2026-11-16
 
 The gate itself runs inside every gem5 run (`gem5_common.process_one` → `STAGE3_gem5/resolved_gate.py`, criteria key `resolved_older_before_signal`; rule in `wiki/design/RESOLUTION_HOOKS.md` §3). Older campaigns are re-scored from their saved raw records with the same function. Results and paths: `wiki/state/EVAL_MANIFEST.md` "Resolved-branch gate (2026-11-16)".
@@ -236,7 +247,25 @@ bash scripts/inttwin_20261116/guard.sh                            # disk guard (
 python3 scripts/inttwin_20261116/classify_node.py --node cafe3    # gate / race_scan / E2w-method bucket per finished row -> cls/<row>/
 bash scripts/inttwin_20261116/confirm_uv6_twin.sh fpr|int         # faithful UV6 rerun (SPT d4)
 python3 scripts/inttwin_20261116/pair_table.py <cls dir> --md out.md --json out.json   # FPR / INT / differing pairs per label
+# Mac side (inttwin2):
+bash scripts/inttwin_20261116/watch_done.sh        # poll cafe1/2/3 every 15 min via status_node.py; exit 0 all done, 3 stall; log experiments/2026-11-16_inttwin/watch.log
+bash scripts/inttwin_20261116/finalize.sh [extract|collect|score|table|all]   # rg_extract on nodes, collect cls/rg, RG-1 re-score, pair tables gate off/on -> experiments/2026-11-16_inttwin/
+python3 scripts/inttwin_20261116/pair_table.py <cls dir> --rg <rgs dir> --md out.md --json out.json   # gate-on view (removed-by-RG label)
 ```
+
+## Futuristic testsets (InvisiSpec / STT) — `scripts/futuristic_20261116/` (2026-11-16)
+
+Pilot-first build of the Futuristic-contract testsets (models `STAGE1_alloy/models/*_fut.als`; results and decisions: `wiki/state/EVAL_MANIFEST.md` "Futuristic testsets (2026-11-16)"). Node layout cafe2 `/tests/futuristic_20261116/{code,stage1,ws_pilot_<F>,testsets,firstdet,classify,analysis,logs}`, tmux `fut`. Every script logs start / end / rc under `logs/`. `stage1a.sh` takes optional env FUT_CODE / FUT_WS / FUT_TAG (code dir, workspace, log suffix); the FUT-1 (a) rerun: `FUT_CODE=/tests/futuristic_20261116/code_fut2 FUT_WS=/tests/futuristic_20261116/stage1_fut2 FUT_TAG=fut2 bash scripts/futuristic_20261116/stage1a.sh <stem> 10`.
+
+| command | what it does |
+|---|---|
+| `scripts/futuristic_20261116/ship_code.sh cafe2` (Mac) | tar today's tree to `<node>:/tests/futuristic_20261116/code` + `SNAPSHOT.txt` sha256s; refuses while a `fut` window runs; log `~/Library/Logs/simspect/futuristic_ship.log` |
+| `bash scripts/futuristic_20261116/stage1a.sh <core stem> [jobs]` (node) | Stage 1a to UNSAT: `partition_stage1.py` + `launch_stage1.py` (nice 19, 24 h per partition); verdicts `stage1/logs/<stem>__<part>.log` |
+| `bash scripts/futuristic_20261116/pilot.sh gen <F>` / `pilot.sh gem5 <cfg> <corpus> <name> [P]` (node) | pilot corpus via `twostage_lp.py` + `runconfigs/futuristic_20261116/twostage_<F>_fut_pilot.jsonc`; gem5 via `firstdet_stream.py` on every test with `--keep-all-traces` |
+| `bash scripts/futuristic_20261116/analyze_pilot.sh <run> <corpus> <invisispec\|stt> <tag>` (node) | `bugs/classify.py footprint` + `pilot_fidelity.py` + `blocker.py` on a finished pilot run |
+| `python3 scripts/futuristic_20261116/core_shapes.py --code <code> [--json f] <dirs>` | speculation-source kinds of Alloy instances (`inst-*.txt`): branch / non-branch, rf reads of unresolved outputs, in the transmitter's cone |
+| `python3 scripts/futuristic_20261116/pilot_fidelity.py --run <firstdet dir> --testset <corpus> --code <code> --json f` | per test: graph sources mapped to runtime PCs (`__litmus` labels, shifted by the raw `xmit_pc`), source incomplete at transmitter issue / check_ld signal, `LSQ:safe` USL status, footprints, older-complete-at-signal |
+| `python3 scripts/futuristic_20261116/{blocker,vp_lag,residue_profile}.py ...` | what kept the transmitter speculative; checker vp vs `LSQ:safe`; profile of the unexplained `other_*` records |
 
 ## Two-stage audit tools (read-only) — `STAGE1_alloy/models/proposed_twophase/dedup_audit/`
 

@@ -1,0 +1,22 @@
+--- a/sections/background.tex
++++ b/sections/background.tex
+@@ -51,7 +51,7 @@
+ aims to uphold \contract{ARCH-SEQ}, and SPT~\cite{spt} \contract{CT-SEQ}~\cite[\S II-C]{protean}. 
+ % Revizor~\cite{revizor} and /
+ % AMuLeT~\cite{amulet} tests hardware against a contract by searching for two inputs with the same contract observations but different microarchitectural traces; AMuLeT tests InvisiSpec, CleanupSpec, and SpecLFB against \contract{CT-SEQ} and STT against \contract{ARCH-SEQ}. 
+-Speculative non-interference (SNI)~\cite{guarnieri2020spectector} and its variant weak SNI~\cite[Def.~4]{guarnieri2021contracts} are the matching program properties: a program is weakly SNI if its observations under a contract reveal nothing beyond its \contract{ARCH-SEQ} observations, so a CPU that upholds \contract{ARCH-SEQ} makes every program weakly SNI.
++\cutsug{Speculative non-interference (SNI)~\cite{guarnieri2020spectector} and its variant weak SNI~\cite[Def.~4]{guarnieri2021contracts} are the matching program properties: a program is weakly SNI if its observations under a contract reveal nothing beyond its \contract{ARCH-SEQ} observations, so a CPU that upholds \contract{ARCH-SEQ} makes every program weakly SNI.}
+ % Speculative non-interference (SNI)~\cite{guarnieri2020spectector} and weak SNI~\cite[Def.~4]{guarnieri2021contracts} are the matching software properties. A program is SNI~\cite{guarnieri2020spectector} if, on inputs that agree on public data, its observations under the contract reveal nothing beyond its \contract{CT-SEQ} observations; it is weakly SNI~\cite[Def.~4]{guarnieri2021contracts} if they reveal nothing beyond its \contract{ARCH-SEQ} observations.
+ 
+ % Speculative non-interference and weak speculative non-interference~\cite{guarnieri2020spectector} are the matching properties of software respectively: a program satisfies it if its speculative executions expose nothing beyond its sequential ones.
+--- a/tikz/intro_threelayer_v9.tex
++++ b/tikz/intro_threelayer_v9.tex
+@@ -44,7 +44,7 @@
+ \begin{tikzpicture}[>=latex, every node/.style={execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000\relax}}]%
+ \coordinate (rail) at (\ovrail,0);%
+ % ---- top row: the security contract and AMuLeT (prior work)
+-\node[ovctx, sharp corners, draw=sssrcink, fill=sssrcbg, text width=\ovcw-8pt, anchor=north west] (C) at (0,0) {\ovtitle{Security Contract (\S\ref{sec:bg-contracts})}(Observer Mode, Execution Mode)\ovhr{sssrcink!40}{\ovdfont\textit{e.g., (\contract{ARCH}, \contract{SEQ}), which guarantees weak speculative non-interference}~\cite{guarnieri2021contracts}\par}};% example at 6.5pt so it fits on 2 lines (Anna 2026-11-16)
++\node[ovctx, sharp corners, draw=sssrcink, fill=sssrcbg, text width=\ovcw-8pt, anchor=north west] (C) at (0,0) {\ovtitle{Security Contract (\S\ref{sec:bg-contracts})}(Observer Mode, Execution Mode)\ovhr{sssrcink!40}{\ovdfont\textit{e.g., (\contract{ARCH}, \contract{SEQ})\cutsug{, which guarantees weak speculative non-interference}}~\cite{guarnieri2021contracts}\par}};% example at 6.5pt so it fits on 2 lines (Anna 2026-11-16)
+ \node[ovctx, text width=\ovaw-8pt, anchor=north west] (A) at (\ovax,0) {\ovtitle{AMuLeT~\cite{amulet}}%
+ % \caroline{try to put on 2 lines}% commented out (Anna 2026-11-15)
+ {\ovdfont\textbf{random testing} of simulated defenses against \textbf{security contracts}\par}

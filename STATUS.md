@@ -18,6 +18,10 @@ list → `wiki/state/OPEN.md`. Prior: cleanuprepo repo cleanup + Mac↔cafe2 git
 
 ---
 
+## 🔮 2026-11-16 — Futuristic InvisiSpec/STT testsets: STOPPED after the pilots, 4 decisions (agent invisispec-fut) → [`wiki/state/EVAL_MANIFEST.md`](wiki/state/EVAL_MANIFEST.md) "Futuristic testsets (2026-11-16)"
+
+New `_fut` models (clause 1 only) enumerated to UNSAT: Footprint 11,432 cores (Spectre 1,411), STT 2,245 so far (Spectre 129). Pilots: non-branch speculation sources are not realized by Stage 2 (6/894 InvisiSpec runs), 3,578 Footprint cores read a value from an instruction the graph calls incomplete, InvisiSpec's Futuristic Inspector is graph-agnostic, check_ld/check_br need a Futuristic window. One NEW STT hit (inst-000151). Decide FUT-1..FUT-4 in [`URGENT_TODO.md`](URGENT_TODO.md). Still running: STT k6 partitions on cafe2 (tmux `fut`).
+
 ## 🧪 2026-11-15 — Big corpus for all 11 paper bugs + race on STT and SPT (agent bigcorpus; RUNNING as last logged 22:10 UTC)
 
 Final recipe A (and B after it) on big Footprint_6_u / STT_6_u / Recon_6_u corpora, cafe3 + cafe2; race sweep commitToIEWDelay 1/3/4 on /work/stt and stt-master, 1/4 on SPT-Fence (cross-model). How to resume: `wiki/state/RUNNING.md` "Big corpus 2026-11-15"; bug table (pending): `wiki/state/EVAL_MANIFEST.md` "Big corpus bug coverage (2026-11-15)". Done so far: SPT-Fence race on the 24 a5 stems, 0/24 at delay 1, 7/23 at delay 4. Decide: URGENT_TODO BC-1 (how to count the race), BC-2 (cross-model SPT), BC-3 (sampling).

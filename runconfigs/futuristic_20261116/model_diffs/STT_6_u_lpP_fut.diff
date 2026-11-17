@@ -1,0 +1,24 @@
+--- STAGE1_alloy/models/STT_6_u_lpP.als	2026-11-10 05:53:54
++++ STAGE1_alloy/models/STT_6_u_lpP_fut.als	2026-11-16 12:44:35
+@@ -1,3 +1,11 @@
++// [fut-0] FUTURISTIC COPY of STT_6_u_lpP.als (sha256 8cb53d095bb173d0cec7a8dca647ff17bced21b29630a0247974af19f9b8cd36, unchanged). New file, agent invisispec-fut 2026-11-16; Anna approved new _fut model files 2026-11-16 (via the coordinator).
++// [fut-0] ONLY change: clause 1, speculation_contract_p = uncommitted AND after some unresolved instruction of ANY kind (Anna's definition, 2026-11-16), tagged [fut-1];
++// [fut-0] the source's Spectre line is kept as a comment above it. Protection set, leakage function, skeleton, minimality and run line are byte-identical to the source.
++// [fut-0] isresolved now means 'completed: can no longer squash a younger instruction' for every kind (branch, load, store, ALU), not only branches.
++// [fut-0] Sources: InvisiSpec p4 SIV-A1 'In our Futuristic attack model, USLs are all the speculative loads that can be squashed by an earlier instruction';
++// [fut-0] STT p5 S6.1 'In the Futuristic model, an instruction has only reached this point if it cannot be squashed'; gem5 amulet-InvisiSpec
++// [fut-0] src/cpu/o3/rob_impl.hh:435-490 (prevInstsComplete: every older instruction readyToCommit && isLoadSafeToCommit, no fault, not squashed), lsq_unit_impl.hh:1110.
++// [fut-0] Docs: wiki/state/EVAL_MANIFEST.md 'Futuristic testsets (2026-11-16)'. Everything below this header is the source file.
+ // production since 2026-11-10 per Anna; source draft STAGE1_alloy/models/proposed/ultimate/loosepin/STT_6_u_lpPc.als, sha256 8c119080f6aa7f53575d19f91abb917334299bfb4f63d033bfa30c57b26c6ea1.
+ // Role: Stage-1.5 loose-pin model (but 8, committed region, prefix IX, no-junk, production minimality) with the Stage-1 core pin: NOT runnable alone, twostage_lp.py / stage15lp.py append one path-style seed_core per core. Ultimate skeleton + the STT_6_u defense block (unchanged from the draft).
+ // Built by regen-lp (wiki/design/TWO_PHASE_MODELS.md '2026-11-10 -- Loose-pin regeneration (regen-lp)'). Everything below this header is the source draft, byte-identical.
+@@ -386,7 +394,8 @@
+ // not readyToCommit, faulted or squashed (rob_impl.hh:489-495) and sets isUnsquashable =
+ // isPrevBrsResolved (rob_impl.hh:518-520). Anna 2026-11-08: a branch that has executed but whose
+ // squash is still pending counts as UNRESOLVED (gem5's readyToCommit shortcut is the A4/S4 bug).
+-fun speculation_contract_p[p: PTag->univ] : Instruction {uncommitted_p[p] & has_unresolved_brs_p[p]} -- [u-2] FLAVOR = spectre
++// [fut-1] source (Spectre) contract: fun speculation_contract_p[p: PTag->univ] : Instruction {uncommitted_p[p] & has_unresolved_brs_p[p]} -- [u-2] FLAVOR = spectre
++fun speculation_contract_p[p: PTag->univ] : Instruction {uncommitted_p[p] & unresolved_p[p].(^(spo_p[p]))} -- [fut-1] FLAVOR = futuristic
+ // Other flavors differ ONLY in the selector line above plus the flavor facts below; generate them
+ // with queries/stt/make_stt_u.py, never by hand:
+ //   stl        {uncommitted_p[p] & u_store_shadow_p[p]}  -- store-address shadow only (Recon-STT STL runs)

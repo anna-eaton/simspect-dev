@@ -1,0 +1,175 @@
+diff -ruN b_gem5-recon/src/cpu/pred/BranchPredictor.py b_gem5-recon-modded/src/cpu/pred/BranchPredictor.py
+--- b_gem5-recon/src/cpu/pred/BranchPredictor.py	2025-02-07 14:35:52
++++ b_gem5-recon-modded/src/cpu/pred/BranchPredictor.py	2026-05-20 21:52:49
+@@ -67,6 +67,22 @@
+     indirectBranchPred = Param.IndirectPredictor(SimpleIndirectPredictor(),
+       "Indirect branch predictor, set to NULL to disable indirect predictions")
+ 
++    # BTB-override annotations. Each matching index in the two vectors forms
++    # a (branch_pc -> forced_target_pc) pair. When the branch predictor is
++    # asked to predict at branch_pc, the BTB lookup is bypassed and the target
++    # is forced to forced_target_pc (with pred_taken=true), which typically
++    # produces a misprediction once the branch actually resolves.
++    annotationBranchPCs = VectorParam.Addr([],
++        "Branch PCs whose BTB output is to be overridden")
++    annotationForcedTargets = VectorParam.Addr([],
++        "Forced BTB target for each annotationBranchPCs entry")
++    # Per-branch resolution-broadcast stall (cycles past natural broadcast
++    # time after execute completes). When non-zero, IEW defers setExecuted +
++    # instToCommit + the mispredict/squash dispatch by N cycles via a
++    # scheduled event. Indices align with annotationBranchPCs.
++    annotationResolveStallCycles = VectorParam.UInt64([],
++        "Resolve-broadcast stall (cycles) per annotationBranchPCs entry")
++
+ class LocalBP(BranchPredictor):
+     type = 'LocalBP'
+     cxx_class = 'gem5::branch_prediction::LocalBP'
+diff -ruN b_gem5-recon/src/cpu/pred/bpred_unit.cc b_gem5-recon-modded/src/cpu/pred/bpred_unit.cc
+--- b_gem5-recon/src/cpu/pred/bpred_unit.cc	2025-02-07 14:35:52
++++ b_gem5-recon-modded/src/cpu/pred/bpred_unit.cc	2026-10-30 12:33:09
+@@ -49,6 +49,8 @@
+ #include "base/trace.hh"
+ #include "config/the_isa.hh"
+ #include "debug/Branch.hh"
++#include "debug/O3PipeView.hh"  // SimSpect resolve hooks (2026-10-30)
++#include "sim/core.hh"
+ 
+ namespace gem5
+ {
+@@ -71,6 +73,49 @@
+ {
+     for (auto& r : RAS)
+         r.init(params.RASSize);
++
++    if (params.annotationBranchPCs.size() !=
++        params.annotationForcedTargets.size()) {
++        fatal("BPredUnit: annotationBranchPCs and annotationForcedTargets "
++              "must have the same length (got %u vs %u)",
++              params.annotationBranchPCs.size(),
++              params.annotationForcedTargets.size());
++    }
++    if (!params.annotationResolveStallCycles.empty() &&
++        params.annotationResolveStallCycles.size() !=
++        params.annotationBranchPCs.size()) {
++        fatal("BPredUnit: annotationResolveStallCycles, when supplied, must "
++              "match annotationBranchPCs length (got %u vs %u)",
++              params.annotationResolveStallCycles.size(),
++              params.annotationBranchPCs.size());
++    }
++    for (size_t i = 0; i < params.annotationBranchPCs.size(); ++i) {
++        Addr branch_pc = params.annotationBranchPCs[i];
++        Addr target_pc = params.annotationForcedTargets[i];
++        // target_pc == 0 is the "stall-only" sentinel (correctly_not_taken):
++        // populate the stall map but do NOT register a BTB override, since
++        // the natural BTB prediction is already correct for those branches.
++        if (target_pc != 0) {
++            btbForcedTargets[branch_pc] = target_pc;
++            DPRINTF(Branch,
++                    "BTB forced-target annotation: %#x -> %#x\n",
++                    branch_pc, target_pc);
++        } else {
++            DPRINTF(Branch,
++                    "BTB stall-only annotation (no force): %#x\n",
++                    branch_pc);
++        }
++
++        if (i < params.annotationResolveStallCycles.size()) {
++            uint64_t stall = params.annotationResolveStallCycles[i];
++            if (stall > 0) {
++                branchResolveStallCycles[branch_pc] = Cycles(stall);
++                DPRINTF(Branch,
++                        "Branch resolve-stall annotation: %#x -> %llu cycles\n",
++                        branch_pc, stall);
++            }
++        }
++    }
+ }
+ 
+ BPredUnit::BPredUnitStats::BPredUnitStats(statistics::Group *parent)
+@@ -277,6 +322,40 @@
+         }
+         inst->advancePC(*target);
+     }
++
++    // Annotation-driven BTB override. If this branch's PC is in the
++    // forced-target map, bypass whatever the BTB/RAS/iPred said and redirect
++    // fetch to the annotated target. We mark the branch as taken so fetch
++    // follows the forced target; if the real target differs, the normal
++    // mispredict/squash machinery will recover when the branch resolves.
++    if (!btbForcedTargets.empty()) {
++        auto it = btbForcedTargets.find(pc.instAddr());
++        if (it != btbForcedTargets.end()) {
++            Addr forced = it->second;
++            DPRINTF(Branch,
++                    "[tid:%i] [sn:%llu] Annotation override: forcing BTB "
++                    "target at PC %#x to %#x\n",
++                    tid, seqNum, pc.instAddr(), forced);
++            // SimSpect resolve hooks (2026-10-30): forced target 1 = predict not-taken (fall-through).
++            if (it->second == 1) {
++                target.reset(pc.clone());
++                inst->advancePC(*target);
++                pred_taken = false;
++                predict_record.predTaken = false;
++            } else {
++                target->setInstAddr(forced);
++                pred_taken = true;
++                predict_record.predTaken = true;
++            }
++            DPRINTFR(O3PipeView, "O3PipeView:simspect:%llu:BR:predict_force:line=-:seq=%llu:pc=%#llx:victim=-:cause=-:sq=-:id=-:taken=%d:target=%#llx\n",
++                     (unsigned long long)curTick(),
++                     (unsigned long long)seqNum,
++                     (unsigned long long)pc.instAddr(),
++                     (int)pred_taken,
++                     (unsigned long long)target->instAddr());
++        }
++    }
++
+     predict_record.target = target->instAddr();
+ 
+     set(pc, *target);
+diff -ruN b_gem5-recon/src/cpu/pred/bpred_unit.hh b_gem5-recon-modded/src/cpu/pred/bpred_unit.hh
+--- b_gem5-recon/src/cpu/pred/bpred_unit.hh	2025-02-07 14:35:52
++++ b_gem5-recon-modded/src/cpu/pred/bpred_unit.hh	2026-05-06 01:14:49
+@@ -43,6 +43,7 @@
+ #define __CPU_PRED_BPRED_UNIT_HH__
+ 
+ #include <deque>
++#include <unordered_map>
+ 
+ #include "base/statistics.hh"
+ #include "base/types.hh"
+@@ -295,6 +296,34 @@
+ 
+     /** The BTB. */
+     DefaultBTB BTB;
++
++    /**
++     * BTB-override map loaded from an annotation file at startup. When
++     * predict() is called with a PC present in this map, the BTB lookup is
++     * bypassed and the target is forced to the mapped address so fetch will
++     * speculatively redirect there; the mispredict is caught later through
++     * the normal squash path.
++     */
++    std::unordered_map<Addr, Addr> btbForcedTargets;
++
++    /**
++     * Resolution-broadcast stall map. For PCs in this map, IEW defers the
++     * post-execute broadcast (setExecuted + instToCommit + mispredict/squash
++     * dispatch) by the mapped number of cycles via a scheduled event.
++     * Populated alongside btbForcedTargets from annotation params.
++     */
++    std::unordered_map<Addr, Cycles> branchResolveStallCycles;
++
++  public:
++    /** Look up the resolve-broadcast stall for a branch PC; 0 if absent. */
++    Cycles getResolveStallCyclesFor(Addr pc) const
++    {
++        auto it = branchResolveStallCycles.find(pc);
++        return (it != branchResolveStallCycles.end()) ? it->second
++                                                       : Cycles(0);
++    }
++
++  private:
+ 
+     /** The per-thread return address stack. */
+     std::vector<ReturnAddrStack> RAS;

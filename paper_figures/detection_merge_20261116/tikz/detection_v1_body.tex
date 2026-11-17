@@ -1,0 +1,112 @@
+% detection v1 body (2026-11-16, fig10-11-merge agent): Figs. 10 and 11 (tests per detection, CPU time to detect) as ONE single-column figure,
+% panel (a) tests per detection on top, panel (b) CPU time below, sharing one row of bug labels (under (b) only) and one legend (in (a)).
+% Panel (a) = tikz/firstdet_dots_v2_body.tex (rows, markers, error bars, labels, multipliers copied unchanged; its bug-label and defense rows dropped,
+% its two-entry legend replaced by the shared legend). Panel (b) = tikz/timedet_dots3_v3_body.tex (rows etc. copied unchanged; its legend dropped).
+% Values: simspect experiments/2026-11-10_footprint_vs_amulet/code/figvalues_20261116d.py (both source bodies). No number changed.
+% Colours as in both sources: light blue = SimSpect (tests in (a), execution only in (b)), dark blue = SimSpect with test generation ((b) only), gray = AMuLeT.
+% (a) is placed automatically just above (b)'s tallest multiplier (\fdbtop + 0.14 cm). Every text \figfont (8pt); dagger and asterisk full size.
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}%
+\begin{tikzpicture}[font=\figfont, x=1cm, y=1cm]
+\definecolor{fdsim}{RGB}{158,202,225}% light blue: SimSpect (execution only in the timing panel)
+\definecolor{fdsimg}{RGB}{49,130,189}% darker blue: SimSpect with test generation
+\definecolor{fdamu}{RGB}{189,189,189}% gray: AMuLeT
+\def\fdu{0.40}% cm per decade
+\def\fdoff{0.30}% log10 offset so a value of 1 still shows
+\def\fdgap{1.16}% group pitch, cm
+\def\fdax{6.2}% axis top, in decades
+\tikzset{fderr/.style={draw=black, line width=0.6pt},
+  fdmS/.style={circle, fill=fdsim, draw=black!80, line width=0.5pt, inner sep=0pt, minimum size=5.2pt},
+  fdmG/.style={circle, fill=fdsimg, draw=black!80, line width=0.5pt, inner sep=0pt, minimum size=5.2pt},
+  fdmA/.style={rectangle, fill=fdamu, draw=black!80, line width=0.5pt, inner sep=0pt, minimum size=4.8pt}}
+% ===================== panel (b): CPU time to detect (at the origin; owns the shared bug-label rows) =====================
+\gdef\fdbtop{0}%
+\foreach \e/\lab in {0/1, 1/10, 2/100, 3/1k, 4/10k, 5/100k, 6/1M} {
+  \draw[black!12] (0, {(\e+\fdoff)*\fdu}) -- ({6*\fdgap+0.10}, {(\e+\fdoff)*\fdu});
+  \draw (0, {(\e+\fdoff)*\fdu}) -- (-0.06, {(\e+\fdoff)*\fdu}) node[left, inner sep=1pt] {\lab};
+}
+\draw (0,0) -- (0, {(\fdax+\fdoff)*\fdu});
+\draw (0,0) -- ({6*\fdgap+0.10}, 0);
+\node[rotate=90, anchor=south] at (-0.62, {(3+\fdoff)*\fdu}) {seconds per detection (log)};
+\foreach \i/\e/\s/\a/\el/\sl/\al/\re/\rg/\la/\elo/\ehi/\slo/\shi/\alo/\ahi in {
+  0/0.4289/0.6573/2.3829/{2.7}/{4.5}/{241}/{90$\times$}/{53$\times$}/A-UV1/0.4157/0.4428/0.6440/0.6712/2.3327/2.4379,
+  1/1.8426/2.0287/1.9463/{70}/{107}/{88}/{1.3$\times$}/{0.83$\times$}/A-UV3/1.8328/1.8525/2.0189/2.0387/1.8927/2.0054,
+  2/2.7414/2.9276/3.6221/{551}/{846}/{4.2k}/{7.6$\times$}/{4.9$\times$}/A-UV4/2.7139/2.7704/2.9000/2.9565/3.3107/4.2837,
+  3/4.9271/5.1132/3.6221/{85k}/{130k}/{4.2k}/{0.050$\times$}/{0.032$\times$}/{A-UV5$^{\textstyle\dagger}$}/4.6382/5.4948/4.8244/5.6809/3.3107/4.2837,
+  4/0.7842/1.0192/2.0601/{6.1}/{10}/{115}/{19$\times$}/{11$\times$}/A-UV6/0.7588/0.8111/0.9938/1.0461/1.9935/2.1354,
+  5/0.9920/1.2270/2.5578/{9.8}/{17}/{361}/{37$\times$}/{21$\times$}/{jmp$^{\textstyle *}$}/0.9583/1.0282/1.1932/1.2632/2.4432/2.7008} {
+  \pgfmathsetmacro{\xc}{0.58+\i*\fdgap}
+  \pgfmathsetmacro{\xe}{\xc-0.26}
+  \pgfmathsetmacro{\xg}{\xc}
+  \pgfmathsetmacro{\xa}{\xc+0.26}
+  \node[fdmS] at (\xe, {(\e+\fdoff)*\fdu}) {};
+  \node[fdmG] at (\xg, {(\s+\fdoff)*\fdu}) {};
+  \node[fdmA] at (\xa, {(\a+\fdoff)*\fdu}) {};
+  \pgfmathsetmacro{\hlo}{(\elo+\fdoff)*\fdu}\pgfmathsetmacro{\hhi}{(\ehi+\fdoff)*\fdu}
+  \draw[fderr] (\xe, \hlo) -- (\xe, \hhi) (\xe-0.05, \hlo) -- (\xe+0.05, \hlo) (\xe-0.05, \hhi) -- (\xe+0.05, \hhi);
+  \pgfmathsetmacro{\hlo}{(\slo+\fdoff)*\fdu}\pgfmathsetmacro{\hhi}{(\shi+\fdoff)*\fdu}
+  \draw[fderr] (\xg, \hlo) -- (\xg, \hhi) (\xg-0.05, \hlo) -- (\xg+0.05, \hlo) (\xg-0.05, \hhi) -- (\xg+0.05, \hhi);
+  \pgfmathsetmacro{\hlo}{(\alo+\fdoff)*\fdu}\pgfmathsetmacro{\hhi}{(\ahi+\fdoff)*\fdu}
+  \draw[fderr] (\xa, \hlo) -- (\xa, \hhi) (\xa-0.05, \hlo) -- (\xa+0.05, \hlo) (\xa-0.05, \hhi) -- (\xa+0.05, \hhi);
+  \node[rotate=90, anchor=west, inner sep=0.6pt] (fdl0) at (\xe, {(max(\e,\ehi)+\fdoff)*\fdu+0.10}) {\el};
+  \node[rotate=90, anchor=west, inner sep=0.6pt] (fdl1) at (\xg, {(max(\s,\shi)+\fdoff)*\fdu+0.10}) {\sl};
+  \node[rotate=90, anchor=west, inner sep=0.6pt] (fdl2) at (\xa, {(max(\a,\ahi)+\fdoff)*\fdu+0.10}) {\al};
+  \pgfpointanchor{fdl0}{east}\pgfgetlastxy{\fdtmp}{\fdtc}
+  \pgfpointanchor{fdl1}{east}\pgfgetlastxy{\fdtmp}{\fdta}
+  \pgfpointanchor{fdl2}{east}\pgfgetlastxy{\fdtmp}{\fdtb}
+  \pgfmathsetmacro{\hm}{max(max(\fdta,\fdtb),\fdtc)/28.4528+0.08}
+  \node[anchor=south, inner sep=1pt, align=center] (fdm) at (\xc, \hm) {\re\\\textbf{\rg}};
+  \pgfpointanchor{fdm}{north}\pgfgetlastxy{\fdtmp}{\fdty}
+  \pgfmathsetmacro{\fdnew}{max(\fdbtop,\fdty/28.4528)}\xdef\fdbtop{\fdnew}%
+  \node[anchor=base, inner sep=1.5pt] at (\xc, -0.32) {\la};
+}
+\node[anchor=north, inner sep=1.5pt] at ({0.58+0*\fdgap}, -0.42) {InvisiSpec};
+\node[anchor=north, inner sep=1.5pt] at ({0.58+2*\fdgap}, -0.42) {CleanupSpec};
+\node[anchor=north, inner sep=1.5pt] at ({0.58+4.5*\fdgap}, -0.42) {SpecLFB};
+\draw[black!45] ({0.58+1*\fdgap-0.32}, -0.46) -- ({0.58+3*\fdgap+0.32}, -0.46);
+\draw[black!45] ({0.58+4*\fdgap-0.32}, -0.46) -- ({0.58+5*\fdgap+0.32}, -0.46);
+\draw[black!45, dashed] ({0.58+4.5*\fdgap}, 0) -- ({0.58+4.5*\fdgap}, {(\fdax+\fdoff)*\fdu});
+\node[anchor=north west, inner sep=0pt] at (-0.95, {(8.6+0.15+\fdoff)*\fdu+0.12}) {(b)};
+% ===================== panel (a): tests per detection, shifted up to clear (b)'s tallest multiplier =====================
+\pgfmathsetmacro{\fdshift}{\fdbtop+0.14}
+\begin{scope}[yshift=\fdshift cm]
+\foreach \e/\lab in {0/1, 1/10, 2/100, 3/1k, 4/10k, 5/100k, 6/1M} {
+  \draw[black!12] (0, {(\e+\fdoff)*\fdu}) -- ({6*\fdgap+0.10}, {(\e+\fdoff)*\fdu});
+  \draw (0, {(\e+\fdoff)*\fdu}) -- (-0.06, {(\e+\fdoff)*\fdu}) node[left, inner sep=1pt] {\lab};
+}
+\draw (0,0) -- (0, {(\fdax+\fdoff)*\fdu});
+\draw (0,0) -- ({6*\fdgap+0.10}, 0);
+\node[rotate=90, anchor=south] at (-0.62, {(3+\fdoff)*\fdu}) {tests per detection (log)};
+\foreach \i/\s/\a/\sl/\al/\r/\slo/\shi/\alo/\ahi in {
+  0/0.3005/3.5193/{2.0}/{3.3k}/{1{,}655$\times$}/0.2873/0.3144/3.4692/3.5744,
+  1/1.6025/3.5776/{40}/{3.8k}/{94$\times$}/1.5927/1.6125/3.5240/3.6366,
+  2/2.5014/5.2533/{317}/{179k}/{565$\times$}/2.4738/2.5304/4.9419/5.9149,
+  3/4.6870/5.2533/{49k}/{179k}/{3.7$\times$}/4.3982/5.2547/4.9419/5.9149,
+  4/0.6717/3.7733/{4.7}/{5.9k}/{1{,}264$\times$}/0.6463/0.6986/3.7068/3.8486,
+  5/0.8795/4.2711/{7.6}/{19k}/{2{,}463$\times$}/0.8458/0.9157/4.1564/4.4141} {
+  \pgfmathsetmacro{\xc}{0.58+\i*\fdgap}
+  \pgfmathsetmacro{\xs}{\xc-0.17}
+  \pgfmathsetmacro{\xa}{\xc+0.17}
+  \node[fdmS] at (\xs, {(\s+\fdoff)*\fdu}) {};
+  \node[fdmA] at (\xa, {(\a+\fdoff)*\fdu}) {};
+  \pgfmathsetmacro{\hlo}{(\slo+\fdoff)*\fdu}\pgfmathsetmacro{\hhi}{(\shi+\fdoff)*\fdu}
+  \draw[fderr] (\xs, \hlo) -- (\xs, \hhi) (\xs-0.05, \hlo) -- (\xs+0.05, \hlo) (\xs-0.05, \hhi) -- (\xs+0.05, \hhi);
+  \pgfmathsetmacro{\hlo}{(\alo+\fdoff)*\fdu}\pgfmathsetmacro{\hhi}{(\ahi+\fdoff)*\fdu}
+  \draw[fderr] (\xa, \hlo) -- (\xa, \hhi) (\xa-0.05, \hlo) -- (\xa+0.05, \hlo) (\xa-0.05, \hhi) -- (\xa+0.05, \hhi);
+  \node[rotate=90, anchor=west, inner sep=1pt] (fdl1) at (\xs, {(max(\s,\shi)+\fdoff)*\fdu+0.10}) {\sl};
+  \node[rotate=90, anchor=west, inner sep=1pt] (fdl2) at (\xa, {(max(\a,\ahi)+\fdoff)*\fdu+0.10}) {\al};
+  \pgfpointanchor{fdl1}{east}\pgfgetlastxy{\fdtmp}{\fdta}
+  \pgfpointanchor{fdl2}{east}\pgfgetlastxy{\fdtmp}{\fdtb}
+  \pgfmathsetmacro{\hm}{max(\fdta,\fdtb)/28.4528+0.08}
+  \node[anchor=south, inner sep=1pt, font=\figfont\bfseries] at (\xc, \hm) {\r};
+}
+\draw[black!45, dashed] ({0.58+4.5*\fdgap}, 0) -- ({0.58+4.5*\fdgap}, {(\fdax+\fdoff)*\fdu});
+\node[anchor=north west, inner sep=0pt] at (-0.95, {(8.6+0.15+\fdoff)*\fdu+0.12}) {(a)};
+% shared legend (both panels): light blue SimSpect, dark blue SimSpect with generation (only in (b)), gray AMuLeT; rows 0.34 cm (9.6pt) apart, as timedet_dots3_v3 (0.30 cm let descenders touch)
+\node[fdmS] at (0.12, {(8.1+0.15+\fdoff)*\fdu}) {};
+\node[anchor=west, inner sep=2pt] at (0.22, {(8.1+0.15+\fdoff)*\fdu}) {\toolname{}};
+\node[fdmG] at (0.12, {(8.1+0.15+\fdoff)*\fdu-0.34}) {};
+\node[anchor=west, inner sep=2pt] at (0.22, {(8.1+0.15+\fdoff)*\fdu-0.34}) {with generation};
+\node[fdmA] at (4.74, {(8.1+0.15+\fdoff)*\fdu}) {};
+\node[anchor=west, inner sep=2pt] at (4.84, {(8.1+0.15+\fdoff)*\fdu}) {AMuLeT};
+\end{scope}
+\end{tikzpicture}%

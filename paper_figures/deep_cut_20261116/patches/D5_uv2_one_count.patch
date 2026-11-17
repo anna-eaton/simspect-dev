@@ -1,0 +1,11 @@
+--- a/sections/results.tex
++++ b/sections/results.tex
+@@ -59,7 +59,7 @@
+ % [F1: blank line removed so the UV2 head runs in]
+ STT treats store-to-load forwarding as an implicit branch on the load's address and delays resolving it until that address is untainted~\cite[\S 6.4.2]{yu2019stt}. ReCon's implementation of STT~\cite{recon} checks a load's taint only on its cache path: when an older in-flight store has the same address, the load takes the store's data and completes without passing the taint check (\texttt{lsq\_unit.cc:2019}). Its completion time therefore reveals whether its secret-derived address matches the store's. Fig.~\ref{fig:reconstl} shows this in generated test inst-014536. 
+ % \toolname{}'s Inspector catches this because STT's transmission criterion is whether the transmitter obtained its data, not whether it sent a cache request.
+-1{,}690 of the 30{,}368 tests from our STT model reach the bug on ReCon's implementation of STT, and so do 2{,}848 of the 60{,}342 tests of ReCon's own specification\cutsug{, whose execution contract adds store shadows (\S\ref{sec:example-contract})}.
++1{,}690 of the 30{,}368 tests from our STT model reach the bug on ReCon's implementation of STT\cutsug{, and so do 2{,}848 of the 60{,}342 tests of ReCon's own specification}\cutsug{, whose execution contract adds store shadows (\S\ref{sec:example-contract})}.
+ {\emergencystretch=2em\par}% lets this paragraph's lines stretch slightly so nothing sticks into the margin after the F1 run-in heads (same fix as e650097)
+ 
+ \input{tikz/reconstl_v5_8pt}% v5: whitespace pass + bold title (2026-11-16); was reconstl_v3_8pt

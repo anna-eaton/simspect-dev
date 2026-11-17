@@ -1,0 +1,11 @@
+--- a/sections/model.tex
++++ b/sections/model.tex
+@@ -1,6 +1,7 @@
+ \section{Defense Specification} \label{formalmodel} 
+ % per-stage In/Out line (Anna 2026-11-16): one paragraph, Out right after In, normal wrapping
+-\providecommand{\stageio}[2]{\par\noindent{\itshape\textbf{Input:}~#1\enspace\textbf{Output:}~#2\par}\nopagebreak\smallskip}
++% [deep cut 2026-11-16, was:] \providecommand{\stageio}[2]{\par\noindent{\itshape\textbf{Input:}~#1\enspace\textbf{Output:}~#2\par}\nopagebreak\smallskip}
++\providecommand{\stageio}[2]{}
+ \stageio{a defense's paper}{a defense specification: (leakage contract, execution contract, protection set)}
+ % \anna{should this have axiomatic or match figure 1}
+ % A \toolname{} specification states a defense's security guarantee as a \emph{leakage predicate}, a condition on a single execution that holds when the defense forbids that execution. The specification has three clauses

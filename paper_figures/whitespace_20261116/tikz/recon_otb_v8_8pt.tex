@@ -1,0 +1,207 @@
+% ReCon OTB figure v8 (2026-11-16, agent fig-whitespace): v7 plus the 'Violation window' title in bold, dark saturated yellow (#8C6400) so it stands out on the tan band (Anna 2026-11-16). Nothing else changed.
+% ReCon OTB figure v7 (2026-11-16, whitespace pass, agent fig-whitespace): v6 with spacing tightened only; same program lines, trace data, marks, labels and caption.
+% (1) the two-line 'Violation window' title moves down into the band on i2's row (the band is empty there: i2's bar ends at the band's left edge),
+%     with a tan fill over the dotted cycle lines; the band now starts 8pt above i2's bar (was 24pt) and the program listing sits 15pt above it (was 28pt),
+%     clear of i2's 'Resolves' label; (2) rows 21pt apart (was 22pt); (3) 9.5pt instead of 11.5pt from the cycle numbers to the rule box.
+%     Height 253.9 -> 234.9pt. Everything else is v6 verbatim.
+% recon_otb v6 (2026-11-16): v5 in the shared timeline style (simspect paper_figures/FIGURES.md "Timeline figure style"; macros as in
+%   squashrace_v5_8pt): no F letters (a bar starts with a closing tick at its fetch cycle), labels on leaders, one row of cycle numbers at
+%   12 pt per cycle. To fit one column, 507 and 2511 carry marks but no number (their neighbours 508 and 2510 are numbered), and v5's
+%   "Reads cache" mark on i6 (cycle 126) is dropped; every other event, the listing, the rule box and the data are unchanged.
+% recon_otb v5 (2026-11-16, one column): Fig. 8 on a GENERATED test instead of v4's hand-built one, in the visual language of
+% checkerwindow_v7_8pt and squashrace_v4_8pt (one tan violation window; every event a mark on its bar at its trace cycle).
+% Test: integer version of E2w test inst-003908 (corpus STT_6_u_core_lpP_s2A, integer version = STT_6_u_core_lpP_s2A_gprtwin),
+%   mispredict_not_taken, one of the 22 R-SA-8/UV3 signature tests of row E2w (simspect wiki/state/EVAL_MANIFEST.md "OTB check on
+%   recipe A"). Graph (testsets/STT_6_u_core_lpP_s2A/xml/inst-003908.xml; i<k> = pc<k>): i2 Branch_n (committed), i3 Load (lc, its
+%   output register unspecified, concretized to rdx), i4 Branch_x (fnc, unresolved, forced to mispredict), i5 Other_x (signed division),
+%   i6 Load r0 <- [r0], i7 Branch_x (xmit) reading i6's r0.
+% Run: re-run 2026-11-16 by agent fig8-otb-v5 exactly as the E2w campaign ran it (cafe3; /work/gem5-recon-modded X86, X86O3CPU,
+%   --scheme=2, branch_ann_enable, warm cache, timing-grid point of the stem = unresolved 2500 / resolved 500 cycles), only adding the
+%   print-only debug flags Commit,DelayUnit,Rename,IEW; hit reproduced (check_br issued_in_window true) and rsa8_trace's R-SA-8 signature
+%   holds with the campaign's ticks (release 2978500 < window-branch fire 3979000). Data: simspect repo paper_figures/otb_v5/ (README,
+%   runs/int_not_taken_inst-003908/ with pipeview.txt.gz + sha256s.txt, cycles_int_not_taken_inst-003908.json from extract_cycles.py).
+% Cycle c = (tick - 2724500)/500 (0 = lc's fetch). Every drawn cycle, from the trace:
+%   i2 = JNB_I 0x401c85 (seq 606-608): fetch -1; BR:resolve_hold 6 (stall 500); BR:resolve_visible 507 (correct); retires 508.
+%   i3 = lc, MOV_R_M 0x401c8f `ld rdx` (seq 611): fetch 0; retires 508 (the window opens).
+%   i4 = fnc, JNZ_I 0x401ca6 (seq 619-621): fetch 1; BR:resolve_hold 9 (stall 2500); Commit "Squashing due to branch mispred
+%        PC:0x401ca6" 2510 (resolves); rename "[squash sn:621]" and its retirement 2511 (the squash lands; the window closes).
+%   i6 = MOV_R_M 0x401cf1 `ld rsi` (seq 677): fetch 110; LSQ "Executing load" + "Memory request ... was sent" 126 (reads the cache);
+%        LSQ "Load Instruction ... squashed" 2511.
+%   i7 = the block `movq %rsi,%rax; cmpq $1,%rax; jb` (pc7 label on the mov). mov = MOV_R_R 0x401cf9 `mov rax, rax, rsi` (seq 679):
+%        fetch 111, rename 121 (gem5 lists the old rax, i5's quotient, as a source; ReCon's propagateTaints gives rax the oldest
+%        taint, i3's: taint_tracker.cc:108-131, rename.cc:714-720). jb = JB_I 0x401d00 (wrip seq 684): fetch 213; "Inserting branch
+%        [sn:684] into delay_unit as it has tainted operands" 216; "Released tainted branch ... from delay_unit" 508 (one cycle after
+%        i2's resolve_visible frees i3's taint); IEW "Branch mispredict detected ... Redirecting fetch" 510 (the transmission;
+%        check_br's campaign signal = its complete tick 510, inside (lc retire 508, fnc retire 2511)); squashed with i4's squash 2511.
+%   i5 (not drawn) = CQO_R_R 0x401cd6 `mov rdx, rdx, rax` (seq 638) lists the old rdx = i3's result as a source, so i5's quotient
+%        carries i3's taint (taint_replay_min.py: OLDEST root 611 at seq 679, UNION {611, 677}).
+% Label: fig:otb (unchanged).
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}% 8pt figure text regardless of document class (acmart sigconf \footnotesize is 7pt)
+\begin{figure}[t]
+\centering
+% Body only; everything is wrapped in { } so no macro or style leaks into other figures; all helper names are prefixed \ov.%
+{%
+\definecolor{sswintitle}{HTML}{8C6400}% dark saturated yellow for the 'Violation window' title (bold): 4.7:1 contrast on the tan band, dark gray in grayscale (Anna 2026-11-16: bold, dark yellow, legible)%
+\providecolor{ssspecfill}{gray}{0.94}\providecolor{ssspecink}{gray}{0}%
+\providecolor{ssxmitfill}{gray}{0.76}\providecolor{ssxmitink}{gray}{0}%
+\providecolor{sssrcfill}{gray}{0.85}\providecolor{sssrcink}{gray}{0}\providecolor{sssrcbg}{gray}{0.90}%
+% ============================ TUNING KNOBS ============================%
+\def\ovcyc{12}%         pt per simulated cycle (same scale in every axis segment)%
+% pt width of the elided (dotted) stretch before each segment (wide enough that neighbouring cycle numbers never touch)%
+\def\ovbrkB{12}\def\ovbrkG{13}\def\ovbrkC{9}\def\ovbrkD{7}\def\ovbrkE{10}%
+\def\ovtl{57}%          pt, x of the time axis origin; left of it: row labels%
+\def\ovrow{21}% v7: was 22%         pt between rows%
+\def\ovbarh{4}%         pt height of an instruction bar%
+\def\ovdot{1.9pt}%      radius of an event dot%
+\def\ovstar{8pt}%       outer diameter of the transmission star%
+\def\ovlane{3.2}%       pt from a bar's edge to the near edge of a label on a leader%
+\def\ovboxw{237}%       pt, width of the rule box (the whole picture stays within 237.5pt)%
+\def\ovfs{\figfont}%    the one font size (8pt)%
+% axis segments [start,end], in cycles after lc's fetch; an elided stretch before each segment after the first%
+\def\ovsA{-1.3}\def\oveA{1.3}%          i2, i3 (lc), i4 (fnc) fetched at -1, 0, 1%
+\def\ovsB{109.7}\def\oveB{111.3}%       i6 fetched at 110, i7 (its mov) at 111%
+\def\ovsG{120.7}\def\oveG{121.3}%       i7's mov renamed 121: takes i3's taint%
+\def\ovsC{215.7}\def\oveC{216.3}%       i7's jb enters the delay unit 216%
+\def\ovsD{506.7}\def\oveD{510.3}%       i2 resolves 507; lc retires and i7 released 508; i7 redirects fetch 510%
+\def\ovsE{2509.7}\def\oveE{2511.3}%     i4 resolves 2510; the squash lands 2511%
+% ======================================================================%
+\pgfmathsetmacro\ovoA{0}%
+\pgfmathsetmacro\ovoB{\ovoA+(\oveA-\ovsA)*\ovcyc+\ovbrkB}%
+\pgfmathsetmacro\ovoG{\ovoB+(\oveB-\ovsB)*\ovcyc+\ovbrkG}%
+\pgfmathsetmacro\ovoC{\ovoG+(\oveG-\ovsG)*\ovcyc+\ovbrkC}%
+\pgfmathsetmacro\ovoD{\ovoC+(\oveC-\ovsC)*\ovcyc+\ovbrkD}%
+\pgfmathsetmacro\ovoE{\ovoD+(\oveD-\ovsD)*\ovcyc+\ovbrkE}%
+% x (pt) of cycle #2 in segment #1; start and end x of segment #1%
+\newcommand\ovx[2]{(\ovtl+\csname ovo#1\endcsname+(#2-\csname ovs#1\endcsname)*\ovcyc)}%
+\newcommand\ovxs[1]{(\ovtl+\csname ovo#1\endcsname)}%
+\newcommand\ovxe[1]{(\ovtl+\csname ovo#1\endcsname+(\csname ove#1\endcsname-\csname ovs#1\endcsname)*\ovcyc)}%
+% bar on row y=#1 from x=#2 to x=#3, fill #4: top and bottom edges; \ovend: the closing tick at a bar's fetch%
+\newcommand\ovbar[4]{\fill[#4] ({#2},#1-\ovbarh/2) rectangle ({#3},#1+\ovbarh/2);\draw[line width=0.4pt] ({#2},#1+\ovbarh/2) -- ({#3},#1+\ovbarh/2) ({#2},#1-\ovbarh/2) -- ({#3},#1-\ovbarh/2);}%
+\newcommand\ovend[2]{\draw[line width=0.6pt] ({#2},#1-\ovbarh/2) -- ({#2},#1+\ovbarh/2);}%
+% elided stretch between segments #2 and #3 on row y=#1 (fill #4): dotted edges%
+\newcommand\ovgap[4]{\fill[#4] ({\ovxe{#2}},#1-\ovbarh/2-0.3) rectangle ({\ovxs{#3}},#1+\ovbarh/2+0.3);\draw[densely dotted, line width=0.4pt] ({\ovxe{#2}},#1+\ovbarh/2) -- ({\ovxs{#3}},#1+\ovbarh/2) ({\ovxe{#2}},#1-\ovbarh/2) -- ({\ovxs{#3}},#1-\ovbarh/2);}%
+% event dot at x=#2 on row y=#1 (white rim so it reads on the bar's edges)%
+\newcommand\ovdotat[2]{\fill[black, draw=white, line width=0.4pt] ({#2},#1) circle (\ovdot);}%
+% squash cross at x=#2 on row y=#1%
+\newcommand\ovcross[2]{\draw[white, line width=1.8pt] ({#2},#1) ++(-2.4,-2.4) -- ++(4.8,4.8) ({#2},#1) ++(-2.4,2.4) -- ++(4.8,-4.8);\draw[line width=0.8pt] ({#2},#1) ++(-2.4,-2.4) -- ++(4.8,4.8) ({#2},#1) ++(-2.4,2.4) -- ++(4.8,-4.8);}%
+% transmission star at x=#2 on row y=#1%
+\newcommand\ovstarat[2]{\node[star, star points=5, star point ratio=2.4, fill=ssxmitink, draw=white, line width=0.5pt, minimum size=\ovstar, inner sep=0pt] at ({#2},#1) {};}%
+% label on a leader: from the mark at x=#2 on row y=#1, a vertical leader up (#3=1) or down (#3=-1) to a label set beside it on the%
+% side #4 (e: label starts at the leader; w: label ends at the leader; c: label centred on it); #5 = extra lift in pt (a second lane),%
+% #6 = style, #7 = text. The label's fill covers the leader's top 3.6pt, so the leader meets the label's bottom (or top) edge.%
+\newcommand\ovflag[7]{%
+  \pgfmathsetmacro\ovfy{#1+#3*(\ovbarh/2+\ovlane+#5)}%
+  \ifnum#3>0 \def\ovfv{south}\else\def\ovfv{north}\fi%
+  \ifx#4e\edef\ovfa{\ovfv\space west}\def\ovfd{-0.25}\else\ifx#4w\edef\ovfa{\ovfv\space east}\def\ovfd{0.25}\else\edef\ovfa{\ovfv}\def\ovfd{0}\fi\fi%
+  \draw[ovlead] ({#2},#1) -- ({#2},\ovfy+#3*3.6);%
+  \node[#6, anchor=\ovfa] at ({#2+\ovfd},\ovfy) {#7};}%
+% axis tick at x=#1 and its cycle number #4, anchored #2 and shifted #3 pt (all numbers in one row)%
+\newcommand\ovnum[4]{\draw[line width=0.4pt] ({#1},\ovyX) -- ({#1},\ovyX-2.2);\node[anchor=#2] at ({#1+#3},\ovyT) {#4};}%
+\begin{tikzpicture}[x=1pt, y=1pt,%
+  every node/.style={font=\ovfs, inner sep=0pt,%
+    execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000\relax}},%
+  ovann/.style={font=\ovfs\itshape},%
+  ovband/.style={ovann, fill=ssspecfill, inner sep=0.6pt},% a label on the band hides the dotted cycle lines behind it%
+  ovwhite/.style={ovann, fill=white, inner sep=0.6pt},%
+  ovred/.style={ovband, text=ssxmitink},%
+  ovrowl/.style={anchor=base west},%
+  ovgloss/.style={font=\ovfs\itshape, anchor=base west},%
+  ovgrid/.style={densely dotted, line width=0.3pt, draw=black!35},%
+  ovedge/.style={line width=0.6pt},%
+  ovlead/.style={line width=0.4pt, draw=black!80},%
+]%
+\pgfmathsetmacro\ovyA{0}%                  i2 (the older source's branch)%
+\pgfmathsetmacro\ovyB{-\ovrow}%            i3 = lc (the older source)%
+\pgfmathsetmacro\ovyC{-2*\ovrow}%          i4 = fnc (the mispredicted branch)%
+\pgfmathsetmacro\ovyD{-3*\ovrow}%          i6 (the younger source)%
+\pgfmathsetmacro\ovyE{-4*\ovrow}%          i7 = xmit%
+\pgfmathsetmacro\ovyW{\ovyA+8}% v7: was +24 (title now in the band on i2's row)%           top of the violation-window band (two-line label)%
+\pgfmathsetmacro\ovyX{\ovyE-25}%           time axis line (room for two label lanes under i7)%
+\pgfmathsetmacro\ovyT{\ovyX-3.4}%          top of the row of cycle numbers%
+\pgfmathsetmacro\ovyK{\ovyT-9.5}% v7: was -11.5%         top of the rule box%
+\pgfmathsetmacro\ovgT{\ovyA+3}%            top of the dotted cycle lines%
+
+% ---------- the test's x86 (integer version), lines in program order, others omitted ----------%
+\node[anchor=south west, font=\ovfs\ttfamily] at (0,\ovyA+15) {\begin{tabular}{@{}l@{\hspace{1.2em}}l@{}}%
+jae\ \ \ .Ltmp0 & \#\ i2 Branch\_n\\
+movq\ \ (\%r13,\%rsi), \%rdx & \#\ i3 Load, lc\\
+jne\ \ \ .LBB0\_4 & \#\ i4 Branch\_x, fnc\\
+cqto & \#\ i5 Other\_x: reads rdx in gem5\\
+idivq \%rcx & \#\ \ \ \ result in rax\\
+movq\ \ (\%r13,\%rsi), \%rsi & \#\ i6 Load\\
+movq\ \ \%rsi, \%rax & \#\ i7: reads old rax in gem5\\
+jb\ \ \ \ .Ltmp0 & \#\ i7 Branch\_x, xmit
+\end{tabular}};%
+
+% ---------- the violation window: a tan band from lc's retirement (508) to the squash landing (2511) ----------%
+\fill[ssspecfill] ({\ovx{D}{508}},\ovyW) rectangle ({\ovx{E}{2511}},\ovyX);%
+\foreach \ovc/\ovs in {-1/A, 0/A, 1/A, 110/B, 111/B, 121/G, 216/C, 507/D, 510/D, 2510/E} \draw[ovgrid] ({\ovx{\ovs}{\ovc}},\ovyX) -- ({\ovx{\ovs}{\ovc}},\ovgT);%
+\draw[ovedge] ({\ovx{D}{508}},\ovyW) -- ({\ovx{D}{508}},\ovyX) ({\ovx{E}{2511}},\ovyW) -- ({\ovx{E}{2511}},\ovyX);%
+\node[anchor=center, align=center, fill=ssspecfill, inner sep=0.6pt, font=\ovfs\bfseries, text=sswintitle] at ({(\ovx{D}{508}+\ovx{E}{2511})/2},\ovyA-2) {Violation\\window};% v7: in the band on i2's row (was above the band)%
+
+% ------------- row labels -------------%
+\node[ovrowl] at (0,\ovyA-2.7) {i2: branch};%
+\node[ovgloss] at (0,\ovyA-11.7) {Older branch};%
+\node[ovrowl] at (0,\ovyB-2.7) {i3: lc (load)};%
+\node[ovgloss] at (0,\ovyB-11.7) {Older source};%
+\node[ovrowl] at (0,\ovyC-2.7) {i4: fnc (branch)};%
+\node[ovgloss] at (0,\ovyC-11.7) {Mispredicted};%
+\node[ovrowl] at (0,\ovyD-2.7) {i6: load};%
+\node[ovgloss] at (0,\ovyD-11.7) {Younger source};%
+\node[ovrowl] at (0,\ovyE-2.7) {i7: xmit};%
+\node[ovgloss, text=ssxmitink] at (0,\ovyE-11.7) {Transmitter};%
+
+% ------------- i2: fetched at -1; resolves at 507 (its resolution held 500 cycles); retires 508 -------------%
+\ovbar{\ovyA}{\ovx{A}{-1}}{\ovx{D}{508}}{white}\ovgap{\ovyA}{A}{B}{white}\ovgap{\ovyA}{B}{G}{white}\ovgap{\ovyA}{G}{C}{white}\ovgap{\ovyA}{C}{D}{white}\ovend{\ovyA}{\ovx{A}{-1}}%
+\ovflag{\ovyA}{\ovx{D}{507}}{1}{w}{0}{ovwhite}{Resolves}%
+\ovdotat{\ovyA}{\ovx{D}{507}}%
+
+% ------------- i3 = lc: fetched at 0; retires 508 (the window opens) -------------%
+\ovbar{\ovyB}{\ovx{A}{0}}{\ovx{D}{508}}{white}\ovgap{\ovyB}{A}{B}{white}\ovgap{\ovyB}{B}{G}{white}\ovgap{\ovyB}{G}{C}{white}\ovgap{\ovyB}{C}{D}{white}\ovend{\ovyB}{\ovx{A}{0}}%
+\ovdotat{\ovyB}{\ovx{D}{508}}%
+\node[ovband, anchor=west] at ({\ovx{D}{508}+3},\ovyB) {Retires};%
+
+% ------------- i4 = fnc: fetched at 1; resolves at 2510 (held 2,500 cycles); its squash lands and it retires at 2511 -------------%
+\ovbar{\ovyC}{\ovx{A}{1}}{\ovx{E}{2511}}{white}\ovgap{\ovyC}{A}{B}{white}\ovgap{\ovyC}{B}{G}{white}\ovgap{\ovyC}{G}{C}{white}\ovgap{\ovyC}{C}{D}{white}\ovgap{\ovyC}{D}{E}{white}\ovend{\ovyC}{\ovx{A}{1}}%
+\ovflag{\ovyC}{\ovx{E}{2510}}{1}{w}{0}{ovband}{Resolves}%
+\ovdotat{\ovyC}{\ovx{E}{2510}}%
+
+% ------------- i6: fetched at 110; squashed at 2511 (label left of a leader from the cross's left arm, inside the window) -------------%
+\ovbar{\ovyD}{\ovx{B}{110}}{\ovx{E}{2511}}{white}\ovgap{\ovyD}{B}{G}{white}\ovgap{\ovyD}{G}{C}{white}\ovgap{\ovyD}{C}{D}{white}\ovgap{\ovyD}{D}{E}{white}\ovend{\ovyD}{\ovx{B}{110}}%
+\ovcross{\ovyD}{\ovx{E}{2511}}%
+\ovflag{\ovyD+2.4}{\ovx{E}{2511}-2.4}{1}{w}{-2.4}{ovband}{Squashed}%
+
+% ------------- i7: fetched at 111 (its mov); the mov takes i3's taint (121); its jb is held by STT (blue, 216-508), released at 508, -------------%
+% ------------- redirects fetch at 510; squashed at 2511 -------------%
+\ovbar{\ovyE}{\ovx{B}{111}}{\ovx{C}{216}}{white}\ovgap{\ovyE}{B}{G}{white}\ovgap{\ovyE}{G}{C}{white}\ovend{\ovyE}{\ovx{B}{111}}%
+\ovbar{\ovyE}{\ovx{C}{216}}{\ovx{D}{508}}{sssrcfill}\ovgap{\ovyE}{C}{D}{sssrcfill}%
+\ovbar{\ovyE}{\ovx{D}{508}}{\ovx{E}{2511}}{white}\ovgap{\ovyE}{D}{E}{white}%
+\ovflag{\ovyE}{\ovx{G}{121}}{-1}{w}{0}{ovwhite}{Takes i3's taint}%
+\ovflag{\ovyE}{\ovx{C}{216}}{1}{w}{0}{ovwhite}{Held}%
+\ovflag{\ovyE}{\ovx{D}{508}+1.9}{1}{e}{0}{ovband}{Released}%
+\ovflag{\ovyE}{\ovx{D}{510}}{-1}{c}{0}{ovred}{Redirects}%
+\ovflag{\ovyE-2.4}{\ovx{E}{2511}-2.4}{-1}{w}{6.2}{ovband}{Squashed}%
+\ovdotat{\ovyE}{\ovx{G}{121}}\ovdotat{\ovyE}{\ovx{C}{216}}\ovdotat{\ovyE}{\ovx{D}{508}}%
+\ovstarat{\ovyE}{\ovx{D}{510}}%
+\ovcross{\ovyE}{\ovx{E}{2511}}%
+
+% ------------------------------ time axis: one row of cycle numbers ------------------------------%
+\foreach \ovs in {A, B, G, C, D, E} \draw ({\ovxs{\ovs}},\ovyX) -- ({\ovxe{\ovs}},\ovyX);%
+\draw[densely dotted] ({\ovxe{A}},\ovyX) -- ({\ovxs{B}},\ovyX) ({\ovxe{B}},\ovyX) -- ({\ovxs{G}},\ovyX) ({\ovxe{G}},\ovyX) -- ({\ovxs{C}},\ovyX) ({\ovxe{C}},\ovyX) -- ({\ovxs{D}},\ovyX) ({\ovxe{D}},\ovyX) -- ({\ovxs{E}},\ovyX);%
+\node[anchor=north west] at (0,\ovyT) {Cycle};%
+% cycle/segment/anchor/shift; 507 and 2511 get a tick but no number (one cycle from 508 and 2510)%
+\foreach \ovc/\ovs/\ovan/\ovdx in {-1/A/north east/1.2, 0/A/north/0, 1/A/north west/-1.2, 110/B/north east/1.2, 111/B/north west/-1.2,%
+  121/G/north/0, 216/C/north/0, 508/D/north/0, 510/D/north/0, 2510/E/north/0}%
+  \ovnum{\ovx{\ovs}{\ovc}}{\ovan}{\ovdx}{\ovc};%
+\draw[line width=0.4pt] ({\ovx{D}{507}},\ovyX) -- ({\ovx{D}{507}},\ovyX-2.2) ({\ovx{E}{2511}},\ovyX) -- ({\ovx{E}{2511}},\ovyX-2.2);%
+
+% ------ the defense-specific rule the trace exposes (blue = defense-specific) ------%
+\pgfmathsetmacro\ovtw{\ovboxw-4.4}%
+\node[draw=sssrcink, fill=sssrcbg, line width=0.4pt, anchor=north west, inner xsep=1.8pt, inner ysep=2.2pt] at (0,\ovyK)%
+  {\parbox{\ovtw pt}{\raggedright\textit{ReCon rule:} a result keeps only its oldest source's taint, freed when that source stops being speculative; STT holds a tainted branch (blue).}};%
+
+\end{tikzpicture}%
+}%
+\caption{ReCon's implementation of STT releasing a transmitter early, on a gem5 trace of generated test inst-003908 (integer version; notation of Fig.~\ref{fig:checkerwindow}). Top: lines of its x86 program and the graph instruction each implements. i3 is speculative under branch i2, and i6 under the mispredicted branch i4. gem5's \texttt{cqto} and \texttt{mov} also read their destination registers, so i7's condition depends on i3 (through i5) as well as on i6, and ReCon keeps only i3's taint for it. When i2 resolves at cycle 507, after a 500-cycle hold, i3's taint is freed and i7 is released, although i6 is still speculative; i7 redirects fetch at 510 ($\star$), inside the violation window.}
+\label{fig:otb}
+\end{figure}

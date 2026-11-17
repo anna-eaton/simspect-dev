@@ -1,0 +1,86 @@
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}% figure text: exactly 8pt in any class (ACM sigconf \footnotesize is 7pt)
+% Instrumentation table, short version (2026-11-11): same cells and caption as tikz/instrtable_v2_8pt.tex, but the Stage 2 and Stage 3 columns are merged into one wider column (each cell leads with a bold 'Stage 2:' / 'Stage 3:'), so the prose wraps in fewer lines; rule spacing 4->3pt. Previous header: Instrumentation table (one column). Replaces tikz/sptable.tex in sections/pipeline.tex.
+% Source: simspect repo, paper_figures/drafts/instrtable_v2.tex (2026-11-02). Proposed caption: paper_figures/FIGURES.md (Captions).
+\begin{table}[t]
+\centering
+% [before 2026-11-16 tersening] \caption{How each execution-graph element is realized. Rows are graph fragments in the notation of Table~\ref{tab:execvocab} (xmit: the test's transmitter; lc, fnc: last committed, first uncommitted). Each test starts with a prologue that zeroes its state and runs \texttt{mfence}.}
+\caption{How each execution-graph element is realized (notation of Table~\ref{tab:execvocab}; lc, fnc: last committed, first uncommitted). Each test's prologue zeroes its state and runs \texttt{mfence}.}
+\label{tab:instrtable}\label{tab:sptable}% old label kept so the existing reference resolves
+% Table (d), v2, 8pt version (every text >= 8pt, \figfont; derived from instrtable_v2.tex): how concretization instruments each execution-graph element (one column, \columnwidth = 241pt ACM).%
+% Body only: \input this inside a table float; the caption is inline.%
+% Source of truth for every cell (file:line citations): paper_figures/plans/fig_d_instrtable.md%
+%   (fact table, rows 1-5; its "v2" section maps each v2 cell to it and lists what moved to the caption).%
+% Visual language: paper_figures/plans/VISUAL_LANGUAGE.md (this 8pt variant: one size, \figfont = 8pt; no colour).%
+% Needs (all already in the paper preamble): tikz, booktabs, array.%
+% Exec-graph column: plain placeholder notation (kind in code font as in the Alloy model, lowercase%
+% row-local ids, flags as words). It follows whatever notation the graph figures (a)-(c) settle on.%
+% Every line below ends in % so no stray spaces enter the output.%
+{%
+\providecolor{ssspecfill}{gray}{0.94}\providecolor{ssspecink}{gray}{0}%
+\providecolor{ssprotfill}{gray}{0.83}\providecolor{ssprotink}{gray}{0}%
+\providecolor{ssxmitfill}{gray}{0.76}\providecolor{ssxmitink}{gray}{0}%
+\providecolor{sssrcfill}{gray}{0.66}\providecolor{sssrcink}{gray}{0}%
+\providecolor{sssrcbg}{gray}{0.90}%
+\figfont%
+\hyphenpenalty=10000\exhyphenpenalty=10000%
+% ============================ TUNING KNOBS ============================%
+\def\gw{65pt}%            execution-graph column (v3, 2026-11-16: long flags go under the kind, so the column is 18pt thinner)%
+\def\pw{0pt}%             (unused: Stage 2 and 3 share one column)%
+\def\hw{\dimexpr\columnwidth-\gw-2\tabcolsep\relax}% Stage 3 column (gem5 harness); \gw+\pw+\hw+4\tabcolsep = \columnwidth (241pt ACM column)%
+\setlength{\tabcolsep}{4pt}%       half the gap between columns%
+\setlength{\aboverulesep}{1.5pt}%    space above each rule%
+\setlength{\belowrulesep}{1.5pt}%    space below each rule%
+\def\egid{9pt}%           glyph: x of the kind (after the id)%
+\def\egfl{48pt}%          glyph: x of the flag word (rows whose kind is code)%
+\def\eglh{9.5pt}%         glyph: line pitch (= \figfont baselineskip)%
+\def\egsp{1.5pt}%         glyph: space between the row name and the glyph%
+% ======================================================================%
+% one glyph line: #1 line number (0,1,...), #2 id, #3 kind or role, #4 flag word%
+\def\egl#1#2#3#4{%
+  \node (id#1) at (0,-#1*\eglh) {#2};%
+  \node (k#1) at (\egid,-#1*\eglh) {#3};%
+  \node (f#1) at (\egfl,-#1*\eglh) {\itshape #4};}% #4 may carry its own \textcolor%
+\def\egu#1#2{\node (u#1) at (\egid,-#1*\eglh) {\itshape #2};}% v3: a flag on its own line under the kind%
+% glyph: program order top to bottom; baseline = first line%
+\def\eg#1{\par\vspace{\egsp}\begin{tikzpicture}[baseline=0pt, >=latex,%
+    every node/.style={inner sep=0pt, anchor=base west, font=\figfont}]#1\end{tikzpicture}}%
+\begin{tabular}{@{}>{\raggedright\arraybackslash}p{\gw}>{\raggedright\arraybackslash}p{\hw}@{}}%
+\toprule%
+Execution graph & \textbf{Stage 2:} program; \textbf{Executor:} gem5 run\\%
+\midrule%
+% ---- row 1: unresolved branch (plan Row 2) ----%
+Unresolved branch%
+\eg{\egl{0}{i0}{\texttt{Branch\_n}}{}\egu{1}{unresolved}}%
+% [before 2026-11-16 tersening] & \textbf{Stage 2:} Mispredicted both ways. Constant condition: the architectural path exits, so the rest runs only speculatively. \textbf{Executor:} Forced to mispredict; resolution held 2{,}500, 5{,}000, or 10{,}000 cycles; still unresolved at the xmit.\\%
+& \textbf{Stage 2:} constant condition that exits, so the rest runs only speculatively\cutsug{; one test per misprediction direction}. \textbf{Executor:} forced to mispredict; resolution held\cutsug{ 2{,}500, 5{,}000, or 10{,}000 cycles}.\\%
+\midrule%
+% ---- row 2: resolved branch (plan Row 3) ----%
+Resolved branch%
+\eg{\egl{0}{i0}{\texttt{Branch\_n}}{}\egu{1}{resolved}}%
+% [before 2026-11-16 tersening] & \textbf{Stage 2:} Correctly predicted, not taken: zeroed condition, falls through. \textbf{Executor:} Forced correct; resolution delayed 0, 500, or 2{,}500 cycles.\\%
+& \textbf{Stage 2:} zeroed condition, falls through. \textbf{Executor:} forced correct; resolution delayed\cutsug{ 0, 500, or 2{,}500 cycles}.\\%
+\midrule%
+% ---- row 3: store bypass (plan fact table, Row 1) ----%
+Store bypass%
+\eg{\egl{0}{i0}{\texttt{Store}}{}\egu{1}{unresolved}\egl{2}{i1}{\texttt{Load}}{}%
+  \draw[->, rounded corners=1.2pt] ([xshift=1pt,yshift=2.2pt]k0.base east) -| ([xshift=3pt]u1.east |- 0,-2*\eglh+2.2pt)%
+    node[pos=0.75, anchor=west, xshift=1pt, font=\figfont\itshape] {rf}%
+    -- ([xshift=1pt,yshift=2.2pt]k2.base east);}%
+% [before 2026-11-16 tersening] & \textbf{Stage 2:} i0 and i1 share an address, so i1 mispredicts no alias. Inline asm: no compiler forwarding. \textbf{Executor:} i0's address held 5{,}000 cycles; i1 forced to mispredict no alias.\\%
+& \textbf{Stage 2:} i0 and i1 share an address\cutsug{, in inline asm so the compiler cannot forward}. \textbf{Executor:} i0's address held 5{,}000 cycles; i1 forced to mispredict no alias.\\%
+\midrule%
+% ---- row 4: commit boundary (Row 4) ----%
+Commit boundary%
+\eg{\def\egfl{21.5pt}\egl{0}{i0}{lc}{committed}\egl{1}{i1}{fnc}{uncommitted}}%
+% [before 2026-11-16 tersening] & \textbf{Stage 2:} Global labels on lc and fnc. \textbf{Executor:} Window: lc retired~$<$ xmit~$<$ fnc retires (measured).\\%
+& \textbf{Stage 2:} labels on lc and fnc. \textbf{Executor:} measures their retirements, which bound the window.\\%
+\midrule%
+% ---- row 5: target transmitter (Row 5) ----%
+\textcolor{ssxmitink}{Target transmitter}%
+\eg{\egl{0}{i0}{\texttt{Branch\_x}}{\textcolor{ssxmitink}{xmit}}\egl{1}{\itshape or}{\texttt{Other\_x}}{\textcolor{ssxmitink}{xmit}}}%
+% [before 2026-11-16 tersening] & \textbf{Stage 2:} Load, Store: no special code. \texttt{Branch\_x}: \texttt{testq}+\texttt{jz} on its operand; architecturally taken, mispredicted not taken. \texttt{Other\_x} (divide): unguarded, so a zero divisor faults. \textbf{Executor:} \texttt{Branch\_x}: forced to mispredict, no hold. Divide: a fault after a mispredict is a transmission.\\%
+& \textbf{Stage 2:} loads and stores as is; \texttt{Branch\_x}: \texttt{testq}+\texttt{jz} on its operand, mispredicted; divide: unguarded, so a zero divisor faults. \textbf{Executor:} \texttt{Branch\_x} forced to mispredict, no hold; a divide's fault counts as a transmission.\\%
+\bottomrule%
+\end{tabular}%
+}%
+\end{table}

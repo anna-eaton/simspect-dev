@@ -1,0 +1,23 @@
+// futuristic 2026-11-16 (agent invisispec-fut): PILOT copy of runconfigs/futuristic_20261116/twostage_Footprint_6_u_fut.jsonc.
+// Changed ONLY: corpus -> Footprint_6_u_core_lpP_fut_pilot; stage1 = reuse the EXHAUSTED k2 fut cores (72; whole-file sha256 of
+// Footprint_6_u_core_ri_fut.als); stage15 slots 16 / budget_s 900 / cap 2 (small pilot); stream jobs 16, min_batch 20.
+// Everything else (models, recipe A, no post-passes, walk_p, shuffle seed, dedup) unchanged. Docs: EVAL_MANIFEST 'Futuristic testsets (2026-11-16)'.
+{
+  "paths": {
+    "testset_dir": "/tests/futuristic_20261116/testsets"
+  },
+  "twostage_lp": {
+    "family": "Footprint_6_u",
+    "core_model": "Footprint_6_u_core_ri_fut",
+    "lp_model": "Footprint_6_u_lpP_fut",
+    "corpus": "Footprint_6_u_core_lpP_fut_pilot",
+    "stage2_config": "runconfigs/futuristic_20261116/stage2_final_A.jsonc",
+    "stage1": {
+      "reuse_cores": ["/tests/futuristic_20261116/stage1/out/Footprint_6_u_core_ri_fut/k2/stage1_xml"],
+      "reuse_sha256": "97bad232e03903c3b82c836ddcb19566abc0ebdf3f793b86e2e23c02bc48140c"
+    },
+    "stage15": {"slots": 16, "job_timeout": 300, "budget_s": 900, "cap": 2, "walk_p": 0.05, "shuffle_seed": 20261110, "spread": 2, "dedup_level": "seed", "xmx": "4g"},
+    "stream": {"interval": 60, "jobs": 16, "min_batch": 20, "max_batch": 150},
+    "stage2_postpasses": false
+  }
+}

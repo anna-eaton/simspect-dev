@@ -1,0 +1,11 @@
+--- a/sections/discussion.tex
++++ b/sections/discussion.tex
+@@ -31,7 +31,7 @@
+ % support: Protean §VII-B4b ("an older tainted/protected branch can conditionally block a younger untainted/unprotected branch from initiating a squash depending on whether the former was mispredicted"), §VII-B4c ("We manually discover a corner-case implementation bug in SPT that AMuLeT* misses"); pipeline.tex:61 (Stage 1b connection rule); pipeline.tex:101 (no access faults); intro.tex:75 (seven known bugs)
+ 
+ % GOAL: say what porting SimSpect to RTL, silicon, or a new speculation primitive requires (future work).
+-\noindent\textbf{Generality.} RTL simulation exposes the predictor and pipeline signals that the harness forces and the Inspector reads; on silicon, the directives would have to come from predictor training and eviction, and a hit would have to be measured through a side channel. Each further speculation primitive, such as value prediction or the microcode branch mispredictions that $\mu$Spectre exploits~\cite{mosier2025uspectre}, needs its own execution-contract entry and harness directive.
++\cutsug{\noindent\textbf{Generality.} RTL simulation exposes the predictor and pipeline signals that the harness forces and the Inspector reads; on silicon, the directives would have to come from predictor training and eviction, and a hit would have to be measured through a side channel. Each further speculation primitive, such as value prediction or the microcode branch mispredictions that $\mu$Spectre exploits~\cite{mosier2025uspectre}, needs its own execution-contract entry and harness directive.}
+ % support: future work (design argument); store bypass already has both (pipeline.tex:87, :114)
+ % \section{Discussion And Limitations}\label{sec:discussion}% [stray ``` from an Overleaf paste removed here 2026-11-16: it printed quote marks after the Generality paragraph]
+ % \iffalse % LAB-REVIEW: discussion to-do list hidden (2026-11-03)

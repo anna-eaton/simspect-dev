@@ -1,0 +1,52 @@
+--- a/sections/results.tex	2026-11-16 20:36:38
++++ b/sections/results.tex	2026-11-16 20:36:38
+@@ -41,21 +41,24 @@
+ 
+ \subsection{Unknown Bugs Found By \toolname{}}\label{sec:unknown-bugs-found-simspect}
+ 
+-\subsubsection{UV1: STT Fails To Taint One Register}\label{sec:uv1-stt-fails-taint}
++% [F1, cut plan 2026-11-16: was \subsubsection{UV1: STT Fails To Taint One Register}; bold run-in head instead]
++\noindent\textbf{UV1: STT Fails To Taint One Register.}\label{sec:uv1-stt-fails-taint}
+ % [before 2026-11-16: time-relative and uncited] The check is still present in the latest upstream STT.
+ STT's taint propagation skips any source register with index 16 (\texttt{rob\_impl.hh:229})\footnote{File:line references are to each defense's gem5 source: STT's repository at commit e3283b9~\cite{sttrepo}, ReCon's implementation as obtained from its authors, and AMuLeT's artifact build of SpecLFB~\cite{amulet}.}, a check meant for the zero register that ignores the register class. Floating-point index 16 is the low half of \texttt{xmm4}, so a speculatively loaded secret copied through \texttt{xmm4} and back loses its taint, and the dependent transmitter accesses the cache inside the violation window. Of 100 load-to-load tests that STT blocks when every value stays in an integer register, 98 leak when the value of the load that reads the secret is moved through \texttt{xmm4} before its use, and none when it is moved through \texttt{xmm3}. The check is also at line 229 of STT's master branch, commit 5bf4110~\cite{sttmaster}.
+ \input{tikz/stt_xmm4_code_8pt}
+ 
+-\subsubsection{UV2: ReCon: Store-To-Load Forwarding Skips The Taint Check}\label{sec:bug-stlf}
++% [F1, cut plan 2026-11-16: was \subsubsection{UV2: ReCon: Store-To-Load Forwarding Skips The Taint Check}; bold run-in head instead]
++\noindent\textbf{UV2: ReCon: Store-To-Load Forwarding Skips The Taint Check.}\label{sec:bug-stlf}
+ % [lead for Sec.~\ref{sec:bug-stlf}] (2026-11-10: the detail subsubsection is commented out below; its label moved here)
+-
++% [F1: blank line removed so the UV2 head runs in]
+ STT treats store-to-load forwarding as an implicit branch on the load's address and delays resolving it until that address is untainted~\cite[\S 6.4.2]{yu2019stt}. ReCon's implementation of STT~\cite{recon} checks a load's taint only on its cache path: when an older in-flight store has the same address, the load takes the store's data and completes without passing the taint check (\texttt{lsq\_unit.cc:2019}). Its completion time therefore reveals whether its secret-derived address matches the store's. Fig.~\ref{fig:reconstl} shows this in generated test inst-014536. 
+ % \toolname{}'s Inspector catches this because STT's transmission criterion is whether the transmitter obtained its data, not whether it sent a cache request.
+ 1{,}690 of the 30{,}368 tests from our STT model reach the bug on ReCon's implementation of STT, and so do 2{,}848 of the 60{,}342 tests of ReCon's own specification, whose execution contract adds store shadows (\S\ref{sec:example-contract}).
+ 
+ \input{tikz/reconstl_v3_8pt}
+ 
+-\subsubsection{UV3: ReCon: Only The Oldest Taint Source}\label{sec:bug-otb}
++% [F1, cut plan 2026-11-16: was \subsubsection{UV3: ReCon: Only The Oldest Taint Source}; bold run-in head instead]
++\noindent\textbf{UV3: ReCon: Only The Oldest Taint Source.}\label{sec:bug-otb}
+ % [lead for Sec.~\ref{sec:bug-otb}] (2026-11-10: the detail subsubsection is commented out below; its label moved here)
+ STT keeps a value tainted until the youngest load it depends on reaches the visibility point~\cite[\S 7.1]{yu2019stt}. ReCon's implementation of STT~\cite{recon} instead keeps one taint source per register: an instruction with several tainted operands passes on only the oldest one's taint (\texttt{taint\_tracker.cc:108--131}), which is dropped once that source stops being speculative. A transmitter fed by an older and a younger speculative load is thus released while the younger one is still speculative: Fig.~\ref{fig:otb} shows this in generated test inst-003908. The release needs the older load's branch to resolve after the merge is renamed, since ReCon assigns taint at rename: without the swept 500-cycle hold, i2 would resolve at cycle~6, before the merge is renamed at cycle~121, and ReCon would hold i7 (Table~\ref{tab:instrtable}, row~2).
+ % \anna{Evidence scope: the OTB-merge tests were re-run at every point of the resolution-delay grid and hit only where the older load's branch is stalled (project log 2026-11-09 23:55; grid-0 control 18:50). The 29 generated tests counted below were not checked per grid point.}
+@@ -63,13 +66,17 @@
+ 17 of the 30{,}368 tests from our STT model show this bug on ReCon's implementation of STT. In all 17, the older operand reaches the transmitter only through register reads that gem5's x86 instructions make and the x86 specification does not~\cite{intelsdm}: a \texttt{mov} or \texttt{cqto} reading its old destination (12 tests, as in Fig.~\ref{fig:otb}), or an arithmetic instruction reading the old flags (5). ReCon records one taint source per register (\texttt{taint\_tracker.hh:27}) and gives an instruction's result only its oldest tainted source (\texttt{taint\_tracker.cc:111}), so an instruction that reads two tainted registers, such as an \texttt{add}, loses the younger source in the same way.
+ \input{tikz/recon_otb_v6_8pt}
+ % \input{tikz/resolutiontiming_v2}% moved from the pipeline section, 2026-11-13  (commented out 2026-11-16, Anna: Fig. 8 shows the real trace; the counterfactual is one sentence in UV3)
+-\subsubsection{UV4: SpecLFB: ROB Walk Order}\label{sec:uv4-speclfb-rob-walk} This bug widens A-UV6: AMuLeT reports SpecLFB's unprotected load only for the first speculative load~\cite[\S 4.7]{amulet}, and its patch for A-UV6 would also close this bug. SpecLFB~\cite{cheng2024speclfb} decides whether a speculative load is unsafe in two walks: the ROB walk marks a load that has no older unsafe load, and the LSQ walk flags loads in a branch's shadow. A load is held only if it is flagged and was not marked. At gem5's default delays, a load reaches the ROB one cycle before it reaches the load queue, so the ROB walk can mark a younger load before the LSQ walk has flagged the older one, and the mark is never cleared. Loads after the first speculative load can therefore go unprotected as well, whereas AMuLeT reports the leak only for the first one (A-UV6). In 398 of the first 4{,}000 tests, only a later load leaks.
+ 
+-\subsubsection{UV5: SpecLFB: The Shadow Of A \texttt{jmp}}\label{sec:uv5-speclfb-shadow-jmp}
++% [F1, cut plan 2026-11-16: was \subsubsection{UV4: SpecLFB: ROB Walk Order}; bold run-in head instead]
++\noindent\textbf{UV4: SpecLFB: ROB Walk Order.}\label{sec:uv4-speclfb-rob-walk} This bug widens A-UV6: AMuLeT reports SpecLFB's unprotected load only for the first speculative load~\cite[\S 4.7]{amulet}, and its patch for A-UV6 would also close this bug. SpecLFB~\cite{cheng2024speclfb} decides whether a speculative load is unsafe in two walks: the ROB walk marks a load that has no older unsafe load, and the LSQ walk flags loads in a branch's shadow. A load is held only if it is flagged and was not marked. At gem5's default delays, a load reaches the ROB one cycle before it reaches the load queue, so the ROB walk can mark a younger load before the LSQ walk has flagged the older one, and the mark is never cleared. Loads after the first speculative load can therefore go unprotected as well, whereas AMuLeT reports the leak only for the first one (A-UV6). In 398 of the first 4{,}000 tests, only a later load leaks.
++
++% [F1, cut plan 2026-11-16: was \subsubsection{UV5: SpecLFB: The Shadow Of A \texttt{jmp}}; bold run-in head instead]
++\noindent\textbf{UV5: SpecLFB: The Shadow Of A \texttt{jmp}.}\label{sec:uv5-speclfb-shadow-jmp}
+ % [cut 2026-11-16, Anna: narrative does not need it] The logic was ported from DOLMA~\cite{loughlin2021dolma}, which does not have this bug. 
+ SpecLFB treats a load as safe only if no older control instruction is unresolved~\cite[\S 6.2.2]{cheng2024speclfb}, and its ROB walk tracks this with a single flag. An unresolved branch clears the flag, but a younger direct \texttt{jmp} or \texttt{call} sets it again (\texttt{rob.cc:501}), erasing the older branch's shadow, so loads after the jump count as safe and fill the L1D speculatively. A test reaches it when a direct jump lies between the mispredicted branch and a later load: always with a flushed or filled cache. When we run AMuLeT's fuzzer on SpecLFB, it also triggers this bug, in 47 of 248 violations, which AMuLeT's analysis would attribute to A-UV6 (\S\ref{sec:discussion}).
+ 
+-\subsubsection{UV6: The Visibility-Point/Squash Race}\label{sec:bug-race}
++% [F1, cut plan 2026-11-16: was \subsubsection{UV6: The Visibility-Point/Squash Race}; bold run-in head instead]
++\noindent\textbf{UV6: The Visibility-Point/Squash Race.}\label{sec:bug-race}
+ % [Sec.~\ref{sec:bug-race}, moved last]. (2026-11-10: the detail subsubsection is commented out below; its label moved here)
+ % [before 2026-11-16: depends on where the window ends] and in that gap the transmitter accesses the cache inside the violation window, which lasts until the squash lands.
+ STT~\cite{yu2019stt} releases a transmitter once the branch it depends on resolves, even on the wrong path: a wrong-path load's result stops being tainted as soon as every older branch has resolved (\texttt{rob\_impl.hh:812}). The squash triggered by that resolution reaches the issue stage only \texttt{commitToIEWDelay} cycles later, and in that gap the transmitter obtains its data. We claim the race only for squashes slower than gem5's default (\S\ref{sec:discussion}): \texttt{commitToIEWDelay}~$=3$ triggers it on STT, and at the default of~1 the squash arrives first. SPT-Fence~\cite{spt} lifts its fence on the same signal and races the same way (on tests of SPT's own specification at \texttt{commitToIEWDelay}~$=4$, in 1{,}674 of 2{,}000, and in none of 2{,}000 at the default; re-running 40 of them with the campaign's timing confirms the full signature in all 40, as in Fig.~\ref{fig:race}).

@@ -1,0 +1,27 @@
+% STT xmm4 code snippet figure (UV1), new 2026-11-11. Code copied verbatim from the STT repository (cwfletcher/stt) at commit e3283b9,
+% src/cpu/o3/rob_impl.hh lines 224-233 (local upstream tarball ~/trippel/defense_src/stt_e3283b9; the check is line 229, also :229 on
+% master 5bf41109 and :230 in AMuLeT's copy, simspect project log 2026-11-11). Elisions: the loop condition/increment of line 225 and
+% lines 226-227 (a comment and `DynInstPtr prevInst = (*prevInstIt);`), and the closing braces after 233. Lines 224, 229 and 232 are
+% wrapped at a space (text unchanged). 8pt text (\figfont), tt = Inconsolata (zi4) as in acmart; indentation 1 character per level.
+% Colors from tikz/sscolors.tex: blue box = defense code (sssrcbg), red band = the bug (ssxmitfill), red ink = the index-16 test.
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}%
+% v2 (2026-11-16): ellipses moved onto code rows (226-227 after line 225's brace; 231-232 before line 233's code; line-number gaps show the elisions) and the trailing "..." row dropped: 12 rows -> 7
+\begin{figure}[t]
+\centering
+{\figfont%
+\providecolor{sssrcbg}{gray}{0.92}\providecolor{ssxmitfill}{gray}{0.80}\providecolor{ssxmitink}{gray}{0}%
+\setlength{\fboxsep}{2pt}\setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1}%
+\colorbox{sssrcbg}{%
+\begin{tabular}{>{\ttfamily}r>{\ttfamily\raggedright\arraybackslash}p{\dimexpr\columnwidth-26pt\relax}}%
+225 & for (auto prevInstIt = instList[tid].begin(); ...)\{...\\
+228 & \hspace*{0.5em}for (int i = 0; i < inst->numSrcRegs(); i++) \{\\
+\rowcolor{ssxmitfill}229 & \hspace*{1em}if (inst->srcRegIdx(i).index() == \textcolor{ssxmitink}{\textbf{16}})\\
+\rowcolor{ssxmitfill}    & \hspace*{3em}// exclude zero register\\
+\rowcolor{ssxmitfill}    & \hspace*{4.5em}(zero register cannot be tainted)\\
+\rowcolor{ssxmitfill}230 & \hspace*{1.5em}continue;\hfill{\rmfamily\itshape\textcolor{ssxmitink}{also skips FP register 16, the low half of \texttt{xmm4}}}\\
+233 & \hspace*{2em}...inst->setArgProducer(i, prevInst);%
+\end{tabular}}%
+}%
+\caption{STT's taint propagation (\texttt{rob\_impl.hh:225--233} at commit e3283b9~\cite{sttrepo}; red: line 229, the index-16 check; ``...'' marks elided code, and long lines are wrapped).}
+\label{fig:sttxmm4}
+\end{figure}

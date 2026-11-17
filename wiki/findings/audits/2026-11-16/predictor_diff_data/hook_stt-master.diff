@@ -1,0 +1,102 @@
+diff -ruN b_stt_HEAD/src/cpu/pred/BranchPredictor.py b_stt-master/src/cpu/pred/BranchPredictor.py
+--- b_stt_HEAD/src/cpu/pred/BranchPredictor.py	2020-05-05 16:24:28
++++ b_stt-master/src/cpu/pred/BranchPredictor.py	2026-11-08 18:40:43
+@@ -42,6 +42,10 @@
+     RASSize = Param.Unsigned(16, "RAS size")
+     instShiftAmt = Param.Unsigned(2, "Number of bits to shift instructions by")
+ 
++    annotationBranchPCs         = VectorParam.Addr([], "Branch PCs to annotate")
++    annotationForcedTargets     = VectorParam.Addr([], "Forced BTB target per entry")
++    annotationResolveStallCycles = VectorParam.UInt64([], "Resolve stall cycles per entry")
++
+     useIndirect = Param.Bool(True, "Use indirect branch predictor")
+     indirectHashGHR = Param.Bool(True, "Hash branch predictor GHR")
+     indirectHashTargets = Param.Bool(True, "Hash path history targets")
+diff -ruN b_stt_HEAD/src/cpu/pred/bpred_unit.cc b_stt-master/src/cpu/pred/bpred_unit.cc
+--- b_stt_HEAD/src/cpu/pred/bpred_unit.cc	2020-05-05 16:24:28
++++ b_stt-master/src/cpu/pred/bpred_unit.cc	2026-11-08 18:40:43
+@@ -52,6 +52,8 @@
+ #include "base/trace.hh"
+ #include "config/the_isa.hh"
+ #include "debug/Branch.hh"
++#include "debug/O3PipeView.hh"  // SimSpect resolve hooks (2026-10-30)
++#include "sim/core.hh"
+ 
+ BPredUnit::BPredUnit(const Params *params)
+     : SimObject(params),
+@@ -75,6 +77,15 @@
+ {
+     for (auto& r : RAS)
+         r.init(params->RASSize);
++
++    for (size_t i = 0; i < params->annotationBranchPCs.size(); ++i) {
++        Addr br = params->annotationBranchPCs[i];
++        Addr tgt = params->annotationForcedTargets[i];
++        if (tgt != 0) btbForcedTargets[br] = tgt;
++        if (i < params->annotationResolveStallCycles.size() &&
++            params->annotationResolveStallCycles[i] > 0)
++            branchResolveStallCycles[br] = Cycles(params->annotationResolveStallCycles[i]);
++    }
+ }
+ 
+ void
+@@ -308,6 +319,30 @@
+            predict_record.wasReturn = true;
+         }
+         TheISA::advancePC(target, inst);
++    }
++
++    // BTB annotation override.
++    if (!btbForcedTargets.empty()) {
++        auto it = btbForcedTargets.find(pc.instAddr());
++        if (it != btbForcedTargets.end()) {
++            // SimSpect resolve hooks (2026-10-30): forced target 1 = predict not-taken (fall-through).
++            if (it->second == 1) {
++                target = pc;
++                TheISA::advancePC(target, inst);
++                pred_taken = false;
++                predict_record.predTaken = false;
++            } else {
++                target.set(it->second);
++                pred_taken = true;
++                predict_record.predTaken = true;
++            }
++            DPRINTFR(O3PipeView, "O3PipeView:simspect:%llu:BR:predict_force:line=-:seq=%llu:pc=%#llx:victim=-:cause=-:sq=-:id=-:taken=%d:target=%#llx\n",
++                     (unsigned long long)curTick(),
++                     (unsigned long long)seqNum,
++                     (unsigned long long)pc.instAddr(),
++                     (int)pred_taken,
++                     (unsigned long long)target.instAddr());
++        }
+     }
+ 
+     pc = target;
+diff -ruN b_stt_HEAD/src/cpu/pred/bpred_unit.hh b_stt-master/src/cpu/pred/bpred_unit.hh
+--- b_stt_HEAD/src/cpu/pred/bpred_unit.hh	2020-05-05 16:24:28
++++ b_stt-master/src/cpu/pred/bpred_unit.hh	2026-11-08 18:40:43
+@@ -48,6 +48,7 @@
+ #define __CPU_PRED_BPRED_UNIT_HH__
+ 
+ #include <deque>
++#include <unordered_map>
+ 
+ #include "base/statistics.hh"
+ #include "base/types.hh"
+@@ -303,7 +304,17 @@
+     /** Stat for the number of indirect target mispredictions.*/
+     Stats::Scalar indirectMispredicted;
+ 
++  public:
++    Cycles getResolveStallCyclesFor(Addr pc) const {
++        auto it = branchResolveStallCycles.find(pc);
++        return it != branchResolveStallCycles.end() ? it->second : Cycles(0);
++    }
++
+   protected:
++    // Annotation hooks: populated from params by the constructor.
++    std::unordered_map<Addr, Addr>   btbForcedTargets;
++    std::unordered_map<Addr, Cycles> branchResolveStallCycles;
++
+     /** Number of bits to shift instructions by for predictor addresses. */
+     const unsigned instShiftAmt;
+ 

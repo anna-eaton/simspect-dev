@@ -1,0 +1,20 @@
+--- a/tikz/recon_otb_v8_8pt.tex
++++ b/tikz/recon_otb_v8_8pt.tex
+@@ -203,6 +203,6 @@
+ \end{tikzpicture}%
+ }%
+ % [repeated the paragraph below the figure, before 2026-11-16] gem5's \texttt{cqto} and \texttt{mov} also read their destination registers, so i7's condition
+-\caption{ReCon's implementation of STT releasing a transmitter early, on a gem5 trace of generated test inst-003908 (integer version; notation of Fig.~\ref{fig:checkerwindow}). Top: lines of its x86 program and the graph instruction each implements. i3 is speculative under branch i2, and i6 under the mispredicted branch i4. i7's condition depends on i3 (through i5) as well as on i6, and ReCon keeps only i3's taint for it. When i2 resolves at cycle 507, after a 500-cycle hold, i3's taint is freed and i7 is released, although i6 is still speculative; i7 redirects fetch at 510 ($\star$), inside the violation window.}
++\caption{ReCon's implementation of STT releasing a transmitter early, on a gem5 trace of generated test inst-003908 (integer version; notation of Fig.~\ref{fig:checkerwindow}). Top: lines of its x86 program and the graph instruction each implements.\cutsug{ i3 is speculative under branch i2, and i6 under the mispredicted branch i4.} i7's condition depends on i3 (through i5) as well as on i6, and ReCon keeps only i3's taint for it. When i2 resolves at cycle 507, after a 500-cycle hold, i3's taint is freed and i7 is released, although i6 is still speculative; i7 redirects fetch at 510 ($\star$), inside the violation window.}
+ \label{fig:otb}
+ \end{figure}
+--- a/tikz/squashrace_v7_8pt.tex
++++ b/tikz/squashrace_v7_8pt.tex
+@@ -168,6 +168,6 @@
+ \end{tikzpicture}%
+ }%
+ \caption{
+-The visibility-point/squash race, on a gem5 trace of SPT-Fence running generated test inst-000125 of SPT's specification with \texttt{commitToIEWDelay} raised to 4 (notation of Fig.~\ref{fig:checkerwindow}). xmit's address comes from committed instructions, so SPT holds xmit (blue) while the branch is unresolved. The branch resolves at cycle 2626, SPT releases xmit at 2627, and xmit accesses the cache at 2628 ($\star$), inside the violation window (tan), which closes when the squash lands at 2630.}
++The visibility-point/squash race, on a gem5 trace of SPT-Fence running generated test inst-000125 of SPT's specification with \texttt{commitToIEWDelay} raised to 4 (notation of Fig.~\ref{fig:checkerwindow}).\cutsug{ xmit's address comes from committed instructions, so SPT holds xmit (blue) while the branch is unresolved.} The branch resolves at cycle 2626, SPT releases xmit at 2627, and xmit accesses the cache at 2628 ($\star$), inside the violation window (tan), which closes when the squash lands at 2630.}
+ \label{fig:racev2}\label{fig:race}
+ \end{figure}

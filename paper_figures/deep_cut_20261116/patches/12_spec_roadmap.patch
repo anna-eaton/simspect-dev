@@ -1,0 +1,11 @@
+--- a/sections/model.tex
++++ b/sections/model.tex
+@@ -12,7 +12,7 @@
+ % [§3 opening matched to the intro, before 2026-11-17] a condition on a single execution, which an execution violates when the defense forbids it.
+ % [clauses to components, before 2026-11-17] It has three clauses, written by hand
+ % [clauses to components, before 2026-11-17] then the three clauses and the predicate they form
+-A \toolname{} defense specification states a defense's security guarantee as a \emph{leakage predicate}: a condition on a single execution of a program, which classifies the execution, encoded as an execution graph, as forbidden or permitted by the defense. It has three components, written by hand from the defense's paper: a \emph{leakage contract}, an \emph{execution contract} and a \emph{protection set}. We first define candidate execution graphs (\S\ref{sec:execution-syntax}), then the three components and the predicate they form (\S\ref{sec:leakage-predicate}), and then specify STT as an example (\S\ref{sec:example-contract}). 
++A \toolname{} defense specification states a defense's security guarantee as a \emph{leakage predicate}: a condition on a single execution of a program, which classifies the execution, encoded as an execution graph, as forbidden or permitted by the defense. It has three components, written by hand from the defense's paper: a \emph{leakage contract}, an \emph{execution contract} and a \emph{protection set}.\cutsug{ We first define candidate execution graphs (\S\ref{sec:execution-syntax}), then the three components and the predicate they form (\S\ref{sec:leakage-predicate}), and then specify STT as an example (\S\ref{sec:example-contract}).} 
+ % The leakage predicate is the only defense-specific input to the synthesizer (\S\ref{sec:synthesizer}), and its transmission criterion the only one to the Inspector (\S\ref{sec:transmission-requirement}).
+ The leakage predicate is the synthesizer's defense-specific input (\S\ref{sec:synthesizer}), \cutrep{and the defense's transmission criterion is the Inspector's (\S\ref{sec:transmission-requirement}).}{and the transmission criterion the Inspector's (\S\ref{sec:transmission-requirement}).}
+ 

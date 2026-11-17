@@ -1,0 +1,119 @@
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}% figure text: exactly 8pt in any class (ACM sigconf \footnotesize is 7pt)
+% relaxation figure v5 grid (2026-11-16, Anna: "make sure that all the arrows point from the box not from the text, to the other box": each relaxation arrow now starts on its pane's band edge; labels right-aligned beside the arrow start). Based on v4 grid (2026-11-16, Anna: "is there any way to redesign the relaxation figure so that we can put it in a grid of 4"): the four panes of tikz/relaxation_v3_short.tex in a 2x2 grid, (a) (b) on top, (c) (d) below, in one column. Same content, notation, colors, labels and caption as v3 (every word v3 prints appears here the same number of times). What moved: (1) the pane letters sit on a header line above each pane (they no longer fit left of i0 at half the column width); (d)'s letter joins the title on its box border, "(d) leakage backbone", and (c)'s header shares that baseline; (2) each relaxation label is one line ("RS: unneeded r1") directly under its source pane, at the tail of its arrow: a->d runs diagonally, b->d straight down, c->d straight across under (c), all into (d)'s box; (3) the operand columns are packed closer (a word space or more between tokens; Branch_n still ends left of the ddi label) and the flag words share one column; (4) (b)'s removed rf edge runs in a gutter right of i2's xmit. Row pitch 21pt and every ddi/rf label as in v3. (d)'s box has sharp corners (properties are sharp, rule of 2026-11-15; v3's box was rounded). Height 279.9 -> 189.7pt standalone; float with caption 364.9 -> 274.4pt in the paper (ISCA-27 6f492f7, notes hidden). All positions follow from the knobs below.
+\begin{figure}[t]
+\centering
+% Four panes: (d) the backbone Branch_n; Load r0 <- m0; Load ? <- [r0] (branch unresolved, nothing committed), and three
+% violating variants that relax to it: (a) the transmitter names an unneeded output r1 (RS), (b) a second load i3 (RI),
+% (c) load i1 also unresolved (RR). Gray (rlgone) = the part the relaxation removes; dashed = a removed edge; thick +
+% purple highlighter = the leak path; purple fill = protected m0; tan band = rows after the unresolved branch; red = the
+% xmit flag. Body only, wrapped in { }; every line ends in % so no stray spaces enter the output. Macros prefixed rl.
+{%
+\providecolor{ssspecfill}{gray}{0.94}\providecolor{ssspecink}{gray}{0}%
+\providecolor{ssprotfill}{gray}{0.83}\providecolor{ssprotink}{gray}{0}%
+\providecolor{ssxmitfill}{gray}{0.76}\providecolor{ssxmitink}{gray}{0}%
+\providecolor{sssrcfill}{gray}{0.66}\providecolor{sssrcink}{gray}{0}\providecolor{sssrcbg}{gray}{0.90}%
+\colorlet{rlgone}{black!45}% gray = what the relaxation removes
+% ============================ TUNING KNOBS ============================
+\def\rlAlab{RS}% label of (a)'s relaxation (RS since 2026-11-11: RO is defined but enforced in no model; RS is what removes (a), STT_6.als:214, :310)
+\def\rlP{21}% row pitch in every pane, pt (room for the ddi label above the arc and the rf label beside the arrowhead), as in v3
+\def\rlH{11}% header line (pane letter) to the pane's i0 row, pt
+\def\rlGB{24}% (b)'s last row (i3) to the top border of (d)'s box, pt: holds the RI label
+\def\rlRI{13.5}% (b)'s last row (i3) to the RI label under it, pt
+\def\rlTD{14}% top border of (d)'s box to (d)'s i0 row, pt (v3: 15)
+\def\rlTB{2.6}% the box title's baseline sits this far below the border, pt (centers it on the line); (c)'s header shares it
+\def\rlBB{14.5}% (d)'s i2 row to the bottom border of its box, pt: the c->d arrow enters the box below i2
+\def\rlRR{12.5}% (c)'s i2 row to the RR label under it, pt
+% x positions inside a pane, from the left edge of its tan band
+\def\rlid{2pt}% ids
+\def\rlkind{13.5pt}% kinds
+\def\rlout{38.5pt}% output operand (Branch_n must end left of the ddi label above i1)
+\def\rlarr{49.1pt}% <- arrow
+\def\rlin{60.1pt}% input operand
+\def\rlflag{77pt}% flag words (one column)
+\def\rlgut{97.5pt}% gutter for (b)'s removed rf, right of i2's xmit
+\def\rlbandr{113pt}% right edge of every tan band
+\def\rlpad{3pt}% (d)'s box: padding around its band
+\def\rlcolw{241pt}% column width (ACM sigconf \columnwidth = 241.14pt)
+\def\rllw{1.1pt}% line width of the leak path
+% ======================================================================
+\pgfmathsetmacro\rlXL{0}% left panes (a), (c): band starts at x = 0
+\pgfmathsetmacro\rlXR{\rlcolw-\rlpad-\rlbandr}% right panes (b), (d): (d)'s box ends at the column edge
+% y of every row (pt), from the knobs: \rl<pane><row>
+\pgfmathsetmacro\rlhT{0}% header line of (a), (b)
+\pgfmathsetmacro\rlaA{\rlhT-\rlH}\pgfmathsetmacro\rlaB{\rlaA-\rlP}\pgfmathsetmacro\rlaC{\rlaB-\rlP}\pgfmathsetmacro\rlaD{\rlaC-\rlP}%
+\pgfmathsetmacro\rlboxT{\rlaD-\rlGB}% top border of (d)'s box
+\pgfmathsetmacro\rlhB{\rlboxT-\rlTB}% baseline of (d)'s title and (c)'s header
+\pgfmathsetmacro\rldA{\rlboxT-\rlTD}\pgfmathsetmacro\rldB{\rldA-\rlP}\pgfmathsetmacro\rldC{\rldB-\rlP}%
+\pgfmathsetmacro\rlboxB{\rldC-\rlBB}% bottom border of (d)'s box
+\begin{tikzpicture}[%
+  >=latex,%
+  every node/.style={font=\figfont, inner sep=0pt},%
+  execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000},%
+  rltok/.style={anchor=base west, outer sep=0.6pt},%
+  rllab/.style={font=\figfont\itshape},%
+  rlnote/.style={font=\figfont\itshape, anchor=base west},%
+  rlpanel/.style={font=\figfont\bfseries, anchor=base west},%
+  rlleak/.style={->, line width=\rllw, draw=ssprotink, preaction={draw=ssprotfill, arrows=-, line width=3.6pt, line cap=round, blend mode=multiply}},%
+  rlgoneedge/.style={->, densely dashed, draw=rlgone},%
+  rlrelax/.style={->, line width=0.8pt, draw=black!45, rounded corners=4pt},%
+  rlrlab/.style={font=\figfont, anchor=base west, inner sep=0.5pt},%
+]%
+% ---- row macros: #x = x of the pane's band (number, pt), y arguments are numbers in pt, without the unit ----
+\def\rlband#1#2#3{\fill[ssspecfill, rounded corners=2pt] (#1pt+\rlid-2pt,#2pt-4.5pt) rectangle (#1pt+\rlbandr,#3pt-4pt);}% #1 x, #2 = y of i0, #3 = y of the last row
+\def\rlbranch#1#2{% #1 x, #2 y of i0
+  \node[rltok] at (#1pt+\rlid,#2pt) {i0:};%
+  \node[rltok] at (#1pt+\rlkind,#2pt) {\texttt{Branch\_n}};%
+  \node[rlnote] at (#1pt+\rlflag,#2pt) {unresolved};}%
+\def\rlload#1#2#3{% i1: Load r0 <- m0 (m0 protected): #1 prefix, #2 x, #3 y
+  \node[rltok] at (#2pt+\rlid,#3pt) {i1:};%
+  \node[rltok] at (#2pt+\rlkind,#3pt) {\texttt{Load}};%
+  \node[rltok] (#1o) at (#2pt+\rlout,#3pt) {$r0$};%
+  \node[rltok] at (#2pt+\rlarr,#3pt) {$\leftarrow$};%
+  \node[rltok, fill=ssprotfill, inner xsep=1pt, inner ysep=1.3pt] (#1m) at (#2pt+\rlin,#3pt) {$m0$};}%
+\def\rlldx#1#2#3#4#5#6{% Load <out> <- [r0]: #1 prefix, #2 x, #3 id, #4 y, #5 output token, #6 text color
+  \node[rltok, text=#6] at (#2pt+\rlid,#4pt) {i#3:};%
+  \node[rltok, text=#6] at (#2pt+\rlkind,#4pt) {\texttt{Load}};%
+  \node[rltok, text=#6] (#1o) at (#2pt+\rlout,#4pt) {#5};%
+  \node[rltok, text=#6] at (#2pt+\rlarr,#4pt) {$\leftarrow$};%
+  \node[rltok, text=#6] (#1b) at (#2pt+\rlin,#4pt) {[};%
+  \node[rltok, text=#6, outer sep=0pt] (#1r) at (#1b.base east) {$r0$};%
+  \node[rltok, text=#6] (#1c) at (#1r.base east) {]};}%
+\def\rlxmit#1#2{\node[rlnote, text=ssxmitink] at (#1pt+\rlflag,#2pt) {xmit};}%
+\def\rlleak#1#2{% the leak path m0 -ddi-> r0 -rf-> [r0], labeled in every pane (as in Fig. 2)
+  \draw[rlleak, shorten >=1.4pt] ($(#1m.north)+(0,0.3pt)$) to[out=115, in=65, looseness=1.1]%
+    node[pos=0.5, above=1.4pt, rllab] {ddi} ($(#1o.north)+(0,0.6pt)$);%
+  \draw[rlleak, shorten <=0.6pt, shorten >=1.0pt, rounded corners=2pt] (#1o.south) -- ++(0,-4pt) -| ($(#2r.north)+(0,0.2pt)$)%
+    node[pos=0.78, anchor=west, xshift=2pt, rllab] {rf};}%
+% (a) unneeded output r1 (top left)
+\node[rlpanel] at (\rlXL pt,\rlhT pt) {(a)};%
+\rlband{\rlXL}{\rlaA}{\rlaC}\rlbranch{\rlXL}{\rlaA}\rlload{a1}{\rlXL}{\rlaB}%
+\rlldx{a2}{\rlXL}{2}{\rlaC}{\textcolor{rlgone}{$r1$}}{black}\rlxmit{\rlXL}{\rlaC}\rlleak{a1}{a2}%
+% (b) a second load i3 (top right)
+\node[rlpanel] at (\rlXR pt,\rlhT pt) {(b)};%
+\rlband{\rlXR}{\rlaA}{\rlaD}\rlbranch{\rlXR}{\rlaA}\rlload{b1}{\rlXR}{\rlaB}%
+\rlldx{b2}{\rlXR}{2}{\rlaC}{?}{black}\rlxmit{\rlXR}{\rlaC}%
+\rlldx{b3}{\rlXR}{3}{\rlaD}{?}{rlgone}%
+\draw[rlgoneedge, rounded corners=2pt, shorten >=0.8pt] ($(b1o.south)+(0,-4pt)$) -| (\rlXR pt+\rlgut,0 |- b3c.east) -- (b3c.east);%
+\node[rllab, text=rlgone, anchor=base west] at (\rlXR pt+\rlgut+2.5pt,\rlaD pt) {rf};%
+\rlleak{b1}{b2}%
+% (c) i1 also unresolved (bottom left); its header shares the baseline of (d)'s title
+\node[rlpanel] at (\rlXL pt,\rlhB pt) {(c)};%
+\rlband{\rlXL}{\rldA}{\rldC}\rlbranch{\rlXL}{\rldA}\rlload{c1}{\rlXL}{\rldB}\node[rlnote, text=rlgone] at (\rlXL pt+\rlflag,\rldB pt) {unresolved};%
+\rlldx{c2}{\rlXL}{2}{\rldC}{?}{black}\rlxmit{\rlXL}{\rldC}\rlleak{c1}{c2}%
+% (d) the backbone (bottom right), boxed; the box's title sits on its top border (white behind it breaks the line)
+\rlband{\rlXR}{\rldA}{\rldC}\rlbranch{\rlXR}{\rldA}\rlload{d1}{\rlXR}{\rldB}%
+\rlldx{d2}{\rlXR}{2}{\rldC}{?}{black}\rlxmit{\rlXR}{\rldC}\rlleak{d1}{d2}%
+\draw (\rlXR pt-\rlpad,\rlboxT pt) rectangle (\rlXR pt+\rlbandr+\rlpad,\rlboxB pt);%
+\node[anchor=base west, fill=white, inner xsep=2pt, inner ysep=1pt] at (\rlXR pt+\rlid-2pt,\rlhB pt) {\bfseries (d) \itshape leakage backbone};%
+% relaxation arrows (a), (b), (c) -> (d); each label sits under its pane, names the relaxation and what it removes
+\node[rlrlab, anchor=base east] (rlRS) at (\rlXL pt+\rlbandr-12pt,\rlaD pt) {\rlAlab: \itshape unneeded $r1$};%
+\draw[rlrelax] (\rlXL pt+\rlbandr-8pt,\rlaC pt-4pt) -- (\rlXR pt-\rlpad,\rldA pt+6pt);% v5: starts on the bottom edge of (a)'s band
+\node[rlrlab, anchor=base east] (rlRI) at (\rlXR pt+\rlbandr-9pt,\rlaD pt-\rlRI pt) {RI: \itshape extra load i3};%
+\draw[rlrelax] (\rlXR pt+\rlbandr-5pt,\rlaD pt-4pt) -- (\rlXR pt+\rlbandr-5pt,\rlboxT pt);% v5: starts exactly on the bottom edge of (b)'s band
+\node[rlrlab, anchor=base east] (rlRR) at (\rlXL pt+\rlbandr-12pt,\rldC pt-\rlRR pt) {RR: \itshape resolve i1};%
+\draw[rlrelax] (\rlXL pt+\rlbandr-8pt,\rldC pt-4pt) |- (\rlXR pt-\rlpad,\rldC pt-\rlRR pt+2.5pt);% v5: starts on the bottom edge of (c)'s band
+\end{tikzpicture}%
+}%
+\caption{Three STT executions that violate the leakage predicate, (a)--(c), and relax to one leakage backbone, (d). In (d), branch i0 is unresolved, so i1 and i2 are speculative, and load i1 reads protected memory $m0$ into $r0$, the address of transmitter i2. (a) also specifies i2's destination $r1$; (b) adds a second load i3 from $[r0]$; (c) also marks i1 unresolved. Each relaxes to (d) by the relaxation on its arrow (gray: removed; dashed: a removed edge), so Stage~1a emits only (d).}
+\label{fig:relaxation}\label{fig:four-panes}
+\end{figure}

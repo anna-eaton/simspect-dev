@@ -1374,6 +1374,44 @@ Anna asked "why didn't we hit uv5" and then (2026-11-16, via the coordinator) "f
 
 The 24-stem line reproduces the SPT-Fence race at delay 4 and its absence at delay 1. It gives 7, not the paper's "15 of 24": that number came from the a5 run with the old campaign settings (fnc commit stall 150, no freeParam); a5's "current config + delay 4" variant gave 11 in-window / 15 packets, and today's rerun adds random_all cache setup. Records: cafe2 `/tests/bigcorpus_20261115/race/spt24_d{1,4}.json`, log `logs/spt24_race.out`.
 
+## Futuristic testsets (2026-11-16)
+
+Agent invisispec-fut, from Anna's decision (2026-11-16, via the coordinator): build InvisiSpec and STT testsets whose execution contract is the Futuristic model, "an instruction is speculative if it is uncommitted AND comes after some unresolved instruction of any type", and run them on the Futuristic builds. Leakage and protection set stay each family's own. **Decided 2026-11-16 (Anna): FUT-2 = branch sources only (the Futuristic runs are E4 and T1g, nothing new to run), FUT-1 = (a) (fact [fut-2] added to the four `_fut` models; Stage 1a re-enumeration in cafe2 `/tests/futuristic_20261116/stage1_fut2`; claudelog 2026-11-17 05:05).** **Status: STOPPED after the pilots (pilot-first rule).** Faithful concretization of non-branch speculation sources needs decisions FUT-1..FUT-4 (`URGENT_TODO.md`); the full corpus was not generated or run. Stage 1a (model only) was enumerated to UNSAT. Everything is on cafe2 `/tests/futuristic_20261116/` (code snapshot `code/` + `SNAPSHOT.txt` sha256s; logs `logs/`; tmux `fut`). Scripts `scripts/futuristic_20261116/`, configs `runconfigs/futuristic_20261116/`, commands `wiki/state/COMMANDS.md` "Futuristic testsets".
+
+**Models (new files; no existing `.als` edited).** `STAGE1_alloy/models/{Footprint_6_u_core_ri,Footprint_6_u_lpP,STT_6_u_core_ri,STT_6_u_lpP}_fut.als` = the sources of the reported corpora (InvisiSpec row: `Footprint_6_u_nov10_s2A` from `Footprint_6_u_core_ri` + `Footprint_6_u_lpP`; STT rows: `STT_6_u_core_lpP_s2A` from `STT_6_u_core_ri` + `STT_6_u_lpP`) with one non-comment change, clause 1: `fun speculation_contract_p[p: PTag->univ] : Instruction {uncommitted_p[p] & unresolved_p[p].(^(spo_p[p]))} -- [fut-1]` (the Spectre line kept as a comment above it) plus an 8-line `[fut-0]` provenance header. Diffs: `runconfigs/futuristic_20261116/model_diffs/*.diff`. No flavor fact was needed: no skeleton fact restricts which kinds may be unresolved (only `committed in resolved`; lpP's `no_extra_inst` only says an operand-free instruction must be an unresolved branch). STT's protection set reads the contract directly (`(Loads & speculation_contract_p[p]).inmem`), so its taint sources follow the new contract with no clause-2 edit. sha256: Footprint core 97bad232…, lpP 7c22d0a4…; STT core afcfb87a…, lpP bc24fe3b….
+
+**Stage 1a to UNSAT (6-instruction bound, production partitions, `scripts/futuristic_20261116/stage1a.sh`):**
+
+| family | Spectre model cores | Futuristic cores | branch-source | non-branch-source | non-branch with an rf read of an unresolved instruction | ... with it in the transmitter's dataflow cone |
+|---|---|---|---|---|---|---|
+| Footprint (InvisiSpec) | 1,411 (k2 11, k3 1,400) | **11,432** (k2 72, k3 11,360; every partition EXHAUSTED) | 1,411 | 10,021 | 4,030 | 3,578 |
+| STT | 129 | **2,245 so far** (k3 2,245; k1, k2, k4, k5_*, k6_rest EXHAUSTED at 0; k6_Branchxs and k6_Loads still running, 0 after 30 min) | 129 | 2,116 | 888 | 555 |
+
+The branch-source subset has exactly the Spectre model's core count in both families (Futuristic ⊇ Spectre). Non-branch sources by kind (cores with ≥1 such source), Footprint: store 3,389, ALU 2,868 (othn and othx each; the two kinds are inert duplicates here since neither transmits), load 896; STT: store 1,010, load 500, ALU 303. Tabulation: `scripts/futuristic_20261116/core_shapes.py`, outputs `analysis/cores_*.json`.
+
+**Finding 1 (model, FUT-1): the contract admits graphs the hardware cannot run.** Under Futuristic, `isresolved` means "completed". 3,578 of 10,021 non-branch Footprint cores (555/2,116 STT) read the transmitter's operand, through rf, from the output of an instruction the graph says has not completed (e.g. pilot `inst-000005`, `ldC othx!U ld*X`: rf `Outreg$0` of the unresolved ALU op → `Inaddr$1` of the transmitter). Without value prediction a consumer cannot issue before its producer writes back, so the graph's speculation premise can never hold in such a run. In the Spectre model a non-branch's resolved bit is inert, so this never arose.
+
+**Finding 2 (concretization, FUT-2): Stage 2 and the harness realize no non-branch source.** `parsexml` acts on `resolved` only for branches (pass2_5: forced misprediction + resolve stall) and, in `stl_bypass` mode, stores (pass2_6); an unresolved load / ALU op is emitted as a plain instruction with no hold, and the `.ann.json` does not record it (the asm label `__litmus_<stem>_pcN` exists). The `fnc_commit_stall` hook holds commit, which does not matter under Futuristic (its visibility point is "all older completed", amulet-InvisiSpec `rob_impl.hh:435-490`, `lsq_unit_impl.hh:1110`). For non-branch programs the two branch modes compile to identical asm, so each such program is run twice.
+
+**InvisiSpec pilot (row T1g-fut).** Corpus `Footprint_6_u_core_lpP_fut_pilot` = `twostage_lp.py` on the 72 k2 Futuristic cores (`runconfigs/futuristic_20261116/twostage_Footprint_6_u_fut_pilot.jsonc`: Stage 1.5 900 s, cap 2; Stage 2 recipe A = `stage2_final_A.jsonc` paths only, no post-passes): 520 programs (73 branch-source, 447 non-branch, of which 340 have the source's output in the transmitter's cone), 1,040 tests. gem5: `firstdet_stream.py` with `T1g_Footprint_6_u_core_lpP_fut_s2A.jsonc` (= the reported `T1g_Footprint_6_u_core_lpP_s2A.jsonc`, paths only: amulet-InvisiSpec, `--scheme=FuturisticSafeInvisibleSpec`, random_all, 3x3 timing grid), every test, `--keep-all-traces`: 1,040/1,040 ok, 1,040 raw hits (the same saturation as the reported row's 4,000/4,000). Classes (`bugs/classify.py footprint --defense invisispec`): A-UV1 556 (UV1_transient 166), excluded_SETUP 2, residue `other_*` 482.
+
+| graph | setup | tests | classes |
+|---|---|---|---|
+| branch-source | full | 84 | A-UV1 (+UV1_transient) 84 |
+| branch-source | warm | 62 | residue `other_*` 62 |
+| non-branch | full | 474 | A-UV1 472 (82 also UV1_transient), excluded_SETUP 2 |
+| non-branch | warm | 420 | residue `other_*` 420 |
+
+**Pilot fidelity (`pilot_fidelity.py`, `blocker.py`; outputs `analysis/{fidelity,blocker}_T1g_fut_pilot_final.json`).** Per test the graph's Alloy pcs are mapped to runtime addresses (rebuilt binary + `__litmus` labels, shifted by the raw record's `xmit_pc`) and joined with O3PipeView and the `LSQ:safe` hook (gem5's own Futuristic visibility point). Of 894 non-branch-source tests, the graph's source was still incomplete when the transmitter issued in **6 (0.7%)**; sources completed a median 20 cycles before the transmitter issued (96% before; 120 store sources not located by the script). The transmitter was still a USL at issue in 718, but in 520 of the 716 with a safe tick every older instruction had already completed (it was a USL only for gem5's ~2-cycle visibility-point update lag), and the last older instruction to complete before its safe tick was a Stage-2-inserted one (splice/filler/route/`mfence`) in 672, a model-resolved instruction in 28 and the graph's source in 16. So the runs do not behave as the non-branch graphs say; their verdicts come from instructions outside the graph. Branch-source tests use the existing branch mechanism (judged by BR events, not this measure).
+
+**Inspector (FUT-3).** `check_footprint`'s Futuristic mode (`before_visibility_point`) is graph-agnostic: it flags any load's footprint before that load's own first expose/validate (else ROB-head) tick and never looks at the graph's source or transmitter, so it scores these tests "correctly" by InvisiSpec's own guarantee whether or not the graph was realized. Its documented vp limit is harmless here: 25/1,040 records have any offending event between `LSQ:safe` and the checker's vp, and none is made only of such events (`analysis/vp_lag_T1g_fut_pilot.json`).
+
+**NEW (unexplained) InvisiSpec records: the 482 warm residue records (241 stems × 2 modes; list `analysis/T1g_fut_pilot_residue.tsv`).** Profile (`residue_profile.py`, `analysis/residue_T1g_fut_pilot.json`): in all 482, every offending event is either a `req=st` event (L1D `repl_touch` in 482, L1D/L2 `fill` + DIR `coh` in 480) whose actor has no pipeview record (micro-op unknown, so W-3 keeps it; vp = never), or a DTLB `repl_touch` by a load (retired loads, the transmitter, squashed loads). No residue record has an L1D/L2 fill or eviction by a load before its visibility point. These are the two patterns described for the reported row's warm hits (claudelog 2026-11-10: D-1 and the no-pipeview `req=st` events), but no bug module encodes them, so they remain unattributed.
+
+**STT pilot (row E4-fut).** Corpus `STT_6_u_core_lpP_fut_pilot` = `twostage_lp.py` on the 2,245 k3 STT-fut cores (Stage 1.5 600 s, cap 1, recipe A, no post-passes): 283 programs (19 branch-source, 264 non-branch, 90 with the source's output in the transmitter's cone), 566 tests (ld 372, br_x 194). gem5: `E4_STT_6_u_core_lpP_fut_s2A.jsonc` (= the reported E4 config, paths only: amulet-STT, `--threat_model=Futuristic --STT=1 --implicit_channel=1 --needsTSO=1`), every test: 566/566 ok, **16 hits**; `bugs/classify.py footprint --defense stt`: branch-source 14 = S1_xmm4 (paper STT UV1) 8 + `disq_not_obtained(never_executed)` 6; non-branch 2 = **NEW `other_stt`: `inst-000151`, both modes** (br_x transmitter, shape `othnC ld!U st ld brx*X`, full setup): the graph's source load (0x402a62, the boundary instruction) completed at tick 7,174,500 and retired at 7,185,000; the transmitting branch redirected at 7,184,500, 20 cycles after the source completed and 1 cycle before it retired; not root-caused. Non-branch ld tests (342 analyzed): 0 hits; check_ld's failing criterion was `before_fnc` in 338 (the transmitter executed after the boundary instruction retired); every older instruction had completed before the transmitter's signal in 310 (STT held it to its Futuristic visibility point); the graph's source was still incomplete at the signal in 2. Outputs `firstdet/E4_fut_pilot/`, `classify/E4_fut_pilot_final/`, `analysis/fidelity_E4_fut_pilot_final.json`.
+
+**check_ld / check_br on Futuristic STT (FUT-4).** The window (lc_retire < signal < fnc_retire, every model-unresolved *branch* still unresolved) knows only branches (`gem5_common.collect_unresolved_branches`) and STL stores. On today's E4 rows (Spectre-model corpus on the Futuristic build) it is sound but scores only the Spectre sub-window: a branch-source graph's window lies inside STT-Futuristic's protected interval. On Futuristic graphs with a non-branch source it reduces to (lc_retire, fnc_retire): it counts the source's completion-to-retirement gap, where STT-Futuristic may legally let the transmitter go (the one NEW STT hit is in that gap), and it never checks that the graph's source is still incomplete. **stt-master can run Futuristic without a glue change**: `/work/stt-master/configs/example/se_futuristic.py` (2026-11-07) differs from `se.py` only in `threatModel = 'Futuristic'` for scheme 2 (set `gem5.config_script`); not run.
+
 ## Resolved-branch gate (2026-11-16)
 
 Anna (2026-11-16) chose option (b), gate on late resolved branches, and then RG-1 = (b), correct path only. **Rule:** every resolved (`correctly_not_taken`) branch with spo after lc, before the transmitter, AND older than the oldest unresolved (mispredicted window) branch must be visibly resolved strictly before the transmitter's signal, else the record is not a hit. Wrong-path resolved branches never gate (reported in `record.resolved_gate.wrong_path`); a test without a window branch (store shadows) has all its older uncommitted resolved branches on the correct path. Code: `STAGE3_gem5/resolved_gate.py` (pure function), `gem5_common.process_one` (criteria key `resolved_older_before_signal`; NOT deployed to any node: inttwin and the random-cache ReCon reruns were live), tests `STAGE3_gem5/tests/test_resolved_gate.py` (9 OK); design `wiki/design/RESOLUTION_HOOKS.md` §3; commands `wiki/state/COMMANDS.md` "Resolved-branch gate re-score". Offline re-score from the saved raw records, no gem5: run dir `experiments/2026-11-16_resolved_gate/` (extracts by `run_extracts{,2,3}.sh`, read-only on the nodes; scoring by `rescore_all.sh`; log `jobs.log`; `scores/<campaign>.json`, `scores/<campaign>_removed.jsonl`, `scores/instance_diag.txt`; the superseded all-paths scoring is kept in `scores_v1_allpaths/`). Removed hits are joined to each row's existing per-record labels (`labels/`); classification is per record, so classify.py was not rerun.
@@ -1401,6 +1439,96 @@ UV6 race metrics (race_scan, gate at the access tick): unchanged everywhere (spt
 **Committed-branch cross-check.** Every hit with a signal: 0 exceptions. Footprint (checked against lc_retire): 1, T1g taken inst-023003, an instance-choice artifact (the committed instance seq 1604 is visible at 18,883,000 < lc_retire 18,883,500; `_resolution_of` records a younger re-fetched instance that never resolved).
 
 **Open:** RG-2 (signal for check_footprint records; no effect on today's corpora) and RG-3 (dynamic instance choice; 80 / 624 removals depend on it) in URGENT_TODO.
+
+## Integer twins (2026-11-16)
+
+**What.** Every taint-tracking test (STT, ReCon, SPT) comes as a pair from one Alloy graph: the FPR version (recipe A: every used load result routed through an xmm register) and the integer version (same recipe with ONLY `fpr.enabled` false). Brief: `scripts/inttwin_20261116/BRIEF.md` (Anna 2026-11-16, + addendum: E2w / E2w-stl also rerun with `random_all`). Built and launched by agent inttwin (claudelog 2026-11-16 16:50), `_ra` rows by e2wra (claudelog 17:15), finished and scored by inttwin2 (claudelog 2026-11-16 22:40). Commands: `wiki/state/COMMANDS.md` "Integer twins". (This section did not exist before 22:40Z although the claudelog and COMMANDS pointed here; it is written fresh from those entries and the run outputs.)
+
+**Provenance.** Recipes `runconfigs/inttwin_20261116/stage2_final_A_int.jsonc` (sha256 `c87151b0…`), `stage2_stl_A_int.jsonc` (`764a39c3…`), `stage2_final_A_spt_int.jsonc` (`d6977362…`); frozen recipe A untouched (`859c20fb…`). The integer version can still contain recipe A's dead interleave-only SSE fillers on xmm14/xmm15 (filler table kept identical). Twins (cafe3 `/tests/inttwin_20261116/testsets/`): `STT_6_u_core_lpP_s2Aint` 30,368 tests, `Recon_6_u_core_lpP_s2Aint` 14,734, `Recon_6_u_stl_core_lpP_s2Aint` 60,342, `SPT_6_oneLP_v2_flat_ld_s2Asptint` 9,928; same (mode, stem) set as each corpus, no stem dropped (RMW and jmp stems included), and `pairdiff.py` proved EVERY pair differs only in FPR route lines. Campaign configs `runconfigs/inttwin_20261116/<row>_{fpr,int}[_ra].jsonc` = the reported configs with only testset_dir / results_name changed (`_ra`: + `cache_setup: random_all`, `cache_setup_fill_bytes: 64kB`); list `campaigns.json`. Node code snapshot `/tests/inttwin_20261116/code` (gem5_common 9f67f809, no resolved gate in the runs; RG-1 (b) applied offline). Runs: cafe3 E3/E4/E2w 16:34-18:49Z, cafe3 `_ra` 17:00-20:56Z, cafe1 E2/E2wstl/race_stt*/race_sttmaster* 16:37-19:29Z, cafe2 E6/race_sptfence* 16:42-20:04Z; every shard rc 0. Node logs `/tests/inttwin_20261116/logs/` (queue, classify, rsa8, stl_ot, rg_extract, guard); per-row outputs `cls/<row>/`.
+
+**Scoring.** Per row and version: `classify.py gate` + `bucket` (ReCon rows: the E2w method with the integer version as the twin; the integer version is its own twin), `race_scan.py` for race rows, UV3 confirmation (branch shadows: `scripts/inttwin_20261116/rsa8_trace_cs.py` faithful reruns + static `movmerge_check.py`; store shadows: `stl_ot_node.sh` = rstltriage's `oldest_taint_replay.py` + `classify.py bucket --oldest-taint`), UV6 40-test confirmation per version (`confirm_uv6_twin.sh`). Resolved-branch gate (RG-1 b) re-score offline: `scripts/inttwin_20261116/finalize.sh` (node `rg_extract.sh`, Mac `rescore_resolved_gate.py score`, then `pair_table.py` gate off and on). Collected outputs (Mac, gitignored): `experiments/2026-11-16_inttwin/` (`cls/`, `rg/`, `rgs/`, `pair_table_gate{off,on}.{md,json}` = the full per-label tables, `watch.log`, `finalize.log`).
+
+**Resolved gate.** Gate on = gate off everywhere except the two store-shadow rows: E2w-stl removes 624 (FPR) / 319 (INT) hits, E2w-stl `_ra` 608 / 310. No race measure changes. Counts below are gate ON (what the paper uses); for E2w-stl the gate-off numbers are in brackets.
+
+Units: a record = one (mode, stem) test; stems in brackets. "Both" = the same pair is that bug in both versions.
+
+**UV1 (STT xmm4 taint skip, `S1_xmm4`).** Only in FPR versions, as expected.
+
+| Row | FPR | INT |
+|---|---|---|
+| E3 (stt-master) | 2,687 (1,347 stems) of 30,368 | 0 |
+| E4 (AMuLeT STT) | 682 (342) of 7,654 | 0 |
+| race_stt / race_sttmaster d1 / d3 / d4 | 243 / 239 / 238 | 0 |
+
+**UV2 (ReCon STL bypass, A2) and UV3 (oldest-source taint, R-SA-8), branch shadows.** UV3 = rsa8_trace_cs-confirmed per version; "cand." = candidates whose rerun lacks the signature. Mov = static `movmerge_check` finds an x86 `mov` old-destination merge (it walks integer registers only, so it reads 0 on FPR tests whose chain passes an xmm route; not a "real data" verdict).
+
+| Row | UV2 FPR | UV2 INT | UV2 both | UV3 FPR | UV3 INT | UV3 both | cand. FPR / INT | mov FPR / INT |
+|---|---|---|---|---|---|---|---|---|
+| E2w warm (ReCon-STT) | 1,761 (881) | 3,252 (1,633) | 1,747 | 16 of 24 cand. (8) | 47 of 51 (26) | 16 | 8 / 4 | 0 / 39 |
+| E2w `random_all` | 1,726 (865) | 3,327 (1,677) | 1,697 | 212 of 326 (113) | 549 of 554 (292) | 212 | 114 / 5 | 9 / 431 |
+| E6 (ReCon) | 747 (374) | 1,450 (731) | 735 | 65 of 186 (36) | 318 of 325 (170) | 65 | 121 / 7 | 2 / 241 |
+
+**Store shadows (E2w-stl, `gem5-recon-modded-stl`, 60,342 tests per version).** UV3 = oldest-source taint replay confirmed. In the FPR version the replay that confirms is the integer twin's (rstltriage method); carriers below are from that replay (FPR) / the test's own replay (INT).
+
+| Row | UV2 FPR | UV2 INT | UV2 both | UV3 FPR | UV3 INT | UV3 both | UV3 cand. FPR / INT | UV3 carriers FPR (twin) | UV3 carriers INT |
+|---|---|---|---|---|---|---|---|---|---|
+| E2w-stl warm | 2,969 [3,028] | 5,981 [6,091] | 2,887 | 61 [62] | 118 [119] | 59 | 2 / 5 | flags 41, mov 17, data 2, none 2 | flags 87, mov 26, data 6 |
+| E2w-stl `random_all` | 2,853 [2,910] | 5,969 [6,077] | 2,768 | 204 [204] | 367 [370] | 193 | 7 / 13 | flags 101, mov 86, data 6, none 11 | flags 197, mov 158, data 15 |
+
+The paper's "2,848 of the 60,342" (warm, gate on, the 2026-11-16 bucket inputs) becomes 2,969 under this run's bucketing: 122 RMW records that the old run labelled `R-SA-13 (static only, RMW)` (the old GPR twin had no RMW stems, so no recon_stlf evidence) now get main-run STL evidence and land in UV2 (`A2 STLF bypass (main-run evidence, no twin, RMW)`); 6 move the other way. Hit counts are identical (33,671 → 33,047 under the gate).
+
+**R-SA-13 (ReCon SSE / FP loads never marked speculative; possible UV7).** All R-SA-13 labels (static, RMW, via FP elsewhere, SSE replay), gate on: E2w warm 12,884 FPR / 0 INT; E2w `random_all` 12,463 / 0; E6 5,953 / 0; E2w-stl 23,057 [23,485] / 0; E2w-stl `random_all` 22,100 [22,519] / 0. It never appears in an integer version, as expected (every integer-version load is a GPR load). "R-SA-13 candidate (untainted, no twin, RMW)": E2w 2 / 5, E2w `random_all` 13 / 66, E6 13 / 59, E2w-stl `random_all` 1 / 5.
+
+**UV6 (SPT-Fence VP/squash race) on SPT's own corpus** (`SPT_6_oneLP_v2_flat_ld_s2Aspt`, 9,928 tests per version = 4,964 per mode, both modes summed):
+
+| commitToIEWDelay | strict race FPR / INT | wp_obtained FPR / INT | paired delay-induced FPR / INT (differing pairs) |
+|---|---|---|---|
+| 1 | 0 / 0 | 3,315 / 3,320 | (control) |
+| 3 | 5,302 / 5,297 | 9,385 / 9,382 | 6,085 / 6,086 (8 FPR-only, 9 INT-only) |
+| 4 | 5,420 / 5,410 | 9,508 / 9,503 | 6,207 / 6,205 (18 / 16) |
+
+The FPR numbers reproduce sptrace exactly (delay-induced 3,106 + 3,101 = 6,207 at d4, 3,045 + 3,040 = 6,085 at d3). Faithful 40-test confirmation (first 40 warm delay-induced not_taken stems, campaign stalls, delay 4): FPR 40/40 `stt_vp_squash_race`, INT 40/40, the same 40 stems.
+
+**STT race (STT corpus sample, 3,048 tests per version), delay 3 / 4.** race_stt (`/work/stt`) and race_sttmaster (`/work/stt-master`) are tick-identical record for record (checked on a full shard: 1,016/1,016 records, every tick field equal; manifests name the two different binaries, md5 b5a38761 vs 1fed10b5): all these transmitters are loads, and stt-master's pending-squash fix only moves `br_x` timing (this section, "stt-master").
+
+| delay | strict race FPR / INT | wp_obtained FPR / INT | paired delay-induced FPR / INT | FPR only / INT only |
+|---|---|---|---|---|
+| 1 | 0 / 0 | 150 / 1 | (control) | |
+| 3 | 1,239 / 1,273 | 1,474 / 1,437 | 1,324 / 1,436 | 24 / 136 |
+| 4 | 1,442 / 1,447 | 1,679 / 1,648 | 1,529 / 1,647 | 30 / 148 |
+
+The FPR version's 150 delay-1 wp_obtained are UV1 (xmm4) hits; they are subtracted as the control, which is why fewer FPR tests count as delay-induced.
+
+**SPT-Fence race on the STT corpus (3,048 per version).** d1: race 0 / 0, wp_obtained 190 / 204. d4: race 582 / 547, wp_obtained 792 / 805, delay-induced 602 / 602 (27 FPR-only, 27 INT-only).
+
+**ReCon E6** (Recon corpus, 14,734 per version): in the branch-shadow table above.
+
+**E2 is E2w `random_all`.** `E2_STT_6_u_core_lpP_s2A_{fpr,int}.jsonc` and `E2w_..._{fpr,int}_ra.jsonc` differ only in `jobs` and results_name, and their pair tables are identical record for record (gem5 is deterministic). The `_ra` rerun therefore reproduced E2.
+
+**Unexplained (new) records.** FPR versions: E3 2 (`other`). INT versions: E2w `random_all` / E2 20 `unexplained(no twin, RMW: other(GPR slice), isTainted=1 isSpeculative=1)` + 21 `twin-hit ld, other STL signature`; E6 4 + 20 (18 INT-only); E2w-stl `random_all` 4 + 11; E2w-stl warm 0 + 2; race_stt d3/d4 2 `other`. The `twin-hit ld` rows in the integer version are an artefact of using the version as its own twin (every hit is a "twin hit"), so they are not yet evidence of a new bug. Not triaged.
+
+## Re-score with W-3 + RG-1 (2026-11-16)
+
+Agent fprescore. The paper's InvisiSpec and SpecLFB first-detection numbers (first 4,000 seed-20261109 tests of `Footprint_6_u_nov10_s2A`, runs `T1g_Footprint_6_u_nov10_s2A` / `T3g_Footprint_6_u_nov10_s2A` on cafe3 `/tests/bigcorpus_20261115/firstdet/`) re-scored with both checker changes decided since: **W-3** (InvisiSpec and SpecLFB footprints count only load micro-ops; claudelog 2026-11-16 15:45) and **RG-1 = (b)** (resolved-branch gate, correct path only; claudelog 17:05 / 17:20). **Result: nothing changes.** Every hit stays a hit, every label is identical, so every K/N, multiple and Fig. 11/12 value is unchanged.
+
+**Method (offline, no gem5).** The raw records group offending events by line without the micro-op, but the runs had kept the full gzipped trace of every hit (`traces/<mode>/<stem>.pipeview.txt.gz`: all 4,000 T1g tests, all 1,748 T3g hits; each test ran gem5 exactly once). So each saved hit was re-scored by **trace replay**: `timing_driver.run_one` unchanged (production path, `pipeline.py gem5` with the run's `run_config.jsonc` verbatim, `fast_path` forced off as in the original runs) on a copy of the current Mac code tree, where a patch appended to that copy's `gem5_common.py` makes `run_gem5` write the saved trace (and the same `force_plan.json`/branch-ann copy) instead of running gem5. Non-hits need no replay: W-3 only removes actors from an `exists` criterion and the resolved gate only ANDs, so neither can create a hit (their old rows were copied, `replay: not_replayed`). Fidelity: on every replayed record xmit/lc/fnc PCs, lc/fnc retire ticks, force plan, event and squash counts, BR events and cache setup equal the old raw record (0 differences in 5,748); a 300-test control per defense replayed with the W-3 filter removed (`*_noW3.json`, replay copy only) reproduces the old offending events exactly (300/300 each); current `classify.py footprint` on the OLD runs reproduces the old `classes.jsonl` label for label (0 diffs).
+
+**Code (sha256, Mac working tree 2026-11-16 ~17:45Z; node copies identical):** `STAGE3_gem5/check_footprint.py` 935b9f5f…ae012, `STAGE3_gem5/gem5_common.py` b75ae1ef…2871a (replay copy with patch 9c40a789…ff351), `STAGE3_gem5/resolved_gate.py` 33dff7bd…1314, `specs/leakage/invisispec.json` ca3bc7da…a66a, `specs/leakage/speclfb.json` 6b611882…fff7, `specs/leakage/cleanupspec.json` 3098124c…3b, `pipeline.py` edd5b07f…a012, `STAGE3_gem5/bugs/classify.py` c53fb6bc…45f4, `STAGE3_gem5/timing/timing_driver.py` cc9e2b83…7a63, `STAGE3_gem5/cache_setup.py` 93f14381…c9 (full hashes in `experiments/2026-11-16_fprescore/code_sha256_mac.txt` and `cafe3/code_sha256_unpatched.txt`).
+
+| number | old | new (W-3 + RG-1) |
+|---|---|---|
+| InvisiSpec raw checker hits | 4,000 / 4,000 | 4,000 / 4,000 |
+| A-UV1 InvisiSpec K/N | 2,002 / 4,000 | 2,002 / 4,000 |
+| SpecLFB raw checker hits | 1,748 / 4,000 | 1,748 / 4,000 |
+| A-UV6 SpecLFB | 851 | 851 |
+| walk order (UV4 in the paper = walk order without A-UV6) | 657 (398) | 657 (398) |
+| jmp shadow | 527 | 527 |
+| tests per detection multiple A-UV1 / A-UV6 / jmp | 1,655x / 1,264x / 2,463x | 1,655x / 1,264x / 2,463x |
+| CPU-s per detection SimSpect (gen incl.) A-UV1 / A-UV6 / jmp | 4.5 / 10.5 / 16.9 | unchanged (`figvalues_20261116e.out` byte-identical to d's output) |
+
+**Why it does not move.** SpecLFB: in all 1,748 hits every offending event already belongs to a load micro-op (offending sets identical to the old ones, 0 unknown micro-ops). InvisiSpec: W-3 removes non-load actors from all 4,000 hits (offending sets shrink in every record), but every hit keeps at least one event from a known load micro-op, so none survives only through the keep-unknown rule. Every InvisiSpec hit also has `n_actor_op_unknown > 0`: seqs with no O3PipeView record (the top PCs, e.g. 0x401bd2-0x401c02 spaced 12 bytes, recur in ~1,000 tests each). They do not decide any verdict here. **RG-1:** `resolved_gate.evaluate` returns None without a signal tick and check_footprint records have none, so the gate is None on all 5,748 replayed records (as the resolved-gate agent found: every older uncommitted resolved branch in these corpora is wrong-path anyway). **CleanupSpec:** its criterion has no `op_class` (W-3 rule unchanged) and the resolved gate is None for every footprint record, so the pool (A-UV3 7,288, A-UV4 919, A-UV5 5 of 291,860) is unaffected; no CleanupSpec re-score was needed.
+
+**Paths.** Node: cafe3 `/tests/fprescore_20261116/` (`T1g_W3RG1/` new run, `T1g_control_noW3/`, `classify_{old,new}_T1g/`, `logs/`), cafe1 `/tests/fprescore_20261116/` (T3g, moved there when cafe3 was oversubscribed; `T3g_W3RG1/`, `T3g_control_noW3/`, `classify_{old,new}_T3g/`, `logs/`); replay trace copies and work dirs deleted afterwards (the originals stay in the old run dirs). Mac copy: `experiments/2026-11-16_fprescore/` (tools `replay_driver.py`, `replay_patch.py`, `compare.py`, `actor_breakdown.py`, `count_classes.py`, launchers; per-run `compare.json`, new `results.jsonl.gz`, old/new `classes.jsonl`, logs, `figvalues_20261116e.out`). Figure script: `experiments/2026-11-10_footprint_vs_amulet/code/figvalues_20261116e.py` (= d with the re-scored K/N, which are the same).
 
 ## Decisions
 

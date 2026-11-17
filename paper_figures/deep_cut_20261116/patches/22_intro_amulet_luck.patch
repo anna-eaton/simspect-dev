@@ -1,0 +1,13 @@
+--- a/sections/intro.tex
++++ b/sections/intro.tex
+@@ -140,8 +140,8 @@
+ speculative execution.}
+ % [before 2026-11-16: 'Notably,' cut so the paragraph does not end on a lone word; AMuLet typo fixed] Notably, AMuLet relies heavily on luck to find violations.
+ 
+-AMuLeT relies heavily on luck to find violations.
+-A randomly generated program must happen to create
++\cutsug{AMuLeT relies heavily on luck to find violations.}
++\cutrep{A randomly generated program must happen to create}{To find a violation, a randomly generated program must happen to create}
+ the conditions under which speculative leakage is
+ possible, and the adversary model must 
+ monitor the leaking channel.

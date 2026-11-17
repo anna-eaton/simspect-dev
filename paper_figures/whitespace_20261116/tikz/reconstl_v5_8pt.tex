@@ -1,0 +1,224 @@
+% ReCon STL figure v5 (2026-11-16, agent fig-whitespace): v4 plus the 'Violation window' title in bold, dark saturated yellow (#8C6400) so it stands out on the tan band (Anna 2026-11-16). Nothing else changed.
+% ReCon STL figure v4 (2026-11-16, whitespace pass, agent fig-whitespace): v3 with spacing tightened only; same graph, trace data, marks, labels and caption.
+% (1) 'Violation window' moves from its own line above the band into the band, on lc's row, right-aligned against the band's right edge (tan fill),
+%     centred 2pt above lc's bar so it clears the '5,000-cycle hold' label below it; the band now starts 7.5pt above lc's bar (was 14.5pt);
+% (2) the timeline starts 20pt below the graph's last row (was 32pt), leaving 8pt between the graph's tan band and the window's band;
+% (3) store and xmit rows 22pt apart (was 24pt; 'Forwarded' still clears both bars by 4pt); (4) 9.5pt instead of 11.5pt from the cycle numbers to the
+%     rule box. Height 245.2 -> about 229pt. Everything else is v3 verbatim.
+% ReCon-STT store-to-load-forwarding figure v3 (2026-11-16, one column): a counted UV2 test of the paper's campaign, in the timeline
+% style of simspect paper_figures/FIGURES.md "Timeline figure style" (as squashrace_v5_8pt / checkerwindow_v7c_8pt). Replaces v2
+% (inst-014912 of the 2026-06-02 Recon_6 campaign, N/E/C letters).
+% Test: STT_6_u_core_lpP_s2A inst-014536, mispredict_not_taken: one of the 1,690 UV2 tests (bucket "A2 STLF bypass", GPR-twin evidence)
+%   of row E2w = ReCon's implementation of STT (/work/gem5-recon-modded, X86O3CPU, --scheme=2, warm cache, BTB-force branch annotation,
+%   the campaign's timing-grid draw for this stem holds the unresolved branch pc1 5,000 cycles (the test has no resolved branch);
+%   cafe3 /tests/bigcorpus_20261115/e2w/buckets_per_stem.json).
+%   Program (asm): pc0 = lc, a load into r14 (0x401c19); pc1 = fnc, the branch (0x401c45, forced not taken); pc2 a load
+%   r14 <- [rdx+r14] (0x401c4a, reads the protected value); pc3 the store [rdx+r14] <- r14 (0x401c5f); pc4 = xmit, the load
+%   rdi <- [r14+rdx] (0x401c63), same address as pc3.
+% Execution graph = the Alloy instance STT_6_u_core_lpP_s2A/xml/inst-014536.{xml,txt}: kinds, spo, opstate (every register operand
+%   Reg_s$0 = r0, every memory operand Mem_s$0 = m0), iscommitted on i0, isresolved on every instruction but the branch i1, isxm on i4,
+%   ddi i2 m0 -> r0 and i3 r0 -> m0, rf i0 r0 -> i1 and -> i2's address, rf i2 r0 -> i3's address and data and -> i4's address,
+%   rf i3 m0 -> i4's m0 (store to load). Drawn: the leak path (i2 ddi, rf into i4's address) and the store-to-load rf; the other rf
+%   edges are left out (i3's note says its address is i2's r0, as i4's).
+% Run: rerun 2026-11-16 on cafe3 by simspect paper_figures/stl_v3/rerun_stl_v3.sh (a copy of the Fig. 8 agent's rerun_otb_v5.sh): the
+%   E2w row config from the campaign's code snapshot, only paths/keep_tmp/jobs/branch_modes changed and print-only debug flags
+%   Commit, DelayUnit, Rename, IEW added; check_ld record issued_in_window true, cache_fate store_forward, as in the campaign
+%   (issued_in_window true) and its recon_stlf evidence (STL_CHECK isTainted=1 isSpeculative=1, forwarded, ready 2676500, window end
+%   5174000). Data: simspect paper_figures/stl_v3/ (README.md, run/vec_not_taken_inst-014536/pipeview.txt.gz, record, sha256s).
+% Cycle c = (tick - 2618500)/500 (0 = lc's fetch). Every drawn cycle, read from the trace:
+%   lc   = pc0, seq 546 (0x401c19 MOVQ_XMM_M ldfp): fetch 2618500 = 0, retire 2628000 = 19 (the window opens).
+%   fnc  = pc1, wrip micro-op seq 563 (0x401c45 JNZ_I): fetch 2670000 = 103 (BR:predict_force taken=0); BR:resolve_hold 2673500 = 110
+%          (stall 5000, fire 5173500 = 5110); BR:resolve_visible and Commit "Squashing due to branch mispred PC:0x401c45" 5174000 = 5111
+%          (resolves); retire 5174500 = 5112.
+%   i3   = pc3, the store, seq 570 (0x401c5f MOV_M_R st): fetch 2670500 = 104; IEW "Execute: Processing" + LSQ "Executing store" +
+%          "Doing write to store idx 261, addr 0x35c0" 2675500 = 114 (address and data known); LSQ "Store Instruction ... squashed"
+%          5174500 = 5112.
+%   xmit = pc4, seq 571 (0x401c63 MOV_R_M ld): fetch 2670500 = 104; at 2675500 = 114: LSQ "Executing load", "STL_CHECK: load PC 0x401c63
+%          isTainted=1 isSpeculative=1" (SimSpect's print of ReCon's taint tracker, gem5-hooks/gem5-recon-modded/recon-modded_src.diff:339,
+%          just before the store-queue search), "Forwarding from store idx 262 to load to addr 0x7fffffffe5c0", and pipeview complete
+%          2675500 (check_ld xmit_complete; the forwarded value is obtained); writeback 2676000, Commit "ready within ROB" 2676500;
+%          LSQ "Load Instruction PC (0x401c63...) squashed" 5174500 = 5112 (the squash lands; the window closes; fnc retires in the same
+%          cycle).
+%   ReCon's own taint check (lsq_unit.cc:2095-2104, insertTaintedLoad) is on the cache path after the store-queue search; a forwarded
+%   load returns before it (lsq_unit.cc:2019-2031).
+% Label: fig:reconstl (as v2).
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}% 8pt figure text regardless of document class (acmart sigconf \footnotesize is 7pt)
+\begin{figure}[t]
+\centering
+% Body only; everything is wrapped in { } so no macro or style leaks into other figures; graph helpers are prefixed \rs, timeline \cw.%
+{%
+\definecolor{sswintitle}{HTML}{8C6400}% dark saturated yellow for the 'Violation window' title (bold): 4.7:1 contrast on the tan band, dark gray in grayscale (Anna 2026-11-16: bold, dark yellow, legible)%
+\providecolor{ssspecfill}{gray}{0.94}\providecolor{ssspecink}{gray}{0}%
+\providecolor{ssprotfill}{gray}{0.83}\providecolor{ssprotink}{gray}{0}%
+\providecolor{ssxmitfill}{gray}{0.76}\providecolor{ssxmitink}{gray}{0}%
+\providecolor{sssrcfill}{gray}{0.85}\providecolor{sssrcink}{gray}{0}\providecolor{sssrcbg}{gray}{0.90}%
+% ============================ TUNING KNOBS ============================%
+\def\cwcyc{14}%         pt per simulated cycle (same scale in every axis segment)%
+% pt width of the elided (dotted) stretch before each segment (wide enough that neighbouring cycle numbers never touch)%
+\def\cwbrkH{7}\def\cwbrkB{7}\def\cwbrkC{7}\def\cwbrkD{7}\def\cwbrkE{10}%
+\def\cwtl{57}%          pt, x of the time axis origin; left of it: row labels%
+\def\cwrowAB{26}\def\cwrowBC{24}\def\cwrowCD{22}% pt between the timeline rows lc-fnc, fnc-store, store-xmit%
+\def\cwbarh{4}%         pt height of an instruction bar%
+\def\cwdot{1.9pt}%      radius of an event dot%
+\def\cwstar{8pt}%       outer diameter of the transmission star%
+\def\cwlane{3.2}%       pt from a bar's edge to the near edge of a label on a leader%
+\def\cwboxw{237}%       pt, width of the rule box (the whole picture stays within 237.5pt)%
+\def\cwfs{\figfont}%    the one font size (8pt)%
+% axis segments [start,end], in cycles after lc's fetch; an elided stretch before each segment after the first%
+\def\cwsA{-0.5}\def\cweA{0.5}%        lc fetch 0%
+\def\cwsH{18.5}\def\cweH{19.5}%       lc retires 19%
+\def\cwsB{102.5}\def\cweB{104.5}%     fnc fetch 103; store and xmit fetch 104%
+\def\cwsC{109.5}\def\cweC{110.5}%     fnc held 110%
+\def\cwsD{113.5}\def\cweD{114.5}%     store executes, forwards to xmit, xmit completes: 114%
+\def\cwsE{5110.5}\def\cweE{5112.5}%   fnc resolves 5111; squash lands and fnc retires 5112%
+% graph columns (pt): kind, output, arrow, input, flag, note; right edge of the tan band%
+\def\rskind{11}\def\rsout{55}\def\rsarr{66}\def\rsin{77}\def\rsflag{118}\def\rsnotex{166}\def\rsbandr{162}%
+% ======================================================================%
+\pgfmathsetmacro\cwoA{0}%
+\pgfmathsetmacro\cwoH{\cwoA+(\cweA-\cwsA)*\cwcyc+\cwbrkH}%
+\pgfmathsetmacro\cwoB{\cwoH+(\cweH-\cwsH)*\cwcyc+\cwbrkB}%
+\pgfmathsetmacro\cwoC{\cwoB+(\cweB-\cwsB)*\cwcyc+\cwbrkC}%
+\pgfmathsetmacro\cwoD{\cwoC+(\cweC-\cwsC)*\cwcyc+\cwbrkD}%
+\pgfmathsetmacro\cwoE{\cwoD+(\cweD-\cwsD)*\cwcyc+\cwbrkE}%
+\newcommand\cwx[2]{(\cwtl+\csname cwo#1\endcsname+(#2-\csname cws#1\endcsname)*\cwcyc)}%
+\newcommand\cwxs[1]{(\cwtl+\csname cwo#1\endcsname)}%
+\newcommand\cwxe[1]{(\cwtl+\csname cwo#1\endcsname+(\csname cwe#1\endcsname-\csname cws#1\endcsname)*\cwcyc)}%
+\newcommand\cwab[1]{\textup{#1}}%
+\newcommand\cwbar[4]{\fill[#4] ({#2},#1-\cwbarh/2) rectangle ({#3},#1+\cwbarh/2);\draw[line width=0.4pt] ({#2},#1+\cwbarh/2) -- ({#3},#1+\cwbarh/2) ({#2},#1-\cwbarh/2) -- ({#3},#1-\cwbarh/2);}%
+\newcommand\cwend[2]{\draw[line width=0.6pt] ({#2},#1-\cwbarh/2) -- ({#2},#1+\cwbarh/2);}%
+\newcommand\cwgap[4]{\fill[#4] ({\cwxe{#2}},#1-\cwbarh/2-0.3) rectangle ({\cwxs{#3}},#1+\cwbarh/2+0.3);\draw[densely dotted, line width=0.4pt] ({\cwxe{#2}},#1+\cwbarh/2) -- ({\cwxs{#3}},#1+\cwbarh/2) ({\cwxe{#2}},#1-\cwbarh/2) -- ({\cwxs{#3}},#1-\cwbarh/2);}%
+\newcommand\cwdotat[2]{\fill[black, draw=white, line width=0.4pt] ({#2},#1) circle (\cwdot);}%
+\newcommand\cwcross[2]{\draw[white, line width=1.8pt] ({#2},#1) ++(-2.4,-2.4) -- ++(4.8,4.8) ({#2},#1) ++(-2.4,2.4) -- ++(4.8,-4.8);\draw[line width=0.8pt] ({#2},#1) ++(-2.4,-2.4) -- ++(4.8,4.8) ({#2},#1) ++(-2.4,2.4) -- ++(4.8,-4.8);}%
+\newcommand\cwstarat[2]{\node[star, star points=5, star point ratio=2.4, fill=ssxmitink, draw=white, line width=0.5pt, minimum size=\cwstar, inner sep=0pt] at ({#2},#1) {};}%
+% label on a leader: from the mark at x=#2 on row y=#1, a vertical leader up (#3=1) or down (#3=-1) to a label set beside it on the%
+% side #4 (e: label starts at the leader; w: label ends at the leader; c: label centred on it); #5 = extra lift in pt (a second lane),%
+% #6 = style, #7 = text. The label's fill covers the leader's top 3.6pt, so the leader meets the label's bottom (or top) edge.%
+\newcommand\cwflag[7]{%
+  \pgfmathsetmacro\cwfy{#1+#3*(\cwbarh/2+\cwlane+#5)}%
+  \ifnum#3>0 \def\cwfv{south}\else\def\cwfv{north}\fi%
+  \ifx#4e\edef\cwfa{\cwfv\space west}\def\cwfd{-0.25}\else\ifx#4w\edef\cwfa{\cwfv\space east}\def\cwfd{0.25}\else\edef\cwfa{\cwfv}\def\cwfd{0}\fi\fi%
+  \draw[cwlead] ({#2},#1) -- ({#2},\cwfy+#3*3.6);%
+  \node[#6, anchor=\cwfa] at ({#2+\cwfd},\cwfy) {#7};}%
+% axis tick at x=#1 and its cycle number #4, anchored #2 and shifted #3 pt (one row; two numbers one cycle apart spread away)%
+\newcommand\cwnum[4]{\draw[line width=0.4pt] ({#1},\cwyX) -- ({#1},\cwyX-2.2);\node[anchor=#2] at ({#1+#3},\cwyT) {#4};}%
+\begin{tikzpicture}[x=1pt, y=1pt, >=latex,%
+  every node/.style={font=\cwfs, inner sep=0pt,%
+    execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000\relax}},%
+  cwann/.style={font=\cwfs\itshape},%
+  cwband/.style={cwann, fill=ssspecfill, inner sep=0.6pt},%
+  cwwhite/.style={cwann, fill=white, inner sep=0.6pt},%
+  cwred/.style={cwband, text=ssxmitink},%
+  cwdef/.style={cwband, text=sssrcink},%
+  cwrow/.style={anchor=base west},%
+  cwgloss/.style={font=\cwfs\itshape, anchor=base west},%
+  cwgrid/.style={densely dotted, line width=0.3pt, draw=black!35},%
+  cwedge/.style={line width=0.6pt},%
+  cwlead/.style={line width=0.4pt, draw=black!80},%
+  rsann/.style={font=\cwfs\itshape},%
+  rsgloss/.style={font=\cwfs\itshape, anchor=base west},%
+  rstok/.style={anchor=base west, outer sep=0.6pt},%
+  rsleak/.style={->, line width=1.1pt, draw=ssprotink, preaction={draw=ssprotfill, arrows=-, line width=3.6pt, line cap=round, blend mode=multiply}},%
+  rsrf/.style={->, line width=0.5pt},%
+]%
+% ------------- execution graph of the Alloy instance (inst-014536; i0..i4 = pc0..pc4) -------------%
+\pgfmathsetmacro\rsgA{0}\pgfmathsetmacro\rsgB{-13}\pgfmathsetmacro\rsgC{-28}\pgfmathsetmacro\rsgD{-42}\pgfmathsetmacro\rsgE{-63}%
+% tan band: the instructions after the unresolved branch i1 (i2-i4) are speculative%
+\fill[ssspecfill, rounded corners=2pt] (-2,\rsgB-5) rectangle (\rsbandr,\rsgE-4.5);%
+\node[rsgloss, anchor=south, text=black!55, rotate=90] at (\rsbandr-1.2,{(\rsgB-5+\rsgE-4.5)/2}) {speculative};%
+\foreach \rsi/\rsy/\rsk in {0/\rsgA/Load,1/\rsgB/Branch\_n,2/\rsgC/Load,3/\rsgD/Store,4/\rsgE/Load}{%
+  \node[cwrow] at (0,\rsy) {i\rsi:};%
+  \node[cwrow] at (\rskind,\rsy) {\texttt{\rsk}};}%
+% i0: Load r0 <- m0, committed (lc)%
+\node[rstok] at (\rsout,\rsgA) {$r0$};\node[rstok] at (\rsarr,\rsgA) {$\leftarrow$};\node[rstok] at (\rsin,\rsgA) {$m0$};%
+\node[rsgloss] at (\rsflag,\rsgA) {committed};%
+% i1: Branch_n, unresolved and mispredicted (fnc)%
+\node[rsgloss] at (\rsflag,\rsgB) {unresolved};%
+\node[rsgloss] at (\rsnotex,\rsgB) {mispredicted};%
+% i2: Load r0 <- m0; its m0 is protected (a speculative load's input memory, STT_6_u clause 2)%
+\node[rstok] (rsg2o) at (\rsout,\rsgC) {$r0$};\node[rstok] at (\rsarr,\rsgC) {$\leftarrow$};%
+\node[rstok, fill=ssprotfill, inner xsep=1pt, inner ysep=1.3pt] (rsg2m) at (\rsin,\rsgC) {$m0$};%
+\node[rsgloss, text=ssprotink] at (\rsnotex,\rsgC) {$m0$: protected};%
+% i3: Store [r0] <- r0, resolved%
+\node[rstok, anchor=base east] (rsg3a) at (\rsarr-0.5,\rsgD) {[$r0$]};\node[rstok] at (\rsarr,\rsgD) {$\leftarrow$};%
+\node[rstok] at (\rsin,\rsgD) {$r0$};%
+\node[rsgloss] at (\rsflag,\rsgD) {resolved};%
+\node[rsgloss] at (\rsnotex,\rsgD) {address $r0$, as i4};%
+% i4: Load ? <- [r0], xmit%
+\node[rstok] at (\rsout,\rsgE) {?};\node[rstok] at (\rsarr,\rsgE) {$\leftarrow$};%
+\node[rstok] (rsg4b) at (\rsin,\rsgE) {[};\node[rstok, outer sep=0pt] (rsg4r) at (rsg4b.base east) {$r0$};\node[rstok] (rsg4c) at (rsg4r.base east) {]};%
+\node[rsgloss, text=ssxmitink] at (\rsflag,\rsgE) {xmit};%
+\node[rsgloss, text=ssxmitink] at (\rsnotex,\rsgE) {leaks its address};%
+% the leak path (thick): m0 -ddi-> r0 (i2) -rf-> [r0] (i4), the rf through the gutter right of the operands%
+\draw[rsleak, shorten >=1.4pt] ($(rsg2m.north)+(0,0.3)$) to[out=115, in=65, looseness=1.1]%
+  node[pos=0.5, above=1.4pt, rsann] {ddi} ($(rsg2o.north)+(0,0.6)$);%
+\draw[rsleak, shorten <=0.6pt, shorten >=1.0pt, rounded corners=2pt] (rsg2o.south) -- ++(0,-3.5) -- (102,\rsgC-3.5-1.6)%
+  -- (102,\rsgE+9) node[pos=0.5, anchor=west, xshift=2pt, rsann] {rf} -| (rsg4r.north);%
+% the store-to-load rf: i3 writes m0 at [r0], i4 reads it%
+\draw[rsrf, shorten <=0.6pt, shorten >=0.6pt] (rsg3a.south) -- node[pos=0.25, anchor=north east, inner sep=1pt, rsann] {rf} ($(rsg4b.north west)+(0.6,-0.4)$);%
+
+% ------------------------------ timeline ------------------------------%
+\pgfmathsetmacro\cwyA{\rsgE-20}% v4: was \rsgE-32%                 lc (i0)%
+\pgfmathsetmacro\cwyB{\cwyA-\cwrowAB}%           fnc (i1, the branch)%
+\pgfmathsetmacro\cwyC{\cwyB-\cwrowBC}%           the store (i3)%
+\pgfmathsetmacro\cwyD{\cwyC-\cwrowCD}%           xmit (i4)%
+\pgfmathsetmacro\cwyW{\cwyA+7.5}% v4: was +14.5 (title now in the band on lc's row)%               top of the violation-window band%
+\pgfmathsetmacro\cwyX{\cwyD-24.5}%               time axis line (room for the two label lanes under xmit)%
+\pgfmathsetmacro\cwyT{\cwyX-3.4}%                top of the row of cycle numbers%
+\pgfmathsetmacro\cwyK{\cwyT-9.5}% v4: was -11.5%               top of the rule box%
+\pgfmathsetmacro\cwgT{\cwyA+3}%                  top of the dotted cycle lines%
+% the violation window: from lc's retirement (19) to the squash landing on xmit (5112)%
+\fill[ssspecfill] ({\cwx{H}{19}},\cwyW) rectangle ({\cwx{E}{5112}},\cwyX);%
+\foreach \cwc/\cws in {0/A, 103/B, 104/B, 110/C, 114/D, 5111/E} \draw[cwgrid] ({\cwx{\cws}{\cwc}},\cwyX) -- ({\cwx{\cws}{\cwc}},\cwgT);%
+\draw[cwedge] ({\cwx{H}{19}},\cwyW) -- ({\cwx{H}{19}},\cwyX) ({\cwx{E}{5112}},\cwyW) -- ({\cwx{E}{5112}},\cwyX);%
+\node[cwband, font=\cwfs\bfseries, text=sswintitle, anchor=east] at ({\cwx{E}{5112}-2.5},\cwyA+2) {Violation window};% v4: in the band on lc's row, right-aligned (was centred above the band)%
+% row labels%
+\node[cwrow] at (0,\cwyA-2.7) {i0: \cwab{lc}};%
+\node[cwgloss] at (0,\cwyA-11.7) {Last committed};%
+\node[cwrow] at (0,\cwyB-2.7) {i1: \cwab{fnc} (branch)};%
+\node[cwgloss] at (0,\cwyB-11.7) {First uncommitted};%
+\node[cwrow] at (0,\cwyC-2.7) {i3: store};%
+\node[cwgloss] at (0,\cwyC-11.7) {Same address};%
+\node[cwrow] at (0,\cwyD-2.7) {i4: \cwab{xmit}};%
+\node[cwgloss, text=ssxmitink] at (0,\cwyD-11.7) {Transmitter};%
+% lc: fetched at 0; its retirement (19) opens the window%
+\cwbar{\cwyA}{\cwx{A}{0}}{\cwx{H}{19}}{white}\cwgap{\cwyA}{A}{H}{white}\cwend{\cwyA}{\cwx{A}{0}}%
+\cwdotat{\cwyA}{\cwx{H}{19}}%
+\node[cwband, anchor=west] at ({\cwx{H}{19}+3},\cwyA) {Retires};%
+% fnc: the branch, forced to mispredict; the harness holds its resolution 5,000 cycles; it retires as the squash lands%
+\cwbar{\cwyB}{\cwx{B}{103}}{\cwx{E}{5112}}{white}\cwgap{\cwyB}{B}{C}{white}\cwgap{\cwyB}{C}{D}{white}\cwgap{\cwyB}{D}{E}{white}\cwend{\cwyB}{\cwx{B}{103}}%
+\cwflag{\cwyB}{\cwx{C}{110}}{1}{c}{8.6}{cwband}{5{,}000-cycle hold}%
+\cwflag{\cwyB}{\cwx{E}{5111}}{1}{w}{0}{cwband}{Resolves}%
+\cwdotat{\cwyB}{\cwx{C}{110}}\cwdotat{\cwyB}{\cwx{E}{5111}}\cwdotat{\cwyB}{\cwx{E}{5112}}%
+\node[cwwhite, anchor=west] at ({\cwx{E}{5112}+3},\cwyB) {Retires};%
+% the store: address and data known at 114; squashed at 5112%
+\cwbar{\cwyC}{\cwx{B}{104}}{\cwx{E}{5112}}{white}\cwgap{\cwyC}{B}{C}{white}\cwgap{\cwyC}{C}{D}{white}\cwgap{\cwyC}{D}{E}{white}\cwend{\cwyC}{\cwx{B}{104}}%
+\cwflag{\cwyC}{\cwx{D}{114}}{1}{w}{0}{cwband}{Address, data ready}%
+\cwcross{\cwyC}{\cwx{E}{5112}}%
+\node[cwwhite, anchor=west] at ({\cwx{E}{5112}+3.8},\cwyC) {Squashed};%
+% the forward: the store queue hands the store's data to xmit in the same cycle%
+\draw[->, densely dashed, line width=0.5pt, shorten <=2.4pt, shorten >=4.2pt] ({\cwx{D}{114}},\cwyC) -- ({\cwx{D}{114}},\cwyD);%
+\node[cwband, anchor=east] at ({\cwx{D}{114}-2.5},{(\cwyC+\cwyD)/2}) {Forwarded};%
+\cwdotat{\cwyC}{\cwx{D}{114}}%
+% xmit: in that cycle ReCon's taint tracker has it tainted and speculative (blue: defense state), and it completes (the star)%
+\cwbar{\cwyD}{\cwx{B}{104}}{\cwx{E}{5112}}{white}\cwgap{\cwyD}{B}{C}{white}\cwgap{\cwyD}{C}{D}{white}\cwgap{\cwyD}{D}{E}{white}\cwend{\cwyD}{\cwx{B}{104}}%
+\cwflag{\cwyD}{\cwx{D}{114}}{-1}{e}{0}{cwred}{Completes}%
+\cwflag{\cwyD}{\cwx{D}{114}}{-1}{w}{8.6}{cwdef}{Tainted, speculative}%
+\cwstarat{\cwyD}{\cwx{D}{114}}%
+\cwcross{\cwyD}{\cwx{E}{5112}}%
+\node[cwwhite, anchor=west] at ({\cwx{E}{5112}+3.8},\cwyD) {Squashed};%
+% time axis: one row of cycle numbers%
+\draw ({\cwxs{A}},\cwyX) -- ({\cwxe{A}},\cwyX) ({\cwxs{H}},\cwyX) -- ({\cwxe{H}},\cwyX) ({\cwxs{B}},\cwyX) -- ({\cwxe{B}},\cwyX) ({\cwxs{C}},\cwyX) -- ({\cwxe{C}},\cwyX) ({\cwxs{D}},\cwyX) -- ({\cwxe{D}},\cwyX) ({\cwxs{E}},\cwyX) -- ({\cwxe{E}},\cwyX);%
+\draw[densely dotted] ({\cwxe{A}},\cwyX) -- ({\cwxs{H}},\cwyX) ({\cwxe{H}},\cwyX) -- ({\cwxs{B}},\cwyX) ({\cwxe{B}},\cwyX) -- ({\cwxs{C}},\cwyX) ({\cwxe{C}},\cwyX) -- ({\cwxs{D}},\cwyX) ({\cwxe{D}},\cwyX) -- ({\cwxs{E}},\cwyX);%
+\node[anchor=north west] at (0,\cwyT) {Cycle};%
+\foreach \cwc/\cws/\cwan/\cwdx in {0/A/north/0, 19/H/north/0, 103/B/north east/1.2, 104/B/north west/-1.2, 110/C/north/0, 114/D/north/0, 5111/E/north east/1.2, 5112/E/north west/-1.2}%
+  \cwnum{\cwx{\cws}{\cwc}}{\cwan}{\cwdx}{\cwc};%
+% the defense-specific rule the trace violates (blue = defense-specific)%
+\pgfmathsetmacro\cwtw{\cwboxw-4.4}%
+\node[draw=sssrcink, fill=sssrcbg, line width=0.4pt, anchor=north west, inner xsep=1.8pt, inner ysep=2.2pt] at (0,\cwyK)%
+  {\parbox{\cwtw pt}{\raggedright\textit{ReCon-STT rule:} a load whose address is tainted waits in the delay unit until it is no longer speculative. ReCon checks taint only on the cache path, after forwarding, so i4 completes at 114 with i3's value.}};%
+\end{tikzpicture}%
+}%
+\caption{
+ReCon-STT lets a tainted load complete through store-to-load forwarding, in generated test inst-014536. Top: the test's execution graph (notation of Table~\ref{tab:execvocab}); i1 is the unresolved branch, so i2--i4 are speculative; i2 loads the protected $m0$ into $r0$ (\textit{ddi}), $r0$ is the address of both the store i3 and the transmitter i4, and i4 reads i3's store (\textit{rf}). Bottom: the gem5 trace (notation of Fig.~\ref{fig:checkerwindow}). At cycle 114, ReCon's taint tracker marks i4 tainted and speculative, yet i4 takes i3's value from the store queue and completes ($\star$), inside the violation window (tan).}
+\label{fig:reconstl}
+\end{figure}

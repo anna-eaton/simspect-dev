@@ -1,0 +1,12 @@
+--- a/tikz/firstdet_bars_v9_8pt.tex	2026-11-16 20:39:34
++++ b/tikz/firstdet_bars_v9_8pt.tex	2026-11-16 20:39:34
+@@ -8,6 +8,8 @@
+ \centering
+ \input{tikz/firstdet_dots_v2_body}
+ % [caption before 2026-11-16 shortening] \caption{ Expected tests per detection of each previously known bug (A-UV$n$: AMuLeT's unknown vulnerability $n$), and of \toolname{}'s new jmp-shadow bug (jmp$^{*}$, UV5, \S\ref{sec:uv5-speclfb-shadow-jmp}), on a log scale. Labels give each point's value; the bold multiplier is AMuLeT's tests per detection divided by \toolname{}'s (e.g., $1{,}655\times$: \toolname{} needs $1{,}655$ times fewer tests). \toolname{}: InvisiSpec and SpecLFB run the first 4{,}000 tests of one generated corpus, CleanupSpec all 291{,}860 tests of two generated corpora and three random re-concretizations of the first. AMuLeT: 32 runs of its own fuzzer with its own settings. Error bars: 95\% Clopper--Pearson intervals on each side's detection rate. $^{\dagger}$A-UV5 is rare for both tools: 5 detections (from 3 programs) in \toolname{}'s 291{,}860 tests and 4 in AMuLeT's 896{,}000 test cases (95\% interval for the ratio, both sides' uncertainty: 0.8--19$\times$).}
+-\caption{Expected tests per detection of each previously known bug (A-UV$n$: AMuLeT's unknown vulnerability $n$) and of \toolname{}'s jmp-shadow bug (jmp$^{*}$, UV5), on a log scale. Each bold multiplier is AMuLeT's tests per detection divided by \toolname{}'s. $^{\dagger}$A-UV5: 5 detections in \toolname{}'s 291{,}860 tests and 4 in AMuLeT's 896{,}000 test cases (95\% interval for the ratio: 0.8--19$\times$).}
++\caption{Expected tests per detection of each previously known bug %
++% (A-UV$n$: AMuLeT's unknown vulnerability $n$)% [F8, cut plan 2026-11-16: commented out; A-UV$n$ is defined in Section 6's first paragraph; also 'interval for the ratio' -> 'interval']
++and of \toolname{}'s jmp-shadow bug (jmp$^{*}$, UV5), on a log scale. Each bold multiplier is AMuLeT's tests per detection divided by \toolname{}'s. $^{\dagger}$A-UV5: 5 detections in \toolname{}'s 291{,}860 tests and 4 in AMuLeT's 896{,}000 test cases (95\% interval: 0.8--19$\times$).}
+ \label{fig:firstdetv2}
+ \end{figure}

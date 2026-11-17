@@ -1,0 +1,11 @@
+--- a/sections/intro.tex
++++ b/sections/intro.tex
+@@ -275,7 +275,7 @@
+ % [status to state (Anna), before 2026-11-17] labeled with their microarchitectural status, and its edges
+ The graph's nodes are the program's committed and in-flight instructions, labeled with their microarchitectural state, and its edges are program order and data dependencies.
+ % The execution captures what decides whether the defense lets an instruction leak an operand: which older branches are unresolved and which instructions have committed.
+-The execution captures the microarchitectural state that the defense's guarantee depends on, e.g., which branches are unresolved and which instructions have committed.
++\cutsug{The execution captures the microarchitectural state that the defense's guarantee depends on, e.g., which branches are unresolved and which instructions have committed.}
+ The graph is detailed enough to express how the defense decides what to protect, yet abstract enough for a solver (our implementation uses Alloy) to enumerate every minimal violating execution up to a bound.
+ 
+ % [no hyphen on the noun, before 2026-11-17] through a hardware side-channel~\cite{rtl2upath}

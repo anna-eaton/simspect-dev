@@ -1,0 +1,10 @@
+--- a/tikz/dataflow_v2_8pt.tex
++++ b/tikz/dataflow_v2_8pt.tex
+@@ -81,6 +81,6 @@
+ % your caption, 2026-11-03:
+ % \caption{\textbf{Example abstract execution graph:} violates the STT leakage predicate. Intra-instruction \emph{ddi} (data-dependence internal) edges and inter-instruction \emph{rf} (reads-from) edges across a generated execution track dataflow from a state element in the protection set ($m1$) to an operand in the leakage contract (load's input address) when its instruction is speculative as it follows an unresolved branch.}
+ \caption{
+-An execution graph that violates STT's leakage predicate: protected $m1$ reaches the address of speculative load i3 through dataflow (ddi and rf) edges. In this and every later execution graph, the tan band marks speculative instructions, purple marks protected state, thick arrows mark the leak's dataflow, red marks the transmitter, unflagged rows are resolved and uncommitted, and $?$ is an operand the graph leaves unspecified. }
++An execution graph that violates STT's leakage predicate: protected $m1$ reaches the address of speculative load i3 through dataflow (ddi and rf) edges. \cutrep{In this and every later execution graph,}{In every execution graph,} the tan band marks speculative instructions, purple marks protected state, thick arrows mark the leak's dataflow, red marks the transmitter, unflagged rows are resolved and uncommitted, and $?$ is an operand the graph leaves unspecified. }
+ \label{fig:ddi-rf}
+ \end{figure}

@@ -1,0 +1,104 @@
+diff -ruN ae_SpecLFB/src/cpu/pred/BranchPredictor.py b_amulet-gem5-SpecLFB_AE-v1.1/src/cpu/pred/BranchPredictor.py
+--- ae_SpecLFB/src/cpu/pred/BranchPredictor.py	2025-02-05 21:05:37
++++ b_amulet-gem5-SpecLFB_AE-v1.1/src/cpu/pred/BranchPredictor.py	2026-05-20 23:26:39
+@@ -68,6 +68,10 @@
+     RASSize = Param.Unsigned(16, "RAS size")
+     instShiftAmt = Param.Unsigned(2, "Number of bits to shift instructions by")
+ 
++    annotationBranchPCs          = VectorParam.Addr([], "Branch PCs to annotate")
++    annotationForcedTargets      = VectorParam.Addr([], "Forced BTB target per entry")
++    annotationResolveStallCycles = VectorParam.UInt64([], "Resolve stall cycles per entry")
++
+     indirectBranchPred = Param.IndirectPredictor(
+         SimpleIndirectPredictor(),
+         "Indirect branch predictor, set to NULL to disable indirect predictions",
+diff -ruN ae_SpecLFB/src/cpu/pred/bpred_unit.cc b_amulet-gem5-SpecLFB_AE-v1.1/src/cpu/pred/bpred_unit.cc
+--- ae_SpecLFB/src/cpu/pred/bpred_unit.cc	2025-02-05 21:05:37
++++ b_amulet-gem5-SpecLFB_AE-v1.1/src/cpu/pred/bpred_unit.cc	2026-10-30 12:33:09
+@@ -45,9 +45,12 @@
+ #include <algorithm>
+ 
+ #include "arch/generic/pcstate.hh"
++#include "arch/x86/pcstate.hh"
+ #include "base/compiler.hh"
+ #include "base/trace.hh"
+ #include "debug/Branch.hh"
++#include "debug/O3PipeView.hh"  // SimSpect resolve hooks (2026-10-30)
++#include "sim/core.hh"
+ #include "debug/AnalyseIPC.hh"
+ 
+ namespace gem5
+@@ -71,6 +74,15 @@
+ {
+     for (auto& r : RAS)
+         r.init(params.RASSize);
++
++    for (size_t i = 0; i < params.annotationBranchPCs.size(); ++i) {
++        Addr br = params.annotationBranchPCs[i];
++        Addr tgt = params.annotationForcedTargets[i];
++        if (tgt != 0) btbForcedTargets[br] = tgt;
++        if (i < params.annotationResolveStallCycles.size() &&
++            params.annotationResolveStallCycles[i] > 0)
++            branchResolveStallCycles[br] = Cycles(params.annotationResolveStallCycles[i]);
++    }
+ }
+ 
+ BPredUnit::BPredUnitStats::BPredUnitStats(statistics::Group *parent)
+@@ -284,6 +296,29 @@
+         }
+         inst->advancePC(*target);
+     }
++    if (!btbForcedTargets.empty()) {
++        auto it = btbForcedTargets.find(pc.instAddr());
++        if (it != btbForcedTargets.end()) {
++            // SimSpect resolve hooks (2026-10-30): forced target 1 = predict not-taken (fall-through).
++            if (it->second == 1) {
++                target.reset(pc.clone());
++                inst->advancePC(*target);
++                pred_taken = false;
++                predict_record.predTaken = false;
++            } else {
++                target->as<X86ISA::PCState>().set(it->second);
++                pred_taken = true;
++                predict_record.predTaken = true;
++            }
++            DPRINTFR(O3PipeView, "O3PipeView:simspect:%llu:BR:predict_force:line=-:seq=%llu:pc=%#llx:victim=-:cause=-:sq=-:id=-:taken=%d:target=%#llx\n",
++                     (unsigned long long)curTick(),
++                     (unsigned long long)seqNum,
++                     (unsigned long long)pc.instAddr(),
++                     (int)pred_taken,
++                     (unsigned long long)target->instAddr());
++        }
++    }
++
+     predict_record.target = target->instAddr();
+ 
+     set(pc, *target);
+diff -ruN ae_SpecLFB/src/cpu/pred/bpred_unit.hh b_amulet-gem5-SpecLFB_AE-v1.1/src/cpu/pred/bpred_unit.hh
+--- ae_SpecLFB/src/cpu/pred/bpred_unit.hh	2025-02-05 21:05:37
++++ b_amulet-gem5-SpecLFB_AE-v1.1/src/cpu/pred/bpred_unit.hh	2026-05-20 23:25:41
+@@ -43,6 +43,7 @@
+ #define __CPU_PRED_BPRED_UNIT_HH__
+ 
+ #include <deque>
++#include <unordered_map>
+ 
+ #include "base/statistics.hh"
+ #include "base/types.hh"
+@@ -336,7 +337,16 @@
+         statistics::Scalar indirectMispredicted;
+     } stats;
+ 
++  public:
++    Cycles getResolveStallCyclesFor(Addr pc) const {
++        auto it = branchResolveStallCycles.find(pc);
++        return it != branchResolveStallCycles.end() ? it->second : Cycles(0);
++    }
++
+   protected:
++    std::unordered_map<Addr, Addr>   btbForcedTargets;
++    std::unordered_map<Addr, Cycles> branchResolveStallCycles;
++
+     /** Number of bits to shift instructions by for predictor addresses. */
+     const unsigned instShiftAmt;
+ 

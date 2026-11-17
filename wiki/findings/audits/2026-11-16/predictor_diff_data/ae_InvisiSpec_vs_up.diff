@@ -1,0 +1,562 @@
+diff -ruN up_1088f0c4a/src/cpu/pred/BranchPredictor.py ae_InvisiSpec/src/cpu/pred/BranchPredictor.py
+--- up_1088f0c4a/src/cpu/pred/BranchPredictor.py	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/BranchPredictor.py	2025-02-05 21:03:48
+@@ -53,6 +53,15 @@
+ 
+ 
+ 
++class StaticBP(BranchPredictor):
++    type = 'StaticBP'
++    cxx_class = 'StaticBP'
++    cxx_header = "cpu/pred/static.hh"
++
++    staticPrediction = Param.Bool(False, "Static prediction")
++
++
++
+ class LocalBP(BranchPredictor):
+     type = 'LocalBP'
+     cxx_class = 'LocalBP'
+diff -ruN up_1088f0c4a/src/cpu/pred/SConscript ae_InvisiSpec/src/cpu/pred/SConscript
+--- up_1088f0c4a/src/cpu/pred/SConscript	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/SConscript	2025-02-05 21:03:48
+@@ -44,6 +44,8 @@
+ Source('tournament.cc')
+ Source ('bi_mode.cc')
+ Source('ltage.cc')
++Source('static.cc')
+ DebugFlag('FreeList')
+ DebugFlag('Branch')
+ DebugFlag('LTage')
++DebugFlag('Tournament')
+diff -ruN up_1088f0c4a/src/cpu/pred/bpred_unit.cc ae_InvisiSpec/src/cpu/pred/bpred_unit.cc
+--- up_1088f0c4a/src/cpu/pred/bpred_unit.cc	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/bpred_unit.cc	2025-02-05 21:03:48
+@@ -50,8 +50,11 @@
+ #include "arch/types.hh"
+ #include "arch/utility.hh"
+ #include "base/trace.hh"
++#include "sim/core.hh"
+ #include "config/the_isa.hh"
+ #include "debug/Branch.hh"
++#include "debug/AnalyseIPC.hh"
++#include "revizor_ipc/revizor_ipc.hh"
+ 
+ BPredUnit::BPredUnit(const Params *params)
+     : SimObject(params),
+@@ -310,6 +313,10 @@
+         TheISA::advancePC(target, inst);
+     }
+ 
++    if (keepPredictionLog) {
++        predictionLog << std::dec << "tick:" << curTick() - RevizorIPC::startTick << ",pc:" << std::hex << std::showbase << pc.instAddr() << ",target:" << target.instAddr() << ";";
++    }
++    DPRINTF(AnalyseIPC, "analyse_ipc_violation: predicting branch at %#lx to go to %#lx\n", pc.instAddr(), target.instAddr());
+     pc = target;
+ 
+     predHist[tid].push_front(predict_record);
+@@ -443,6 +450,7 @@
+ 
+         update(tid, (*hist_it).pc, actually_taken,
+                pred_hist.front().bpHistory, true);
++        DPRINTF(AnalyseIPC, "analyse_ipc_violation: Mispredicted branch at PC %#llx\n", (unsigned long long)hist_it->pc);
+ 
+         if (actually_taken) {
+             if (hist_it->wasReturn && !hist_it->usedRAS) {
+diff -ruN up_1088f0c4a/src/cpu/pred/bpred_unit.hh ae_InvisiSpec/src/cpu/pred/bpred_unit.hh
+--- up_1088f0c4a/src/cpu/pred/bpred_unit.hh	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/bpred_unit.hh	2025-02-05 21:03:48
+@@ -48,6 +48,7 @@
+ #define __CPU_PRED_BPRED_UNIT_HH__
+ 
+ #include <deque>
++#include <sstream>
+ 
+ #include "base/statistics.hh"
+ #include "base/types.hh"
+@@ -187,12 +188,21 @@
+     void BTBUpdate(Addr instPC, const TheISA::PCState &target)
+     { BTB.update(instPC, target, 0); }
+ 
+-
+     virtual unsigned getGHR(ThreadID tid, void* bp_history) const { return 0; }
+ 
++    /** Reset state of branch predictor */
++    virtual void reset() { fatal("BPredUnit::reset not implemented for this branch predictor type"); }
++    std::string getPredictionLog() const {
++        return predictionLog.str();
++    }
++    inline void startPredictionLog() {
++        predictionLog = std::stringstream();
++        keepPredictionLog = true;
++    }
++
+     void dump();
+ 
+-  private:
++  protected:
+     struct PredictorHistory {
+         /**
+          * Makes a predictor history struct that contains any
+@@ -303,6 +313,8 @@
+     /** Stat for the number of indirect target mispredictions.*/
+     Stats::Scalar indirectMispredicted;
+ 
++    bool keepPredictionLog = false;
++    std::stringstream predictionLog;
+   protected:
+     /** Number of bits to shift instructions by for predictor addresses. */
+     const unsigned instShiftAmt;
+diff -ruN up_1088f0c4a/src/cpu/pred/indirect.cc ae_InvisiSpec/src/cpu/pred/indirect.cc
+--- up_1088f0c4a/src/cpu/pred/indirect.cc	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/indirect.cc	2025-02-05 21:03:48
+@@ -183,3 +183,13 @@
+ {
+     return (br_addr >> instShift) & ((0x1<<tagBits)-1);
+ }
++
++void
++IndirectPredictor::reset() {
++    for (auto &cache: targetCache)
++        cache.clear();
++    for (ThreadInfo &thread: threadInfo) {
++        thread.pathHist.clear();
++        thread.headHistEntry = 0;
++    }
++}
+diff -ruN up_1088f0c4a/src/cpu/pred/indirect.hh ae_InvisiSpec/src/cpu/pred/indirect.hh
+--- up_1088f0c4a/src/cpu/pred/indirect.hh	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/indirect.hh	2025-02-05 21:03:48
+@@ -52,7 +52,7 @@
+     void squash(InstSeqNum seq_num, ThreadID tid);
+     void recordTarget(InstSeqNum seq_num, unsigned ghr,
+                       const TheISA::PCState& target, ThreadID tid);
+-
++    void reset();
+   private:
+     const bool hashGHR;
+     const bool hashTargets;
+diff -ruN up_1088f0c4a/src/cpu/pred/sat_counter.hh ae_InvisiSpec/src/cpu/pred/sat_counter.hh
+--- up_1088f0c4a/src/cpu/pred/sat_counter.hh	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/sat_counter.hh	2025-02-05 21:03:48
+@@ -108,7 +108,7 @@
+     uint8_t read() const
+     { return counter; }
+ 
+-  private:
++  public:
+     uint8_t initialVal;
+     uint8_t maxVal;
+     uint8_t counter;
+diff -ruN up_1088f0c4a/src/cpu/pred/static.cc ae_InvisiSpec/src/cpu/pred/static.cc
+--- up_1088f0c4a/src/cpu/pred/static.cc	1969-12-31 16:00:00
++++ ae_InvisiSpec/src/cpu/pred/static.cc	2025-02-05 21:03:48
+@@ -0,0 +1,63 @@
++/*
++ * Copyright (c) 2004-2006 The Regents of The University of Michigan
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are
++ * met: redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer;
++ * redistributions in binary form must reproduce the above copyright
++ * notice, this list of conditions and the following disclaimer in the
++ * documentation and/or other materials provided with the distribution;
++ * neither the name of the copyright holders nor the names of its
++ * contributors may be used to endorse or promote products derived from
++ * this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ * Authors: Kevin Lim
++ */
++
++#include "cpu/pred/static.hh"
++
++StaticBP::StaticBP(const StaticBPParams *params)
++    : BPredUnit(params),
++      staticPrediction(params->staticPrediction)
++{
++
++}
++
++void
++StaticBP::btbUpdate(ThreadID tid, Addr branch_addr, void * &bp_history)
++{
++// Place holder for a function that is called to update predictor history when
++// a BTB entry is invalid or not found.
++}
++
++
++bool
++StaticBP::lookup(ThreadID tid, Addr branch_addr, void * &bp_history)
++{
++    return staticPrediction;
++}
++
++void
++StaticBP::uncondBranch(ThreadID tid, Addr pc, void *&bp_history)
++{
++}
++
++StaticBP*
++StaticBPParams::create()
++{
++    return new StaticBP(this);
++}
+diff -ruN up_1088f0c4a/src/cpu/pred/static.hh ae_InvisiSpec/src/cpu/pred/static.hh
+--- up_1088f0c4a/src/cpu/pred/static.hh	1969-12-31 16:00:00
++++ ae_InvisiSpec/src/cpu/pred/static.hh	2025-02-05 21:03:48
+@@ -0,0 +1,105 @@
++/*
++ * Copyright (c) 2011, 2014 ARM Limited
++ * All rights reserved
++ *
++ * The license below extends only to copyright in the software and shall
++ * not be construed as granting a license to any other intellectual
++ * property including but not limited to intellectual property relating
++ * to a hardware implementation of the functionality of the software
++ * licensed hereunder.  You may use the software subject to the license
++ * terms below provided that you ensure that this notice is replicated
++ * unmodified and in its entirety in all distributions of the software,
++ * modified or unmodified, in source code or in binary form.
++ *
++ * Copyright (c) 2004-2006 The Regents of The University of Michigan
++ * All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions are
++ * met: redistributions of source code must retain the above copyright
++ * notice, this list of conditions and the following disclaimer;
++ * redistributions in binary form must reproduce the above copyright
++ * notice, this list of conditions and the following disclaimer in the
++ * documentation and/or other materials provided with the distribution;
++ * neither the name of the copyright holders nor the names of its
++ * contributors may be used to endorse or promote products derived from
++ * this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
++ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
++ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
++ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
++ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
++ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
++ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
++ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
++ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++ *
++ * Authors: Kevin Lim
++ *          Timothy M. Jones
++ */
++
++#ifndef __CPU_PRED_STATIC_PRED_HH__
++#define __CPU_PRED_STATIC_PRED_HH__
++
++#include <vector>
++
++#include "base/types.hh"
++#include "cpu/pred/bpred_unit.hh"
++#include "params/StaticBP.hh"
++
++/**
++ * Implements a local predictor that uses the PC to index into a table of
++ * counters.  Note that any time a pointer to the bp_history is given, it
++ * should be NULL using this predictor because it does not have any branch
++ * predictor state that needs to be recorded or updated; the update can be
++ * determined solely by the branch being taken or not taken.
++ */
++class StaticBP : public BPredUnit
++{
++  public:
++    /**
++     * Default branch predictor constructor.
++     */
++    StaticBP(const StaticBPParams *params);
++
++    virtual void uncondBranch(ThreadID tid, Addr pc, void * &bp_history);
++
++    /**
++     * Looks up the given address in the branch predictor and returns
++     * a true/false value as to whether it is taken.
++     * @param branch_addr The address of the branch to look up.
++     * @param bp_history Pointer to any bp history state.
++     * @return Whether or not the branch is taken.
++     */
++    bool lookup(ThreadID tid, Addr branch_addr, void * &bp_history);
++
++    /**
++     * Updates the branch predictor to Not Taken if a BTB entry is
++     * invalid or not found.
++     * @param branch_addr The address of the branch to look up.
++     * @param bp_history Pointer to any bp history state.
++     * @return Whether or not the branch is taken.
++     */
++    void btbUpdate(ThreadID tid, Addr branch_addr, void * &bp_history);
++
++    /**
++     * Updates the branch predictor with the actual result of a branch.
++     * @param branch_addr The address of the branch to update.
++     * @param taken Whether or not the branch was taken.
++     */
++    void update(ThreadID tid, Addr branch_addr, bool taken, void *bp_history,
++                bool squashed)
++    { assert(bp_history == NULL); }
++
++    void squash(ThreadID tid, void *bp_history)
++    { assert(bp_history == NULL); }
++
++  private:
++    /** Static prediction. */
++    bool staticPrediction;
++};
++
++#endif // __CPU_PRED_STATIC_PRED_HH__
+diff -ruN up_1088f0c4a/src/cpu/pred/tournament.cc ae_InvisiSpec/src/cpu/pred/tournament.cc
+--- up_1088f0c4a/src/cpu/pred/tournament.cc	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/tournament.cc	2025-02-05 21:03:48
+@@ -44,6 +44,7 @@
+ 
+ #include "base/bitfield.hh"
+ #include "base/intmath.hh"
++#include "debug/Tournament.hh"
+ 
+ TournamentBP::TournamentBP(const TournamentBPParams *params)
+     : BPredUnit(params),
+@@ -147,6 +148,7 @@
+ void
+ TournamentBP::updateGlobalHistTaken(ThreadID tid)
+ {
++    DPRINTF(Tournament, "Update global history: branch taken\n");
+     globalHistory[tid] = (globalHistory[tid] << 1) | 1;
+     globalHistory[tid] = globalHistory[tid] & historyRegisterMask;
+ }
+@@ -155,6 +157,7 @@
+ void
+ TournamentBP::updateGlobalHistNotTaken(ThreadID tid)
+ {
++    DPRINTF(Tournament, "Update global history: branch not taken\n");
+     globalHistory[tid] = (globalHistory[tid] << 1);
+     globalHistory[tid] = globalHistory[tid] & historyRegisterMask;
+ }
+@@ -163,6 +166,7 @@
+ void
+ TournamentBP::updateLocalHistTaken(unsigned local_history_idx)
+ {
++    DPRINTF(Tournament, "Update local history @ %u: branch taken\n", local_history_idx);
+     localHistoryTable[local_history_idx] =
+         (localHistoryTable[local_history_idx] << 1) | 1;
+ }
+@@ -171,6 +175,7 @@
+ void
+ TournamentBP::updateLocalHistNotTaken(unsigned local_history_idx)
+ {
++    DPRINTF(Tournament, "Update local history @ %u: branch not taken\n", local_history_idx);
+     localHistoryTable[local_history_idx] =
+         (localHistoryTable[local_history_idx] << 1);
+ }
+@@ -185,6 +190,7 @@
+     //Update Local History to Not Taken
+     localHistoryTable[local_history_idx] =
+        localHistoryTable[local_history_idx] & (localPredictorMask & ~ULL(1));
++    DPRINTF(Tournament, "btbUpdate at address %#lx\n", branch_addr);
+ }
+ 
+ bool
+@@ -284,6 +290,7 @@
+     // updated state (global history register and local history)
+     // and update again.
+     if (squashed) {
++        DPRINTF(Tournament, "Squash! local history[%u] taken=%u\n", local_history_idx, taken);
+         // Global history restore and update
+         globalHistory[tid] = (history->globalHistory << 1) | taken;
+         globalHistory[tid] &= historyRegisterMask;
+@@ -313,8 +320,10 @@
+          unsigned choice_predictor_idx =
+            history->globalHistory & choiceHistoryMask;
+          if (history->localPredTaken == taken) {
++             DPRINTF(Tournament, "Decrement choice predictor[%u]\n", choice_predictor_idx);
+              choiceCtrs[choice_predictor_idx].decrement();
+          } else if (history->globalPredTaken == taken) {
++             DPRINTF(Tournament, "Increment choice predictor[%u]\n", choice_predictor_idx);
+              choiceCtrs[choice_predictor_idx].increment();
+          }
+     }
+@@ -326,6 +335,8 @@
+     // so they do not need to be updated.
+     unsigned global_predictor_idx =
+             history->globalHistory & globalHistoryMask;
++      DPRINTF(Tournament, "Update counter after commit- branch %staken @ global idx %u local idx %d\n",
++        taken ? "" : "not ", global_predictor_idx, old_local_pred_valid ? (int)old_local_pred_index : -1);
+     if (taken) {
+           globalCtrs[global_predictor_idx].increment();
+           if (old_local_pred_valid) {
+@@ -347,11 +358,13 @@
+ {
+     BPHistory *history = static_cast<BPHistory *>(bp_history);
+ 
++    DPRINTF(Tournament, "Restore global history due to squash\n");
+     // Restore global history to state prior to this branch.
+     globalHistory[tid] = history->globalHistory;
+ 
+     // Restore local history
+     if (history->localHistoryIdx != invalidPredictorIndex) {
++        DPRINTF(Tournament, "Restore local history due to squash\n");
+         localHistoryTable[history->localHistoryIdx] = history->localHistory;
+     }
+ 
+@@ -369,6 +382,26 @@
+ TournamentBP::getGHR(ThreadID tid, void *bp_history) const
+ {
+     return static_cast<BPHistory *>(bp_history)->globalHistory;
++}
++
++void
++TournamentBP::reset() {
++    for (int i = 0; i < localHistoryTableSize; ++i)
++        localHistoryTable[i] = 0;
++    for (unsigned &entry: globalHistory)
++        entry = 0;
++    for (int i = 0; i < localPredictorSize; ++i)
++        localCtrs[i].reset();
++    for (int i = 0; i < globalPredictorSize; ++i)
++        globalCtrs[i].reset();
++    for (int i = 0; i < choicePredictorSize; ++i)
++        choiceCtrs[i].reset();
++    for (History &hist: predHist)
++        hist.clear();
++    BTB.reset();
++    for (ReturnAddrStack &stack: RAS)
++        stack.reset();
++    iPred.reset();
+ }
+ 
+ #ifdef DEBUG
+diff -ruN up_1088f0c4a/src/cpu/pred/tournament.hh ae_InvisiSpec/src/cpu/pred/tournament.hh
+--- up_1088f0c4a/src/cpu/pred/tournament.hh	2017-12-04 15:10:55
++++ ae_InvisiSpec/src/cpu/pred/tournament.hh	2025-02-05 21:03:48
+@@ -51,7 +51,42 @@
+ #include "cpu/pred/bpred_unit.hh"
+ #include "cpu/pred/sat_counter.hh"
+ #include "params/TournamentBP.hh"
++#include "boost/algorithm/string.hpp"
+ 
++template<>
++inline void arrayParamOut<SatCounter>(CheckpointOut &os, const std::string &name, const std::vector<SatCounter> &param) {
++    os << name << "=";
++    for (SatCounter counter : param) {
++        os << std::to_string(counter.initialVal) << "|" << std::to_string(counter.counter) << "|" << std::to_string(counter.maxVal);
++        os << " ";
++    }
++    os << "\n";
++}
++
++template<>
++inline void arrayParamIn<SatCounter>(CheckpointIn &os, const std::string &name, std::vector<SatCounter> &param) {
++    const std::string &section(Serializable::currentSection());
++    std::string str;
++    if (!os.find(section, name, str)) {
++        fatal("Can't unserialize '%s:%s'\n", section, name);
++    }
++    param.clear();
++
++    std::vector<std::string> tokens;
++    tokenize(tokens, str, ' ');
++
++    for (std::vector<std::string>::size_type i = 0; i < tokens.size(); i++) {
++        SatCounter value;
++        std::vector<std::string> parts;
++        boost::algorithm::split(parts, tokens[i], boost::is_any_of("|"));
++        value.initialVal = std::stoi(parts[0]);
++        value.maxVal = std::stoi(parts[1]);
++        value.counter = std::stoi(parts[2]);
++
++        param.push_back(value);
++    }
++}
++
+ /**
+  * Implements a tournament branch predictor, hopefully identical to the one
+  * used in the 21264.  It has a local predictor, which uses a local history
+@@ -104,6 +139,8 @@
+      */
+     void update(ThreadID tid, Addr branch_addr, bool taken, void *bp_history,
+                 bool squashed);
++    
++    void reset() override;
+ 
+     /**
+      * Restores the global branch history on a squash.
+@@ -114,6 +151,60 @@
+ 
+     unsigned getGHR(ThreadID tid, void *bp_history) const;
+ 
++    void serialize(CheckpointOut &cp) const override
++    {
++        SERIALIZE_CONTAINER(localCtrs);
++        SERIALIZE_CONTAINER(globalCtrs);
++        SERIALIZE_CONTAINER(globalHistory);
++        SERIALIZE_CONTAINER(choiceCtrs);
++        SERIALIZE_SCALAR(localPredictorSize);
++        SERIALIZE_SCALAR(localPredictorMask);
++        SERIALIZE_SCALAR(localCtrBits);
++        SERIALIZE_SCALAR(localHistoryBits);
++        SERIALIZE_SCALAR(globalPredictorSize);
++        SERIALIZE_SCALAR(globalCtrBits);
++        SERIALIZE_SCALAR(globalHistoryBits);
++        SERIALIZE_SCALAR(globalHistoryMask);
++        SERIALIZE_SCALAR(choiceHistoryMask);
++        SERIALIZE_SCALAR(historyRegisterMask);
++        SERIALIZE_SCALAR(choicePredictorSize);
++        SERIALIZE_SCALAR(choiceCtrBits);
++        SERIALIZE_SCALAR(localThreshold);
++        SERIALIZE_SCALAR(globalThreshold);
++        SERIALIZE_SCALAR(choiceThreshold);
++
++        SERIALIZE_CONTAINER(localHistoryTable);
++        SERIALIZE_SCALAR(localHistoryTableSize);
++            // SERIALIZE_OBJ(RAS[0]);
++    }
++
++    void unserialize(CheckpointIn &cp) override
++    {
++        UNSERIALIZE_CONTAINER(localCtrs);
++        UNSERIALIZE_CONTAINER(globalCtrs);
++        UNSERIALIZE_CONTAINER(globalHistory);
++        UNSERIALIZE_CONTAINER(choiceCtrs);
++        UNSERIALIZE_SCALAR(localPredictorSize);
++        UNSERIALIZE_SCALAR(localPredictorMask);
++        UNSERIALIZE_SCALAR(localCtrBits);
++        UNSERIALIZE_SCALAR(localHistoryBits);
++        UNSERIALIZE_SCALAR(globalPredictorSize);
++        UNSERIALIZE_SCALAR(globalCtrBits);
++        UNSERIALIZE_SCALAR(globalHistoryBits);
++        UNSERIALIZE_SCALAR(globalHistoryMask);
++        UNSERIALIZE_SCALAR(choiceHistoryMask);
++        UNSERIALIZE_SCALAR(historyRegisterMask);
++        UNSERIALIZE_SCALAR(choicePredictorSize);
++        UNSERIALIZE_SCALAR(choiceCtrBits);
++        UNSERIALIZE_SCALAR(localThreshold);
++        UNSERIALIZE_SCALAR(globalThreshold);
++        UNSERIALIZE_SCALAR(choiceThreshold);
++
++        UNSERIALIZE_CONTAINER(localHistoryTable);
++        UNSERIALIZE_SCALAR(localHistoryTableSize);
++    // UNSERIALIZE_OBJ(RAS[0]);
++    }
++    
+   private:
+     /**
+      * Returns if the branch should be taken or not, given a counter

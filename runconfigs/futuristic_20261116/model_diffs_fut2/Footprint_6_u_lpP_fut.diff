@@ -1,0 +1,18 @@
+--- STAGE1_alloy/models/Footprint_6_u_lpP_fut.als (before [fut-2])	2026-11-16 20:54:44
++++ STAGE1_alloy/models/Footprint_6_u_lpP_fut.als	2026-11-16 20:54:44
+@@ -5,6 +5,7 @@
+ // [fut-0] Sources: InvisiSpec p4 SIV-A1 'In our Futuristic attack model, USLs are all the speculative loads that can be squashed by an earlier instruction';
+ // [fut-0] STT p5 S6.1 'In the Futuristic model, an instruction has only reached this point if it cannot be squashed'; gem5 amulet-InvisiSpec
+ // [fut-0] src/cpu/o3/rob_impl.hh:435-490 (prevInstsComplete: every older instruction readyToCommit && isLoadSafeToCommit, no fault, not squashed), lsq_unit_impl.hh:1110.
++// [fut-0] SECOND change (2026-11-16, decision FUT-1 (a), signed off by Anna): fact fut_no_read_from_incomplete under clause 1, tagged [fut-2].
+ // [fut-0] Docs: wiki/state/EVAL_MANIFEST.md 'Futuristic testsets (2026-11-16)'. Everything below this header is the source file.
+ // production since 2026-11-10 per Anna; source draft STAGE1_alloy/models/proposed/ultimate/loosepin/Footprint_6_u_lpPc.als, sha256 6ad90dc59c056986506c5142e488f27c99ae02aab273bea4d2b27520e902ebf0.
+ // Role: Stage-1.5 loose-pin model (but 8, committed region, prefix IX, no-junk, production minimality) with the Stage-1 core pin: NOT runnable alone, twostage_lp.py / stage15lp.py append one path-style seed_core per core. Defense block = footprint v2 (FP-6: memory + unwritten registers), approved 2026-11-10;
+@@ -383,6 +384,7 @@
+ //     tests are valid under both --scheme=SpectreSafeInvisibleSpec and FuturisticSafeInvisibleSpec.
+ // [fut-1] source (Spectre) contract: fun speculation_contract_p[p: PTag->univ] : Instruction {uncommitted_p[p] & has_unresolved_brs_p[p]}
+ fun speculation_contract_p[p: PTag->univ] : Instruction {uncommitted_p[p] & unresolved_p[p].(^(spo_p[p]))} -- [fut-1] FLAVOR = futuristic
++fact fut_no_read_from_incomplete { no (unresolved.(outreg + outmem)).rf } -- [fut-2] FUT-1 (a), Anna 2026-11-16: no instruction reads the output of an instruction the graph calls unresolved (= not completed); without value prediction no machine runs that
+ // (2) protection set: all memory, and (below) it is never untainted.
+ //     InvisiSpec makes every USL invisible whatever its address depends on (p4: "InvisiSpec takes
+ //     an action that will make the USL visible" only at the Visibility Point).

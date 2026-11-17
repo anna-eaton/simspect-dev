@@ -1,0 +1,37 @@
+% execvocab v4 (2026-11-16): narrower name column; Flags row on one line
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}% figure text: exactly 8pt in any class (ACM sigconf \footnotesize is 7pt)
+% execution-graph vocabulary table v3 (2026-11-10; 'Drawn as' row removed 2026-11-11, Anna): v2 plus a 'Drawn as' row giving the graph notation the figures use (answers the figure auditnote that was in v2's Operands row). Previous header: execution-graph vocabulary table (2026-11-02). Source: simspect repo paper_figures/drafts/execvocab_v4_8pt.tex (simple version, 2026-11-02). 
+\begin{table}[t]
+\centering
+\caption{Execution-graph vocabulary shared by every \toolname{} defense specification.}
+\label{tab:execvocab}
+% Simple syntax table (2026-11-02, Anna: "a section for each": instruction types, Booleans on an instruction,
+% operands, state, relations; "doesnt need to be a big table, can be simpler"). Replaces v2 (Graph | Meaning)
+% and v3 (Alloy-first). Names as in the paper prose (sections/pipeline.tex) and the graph figures; source:
+% STAGE1_alloy/models/STT_6.als :19-35 (Booleans, kinds), :24-26 (State), :53-57 + :85-89 (operands), :50 (spo),
+% :81-82 (rf, ddi); shared by Recon_6, SPT_6, SPT_6_oneLP, STT_6_stl (the SPT model is now SPT_6_oneLP_v2, which retypes some skeleton lines, so the caption's ``only the defense block differs'' needs a qualifier). ddi = data-dependence internal (Anna).
+% Color (sscolors.tex): red ink on xmit only. Needs: array (paper preamble).
+% Body only: \input this inside a table float. Every line ends in % so no stray spaces enter the output. Macros \ev.
+{%
+\providecolor{ssxmitink}{gray}{0}\providecolor{ssprotfill}{gray}{0.83}\providecolor{ssspecfill}{gray}{0.94}%
+\figfont%
+\hyphenpenalty=10000\exhyphenpenalty=10000%
+% ============================ TUNING KNOBS ============================
+\def\evgw{39pt}%   section-name column (v4, 2026-11-16: 46pt -> 39pt; the widest name, Instructions, is 37pt)
+\setlength{\tabcolsep}{3pt}%
+\def\evmw{\dimexpr\columnwidth-\evgw-4\tabcolsep-3\arrayrulewidth\relax}% items column (total = \columnwidth = 241pt ACM column)
+\renewcommand{\arraystretch}{1.0}%
+% ======================================================================
+\def\evt#1{\texttt{#1}}%
+\begin{tabular}{|>{\raggedright\arraybackslash\itshape}p{\evgw}|>{\raggedright\arraybackslash}p{\evmw}|}%
+\hline%
+Instructions & \evt{Load}, \evt{Store}, \evt{Branch\_n}, \evt{Branch\_x}, \evt{Other\_n}, \evt{Other\_x} (Other: ALU op; \evt{\_n}: never in a leakage contract)\\\hline%
+% v3: Flags & \evt{resolved}, \evt{committed} (implies resolved), \textcolor{ssxmitink}{\evt{xmit}} (the target transmitter)\\\hline%
+Flags & \evt{resolved}, \evt{committed}, \textcolor{ssxmitink}{\evt{xmit}} (the target transmitter)\\\hline% v4: "implies resolved" is stated in §3 (model.tex)
+Operands & inputs \evt{inreg}, \evt{inaddr}, \evt{inmem}; outputs \evt{outreg}, \evt{outmem}\\\hline%
+State & \evt{Reg}, \evt{Mem}; each operand names one\\\hline%
+Relations & \evt{spo} (speculative program order), \evt{rf} (reads-from), \evt{ddi} (data dependence internal)\\\hline%
+\end{tabular}%
+\vspace{-4pt}%
+}%
+\end{table}

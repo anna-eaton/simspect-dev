@@ -118,3 +118,7 @@ Per-test `raw/` records and pipeview `traces/` of the runs (tens of GB; kept onl
 ## Hashes
 
 `SHA256SUMS` lists every regular file (symlinks excluded) with its sha256, `data/` included; regenerate with `find . -type f ! -name SHA256SUMS ! -name .DS_Store -print0 | sort -z | xargs -0 shasum -a 256 > SHA256SUMS`.
+
+## Note (2026-11-16 22:30, agent fprescore): re-score with W-3 + RG-1
+
+The InvisiSpec and SpecLFB numbers above (A-UV1 2,002, A-UV6 851, walk order 657, jmp shadow 527 of 4,000; raw hits 4,000 / 1,748) were re-scored with the two checker changes decided after this snapshot (W-3 loads-only footprints for InvisiSpec / SpecLFB; RG-1 resolved-branch gate) by offline replay of the saved traces with the current checker: every number is unchanged, label for label, and so are the multiples and the figure values (`experiments/2026-11-10_footprint_vs_amulet/code/figvalues_20261116e.py`, output identical to d). CleanupSpec numbers are unaffected. Details: `wiki/state/EVAL_MANIFEST.md` "Re-score with W-3 + RG-1 (2026-11-16)"; files `experiments/2026-11-16_fprescore/`.

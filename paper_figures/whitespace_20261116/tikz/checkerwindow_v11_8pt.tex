@@ -1,0 +1,159 @@
+% Inspector figure v11 (2026-11-16, agent fig-whitespace): v10 plus the 'Violation window' title in bold, dark saturated yellow (#8C6400) so it stands out on the tan band (Anna 2026-11-16). Nothing else changed.
+% Inspector figure v10 (2026-11-16, whitespace pass, agent fig-whitespace): v9 with spacing tightened only; same data, marks, labels and caption.
+% (1) 'Violation window' moves from its own line above the band into the band, on lc's row, right-aligned against the band's right edge
+%     (tan fill hides the dotted cycle lines behind it, as for every label on the band); the band now starts 5.5pt above lc's bar (was 14.5pt);
+% (2) 9.5pt instead of 11.5pt from the top of the cycle numbers to the criterion box. Height 105.3 -> 94.3pt. Everything else is v9 verbatim.
+% Inspector figure v9 (2026-11-16, one column, agent stt-int-fig): v8's data (integer version of inst-023734 on STT, no hit) in the timeline style
+% of simspect paper_figures/FIGURES.md 'Timeline figure style' (as checkerwindow_v7c_8pt): every labeled event is a mark on its bar at its trace
+% cycle, each label beside its mark or on a vertical leader to it, one row of cycle numbers at 12pt per cycle, no F/D/I letter ticks (a bar runs
+% from the instruction's fetch to its retirement or squash). Macro block copied from checkerwindow_v7c_8pt.tex. Generator: simspect
+% paper_figures/inspector_v8/make_v9.py. v8 drew F letters, a slanted Resolves leader and 5pt per cycle.
+% Test: integer version of STT_6_u_core_lpP_fv3 inst-023734, mispredict_not_taken (Fig. 2's execution graph plus a committed load pc0; the test of
+%   tikz/concretization_example_v2_8pt.tex). Built with the corpus's own Stage-2 code and recipe with only fpr.enabled false; it differs from the
+%   corpus (vector) version only in the two route blocks (pairdiff.py: route_only), and contains no xmm register at all.
+% Run: runconfigs/inttwin_20261116/E3_STT_6_u_core_lpP_s2A_int.jsonc with only paths, keep_tmp, branch_modes and jobs changed (/work/stt-master,
+%   DerivO3CPU, --scheme=2, --caches, branch-ann BTB force, cache_setup random_all -> warm for this stem, timing-grid draw (2500, 500): the
+%   unresolved branch pc1 is held 2,500 cycles; debug flags O3PipeView,LSQUnit,Commit); cafe3 2026-11-16 by agent stt-int-fig through pipeline.py
+%   gem5. Record: issued_in_window false, cache_fate never_executed, lc_retire 2898500, fnc_retire 4207000, fnc_complete 2949500.
+% Data: simspect repo paper_figures/inspector_v8/ (pipeview_E3_int.txt.gz, record_E3_int.json, README.md with commands and sha256s).
+% Cycle c = (tick - 2888500)/500 (0 = lc's fetch). Every drawn cycle, read from the trace:
+%   lc   = pc0, seq 558 (0x401c24 MOV_R_M, the committed load): fetch 2888500 = 0, retire 2898500 = 20 (window opens). Not drawn: decode 1, issue 15.
+%   fnc  = i0, the branch pc1 (0x401c41 JNB_I, wrip micro-op seq 571): fetch 2946000 = 115 (BR:predict_force taken=0 at the same tick);
+%          complete and BR:resolve_hold 2949500 = 122 (stall 2500, fire 4199500 = 2622); BR:resolve_visible 4200000 = 2623 (the resolution the
+%          Inspector uses; Commit "Squashing due to branch mispred PC:0x401c41" at the same tick); retire 4207000 = 2637. Not drawn: decode 116, issue 121.
+%   xmit = i3, the transmitter pc4 (0x401c5f MOV_R_M, seq 580). It has no pipeview record (a squashed load that never issued), so its fetch comes
+%          from its in-order neighbours seq 579 and 581 (both fetched 2946500 = 116); LSQ "Inserting load" 2948500 = 120; its address register
+%          r15 is ready when seq 579 (sub) completes, 2952000 = 127; it never executes (no "Executing load": STT holds it); LSQ "Load Instruction
+%          PC (0x401c5f...) squashed" 4200500 = 2624 (the squash lands; the window closes).
+% Label: fig:checkerwindow (as v5-v8; input one version only).
+\providecommand{\figfont}{\fontsize{8pt}{9.5pt}\selectfont}% 8pt figure text regardless of document class (acmart sigconf \footnotesize is 7pt)
+\begin{figure}[t]
+\centering
+% Body only; everything is wrapped in { } so no macro or style leaks into other figures; all helper names are prefixed \cw.%
+{%
+\definecolor{sswintitle}{HTML}{8C6400}% dark saturated yellow for the 'Violation window' title (bold): 4.7:1 contrast on the tan band, dark gray in grayscale (Anna 2026-11-16: bold, dark yellow, legible)%
+\providecolor{ssspecfill}{gray}{0.94}\providecolor{ssspecink}{gray}{0}%
+\providecolor{ssxmitfill}{gray}{0.76}\providecolor{ssxmitink}{gray}{0}%
+\providecolor{sssrcfill}{gray}{0.85}\providecolor{sssrcink}{gray}{0}\providecolor{sssrcbg}{gray}{0.90}%
+% ============================ TUNING KNOBS ============================%
+\def\cwcyc{12}%         pt per simulated cycle (same scale in every axis segment)%
+% pt width of the elided (dotted) stretch before each segment (wide enough that neighbouring cycle numbers never touch)%
+\def\cwbrkH{7}\def\cwbrkB{7}\def\cwbrkC{7}\def\cwbrkG{7}\def\cwbrkE{12}\def\cwbrkF{12}%
+\def\cwtl{57}%          pt, x of the time axis origin; left of it: row labels%
+\def\cwrowAB{19}\def\cwrowBC{19}% pt between rows lc-fnc and fnc-xmit%
+\def\cwbarh{4}%         pt height of an instruction bar%
+\def\cwdot{1.9pt}%      radius of an event dot%
+\def\cwstar{8pt}%       outer diameter of the transmission star%
+\def\cwlane{3.2}%       pt from a bar's edge to the near edge of a label on a leader%
+\def\cwboxw{237}%       pt, width of the criterion box (the whole picture stays within 237.5pt)%
+\def\cwfs{\figfont}%    the one font size (8pt)%
+% axis segments [start,end], in cycles after lc's fetch; an elided stretch before each segment after the first%
+\def\cwsA{-0.5}\def\cweA{0.5}%   lc fetch 0%
+\def\cwsH{19.5}\def\cweH{20.5}%   lc retires 20%
+\def\cwsB{114.5}\def\cweB{116.5}%   fnc fetch 115, xmit fetch 116%
+\def\cwsC{121.5}\def\cweC{122.5}%   fnc held 122%
+\def\cwsG{126.5}\def\cweG{127.5}%   xmit's address ready 127 (STT holds it from here)%
+\def\cwsE{2622.5}\def\cweE{2624.5}%   fnc resolves 2623, squash lands on xmit 2624%
+\def\cwsF{2636.5}\def\cweF{2637.5}%   fnc retires 2637%
+% ======================================================================%
+\pgfmathsetmacro\cwoA{0}%
+\pgfmathsetmacro\cwoH{\cwoA+(\cweA-\cwsA)*\cwcyc+\cwbrkH}%
+\pgfmathsetmacro\cwoB{\cwoH+(\cweH-\cwsH)*\cwcyc+\cwbrkB}%
+\pgfmathsetmacro\cwoC{\cwoB+(\cweB-\cwsB)*\cwcyc+\cwbrkC}%
+\pgfmathsetmacro\cwoG{\cwoC+(\cweC-\cwsC)*\cwcyc+\cwbrkG}%
+\pgfmathsetmacro\cwoE{\cwoG+(\cweG-\cwsG)*\cwcyc+\cwbrkE}%
+\pgfmathsetmacro\cwoF{\cwoE+(\cweE-\cwsE)*\cwcyc+\cwbrkF}%
+\newcommand\cwx[2]{(\cwtl+\csname cwo#1\endcsname+(#2-\csname cws#1\endcsname)*\cwcyc)}%
+\newcommand\cwxs[1]{(\cwtl+\csname cwo#1\endcsname)}%
+\newcommand\cwxe[1]{(\cwtl+\csname cwo#1\endcsname+(\csname cwe#1\endcsname-\csname cws#1\endcsname)*\cwcyc)}%
+\newcommand\cwab[1]{\textup{#1}}%
+\newcommand\cwbar[4]{\fill[#4] ({#2},#1-\cwbarh/2) rectangle ({#3},#1+\cwbarh/2);\draw[line width=0.4pt] ({#2},#1+\cwbarh/2) -- ({#3},#1+\cwbarh/2) ({#2},#1-\cwbarh/2) -- ({#3},#1-\cwbarh/2);}%
+\newcommand\cwend[2]{\draw[line width=0.6pt] ({#2},#1-\cwbarh/2) -- ({#2},#1+\cwbarh/2);}%
+\newcommand\cwgap[4]{\fill[#4] ({\cwxe{#2}},#1-\cwbarh/2-0.3) rectangle ({\cwxs{#3}},#1+\cwbarh/2+0.3);\draw[densely dotted, line width=0.4pt] ({\cwxe{#2}},#1+\cwbarh/2) -- ({\cwxs{#3}},#1+\cwbarh/2) ({\cwxe{#2}},#1-\cwbarh/2) -- ({\cwxs{#3}},#1-\cwbarh/2);}%
+\newcommand\cwdotat[2]{\fill[black, draw=white, line width=0.4pt] ({#2},#1) circle (\cwdot);}%
+\newcommand\cwcross[2]{\draw[white, line width=1.8pt] ({#2},#1) ++(-2.4,-2.4) -- ++(4.8,4.8) ({#2},#1) ++(-2.4,2.4) -- ++(4.8,-4.8);\draw[line width=0.8pt] ({#2},#1) ++(-2.4,-2.4) -- ++(4.8,4.8) ({#2},#1) ++(-2.4,2.4) -- ++(4.8,-4.8);}%
+% label on a leader: from the mark at x=#2 on row y=#1, a vertical leader up (#3=1) or down (#3=-1) to a label set beside it on the%
+% side #4 (e: label starts at the leader; w: label ends at the leader; c: label centred on it); #5 = extra lift in pt (a second lane),%
+% #6 = style, #7 = text. The label's fill covers the leader's top 3.6pt, so the leader meets the label's bottom (or top) edge.%
+\newcommand\cwflag[7]{%
+  \pgfmathsetmacro\cwfy{#1+#3*(\cwbarh/2+\cwlane+#5)}%
+  \ifnum#3>0 \def\cwfv{south}\else\def\cwfv{north}\fi%
+  \ifx#4e\edef\cwfa{\cwfv\space west}\def\cwfd{-0.25}\else\ifx#4w\edef\cwfa{\cwfv\space east}\def\cwfd{0.25}\else\edef\cwfa{\cwfv}\def\cwfd{0}\fi\fi%
+  \draw[cwlead] ({#2},#1) -- ({#2},\cwfy+#3*3.6);%
+  \node[#6, anchor=\cwfa] at ({#2+\cwfd},\cwfy) {#7};}%
+% axis tick at x=#1 and its cycle number #4, anchored #2 and shifted #3 pt (one row; two numbers one cycle apart spread away)%
+\newcommand\cwnum[4]{\draw[line width=0.4pt] ({#1},\cwyX) -- ({#1},\cwyX-2.2);\node[anchor=#2] at ({#1+#3},\cwyT) {#4};}%
+\newcommand\cwstarat[2]{\node[star, star points=5, star point ratio=2.4, fill=ssxmitink, draw=white, line width=0.5pt, minimum size=\cwstar, inner sep=0pt] at ({#2},#1) {};}%
+\begin{tikzpicture}[x=1pt, y=1pt,%
+  every node/.style={font=\cwfs, inner sep=0pt,%
+    execute at begin node={\hyphenpenalty=10000\exhyphenpenalty=10000\relax}},%
+  cwann/.style={font=\cwfs\itshape},%
+  cwband/.style={cwann, fill=ssspecfill, inner sep=0.6pt},% a label on the band hides the dotted cycle lines behind it%
+  cwwhite/.style={cwann, fill=white, inner sep=0.6pt},%
+  cwred/.style={cwband, text=ssxmitink},%
+  cwrow/.style={anchor=base west},%
+  cwgloss/.style={font=\cwfs\itshape, anchor=base west},%
+  cwgrid/.style={densely dotted, line width=0.3pt, draw=black!35},%
+  cwedge/.style={line width=0.6pt},%
+  cwlead/.style={line width=0.4pt, draw=black!80},%
+]%
+\pgfmathsetmacro\cwyA{0}%                        lc%
+\pgfmathsetmacro\cwyB{-\cwrowAB}%                fnc (the branch)%
+\pgfmathsetmacro\cwyC{-\cwrowAB-\cwrowBC}%       xmit%
+\pgfmathsetmacro\cwyW{\cwyA+5.5}%                top of the violation-window band (v10: was +14.5; the title now sits in the band on lc's row)%
+\pgfmathsetmacro\cwyX{\cwyC-16}%                 time axis line (room for the label under xmit)%
+\pgfmathsetmacro\cwyT{\cwyX-3.4}%                top of the row of cycle numbers%
+\pgfmathsetmacro\cwyK{\cwyT-9.5}%                top of the criterion box (v10: was -11.5)%
+\pgfmathsetmacro\cwgT{\cwyA+3}%                  top of the dotted cycle lines%
+
+% ---------- the violation window: a tan band from lc's retirement (20) to the squash landing on xmit (2624) ----------%
+\fill[ssspecfill] ({\cwx{H}{20}},\cwyW) rectangle ({\cwx{E}{2624}},\cwyX);%
+\foreach \cwc/\cws in {0/A, 115/B, 116/B, 122/C, 127/G, 2623/E, 2637/F} \draw[cwgrid] ({\cwx{\cws}{\cwc}},\cwyX) -- ({\cwx{\cws}{\cwc}},\cwgT);%
+\draw[cwedge] ({\cwx{H}{20}},\cwyW) -- ({\cwx{H}{20}},\cwyX) ({\cwx{E}{2624}},\cwyW) -- ({\cwx{E}{2624}},\cwyX);%
+\node[cwband, font=\cwfs\bfseries, text=sswintitle, anchor=east] at ({\cwx{E}{2624}-2.5},\cwyA) {Violation window};% v10: in the band on lc's row, right-aligned (was centred above the band)%
+
+% ------------- row labels: the roles come from the execution graph -------------%
+\node[cwrow] at (0,\cwyA-2.7) {\cwab{lc}};%
+\node[cwgloss] at (0,\cwyA-11.7) {Last committed};%
+\node[cwrow] at (0,\cwyB-2.7) {i0: \cwab{fnc} (branch)};%
+\node[cwgloss] at (0,\cwyB-11.7) {First uncommitted};%
+\node[cwrow] at (0,\cwyC-2.7) {i3: \cwab{xmit}};%
+\node[cwgloss, text=ssxmitink] at (0,\cwyC-11.7) {Transmitter};%
+
+% ------------------- lc: the committed load, fetched at 0; its retirement (20) opens the window -------------------%
+\cwbar{\cwyA}{\cwx{A}{0}}{\cwx{H}{20}}{white}\cwgap{\cwyA}{A}{H}{white}\cwend{\cwyA}{\cwx{A}{0}}%
+\cwdotat{\cwyA}{\cwx{H}{20}}%
+\node[cwband, anchor=west] at ({\cwx{H}{20}+3},\cwyA) {Retires};%
+
+% ------------- fnc: the branch, fetched at 115, forced to mispredict, its resolution held 2,500 cycles -------------%
+\cwbar{\cwyB}{\cwx{B}{115}}{\cwx{F}{2637}}{white}\cwgap{\cwyB}{B}{C}{white}\cwgap{\cwyB}{C}{G}{white}\cwgap{\cwyB}{G}{E}{white}\cwgap{\cwyB}{E}{F}{white}\cwend{\cwyB}{\cwx{B}{115}}%
+\cwflag{\cwyB}{\cwx{C}{122}}{-1}{e}{0}{cwband}{2{,}500-cycle hold}% under the bar: nothing else is between fnc and xmit there%
+\cwflag{\cwyB}{\cwx{E}{2623}}{1}{w}{0}{cwband}{Resolves}%
+\cwflag{\cwyB}{\cwx{F}{2637}}{1}{c}{0}{cwwhite}{Retires}% centred: right of the window's edge%
+\cwdotat{\cwyB}{\cwx{C}{122}}\cwdotat{\cwyB}{\cwx{E}{2623}}\cwdotat{\cwyB}{\cwx{F}{2637}}%
+
+% ------------- xmit: fetched at 116; STT holds it (blue) from the cycle its address is ready (127) until the squash lands (2624) -------------%
+\cwbar{\cwyC}{\cwx{B}{116}}{\cwx{G}{127}}{white}\cwgap{\cwyC}{B}{C}{white}\cwgap{\cwyC}{C}{G}{white}\cwend{\cwyC}{\cwx{B}{116}}%
+\cwbar{\cwyC}{\cwx{G}{127}}{\cwx{E}{2624}}{sssrcfill}\cwgap{\cwyC}{G}{E}{sssrcfill}%
+\cwflag{\cwyC}{\cwx{G}{127}}{-1}{w}{0}{cwband}{Held by STT}%
+\cwdotat{\cwyC}{\cwx{G}{127}}%
+\cwcross{\cwyC}{\cwx{E}{2624}}%
+\node[cwwhite, anchor=west] at ({\cwx{E}{2624}+3.8},\cwyC) {Squashed};%
+
+% ------------------------------ time axis: one row of cycle numbers ------------------------------%
+\draw ({\cwxs{A}},\cwyX) -- ({\cwxe{A}},\cwyX) ({\cwxs{H}},\cwyX) -- ({\cwxe{H}},\cwyX) ({\cwxs{B}},\cwyX) -- ({\cwxe{B}},\cwyX) ({\cwxs{C}},\cwyX) -- ({\cwxe{C}},\cwyX) ({\cwxs{G}},\cwyX) -- ({\cwxe{G}},\cwyX) ({\cwxs{E}},\cwyX) -- ({\cwxe{E}},\cwyX) ({\cwxs{F}},\cwyX) -- ({\cwxe{F}},\cwyX);%
+\draw[densely dotted] ({\cwxe{A}},\cwyX) -- ({\cwxs{H}},\cwyX) ({\cwxe{H}},\cwyX) -- ({\cwxs{B}},\cwyX) ({\cwxe{B}},\cwyX) -- ({\cwxs{C}},\cwyX) ({\cwxe{C}},\cwyX) -- ({\cwxs{G}},\cwyX) ({\cwxe{G}},\cwyX) -- ({\cwxs{E}},\cwyX) ({\cwxe{E}},\cwyX) -- ({\cwxs{F}},\cwyX);%
+\node[anchor=north west] at (0,\cwyT) {Cycle};%
+\foreach \cwc/\cws/\cwan/\cwdx in {0/A/north/0, 20/H/north/0, 115/B/north east/1.2, 116/B/north west/-1.2, 122/C/north/0, 127/G/north/0, 2623/E/north east/1.2, 2624/E/north west/-1.2, 2637/F/north/0}%
+  \cwnum{\cwx{\cws}{\cwc}}{\cwan}{\cwdx}{\cwc};%
+
+% ------ the defense's transmission criterion (blue = defense-specific) ------%
+\pgfmathsetmacro\cwtw{\cwboxw-4.4}%
+\node[draw=sssrcink, fill=sssrcbg, line width=0.4pt, anchor=north west, inner xsep=1.8pt, inner ysep=2.2pt] at (0,\cwyK)%
+  {\parbox{\cwtw pt}{\raggedright\textit{Transmission criterion:} a load transmits when it executes in the window and obtains its data, by a cache access or a store-to-load forward}};%
+
+\end{tikzpicture}%
+}%
+\caption{How the Inspector decides, on a gem5 trace of STT running the test of Fig.~\ref{fig:concretization}, whether a hit has occurred. Each bar runs from an instruction's fetch to its retirement or squash; dots and the cross mark events at their trace cycles, and dotted stretches are elided cycles. The violation window (tan) opens when lc retires and closes when the branch's squash lands on xmit, before fnc retires. STT holds xmit (blue) from the cycle its address is ready until it is squashed, so xmit never transmits and the verdict is no hit.}
+\label{fig:checkerwindow}
+\end{figure}

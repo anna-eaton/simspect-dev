@@ -6,6 +6,8 @@
 
 ## Live on cafe2 (container `gem5_dev`)
 
+- **Futuristic Stage 1a, STT only (agent invisispec-fut, since 2026-11-16 20:47 UTC):** tmux `fut` window `s1a_stt` runs the last two partitions of `STT_6_u_core_ri_fut` (k6_Branchxs, k6_Loads; 0 instances after 30 min; 24 h timeout each, nice 19). Everything else of the Futuristic work is finished (pilots STOPPED on decisions FUT-1..FUT-4). Read the verdicts with `grep VERDICT /tests/futuristic_20261116/stage1/logs/STT_6_u_core_ri_fut__k6_*.log`; launcher log `/tests/futuristic_20261116/logs/stage1a_STT_6_u_core_ri_fut.log`; to stop: kill that window. Results: `wiki/state/EVAL_MANIFEST.md` "Futuristic testsets (2026-11-16)".
+
 - ~~Single-stage (flat) draft model runs~~ **FINISHED 2026-11-09 ~20:50 PST** (session `singlestage` + 6 agents). No process left; outputs kept on cafe2 `/tests/singlestage_20261109/` (11 GB: `out/<FAMILY>/<model>/<seed>/`, `runs.jsonl`, `census.json`, `logs/`). Results: `wiki/design/TWO_PHASE_MODELS.md` section '2026-11-09 — Single-stage (flat) runs'. Next step waits on DECIDE DA-6 (`URGENT_TODO.md`). Rerun one model: `python3 tools/run_flat.py --model <M.als> --out out/<F>/<stem> --alloy-dir <alloy dir> --classes classes --seeds default,1,2,3 --cap 10000 --timeout 1500 --jobs 4`.
 - **Two-stage STT_6 fanout v2** (workspace `/tests/simspect_alloy_20261108`, code snapshot `code_20261109/` = Mac working tree 2026-11-09 09:51Z, parsexml sha256 6e5c5238).
   - Input: Stage-1.5 STT_6 (296,170) merged + deduped to **93,041** programs, `testsets_twostage/STT_6/xml` (`merge_stage15.py`; 69% were cross-core duplicates). STT_6_stl: 266,946 → 72,777 (`testsets_twostage/STT_6_stl/xml`; no gem5 yet: no STL window checker).
